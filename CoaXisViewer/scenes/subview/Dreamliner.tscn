@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://c48iefv166wer"]
+
+[ext_resource type="PackedScene" uid="uid://codaipgimkvh2" path="res://assets/models/low_poly_boeing_787_dreamliner.glb" id="1_6lx0k"]
+
+[node name="Sketchfab_Scene" unique_id=1183461965 instance=ExtResource("1_6lx0k")]
+
+[node name="Body_Wings_Material_002_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings" parent_id_path=PackedInt32Array(1351529515) index="0" unique_id=735252707]
+layers = 2
+
+[node name="Body_Wings_Material_003_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings" parent_id_path=PackedInt32Array(1351529515) index="1" unique_id=823467776]
+layers = 2
+
+[node name="Rear_Rudder__0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Rear_Rudder" parent_id_path=PackedInt32Array(1258375480) index="0" unique_id=1622816312]
+layers = 2
+
+[node name="Rear_Stabilizer__0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Rear_Stabilizer" parent_id_path=PackedInt32Array(562244720) index="0" unique_id=184002483]
+layers = 2
+
+[node name="Elevators__0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Elevators" parent_id_path=PackedInt32Array(1007414594) index="0" unique_id=1669383274]
+layers = 2
+
+[node name="Horizontal_Stabilizer__0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Horizontal_Stabilizer" parent_id_path=PackedInt32Array(1536759035) index="0" unique_id=2097828833]
+layers = 2
+
+[node name="Fueselage__0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Fueselage" parent_id_path=PackedInt32Array(278923382) index="0" unique_id=265122217]
+layers = 2
+
+[node name="Engines_Material_001_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Engines" parent_id_path=PackedInt32Array(1332586413) index="0" unique_id=1132328215]
+layers = 2
+
+[node name="FRONT_LG_Material_002_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/FRONT_LG" parent_id_path=PackedInt32Array(983292207) index="0" unique_id=1469372608]
+layers = 2
+
+[node name="FRONT_LG_Material_001_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/FRONT_LG" parent_id_path=PackedInt32Array(983292207) index="1" unique_id=1548629732]
+layers = 2
+
+[node name="REAR_LEFT_LG_Material_001_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/REAR_LEFT_LG" parent_id_path=PackedInt32Array(1308843996) index="0" unique_id=610348546]
+layers = 2
+
+[node name="REAR_LEFT_LG_Material_002_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/REAR_LEFT_LG" parent_id_path=PackedInt32Array(1308843996) index="1" unique_id=668003716]
+layers = 2
+
+[node name="Flap_Connectors__0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Flap_Connectors" parent_id_path=PackedInt32Array(1397557590) index="0" unique_id=1355711680]
+layers = 2
+
+[node name="Windows_Material_002_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Windows" parent_id_path=PackedInt32Array(144516664) index="0" unique_id=682935069]
+layers = 2
+
+[node name="Ellerons_Material_003_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Ellerons" parent_id_path=PackedInt32Array(1268917092) index="0" unique_id=2139072129]
+layers = 2
+
+[node name="Flaps_Material_003_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/Flaps" parent_id_path=PackedInt32Array(1763462755) index="0" unique_id=1698751545]
+layers = 2
+
+[node name="REAR_RIGHT_LG_Material_001_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/REAR_RIGHT_LG" parent_id_path=PackedInt32Array(1617701920) index="0" unique_id=257506364]
+layers = 2
+
+[node name="REAR_RIGHT_LG_Material_002_0" parent="Sketchfab_model/2779ac6ccc104ea09fdbd941037114ac_fbx/RootNode/Body_Wings/REAR_RIGHT_LG" parent_id_path=PackedInt32Array(1617701920) index="1" unique_id=760411392]
+layers = 2

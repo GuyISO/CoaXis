@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://b405te6bgadjq"]
+
+[ext_resource type="Script" uid="uid://1us0ficbltrg" path="res://src/viewer/IpcServer.cs" id="1_ned1l"]
+
+[node name="IpcServer" type="Node" unique_id=1710088594]
+script = ExtResource("1_ned1l")

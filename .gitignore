@@ -1,0 +1,27 @@
+# Godot editor cache and platform export folders
+**/.godot/
+**/android/
+
+# Godot export/build outputs
+# **/build/
+# *.pck
+
+# .NET/C# build artifacts
+# **/bin/
+# **/obj/
+# *.csproj.lscache
+
+# IDE user-specific files
+.vs/
+.idea/
+*.suo
+*.user
+*.userprefs
+
+# Local debug/log files
+/debug/
+*.log
+
+# OS generated files
+Thumbs.db
+.DS_Store

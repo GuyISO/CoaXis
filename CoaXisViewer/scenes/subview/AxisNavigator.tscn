@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://clg4ivxpqifho"]
+
+[ext_resource type="Script" uid="uid://1e4air8juy4y" path="res://src/AxisNavigator.cs" id="1_r05hx"]
+[ext_resource type="PackedScene" uid="uid://dan222xlokome" path="res://scenes/subview/AirplaneAxis.tscn" id="2_1dmx6"]
+
+[node name="AxisNavigator" type="Control" unique_id=1990463361]
+layout_mode = 3
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 0
+grow_vertical = 0
+script = ExtResource("1_r05hx")
+
+[node name="SubViewportContainer" type="SubViewportContainer" parent="." unique_id=1854996461]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -256.0
+offset_top = -256.0
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+
+[node name="SubViewport" type="SubViewport" parent="SubViewportContainer" unique_id=1983461875]
+transparent_bg = true
+handle_input_locally = false
+size = Vector2i(256, 256)
+render_target_update_mode = 4
+
+[node name="AirplaneAxis" parent="SubViewportContainer/SubViewport" unique_id=459054826 instance=ExtResource("2_1dmx6")]
+
+[node name="FocalPoint" type="Node3D" parent="SubViewportContainer/SubViewport" unique_id=35820638]
+
+[node name="Camera3D" type="Camera3D" parent="SubViewportContainer/SubViewport/FocalPoint" unique_id=1885653025]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 2)
+cull_mask = 2
+projection = 1
+size = 1.5
+far = 3.0
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/FocalPoint" unique_id=1128561678]
+layers = 2
