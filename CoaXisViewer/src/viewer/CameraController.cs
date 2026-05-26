@@ -27,7 +27,7 @@ using System;
 
 
 
-public partial class CameraController : Node3D
+public partial class CameraController : Node
 {
 	public enum Mode
 	{
@@ -552,7 +552,7 @@ public partial class CameraController : Node3D
 		Vector3 rayDir = Camera.ProjectRayNormal(screenPos).Normalized();
 		Vector3 rayEnd = rayOrigin + rayDir * Camera.Far;
 
-		PhysicsDirectSpaceState3D spaceState = GetWorld3D().DirectSpaceState;
+		PhysicsDirectSpaceState3D spaceState = Camera.GetWorld3D().DirectSpaceState;
 		PhysicsRayQueryParameters3D query = PhysicsRayQueryParameters3D.Create(rayOrigin, rayEnd);
 		Godot.Collections.Dictionary result = spaceState.IntersectRay(query);
 

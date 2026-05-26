@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://1metpnn4wsnc" path="res://src/viewer/CameraController.cs" id="1_p2h27"]
 
-[node name="CameraController" type="Node3D" unique_id=668215330]
+[node name="CameraController" type="Node" unique_id=30234556]
 script = ExtResource("1_p2h27")
 
 [node name="FocalPoint" type="Node3D" parent="." unique_id=335083594]
