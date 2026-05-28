@@ -249,11 +249,11 @@ alignment = 1
 [node name="ButtonRollRight" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1780015491]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "モデル全体が画面に収まるようにカメラを調整します"
+tooltip_text = "左に90度回転します"
 text = "RollLeft"
 
 [node name="ButtonRollLeft" type="Button" parent="PanelContainer/MarginContainer/VBoxContainer/HBoxContainer" unique_id=1453521557]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "モデル全体が画面に収まるようにカメラを調整します"
+tooltip_text = "右に90度回転します"
 text = "RollRight"

@@ -84,6 +84,7 @@ layout_mode = 2
 
 [node name="ButtonSendIpc" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=368943670]
 layout_mode = 2
+tooltip_text = "NamedPipeの通信テストを行います"
 theme_override_font_sizes/font_size = 24
 text = "SendIpc"
 script = ExtResource("3_qmy6f")
@@ -91,6 +92,7 @@ _ipcClientPath = NodePath("../../../../IpcClient")
 
 [node name="ButtonSendHttp" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=576924412]
 layout_mode = 2
+tooltip_text = "httpリクエストの通信テストを行います"
 theme_override_font_sizes/font_size = 24
 text = "SendHttp"
 script = ExtResource("4_mwfav")
@@ -101,12 +103,14 @@ size_flags_horizontal = 3
 
 [node name="ButtonLoad" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=366187773]
 layout_mode = 2
+tooltip_text = "指定したパスからモデルをロードします"
 theme_override_font_sizes/font_size = 24
 text = "LoadModel"
 
 [node name="TextGlbPath" type="TextEdit" parent="Canvas/VBoxContainer/TopBar" unique_id=1210780805]
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
+tooltip_text = "glbファイルのパスを指定してください"
 theme_override_font_sizes/font_size = 24
 text = "D:\\Models\\Untitled.glb"
 
