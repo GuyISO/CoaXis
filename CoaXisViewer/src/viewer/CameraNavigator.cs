@@ -1,7 +1,12 @@
-using Godot;
+﻿using Godot;
 
+/// <summary>
+/// 画面中央のナビゲータ（中心軸・トラックボール補助表示）を描画します。
+/// </summary>
 public partial class CameraNavigator : Control
 {
+	#region Fields
+
 	private const float CircleDashLength = 16.0f;
 	private const float CircleGapLength = 8.0f;
 	private const int MinCircleDashCount = 8;
@@ -31,12 +36,24 @@ public partial class CameraNavigator : Control
 
 	private Control _circle;
 
+	#endregion
+
+	#region Lifecycle
+
+	/// <summary>
+	/// 依存ノードを解決して、必要なシグナルを購読します。
+	/// </summary>
 	public override void _Ready()
 	{
-		// 外部参照ノードがエディターからセットされていない場合はシーンツリーから取得を試みる
-		_cameraController ??= (CameraController)GetNode("/root/Main/CameraController");
+		// 外部参照ノードがエディターで設定されていない場合は、シーンツリーから取得する。
+		_cameraController = ResolveCameraController();
+		if (_cameraController == null)
+		{
+			GD.PushWarning("CameraNavigator: CameraController not found. Navigation rendering is disabled.");
+			return;
+		}
 
-		// シーン内の子ノードを取得
+		// シーン内の子ノードを取得する。
 		_centerAxis = GetNode<Control>("CenterAxis");
 		_axisXPositive = _centerAxis.GetNode<Line2D>("LineXPositive");
 		_axisXNegative = _centerAxis.GetNode<Line2D>("LineXNegative");
@@ -55,12 +72,24 @@ public partial class CameraNavigator : Control
 
 	}
 
+	/// <summary>
+	/// シグナル購読を解除します。
+	/// </summary>
 	public override void _ExitTree()
 	{
+		if (_cameraController == null)
+		{
+			return;
+		}
+
 		_cameraController.ControlModeChanged -= OnCameraControlModeChanged;
 		_cameraController.ViewPortSizeChanged -= OnViewPortSizeChanged;
 	}
 	
+	/// <summary>
+	/// 毎フレームのナビゲータ描画を更新します。
+	/// </summary>
+	/// <param name="delta">前フレームからの経過秒。</param>
 	public override void _Process(double delta)
 	{
 
@@ -69,6 +98,11 @@ public partial class CameraNavigator : Control
 		
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
+	// CameraController の操作モードに合わせて、表示要素の有効/無効を切り替える。
 	private void OnCameraControlModeChanged(CameraController.Mode mode)
 	{
 		bool wasTrackballMode = IsTrackballMode(_currentMode);
@@ -105,10 +139,38 @@ public partial class CameraNavigator : Control
 		_currentMode = mode;
 	}
 
+	// ビューポートサイズ変更時は円ガイドを再生成して表示ずれを防ぐ。
 	private void OnViewPortSizeChanged()
 	{
 		DrawCircle();
 	}
+
+	// Export 未設定でも動作するよう、相対パス・絶対パス・全体探索の順で CameraController を解決する。
+	private CameraController ResolveCameraController()
+	{
+		if (_cameraController != null)
+		{
+			return _cameraController;
+		}
+
+		CameraController controller = GetNodeOrNull<CameraController>("../SubViewportContainer/SubViewport/CameraController");
+		if (controller != null)
+		{
+			return controller;
+		}
+
+		controller = GetNodeOrNull<CameraController>("/root/Main/Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/CameraController");
+		if (controller != null)
+		{
+			return controller;
+		}
+
+		return GetTree()?.Root?.FindChild("CameraController", true, false) as CameraController;
+	}
+
+	#endregion
+
+	#region Internal Helpers
 
 	private void DrawCircle()
 	{
@@ -236,6 +298,10 @@ public partial class CameraNavigator : Control
 
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
 	private bool IsTrackballMode(CameraController.Mode mode)
 	{
 		return mode == CameraController.Mode.Orbit || mode == CameraController.Mode.Roll;
@@ -335,4 +401,9 @@ public partial class CameraNavigator : Control
 
 		return new Vector3(dir.X * sinTheta, dir.Y * sinTheta, Mathf.Cos(theta));
 	}
+
+	#endregion
 }
+
+
+

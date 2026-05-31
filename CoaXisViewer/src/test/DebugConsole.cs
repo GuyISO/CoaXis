@@ -1,26 +1,51 @@
-using Godot;
+﻿using Godot;
 using System.Text;
 
+/// <summary>
+/// シーン内のデバッグログ表示を担う簡易コンソールです。
+/// </summary>
 public partial class DebugConsole : Control
 {
-    public static DebugConsole Instance { get; private set; }
+	#region Fields
+
+	private const int MaxLines = 200;
 
     [Export] private RichTextLabel _label;
-
     private StringBuilder _buffer = new StringBuilder();
-    private const int MaxLines = 200;
 
+	#endregion
+
+	#region Properties
+
+    /// <summary>
+    /// 現在アクティブなデバッグコンソールインスタンスです。
+    /// </summary>
+    public static DebugConsole Instance { get; private set; }
+
+	#endregion
+
+	#region Lifecycle
+
+    /// <summary>
+    /// シーン参加時にシングルトン参照を設定します。
+    /// </summary>
     public override void _EnterTree()
     {
         Instance = this;
     }
 
+    /// <summary>
+    /// シーン離脱時にシングルトン参照を解除します。
+    /// </summary>
     public override void _ExitTree()
     {
         if (Instance == this)
             Instance = null;
     }
 
+    /// <summary>
+    /// 出力先ラベルを解決します。
+    /// </summary>
     public override void _Ready()
     {
         if (_label == null)
@@ -31,6 +56,14 @@ public partial class DebugConsole : Control
 
     }
 
+	#endregion
+
+	#region Public API
+
+    /// <summary>
+    /// 1行ログを画面へ追加します。
+    /// </summary>
+    /// <param name="text">追加する文字列。</param>
     public void AddLine(string text)
     {
         if (_label == null)
@@ -51,9 +84,18 @@ public partial class DebugConsole : Control
         _label.ScrollToLine(Mathf.Max(_label.GetLineCount() - 1, 0));
     }
 
+    /// <summary>
+    /// 標準出力とデバッグコンソールへ同時にログを出力します。
+    /// </summary>
+    /// <param name="msg">出力するメッセージ。</param>
     public static void Log(string msg)
     {
         GD.Print(msg);
         DebugConsole.Instance?.AddLine(msg);
     }
+
+	#endregion
 }
+
+
+

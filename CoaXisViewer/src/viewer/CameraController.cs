@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Globalization;
 
 /// <summary>
 /// Godot 上で CATIA V5 風のカメラ操作を提供するコントローラです。
@@ -29,16 +30,24 @@ using System;
 
 public partial class CameraController : Node
 {
+	/// <summary>
+	/// カメラの入力制御モードです。
+	/// </summary>
 	public enum Mode
 	{
+		/// <summary>操作待機状態。</summary>
 		None,
+		/// <summary>注視点の平行移動操作。</summary>
 		Pan,
+		/// <summary>注視点中心のオービット回転操作。</summary>
 		Orbit,
+		/// <summary>視線方向を軸としたロール回転操作。</summary>
 		Roll,
+		/// <summary>ズーム操作。</summary>
 		Zoom
 	}
 
-	#region Constants and Fields
+	#region Fields
 
 	[ExportGroup("Settings")]
 	[Export] private float _zoomFactor = 1.005f; // ズームの加速度を調整する係数、マウス1pixelあたりの拡大倍率
@@ -54,7 +63,7 @@ public partial class CameraController : Node
 
 	#endregion
 
-	#region Event
+	#region Signals
 	[Signal] public delegate void ControlModeChangedEventHandler(Mode mode);
 	[Signal] public delegate void FocalPointMovedEventHandler(Vector3 newPosition);
 	[Signal] public delegate void FocalPointRotatedEventHandler(Quaternion newRotation);
@@ -63,16 +72,33 @@ public partial class CameraController : Node
 
 	#region Properties
 	
+	/// <summary>
+	/// 注視点となるノードです。
+	/// </summary>
 	public Node3D FocalPoint { get; private set; }
+
+	/// <summary>
+	/// 操作対象のカメラノードです。
+	/// </summary>
 	public Camera3D Camera { get; private set; }
 
+	/// <summary>
+	/// Orbit/Roll 判定に使うトラックボール半径です。
+	/// </summary>
 	public float TrackballRadius { get; private set; }
+
+	/// <summary>
+	/// 画面中心座標です。
+	/// </summary>
 	public Vector2 ScreenCenter { get; private set; }
 
 	#endregion
 
 	#region Lifecycle
 
+	/// <summary>
+	/// ノード初期化時に依存ノード解決と初期パラメータ計算を行います。
+	/// </summary>
 	public override void _Ready()
 	{
 		// 初期化時に関連Nodeをキャッシュ
@@ -84,11 +110,18 @@ public partial class CameraController : Node
 		GetViewport().SizeChanged += OnViewportSizeChanged;
 	}
 
+	/// <summary>
+	/// ノード破棄時に購読中シグナルを解除します。
+	/// </summary>
 	public override void _ExitTree()
 	{
 		GetViewport().SizeChanged -= OnViewportSizeChanged;
 	}
 
+	/// <summary>
+	/// モード中のマウス移動を反映し、カメラ操作を継続します。
+	/// </summary>
+	/// <param name="delta">前フレームからの経過秒。</param>
 	public override void _Process(double delta)
 	{
 
@@ -107,6 +140,10 @@ public partial class CameraController : Node
 
 	}
 
+	/// <summary>
+	/// 未処理入力を監視し、カメラ操作モード遷移を行います。
+	/// </summary>
+	/// <param name="@event">未処理入力イベント。</param>
 	public override void _UnhandledInput(InputEvent @event)
 	{
 		// ボタン入力だけを状態遷移に使用する。
@@ -118,7 +155,7 @@ public partial class CameraController : Node
 
 	#endregion
 
-	#region Input Handling
+	#region Internal Helpers
 
 	private void SetCameraControlMode(Mode mode)
 	{
@@ -247,6 +284,10 @@ public partial class CameraController : Node
 
 	#region Public API
 
+	/// <summary>
+	/// 投影方式を切り替え、見かけサイズが急変しないよう補正します。
+	/// </summary>
+	/// <param name="projectionType">切り替え先の投影方式。</param>
 	public void SetCameraProjectionType(Camera3D.ProjectionType projectionType)
 	{
 		// 投影方式が変わるとズーム表現が変わるため、見かけの大きさをできるだけ維持して変換する。
@@ -255,24 +296,26 @@ public partial class CameraController : Node
 			return;
 		}
 
+		Camera.Projection = projectionType;
 
-		   Camera.Projection = projectionType;
-
-		   if (projectionType == Camera3D.ProjectionType.Perspective)
-		   {
-			   float distance = GetPerspectiveDistanceFromOrthographicSize();
-			   Camera.Position = new Vector3(0, 0, distance);
-		   }
-		   else
-		   {
-			   float size = GetOrthographicSizeFromPerspectiveDistance();
-			   Camera.Size = size;
-			   // 投影物がカメラの視界から出ないようにNearとFarの中間あたりに注視点を置く
-			   float farZ = (Camera.Near + Camera.Far) / 2.0f;
-			   Camera.Position = new Vector3(0, 0, farZ);
-		   }
+		if (projectionType == Camera3D.ProjectionType.Perspective)
+		{
+			float distance = GetPerspectiveDistanceFromOrthographicSize();
+			Camera.Position = new Vector3(0, 0, distance);
+		}
+		else
+		{
+			float size = GetOrthographicSizeFromPerspectiveDistance();
+			Camera.Size = size;
+			// 投影物がカメラの視界から出ないようにNearとFarの中間あたりに注視点を置く
+			float farZ = (Camera.Near + Camera.Far) / 2.0f;
+			Camera.Position = new Vector3(0, 0, farZ);
+		}
 	}
 
+	/// <summary>
+	/// 現在の投影方式を Perspective/Orthogonal でトグルします。
+	/// </summary>
 	public void ToggleProjectionType()
 	{
 		// 現在の投影方式をトグルして、内部で必要な補正を行う。
@@ -283,6 +326,12 @@ public partial class CameraController : Node
 		SetCameraProjectionType(nextProjection);
 	}
 
+	/// <summary>
+	/// 指定ノード配下を画角内に収めるようカメラを調整します。
+	/// </summary>
+	/// <param name="targetRoot">フィット対象のルートノード。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
+	/// <returns>フィット対象の AABB を取得できた場合は <see langword="true"/>。</returns>
 	public bool Fit(Node targetRoot, bool useTween = false)
 	{
 		if (!TryGetAabb(targetRoot, out Aabb worldAabb))
@@ -356,6 +405,11 @@ public partial class CameraController : Node
 		return true;
 	}
 
+	/// <summary>
+	/// 現在の注視点姿勢にロール回転を適用します。
+	/// </summary>
+	/// <param name="angleDegrees">ロール角度（度）。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
 	public void Roll(float angleDegrees, bool useTween = false)
 	{
 		Quaternion nowRotation = FocalPoint.Transform.Basis.GetRotationQuaternion();
@@ -369,7 +423,7 @@ public partial class CameraController : Node
 
 	#endregion
 
-	#region Projection and Conversion
+	#region Internal Helpers
 
 	private float GetPerspectiveDistanceFromOrthographicSize()
 	{
@@ -398,7 +452,7 @@ public partial class CameraController : Node
 
 	#endregion
 
-	#region Helper Methods
+	#region Internal Helpers
 	
 	private bool IsMouseOnCenterArea(Vector2 mousePos)
 	{
@@ -529,7 +583,7 @@ public partial class CameraController : Node
 
 	#endregion
 
-	#region Camera Operations
+	#region Internal Helpers
 
 	private void FocusAtMouse(Vector2 screenPos)
 	{
@@ -641,6 +695,12 @@ public partial class CameraController : Node
 		}
 	}
 
+	/// <summary>
+	/// 注視点の位置と回転を更新します。
+	/// </summary>
+	/// <param name="targetPosition">移動先位置。<see langword="null"/> の場合は現在位置を維持。</param>
+	/// <param name="targetRotation">回転先姿勢。<see langword="null"/> の場合は現在姿勢を維持。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
 	public void MoveFocalPoint(Vector3? targetPosition, Quaternion? targetRotation, bool useTween = false)
 	{
 		// 実行中の補間動作があればキャンセルする
@@ -674,75 +734,237 @@ public partial class CameraController : Node
 
 	#endregion
 
-	#region State Management
+	#region Internal Helpers
 
 	/// <summary>
-	/// カメラ状態をJSON文字列で保存する
+	/// カメラ状態を JSON 文字列として保存します。
 	/// </summary>
+	/// <returns>カメラ状態を表す JSON 文字列。</returns>
 	public string ToJson()
 	{
-		   var state = new Godot.Collections.Dictionary();
-		   state["position"] = new Godot.Collections.Array { FocalPoint.Position.X, FocalPoint.Position.Y, FocalPoint.Position.Z };
-		   state["rotation"] = new Godot.Collections.Array { FocalPoint.Rotation.X, FocalPoint.Rotation.Y, FocalPoint.Rotation.Z };
-		   state["projection"] = (int)Camera.Projection;
-		   state["fov"] = Camera.Fov;
-		   state["distance"] = Camera.Position.Z;
-		   state["size"] = Camera.Size;
-		   return Json.Stringify(state);
+		var state = new Godot.Collections.Dictionary();
+		state["position"] = new Godot.Collections.Array { FocalPoint.Position.X, FocalPoint.Position.Y, FocalPoint.Position.Z };
+		state["rotation"] = new Godot.Collections.Array { FocalPoint.Rotation.X, FocalPoint.Rotation.Y, FocalPoint.Rotation.Z };
+		state["projection"] = (int)Camera.Projection;
+		state["fov"] = Camera.Fov;
+		state["distance"] = Camera.Position.Z;
+		state["size"] = Camera.Size;
+		return Json.Stringify(state);
 	}
 
 	/// <summary>
-	/// JSON文字列からカメラ状態を復元する
+	/// JSON 文字列からカメラ状態を復元します。
 	/// </summary>
+	/// <param name="json">復元対象の JSON 文字列。</param>
 	public void LoadJson(string json)
 	{
+		if (string.IsNullOrWhiteSpace(json))
+		{
+			return;
+		}
 
-		var state = (Godot.Collections.Dictionary)Json.ParseString(json);
-		if (state == null) return;
+		Godot.Collections.Dictionary state;
+		try
+		{
+			state = (Godot.Collections.Dictionary)Json.ParseString(json);
+		}
+		catch (Exception)
+		{
+			GD.PushWarning("CameraController.LoadJson: invalid JSON payload.");
+			return;
+		}
+
+		if (state == null)
+		{
+			return;
+		}
 
 		// 注視点Transform
-		if (state.ContainsKey("position"))
+		if (TryGetVector3(state, "position", out Vector3 position))
 		{
-			var pos = (Godot.Collections.Array)state["position"];
-			if (pos.Count == 3)
-			{
-				FocalPoint.SetPosition(new Vector3((float)pos[0], (float)pos[1], (float)pos[2]));
-			}
+			FocalPoint.SetPosition(position);
 		}
-		if (state.ContainsKey("rotation"))
+
+		if (TryGetVector3(state, "rotation", out Vector3 rotation))
 		{
-			var rot = (Godot.Collections.Array)state["rotation"];
-			if (rot.Count == 3)
-			{
-				FocalPoint.SetRotation(new Vector3((float)rot[0], (float)rot[1], (float)rot[2]));
-			}
+			FocalPoint.SetRotation(rotation);
 		}
 
 		// FOV
-		if (state.ContainsKey("fov"))
+		if (TryGetFloat(state, "fov", out float fov))
 		{
-			Camera.Fov = (float)state["fov"];
+			Camera.Fov = fov;
 		}
 
 		// カメラZ位置
-		if (state.ContainsKey("distance"))
+		if (TryGetFloat(state, "distance", out float distance))
 		{
-			Camera.Position = new Vector3(0, 0, (float)state["distance"]);
+			Camera.Position = new Vector3(0, 0, distance);
 		}
 
 		// 等角投影サイズ
-		if (state.ContainsKey("size"))
+		if (TryGetFloat(state, "size", out float size))
 		{
-			Camera.Size = (float)state["size"];
+			Camera.Size = size;
 		}
 
 		// カメラ投影
-		if (state.ContainsKey("projection"))
+		if (TryGetInt(state, "projection", out int projection)
+			&& Enum.IsDefined(typeof(Camera3D.ProjectionType), projection))
 		{
-			int proj = (int)(long)state["projection"];
-			Camera.Projection = (Camera3D.ProjectionType)proj;
+			Camera.Projection = (Camera3D.ProjectionType)projection;
 		}
 
+	}
+
+	private static bool TryGetVector3(Godot.Collections.Dictionary dictionary, string key, out Vector3 value)
+	{
+		value = Vector3.Zero;
+		if (!dictionary.ContainsKey(key))
+		{
+			return false;
+		}
+
+		Godot.Collections.Array array;
+		try
+		{
+			array = (Godot.Collections.Array)dictionary[key];
+		}
+		catch (Exception)
+		{
+			return false;
+		}
+
+		if (array.Count != 3)
+		{
+			return false;
+		}
+
+		if (!TryConvertToFloat(array[0], out float x)
+			|| !TryConvertToFloat(array[1], out float y)
+			|| !TryConvertToFloat(array[2], out float z))
+		{
+			return false;
+		}
+
+		value = new Vector3(x, y, z);
+		return true;
+	}
+
+	private static bool TryGetFloat(Godot.Collections.Dictionary dictionary, string key, out float value)
+	{
+		value = 0.0f;
+		if (!dictionary.ContainsKey(key))
+		{
+			return false;
+		}
+
+		return TryConvertToFloat(dictionary[key], out value);
+	}
+
+	private static bool TryGetInt(Godot.Collections.Dictionary dictionary, string key, out int value)
+	{
+		value = 0;
+		if (!dictionary.ContainsKey(key))
+		{
+			return false;
+		}
+
+		return TryConvertToInt(dictionary[key], out value);
+	}
+
+	private static bool TryConvertToFloat(object value, out float converted)
+	{
+		switch (value)
+		{
+			case Variant variantValue:
+				return TryConvertVariantToFloat(variantValue, out converted);
+			case float floatValue:
+				converted = floatValue;
+				return true;
+			case double doubleValue:
+				converted = (float)doubleValue;
+				return true;
+			case int intValue:
+				converted = intValue;
+				return true;
+			case long longValue:
+				converted = longValue;
+				return true;
+			case string stringValue:
+				return float.TryParse(stringValue, NumberStyles.Float, CultureInfo.InvariantCulture, out converted);
+		}
+
+		try
+		{
+			converted = Convert.ToSingle(value, CultureInfo.InvariantCulture);
+			return true;
+		}
+		catch (Exception)
+		{
+			converted = 0.0f;
+			return false;
+		}
+	}
+
+	private static bool TryConvertToInt(object value, out int converted)
+	{
+		switch (value)
+		{
+			case Variant variantValue:
+				return TryConvertVariantToInt(variantValue, out converted);
+			case int intValue:
+				converted = intValue;
+				return true;
+			case long longValue when longValue <= int.MaxValue && longValue >= int.MinValue:
+				converted = (int)longValue;
+				return true;
+			case float floatValue:
+				converted = (int)floatValue;
+				return true;
+			case double doubleValue:
+				converted = (int)doubleValue;
+				return true;
+			case string stringValue:
+				return int.TryParse(stringValue, NumberStyles.Integer, CultureInfo.InvariantCulture, out converted);
+		}
+
+		try
+		{
+			converted = Convert.ToInt32(value, CultureInfo.InvariantCulture);
+			return true;
+		}
+		catch (Exception)
+		{
+			converted = 0;
+			return false;
+		}
+	}
+
+	private static bool TryConvertVariantToFloat(Variant value, out float converted)
+	{
+		try
+		{
+			converted = (float)value;
+			return true;
+		}
+		catch (Exception)
+		{
+			return float.TryParse(value.ToString(), NumberStyles.Float, CultureInfo.InvariantCulture, out converted);
+		}
+	}
+
+	private static bool TryConvertVariantToInt(Variant value, out int converted)
+	{
+		try
+		{
+			converted = (int)value;
+			return true;
+		}
+		catch (Exception)
+		{
+			return int.TryParse(value.ToString(), NumberStyles.Integer, CultureInfo.InvariantCulture, out converted);
+		}
 	}
 
 	#endregion

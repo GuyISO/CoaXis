@@ -1,38 +1,72 @@
-using Godot;
-using System;
+﻿using Godot;
 using System.Globalization;
 
+/// <summary>
+/// 画面隅の軸ナビゲータを制御し、クリックでカメラ向きを変更します。
+/// </summary>
 public partial class AxisNavigator : Control
 {
-	
+	#region Fields
+
 	[Export] private CameraController _cameraController;
 
-	private SubViewportContainer _subViewportContainer;
-	private SubViewport _subViewport;
+	private SubViewportContainer _subViewportContainer = null!;
+	private SubViewport _subViewport = null!;
 
-	private Node3D _focalPoint;
-	private Camera3D _camera;
+	private Node3D _focalPoint = null!;
+	private Camera3D _camera = null!;
 
-	// Called when the node enters the scene tree for the first time.
+	#endregion
+
+	#region Lifecycle
+
+	/// <summary>
+	/// 依存ノードを解決して初期化します。
+	/// </summary>
 	public override void _Ready()
 	{
-		_cameraController ??= (CameraController)GetNode("/root/Main/CameraController");
+		_cameraController = ResolveCameraController();
 
-		_focalPoint = (Node3D)FindChild("FocalPoint");
-		_camera = (Camera3D)_focalPoint.GetNode("Camera3D");
+		_focalPoint = GetNodeOrNull<Node3D>("FocalPoint");
+		_camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
+		_subViewportContainer = FindChild("SubViewportContainer") as SubViewportContainer;
+		_subViewport = _subViewportContainer?.GetNodeOrNull<SubViewport>("SubViewport");
 
-		_subViewportContainer = (SubViewportContainer)FindChild("SubViewportContainer");
-		_subViewport = (SubViewport)_subViewportContainer.GetNode("SubViewport");
+		if (_cameraController == null || _focalPoint == null || _camera == null || _subViewportContainer == null || _subViewport == null)
+		{
+			GD.PushWarning("AxisNavigator: required nodes are missing. Axis navigation is disabled.");
+		}
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	/// <summary>
+	/// CameraController の回転を軸ナビゲータに同期します。
+	/// </summary>
+	/// <param name="delta">前フレームからの経過秒。</param>
 	public override void _Process(double delta)
 	{
+		if (_cameraController == null || _focalPoint == null)
+		{
+			return;
+		}
+
 		_focalPoint.Rotation = _cameraController.FocalPoint.Rotation;
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
+	/// <summary>
+	/// 軸ナビゲータのクリックを検知し、対応する向きへカメラを移動します。
+	/// </summary>
+	/// <param name="@event">未処理入力イベント。</param>
 	public override void _UnhandledInput(InputEvent @event)
 	{
+		if (_subViewportContainer == null || _subViewport == null || _camera == null)
+		{
+			return;
+		}
+
 		if (@event is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
 		{
 			var localMouse = mb.Position - _subViewportContainer.GlobalPosition;
@@ -63,11 +97,16 @@ public partial class AxisNavigator : Control
 				OnColliderClicked(collider);
 			}
 
-			// イベントを消費して、他のノードに伝播しないようにする
-			@event.Dispose();
+			// クリックを軸ナビゲータで処理したことを示し、他ノードへの誤伝播を防ぐ。
+			GetViewport().SetInputAsHandled();
 		}
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
+	// クリック対象ノード名を角度定義として解釈し、対応する姿勢へカメラを回転させる。
 	private void OnColliderClicked(Node3D node)
 	{
 		if (TryParseRotationDegreesFromName(node.Name, out Vector3 rotationDegrees))
@@ -79,9 +118,33 @@ public partial class AxisNavigator : Control
 
 	}
 
+	// Export 未設定でも動作するよう、相対パス・絶対パス・全体探索の順で CameraController を解決する。
+	private CameraController ResolveCameraController()
+	{
+		if (_cameraController != null)
+		{
+			return _cameraController;
+		}
+
+		CameraController controller = GetNodeOrNull<CameraController>("../SubViewportContainer/SubViewport/CameraController");
+		if (controller != null)
+		{
+			return controller;
+		}
+
+		controller = GetNodeOrNull<CameraController>("/root/Main/Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/CameraController");
+		if (controller != null)
+		{
+			return controller;
+		}
+
+		return GetTree()?.Root?.FindChild("CameraController", true, false) as CameraController;
+	}
+
+	// ノード名の "x, y, z" 表記を回転角（度）として解釈する。
 	private static bool TryParseRotationDegreesFromName(string name, out Vector3 rotationDegrees)
 	{
-		// ノード名が "x, y, z" の形式で回転角度を表していると仮定して、そこから回転角度をパースし、Quaternionに変換する
+		// ノード名が "x, y, z" 形式の回転角度を表す想定で、Quaternion に変換する。
 		rotationDegrees = Vector3.Zero;
 		var parts = name.Split(',');
 		if (parts.Length != 3)
@@ -108,4 +171,9 @@ public partial class AxisNavigator : Control
 		return true;
 	}
 
+	#endregion
+
 }
+
+
+

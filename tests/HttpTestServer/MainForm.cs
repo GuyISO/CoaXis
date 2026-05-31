@@ -1,185 +1,30 @@
-using System.Net;
+﻿using System.Net;
 using System.Text;
 
 namespace HttpTestServer;
 
-public sealed class MainForm : Form
+public sealed partial class MainForm : Form
 {
-    private readonly TextBox _hostTextBox;
-    private readonly NumericUpDown _portInput;
-    private readonly TextBox _pathTextBox;
-    private readonly Button _startStopButton;
-    private readonly Label _statusLabel;
-    private readonly TextBox _responseTemplateTextBox;
-    private readonly TextBox _logTextBox;
-    private readonly Button _clearLogButton;
-
     private CancellationTokenSource? _listenCancellation;
     private Task? _listenTask;
     private HttpListener? _listener;
 
-    public MainForm()
-    {
-        Text = "HTTP Test Server";
-        MinimumSize = new Size(780, 560);
-        StartPosition = FormStartPosition.CenterScreen;
-
-        var rootLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 3,
-            Padding = new Padding(12)
-        };
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        Controls.Add(rootLayout);
-
-        var connectionLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Top,
-            ColumnCount = 9,
-            AutoSize = true
-        };
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 160));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 180));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-
-        connectionLayout.Controls.Add(new Label
-        {
-            Text = "Host",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 7, 8, 0)
-        }, 0, 0);
-
-        _hostTextBox = new TextBox
-        {
-            Text = "localhost",
-            Dock = DockStyle.Fill,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-        connectionLayout.Controls.Add(_hostTextBox, 1, 0);
-
-        connectionLayout.Controls.Add(new Label
-        {
-            Text = "Port",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 7, 8, 0)
-        }, 2, 0);
-
-        _portInput = new NumericUpDown
-        {
-            Minimum = 1,
-            Maximum = 65535,
-            Value = 8088,
-            Width = 100,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-        connectionLayout.Controls.Add(_portInput, 3, 0);
-
-        connectionLayout.Controls.Add(new Label
-        {
-            Text = "Path",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 7, 8, 0)
-        }, 4, 0);
-
-        _pathTextBox = new TextBox
-        {
-            Text = "api/echo",
-            Dock = DockStyle.Fill,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-        connectionLayout.Controls.Add(_pathTextBox, 5, 0);
-
-        _startStopButton = new Button
-        {
-            Text = "Start Server",
-            AutoSize = true,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-        _startStopButton.Click += StartStopButton_Click;
-        connectionLayout.Controls.Add(_startStopButton, 6, 0);
-
-        _statusLabel = new Label
-        {
-            Text = "Stopped",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            ForeColor = Color.Firebrick,
-            Margin = new Padding(0, 7, 8, 0)
-        };
-        connectionLayout.Controls.Add(_statusLabel, 7, 0);
-
-        rootLayout.Controls.Add(connectionLayout, 0, 0);
-
-        var responseGroup = new GroupBox
-        {
-            Text = "Response template",
-            Dock = DockStyle.Top,
-            Padding = new Padding(10),
-            Height = 120
-        };
-        _responseTemplateTextBox = new TextBox
-        {
-            Multiline = true,
-            Dock = DockStyle.Fill,
-            ScrollBars = ScrollBars.Vertical,
-            Text = "RECEIVED: {request}"
-        };
-        responseGroup.Controls.Add(_responseTemplateTextBox);
-        rootLayout.Controls.Add(responseGroup, 0, 1);
-
-        var logGroup = new GroupBox
-        {
-            Text = "Request / Response log",
-            Dock = DockStyle.Fill,
-            Padding = new Padding(10)
-        };
-        var logLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 2
-        };
-        logLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        logLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        logGroup.Controls.Add(logLayout);
-
-        _logTextBox = new TextBox
-        {
-            Multiline = true,
-            Dock = DockStyle.Fill,
-            ReadOnly = true,
-            ScrollBars = ScrollBars.Both,
-            WordWrap = false
-        };
-        logLayout.Controls.Add(_logTextBox, 0, 0);
-
-        _clearLogButton = new Button
-        {
-            Text = "Clear log",
-            AutoSize = true,
-            Anchor = AnchorStyles.Right
-        };
-        _clearLogButton.Click += (_, _) => _logTextBox.Clear();
-        logLayout.Controls.Add(_clearLogButton, 0, 1);
-        rootLayout.Controls.Add(logGroup, 0, 2);
-
-        FormClosing += MainForm_FormClosing;
-    }
+    #region Properties
 
     private bool IsServerRunning => _listenCancellation is { IsCancellationRequested: false };
+
+    #endregion
+
+    #region Lifecycle
+
+    public MainForm()
+    {
+        InitializeComponent();
+    }
+
+    #endregion
+
+    #region Event Handlers
 
     private async void StartStopButton_Click(object? sender, EventArgs e)
     {
@@ -235,6 +80,15 @@ public sealed class MainForm : Form
         }
     }
 
+    private async void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        await StopServerAsync();
+    }
+
+    #endregion
+
+    #region Server Operations
+
     private async Task ListenAsync(HttpListener listener, CancellationToken cancellationToken)
     {
         try
@@ -282,36 +136,6 @@ public sealed class MainForm : Form
         AppendLog($"RES BODY: {responseBody}");
     }
 
-    private string BuildResponseBody(string requestBody)
-    {
-        string template = _responseTemplateTextBox.Text;
-        if (string.IsNullOrEmpty(template))
-        {
-            template = "RECEIVED: {request}";
-        }
-
-        return template.Replace("{request}", requestBody, StringComparison.Ordinal);
-    }
-
-    private static string BuildPrefix(string host, int port, string path)
-    {
-        string normalizedHost = host.Trim();
-        string normalizedPath = NormalizePath(path);
-        return $"http://{normalizedHost}:{port}/{normalizedPath}";
-    }
-
-    private static string NormalizePath(string path)
-    {
-        string normalized = path.Trim();
-        normalized = normalized.Trim('/');
-        if (string.IsNullOrEmpty(normalized))
-        {
-            return string.Empty;
-        }
-
-        return normalized + "/";
-    }
-
     private async Task StopServerAsync()
     {
         _listenCancellation?.Cancel();
@@ -337,6 +161,10 @@ public sealed class MainForm : Form
         SetStoppedUi();
         AppendLog("Server stopped");
     }
+
+    #endregion
+
+    #region UI Helpers
 
     private void SetStoppedUi()
     {
@@ -378,8 +206,39 @@ public sealed class MainForm : Form
         _logTextBox.AppendText(line);
     }
 
-    private async void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
+    #endregion
+
+    #region Static Helpers
+
+    private string BuildResponseBody(string requestBody)
     {
-        await StopServerAsync();
+        string template = _responseTemplateTextBox.Text;
+        if (string.IsNullOrEmpty(template))
+        {
+            template = "RECEIVED: {request}";
+        }
+
+        return template.Replace("{request}", requestBody, StringComparison.Ordinal);
     }
+
+    private static string BuildPrefix(string host, int port, string path)
+    {
+        string normalizedHost = host.Trim();
+        string normalizedPath = NormalizePath(path);
+        return $"http://{normalizedHost}:{port}/{normalizedPath}";
+    }
+
+    private static string NormalizePath(string path)
+    {
+        string normalized = path.Trim();
+        normalized = normalized.Trim('/');
+        if (string.IsNullOrEmpty(normalized))
+        {
+            return string.Empty;
+        }
+
+        return normalized + "/";
+    }
+
+    #endregion
 }

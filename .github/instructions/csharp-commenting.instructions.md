@@ -1,5 +1,5 @@
 ---
-applyTo: "src/**/*.cs"
+applyTo: "**/src/**/*.cs"
 description: "Use when editing C# code. Require XML doc comments for public API and explanatory Japanese comments for intent/reason/constraints."
 ---
 # C# コメント必須ルール

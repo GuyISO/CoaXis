@@ -5,210 +5,24 @@ using System.Text;
 
 namespace NamedPipeTestServer;
 
-public sealed class MainForm : Form
+public sealed partial class MainForm : Form
 {
-    private readonly TextBox _pipeNameTextBox;
-    private readonly Button _connectButton;
-    private readonly Label _statusLabel;
-    private readonly TextBox _manualMessageTextBox;
-    private readonly Button _sendManualButton;
-    private readonly NumericUpDown _generatedLengthInput;
-    private readonly Button _sendGeneratedButton;
-    private readonly TextBox _receivedMessagesTextBox;
-    private readonly Button _clearLogButton;
-
     private readonly SemaphoreSlim _sendLock = new(1, 1);
     private readonly object _pipeLock = new();
     private NamedPipeServerStream? _connectedPipe;
     private CancellationTokenSource? _listenCancellation;
     private Task? _listenTask;
 
+    #region Lifecycle
+
     public MainForm()
     {
-        Text = "NamedPipe Test Server";
-        MinimumSize = new Size(720, 520);
-        StartPosition = FormStartPosition.CenterScreen;
-
-        var rootLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 4,
-            Padding = new Padding(12)
-        };
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 38));
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 20));
-        rootLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 42));
-        Controls.Add(rootLayout);
-
-        var connectionLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Top,
-            ColumnCount = 4,
-            AutoSize = true
-        };
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        connectionLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-
-        connectionLayout.Controls.Add(new Label
-        {
-            Text = "Pipe Name",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            Margin = new Padding(0, 7, 8, 0)
-        }, 0, 0);
-
-        _pipeNameTextBox = new TextBox
-        {
-            Text = "CoaXisViewer",
-            Dock = DockStyle.Fill,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-        connectionLayout.Controls.Add(_pipeNameTextBox, 1, 0);
-
-        _connectButton = new Button
-        {
-            Text = "Start Server",
-            AutoSize = true,
-            Margin = new Padding(0, 0, 8, 0)
-        };
-        _connectButton.Click += StartStopButton_Click;
-        connectionLayout.Controls.Add(_connectButton, 2, 0);
-
-        _statusLabel = new Label
-        {
-            Text = "Server stopped",
-            AutoSize = true,
-            Anchor = AnchorStyles.Left,
-            ForeColor = Color.Firebrick,
-            Margin = new Padding(0, 7, 0, 0)
-        };
-        connectionLayout.Controls.Add(_statusLabel, 3, 0);
-        rootLayout.Controls.Add(connectionLayout, 0, 0);
-
-        var sendManualGroup = new GroupBox
-        {
-            Text = "Send specified text",
-            Dock = DockStyle.Fill,
-            MinimumSize = new Size(0, 140),
-            Padding = new Padding(10)
-        };
-        var manualLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 2,
-            RowCount = 2
-        };
-        manualLayout.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        manualLayout.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        manualLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        manualLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        sendManualGroup.Controls.Add(manualLayout);
-
-        _manualMessageTextBox = new TextBox
-        {
-            Multiline = true,
-            Dock = DockStyle.Fill,
-            ScrollBars = ScrollBars.Vertical
-        };
-        manualLayout.Controls.Add(_manualMessageTextBox, 0, 0);
-        manualLayout.SetColumnSpan(_manualMessageTextBox, 2);
-
-        _sendManualButton = new Button
-        {
-            Text = "Send",
-            AutoSize = true,
-            Anchor = AnchorStyles.Right,
-            Enabled = false
-        };
-        _sendManualButton.Click += SendManualButton_Click;
-        manualLayout.Controls.Add(_sendManualButton, 1, 1);
-        rootLayout.Controls.Add(sendManualGroup, 0, 1);
-
-        var generatedGroup = new GroupBox
-        {
-            Text = "Send auto-generated text",
-            Dock = DockStyle.Fill,
-            MinimumSize = new Size(0, 80),
-            Padding = new Padding(10)
-        };
-        var generatedLayout = new FlowLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            FlowDirection = FlowDirection.LeftToRight,
-            WrapContents = false,
-            AutoSize = true
-        };
-        generatedGroup.Controls.Add(generatedLayout);
-        generatedLayout.Controls.Add(new Label
-        {
-            Text = "Length",
-            AutoSize = true,
-            Margin = new Padding(0, 8, 8, 0)
-        });
-
-        _generatedLengthInput = new NumericUpDown
-        {
-            Minimum = 1,
-            Maximum = 100000,
-            Value = 256,
-            Width = 120
-        };
-        generatedLayout.Controls.Add(_generatedLengthInput);
-
-        _sendGeneratedButton = new Button
-        {
-            Text = "Generate and Send",
-            AutoSize = true,
-            Enabled = false,
-            Margin = new Padding(12, 3, 0, 0)
-        };
-        _sendGeneratedButton.Click += SendGeneratedButton_Click;
-        generatedLayout.Controls.Add(_sendGeneratedButton);
-        generatedLayout.Anchor = AnchorStyles.Left | AnchorStyles.Top;
-        rootLayout.Controls.Add(generatedGroup, 0, 2);
-
-        var receiveGroup = new GroupBox
-        {
-            Text = "Received messages",
-            Dock = DockStyle.Fill,
-            Padding = new Padding(10)
-        };
-        var receiveLayout = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 2
-        };
-        receiveLayout.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        receiveLayout.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        receiveGroup.Controls.Add(receiveLayout);
-
-        _receivedMessagesTextBox = new TextBox
-        {
-            Multiline = true,
-            Dock = DockStyle.Fill,
-            ReadOnly = true,
-            ScrollBars = ScrollBars.Both,
-            WordWrap = false
-        };
-        receiveLayout.Controls.Add(_receivedMessagesTextBox, 0, 0);
-
-        _clearLogButton = new Button
-        {
-            Text = "Clear log",
-            AutoSize = true,
-            Anchor = AnchorStyles.Right
-        };
-        _clearLogButton.Click += (_, _) => _receivedMessagesTextBox.Clear();
-        receiveLayout.Controls.Add(_clearLogButton, 0, 1);
-        rootLayout.Controls.Add(receiveGroup, 0, 3);
-
-        FormClosing += MainForm_FormClosing;
+        InitializeComponent();
     }
+
+    #endregion
+
+    #region Properties
 
     private bool IsServerRunning => _listenCancellation is { IsCancellationRequested: false };
 
@@ -222,6 +36,10 @@ public sealed class MainForm : Form
             }
         }
     }
+
+    #endregion
+
+    #region Event Handlers
 
     private async void StartStopButton_Click(object? sender, EventArgs e)
     {
@@ -279,6 +97,15 @@ public sealed class MainForm : Form
         string message = GenerateRandomText((int)_generatedLengthInput.Value);
         await SendAndReportAsync(message, $"generated({message.Length})");
     }
+
+    private async void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
+    {
+        await StopServerAsync();
+    }
+
+    #endregion
+
+    #region Pipe Operations
 
     private async Task SendAndReportAsync(string message, string category)
     {
@@ -420,6 +247,10 @@ public sealed class MainForm : Form
         AppendLog("Server stopped");
     }
 
+    #endregion
+
+    #region UI Helpers
+
     private void UpdateConnectionState(bool serverRunning, bool connected)
     {
         if (InvokeRequired)
@@ -468,6 +299,10 @@ public sealed class MainForm : Form
         _receivedMessagesTextBox.AppendText(line);
     }
 
+    #endregion
+
+    #region Static Helpers
+
     private static string GenerateRandomText(int length)
     {
         const string alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -480,11 +315,6 @@ public sealed class MainForm : Form
         }
 
         return new string(buffer);
-    }
-
-    private async void MainForm_FormClosing(object? sender, FormClosingEventArgs e)
-    {
-        await StopServerAsync();
     }
 
     private static async Task<string?> ReadMessageAsync(PipeStream pipe, CancellationToken cancellationToken)
@@ -557,4 +387,6 @@ public sealed class MainForm : Form
             throw new EndOfStreamException("Pipe closed before the full message was read.");
         }
     }
+
+    #endregion
 }

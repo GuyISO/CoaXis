@@ -10,6 +10,28 @@
                 ".\\CoaXis.sln"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "check: mojibake",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                ".\\scripts\\quality\\check-mojibake.ps1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "verify: build + encoding",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "check: mojibake",
+                "build"
+            ],
+            "problemMatcher": []
         }
     ]
 }

@@ -1,0 +1,52 @@
+﻿#nullable enable
+
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
+/// <summary>
+/// CoaXisViewer が扱う IPC コマンド名を定義します。
+/// </summary>
+public static class ViewerIpcCommand
+{
+	public const string LoadModel = "LoadModel";
+	public const string Highlight = "Highlight";
+	public const string Select = "Select";
+	public const string ApplyViewPreset = "ApplyViewPreset";
+	public const string ApplyCameraPreset = "ApplyCameraPreset";
+	public const string ClearHighlight = "ClearHighlight";
+	public const string Focus = "Focus";
+	public const string Hide = "Hide";
+	public const string Show = "Show";
+}
+
+/// <summary>
+/// CoaXisViewer から Editor へ通知する IPC イベント名を定義します。
+/// </summary>
+public static class ViewerIpcEvent
+{
+	public const string OnSelect = "OnSelect";
+	public const string OnHover = "OnHover";
+	public const string OnLoaded = "OnLoaded";
+	public const string OnError = "OnError";
+}
+
+/// <summary>
+/// NamedPipe で送受信する JSON メッセージの共通エンベロープです。
+/// </summary>
+public sealed class ViewerIpcEnvelope
+{
+	/// <summary>
+	/// 実行対象の IPC コマンドまたはイベント名です。
+	/// </summary>
+	[JsonPropertyName("command")]
+	public string Command { get; init; } = string.Empty;
+
+	/// <summary>
+	/// コマンド固有の任意ペイロードです。
+	/// </summary>
+	[JsonPropertyName("payload")]
+	public JsonElement? Payload { get; init; }
+}
+
+
+

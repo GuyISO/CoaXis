@@ -1,15 +1,27 @@
 using Godot;
-using System;
 
+/// <summary>
+/// Viewer シーン全体の統括ポイントです。
+/// IPC・UI・モデルローダー統合時の受け口として使用します。
+/// </summary>
 public partial class GameManager : Node
 {
-	// Called when the node enters the scene tree for the first time.
+	#region Lifecycle
+
+	/// <summary>
+	/// ノード初期化時のフックです。
+	/// </summary>
 	public override void _Ready()
 	{
 	}
 
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
+	/// <summary>
+	/// 毎フレーム呼び出される更新フックです。
+	/// </summary>
+	/// <param name="delta">前フレームからの経過秒。</param>
 	public override void _Process(double delta)
 	{
 	}
+
+	#endregion
 }

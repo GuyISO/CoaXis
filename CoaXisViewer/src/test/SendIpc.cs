@@ -1,25 +1,44 @@
-using Godot;
+﻿using Godot;
 using System;
-using System.Threading.Tasks;
 
+/// <summary>
+/// テスト用に IPC メッセージを送信するボタンコンポーネントです。
+/// </summary>
 public partial class SendIpc : Button
 {
+	#region Fields
+
 	[Export] private NodePath _ipcClientPath = "../../IpcClient";
 	[Export] private string _testMessage = "TEST_FROM_BUTTON";
 
 	private IpcClient _ipcClient = null!;
 
+	#endregion
+
+	#region Lifecycle
+
+	/// <summary>
+	/// 初期化時に IPC クライアント参照を解決し、クリックイベントを購読します。
+	/// </summary>
 	public override void _Ready()
 	{
 		_ipcClient = ResolveIpcClient();
 		Pressed += OnPressed;
 	}
 
+	/// <summary>
+	/// 終了時にクリックイベント購読を解除します。
+	/// </summary>
 	public override void _ExitTree()
 	{
 		Pressed -= OnPressed;
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
+	// ボタン押下時は接続の再解決を試み、送信失敗時は原因切り分けしやすい警告を残す。
 	private async void OnPressed()
 	{
 		if (_ipcClient == null)
@@ -41,6 +60,11 @@ public partial class SendIpc : Button
 		}
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
+	// シーン構成差分に耐えるため、Export 指定パスと Main 直下の両方で IpcClient を探索する。
 	private IpcClient ResolveIpcClient()
 	{
 		IpcClient client = GetNodeOrNull<IpcClient>(_ipcClientPath);
@@ -52,4 +76,9 @@ public partial class SendIpc : Button
 		Node root = GetTree().Root;
 		return root.GetNodeOrNull<IpcClient>("Main/IpcClient");
 	}
+
+	#endregion
 }
+
+
+

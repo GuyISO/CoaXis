@@ -1,25 +1,44 @@
-using Godot;
+﻿using Godot;
 using System;
-using System.Threading.Tasks;
 
+/// <summary>
+/// テスト用に HTTP メッセージを送信するボタンコンポーネントです。
+/// </summary>
 public partial class ButtonSendHttp : Button
 {
+	#region Fields
+
 	[Export] private NodePath _httpClientPath = "../../../../HttpClient";
 	[Export] private string _testMessage = "HTTP_TEST_FROM_BUTTON";
 
 	private HttpClient _httpClient = null!;
 
+	#endregion
+
+	#region Lifecycle
+
+	/// <summary>
+	/// 初期化時に HTTP クライアント参照を解決し、クリックイベントを購読します。
+	/// </summary>
 	public override void _Ready()
 	{
 		_httpClient = ResolveHttpClient();
 		Pressed += OnPressed;
 	}
 
+	/// <summary>
+	/// 終了時にクリックイベント購読を解除します。
+	/// </summary>
 	public override void _ExitTree()
 	{
 		Pressed -= OnPressed;
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
+	// ボタン押下時は接続の再解決を試み、通信失敗時に運用側が原因把握しやすい警告を出す。
 	private async void OnPressed()
 	{
 		if (_httpClient == null)
@@ -41,6 +60,11 @@ public partial class ButtonSendHttp : Button
 		}
 	}
 
+	#endregion
+
+	#region Internal Helpers
+
+	// シーン配置差分に対応するため、Export の NodePath と Main 直下のフォールバックで解決する。
 	private HttpClient ResolveHttpClient()
 	{
 		HttpClient client = GetNodeOrNull<HttpClient>(_httpClientPath);
@@ -52,4 +76,9 @@ public partial class ButtonSendHttp : Button
 		Node root = GetTree().Root;
 		return root.GetNodeOrNull<HttpClient>("Main/HttpClient");
 	}
+
+	#endregion
 }
+
+
+
