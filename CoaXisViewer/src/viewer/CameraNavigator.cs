@@ -76,7 +76,7 @@ public partial class CameraNavigator : Control
 
 		if (!wasTrackballMode && isTrackballMode)
 		{
-			CaptureTrackballAnchor(GetViewport().GetMousePosition());
+			CaptureTrackballAnchor(_cameraController.GetViewport().GetMousePosition());
 		}
 		else if (!isTrackballMode)
 		{

@@ -3,13 +3,13 @@
 **/android/
 
 # Godot export/build outputs
-# **/build/
-# *.pck
+**/build/
+*.pck
 
 # .NET/C# build artifacts
-# **/bin/
-# **/obj/
-# *.csproj.lscache
+**/bin/
+**/obj/
+*.csproj.lscache
 
 # IDE user-specific files
 .vs/
