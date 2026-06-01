@@ -124,7 +124,7 @@ public partial class CameraUi : Control
 
 	#endregion
 
-	#region Internal Helpers
+	#region Events
 
 	// UI操作で投影方式を切り替えた直後に表示ラベルを同期し、表示の遅れを防ぐ。
 	private void OnButtonToggleProjectionPressed()

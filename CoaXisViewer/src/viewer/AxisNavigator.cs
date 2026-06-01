@@ -54,7 +54,7 @@ public partial class AxisNavigator : Control
 
 	#endregion
 
-	#region Internal Helpers
+	#region Events
 
 	/// <summary>
 	/// 軸ナビゲータのクリックを検知し、対応する向きへカメラを移動します。

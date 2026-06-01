@@ -24,7 +24,7 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region Event Handlers
+    #region Events
 
     private async void StartStopButton_Click(object? sender, EventArgs e)
     {
@@ -87,7 +87,7 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region Server Operations
+    #region Internal Helpers
 
     private async Task ListenAsync(HttpListener listener, CancellationToken cancellationToken)
     {
@@ -164,7 +164,7 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region UI Helpers
+    #region Internal Helpers
 
     private void SetStoppedUi()
     {
@@ -208,7 +208,7 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region Static Helpers
+    #region Internal Helpers
 
     private string BuildResponseBody(string requestBody)
     {

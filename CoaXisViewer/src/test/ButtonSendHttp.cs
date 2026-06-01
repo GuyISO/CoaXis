@@ -36,7 +36,7 @@ public partial class ButtonSendHttp : Button
 
 	#endregion
 
-	#region Internal Helpers
+	#region Events
 
 	// ボタン押下時は接続の再解決を試み、通信失敗時に運用側が原因把握しやすい警告を出す。
 	private async void OnPressed()

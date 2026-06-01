@@ -13,15 +13,6 @@ public sealed partial class MainForm : Form
     private CancellationTokenSource? _listenCancellation;
     private Task? _listenTask;
 
-    #region Lifecycle
-
-    public MainForm()
-    {
-        InitializeComponent();
-    }
-
-    #endregion
-
     #region Properties
 
     private bool IsServerRunning => _listenCancellation is { IsCancellationRequested: false };
@@ -39,7 +30,16 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region Event Handlers
+    #region Lifecycle
+
+    public MainForm()
+    {
+        InitializeComponent();
+    }
+
+    #endregion
+
+    #region Events
 
     private async void StartStopButton_Click(object? sender, EventArgs e)
     {
@@ -105,7 +105,7 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region Pipe Operations
+    #region Internal Helpers
 
     private async Task SendAndReportAsync(string message, string category)
     {
@@ -249,7 +249,7 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region UI Helpers
+    #region Internal Helpers
 
     private void UpdateConnectionState(bool serverRunning, bool connected)
     {
@@ -301,7 +301,7 @@ public sealed partial class MainForm : Form
 
     #endregion
 
-    #region Static Helpers
+    #region Internal Helpers
 
     private static string GenerateRandomText(int length)
     {

@@ -47,6 +47,13 @@ public partial class CameraController : Node
 		Zoom
 	}
 
+	#region Signals
+	[Signal] public delegate void ControlModeChangedEventHandler(Mode mode);
+	[Signal] public delegate void FocalPointMovedEventHandler(Vector3 newPosition);
+	[Signal] public delegate void FocalPointRotatedEventHandler(Quaternion newRotation);
+	[Signal] public delegate void ViewPortSizeChangedEventHandler();
+	#endregion
+
 	#region Fields
 
 	[ExportGroup("Settings")]
@@ -61,13 +68,6 @@ public partial class CameraController : Node
 	private bool _hasMoved = false; // 中ボタンを押してからマウスを移動操作したかのフラグ。クリックと移動の区別に使用
 	private Tween _tween; // FocalPointの移動と回転にアニメーションを使用する場合のTweenインスタンス
 
-	#endregion
-
-	#region Signals
-	[Signal] public delegate void ControlModeChangedEventHandler(Mode mode);
-	[Signal] public delegate void FocalPointMovedEventHandler(Vector3 newPosition);
-	[Signal] public delegate void FocalPointRotatedEventHandler(Quaternion newRotation);
-	[Signal] public delegate void ViewPortSizeChangedEventHandler();
 	#endregion
 
 	#region Properties

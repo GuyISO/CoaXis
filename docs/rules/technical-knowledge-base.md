@@ -86,3 +86,18 @@
 - 備考: 検知漏れが見つかった場合は、同日中に検知パターンを追加する。
 
 ---
+
+### [2026-06-01] C#のregion運用をEvents中心へ統合
+
+- 背景: 既存規約ではイベント処理やユーザー操作起点の処理を `Internal Helpers` に集約しており、呼び出し起点の探索に時間がかかっていた。その後 `User Actions` / `Event Handlers` 分離、`Event Handlers` 一本化を経て、最終的に `Events` へ名称統一する段階的見直しを実施した。
+- 問題: region 名と責務の分け方が短期間で変遷し、履歴が分散したことで「現在の正」と「運用手順」が読み取りづらくなっていた。
+- 判断: 外部起点の処理（シグナル/イベント購読コールバック、ユーザー操作起点の直接呼び出し処理）は `Events` region へ統一し、標準順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public API -> Internal Helpers` とする。
+- 判断理由: 名称と責務を一意にしつつ、呼び出し起点の処理を `Public API` より先に配置することで、イベント起点の流れを先に追える構成にできる。
+- 採用しなかった代替案: `User Actions` と `Event Handlers` の分離運用、および `Event Handlers` 名継続は、表現力はあるが配置判断と命名の揺れを生みやすいため不採用。
+- 影響範囲: `CoaXisViewer/src/**/*.cs` および `tests/**/*.cs` のクラス内region構成・命名。
+- 実装/運用手順: クラス更新時は `#region Events` を使用し、`#region User Actions` / `#region Event Handlers` は新規作成しない。順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public API -> Internal Helpers` を適用する。
+- 検証方法: `#region User Actions` と `#region Event Handlers` の残存がないこと、`#region Events` が使用されていること、必要に応じて `dotnet build .\\CoaXis.sln` で整合確認する。
+- 関連ファイル/関連仕様: `docs/rules/implementation-conventions.md`
+- 備考: 同日付の「C#のregion運用へUser ActionsとEvent Handlersを正式追加」「C#のユーザー起点処理をEvent Handlersへ一本化」「C#の外部起点処理region名をEventsへ統一」は本ログへ統合した。
+
+---

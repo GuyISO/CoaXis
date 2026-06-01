@@ -36,7 +36,7 @@ public partial class SendIpc : Button
 
 	#endregion
 
-	#region Internal Helpers
+	#region Events
 
 	// ボタン押下時は接続の再解決を試み、送信失敗時は原因切り分けしやすい警告を残す。
 	private async void OnPressed()

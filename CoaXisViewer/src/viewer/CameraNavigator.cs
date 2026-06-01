@@ -100,7 +100,7 @@ public partial class CameraNavigator : Control
 
 	#endregion
 
-	#region Internal Helpers
+	#region Events
 
 	// CameraController の操作モードに合わせて、表示要素の有効/無効を切り替える。
 	private void OnCameraControlModeChanged(CameraController.Mode mode)

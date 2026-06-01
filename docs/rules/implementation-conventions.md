@@ -17,11 +17,13 @@ Godot C# / 非Godot C# の両方に適用します。
 2. `Fields`
 3. `Properties`
 4. `Lifecycle`
-5. `Public API`
-6. `Internal Helpers`
+5. `Events`（必要な場合のみ）
+6. `Public API`
+7. `Internal Helpers`
 
 補足:
 - `Signals` は Godot の `[Signal]` 宣言がある場合のみ使用する。
+- `Events` は、シグナル/イベント購読のコールバックに加え、ユーザー操作を起点に直接呼び出される処理（ボタン押下、メニュー実行など）も配置する。
 - 該当する要素がないセクションは省略してよい。
 - 1クラスが小さい場合でも、将来拡張を見越して順序は維持する。
 
@@ -33,11 +35,11 @@ Godot C# / 非Godot C# の両方に適用します。
 - `Fields`
 - `Properties`
 - `Lifecycle`
+- `Events`
 - `Public API`
 - `Internal Helpers`
 
 禁止例（統一のため使用しない）:
-- `Event`
 - `Event Handlers`
 - `Signal Handlers`
 - `Input Handling`
@@ -46,7 +48,7 @@ Godot C# / 非Godot C# の両方に適用します。
 - `Node Resolution`
 - `Parsing Helpers`
 
-上記のような詳細分類が必要な場合でも、`Internal Helpers` の中でメソッド順・コメントで意図を示す。
+`Events` 以外で詳細分類が必要な場合は、`Internal Helpers` の中でメソッド順・コメントで意図を示す。
 
 ## 4. コメント方針
 
