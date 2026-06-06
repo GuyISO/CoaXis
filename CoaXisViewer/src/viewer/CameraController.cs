@@ -49,7 +49,7 @@ public partial class CameraController : Node
 
 	#region Signals
 	[Signal] public delegate void ControlModeChangedEventHandler(Mode mode);
-	[Signal] public delegate void FocalPointMovedEventHandler(Vector3 newPosition);
+	[Signal] public delegate void FocalPointTranslatedEventHandler(Vector3 newPosition);
 	[Signal] public delegate void FocalPointRotatedEventHandler(Quaternion newRotation);
 	[Signal] public delegate void ViewPortSizeChangedEventHandler();
 	#endregion
@@ -140,6 +140,10 @@ public partial class CameraController : Node
 
 	}
 
+	#endregion
+
+	#region Events
+
 	/// <summary>
 	/// 未処理入力を監視し、カメラ操作モード遷移を行います。
 	/// </summary>
@@ -151,133 +155,6 @@ public partial class CameraController : Node
 		{
 			HandleMouseButton(button);
 		}
-	}
-
-	#endregion
-
-	#region Internal Helpers
-
-	private void SetCameraControlMode(Mode mode)
-	{
-		if (_currentMode == mode)
-		{
-			return;
-		}
-
-		_currentMode = mode;
-		EmitSignal(SignalName.ControlModeChanged, (int)mode);
-	}
-
-	private void HandleMouseButton(InputEventMouseButton button)
-	{
-		// 入力状態遷移:
-		// None --(中押下)--> Pan --(左右押下)--> Orbit/Roll --(左右離し)--> Zoom --(中離し)--> None
-		// 現在モードに応じて遷移ルールを切り替える。
-		if (_currentMode == Mode.None)
-		{
-			HandleIdleModeInput(button);
-		}
-		else
-		{
-			HandleActiveModeInput(button);
-		}
-	}
-
-	private void HandleIdleModeInput(InputEventMouseButton button)
-	{
-		// 中ボタンのクリック開始を検知したら、移動フラグをリセットしてカメラコントロール開始
-		if (!button.Pressed || button.ButtonIndex != MouseButton.Middle)
-		{
-			return;
-		}
-
-		_hasMoved = false;
-		_lastMousePos = button.Position;
-		SetCameraControlMode(Mode.Pan);
-	}
-
-	private void HandleActiveModeInput(InputEventMouseButton button)
-	{
-		// ウィンドウフォーカス喪失などのキャンセル時は即時終了。
-		if (button.Canceled)
-		{
-			// 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する。
-			SetCameraControlMode(Mode.None);
-			return;
-		}
-
-		// 中ボタンのクリック終了を検知したら、移動していなければクリックとみなし Focus を行い、カメラコントロール終了
-		if (!button.Pressed && button.ButtonIndex == MouseButton.Middle)
-		{
-			if (!_hasMoved)
-			{
-				FocusAtMouse(button.Position);
-			}
-			SetCameraControlMode(Mode.None);
-			return;
-		}
-
-		// 左右ボタンの入力を検知したら、Pan → Orbit/Roll または Orbit/Roll → Zoom へ遷移
-		if (button.ButtonIndex != MouseButton.Left && button.ButtonIndex != MouseButton.Right)
-		{
-			return;
-		}
-
-		// 中ボタンを押したまま右or左クリック開始を検知したら、位置によってOrbit/Rollモードに切り替え
-		if (button.Pressed)
-		{
-			_hasMoved = true; // クリック操作したら注視点移動しないようににするため、移動フラグを立てる
-			SetCameraControlMode(IsMouseOnCenterArea(button.Position) ? Mode.Orbit : Mode.Roll);
-			return;
-		}
-		
-		// 中ボタンを押したまま右or左クリック終了を検知したら、Zoomモードに切り替え
-		SetCameraControlMode(Mode.Zoom);
-	}
-
-	private void ApplyCameraOperation(Vector2 currentMousePos, Vector2 previousMousePos)
-	{
-
-		// currentMousePos !!= previousMousePos は呼び出し元でチェック済みなので、ここではマウスが移動した前提で処理を行う。
-		_hasMoved = true;
-
-		switch (_currentMode)
-		{
-			case Mode.Pan:
-				PanCamera(previousMousePos, currentMousePos);
-				break;
-			case Mode.Orbit:
-				OrbitCamera(previousMousePos, currentMousePos);
-				break;
-			case Mode.Roll:
-				if (IsMouseOnCenterArea(currentMousePos))
-				{
-					// 画面中央寄りに入ったらOrbitに変更、外周寄りはRollのままにする
-					SetCameraControlMode(Mode.Orbit);
-					OrbitCamera(previousMousePos, currentMousePos);
-				}
-				else
-				{
-					RollCamera(previousMousePos, currentMousePos);
-				}
-				break;
-			case Mode.Zoom:
-				ZoomCamera(previousMousePos, currentMousePos);
-				break;
-		}
-	}
-
-	private void OnViewportSizeChanged()
-	{
-		RefreshTrackballParameters();
-	}
-
-	private void RefreshTrackballParameters()
-	{
-		Rect2 rect = GetViewport().GetVisibleRect();
-		ScreenCenter = rect.Position + rect.Size * 0.5f;
-		TrackballRadius = rect.Size.Y * _rollRegionRadiusRatio;
-		EmitSignal(SignalName.ViewPortSizeChanged);
 	}
 
 	#endregion
@@ -419,11 +296,132 @@ public partial class CameraController : Node
 		MoveFocalPoint(null, newRotation, useTween);
 	}
 
-
-
 	#endregion
 
 	#region Internal Helpers
+
+	private void SetCameraControlMode(Mode mode)
+	{
+		if (_currentMode == mode)
+		{
+			return;
+		}
+
+		_currentMode = mode;
+		EmitSignal(SignalName.ControlModeChanged, (int)mode);
+	}
+
+	private void HandleMouseButton(InputEventMouseButton button)
+	{
+		// 入力状態遷移:
+		// None --(中押下)--> Pan --(左右押下)--> Orbit/Roll --(左右離し)--> Zoom --(中離し)--> None
+		// 現在モードに応じて遷移ルールを切り替える。
+		if (_currentMode == Mode.None)
+		{
+			HandleIdleModeInput(button);
+		}
+		else
+		{
+			HandleActiveModeInput(button);
+		}
+	}
+
+	private void HandleIdleModeInput(InputEventMouseButton button)
+	{
+		// 中ボタンのクリック開始を検知したら、移動フラグをリセットしてカメラコントロール開始
+		if (!button.Pressed || button.ButtonIndex != MouseButton.Middle)
+		{
+			return;
+		}
+
+		_hasMoved = false;
+		_lastMousePos = button.Position;
+		SetCameraControlMode(Mode.Pan);
+	}
+
+	private void HandleActiveModeInput(InputEventMouseButton button)
+	{
+		// ウィンドウフォーカス喪失などのキャンセル時は即時終了。
+		if (button.Canceled)
+		{
+			// 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する。
+			SetCameraControlMode(Mode.None);
+			return;
+		}
+
+		// 中ボタンのクリック終了を検知したら、移動していなければクリックとみなし Focus を行い、カメラコントロール終了
+		if (!button.Pressed && button.ButtonIndex == MouseButton.Middle)
+		{
+			if (!_hasMoved)
+			{
+				FocusAtMouse(button.Position);
+			}
+			SetCameraControlMode(Mode.None);
+			return;
+		}
+
+		// 左右ボタンの入力を検知したら、Pan → Orbit/Roll または Orbit/Roll → Zoom へ遷移
+		if (button.ButtonIndex != MouseButton.Left && button.ButtonIndex != MouseButton.Right)
+		{
+			return;
+		}
+
+		// 中ボタンを押したまま右or左クリック開始を検知したら、位置によってOrbit/Rollモードに切り替え
+		if (button.Pressed)
+		{
+			_hasMoved = true; // クリック操作したら注視点移動しないようににするため、移動フラグを立てる
+			SetCameraControlMode(IsMouseOnCenterArea(button.Position) ? Mode.Orbit : Mode.Roll);
+			return;
+		}
+		
+		// 中ボタンを押したまま右or左クリック終了を検知したら、Zoomモードに切り替え
+		SetCameraControlMode(Mode.Zoom);
+	}
+
+	private void ApplyCameraOperation(Vector2 currentMousePos, Vector2 previousMousePos)
+	{
+
+		// currentMousePos !!= previousMousePos は呼び出し元でチェック済みなので、ここではマウスが移動した前提で処理を行う。
+		_hasMoved = true;
+
+		switch (_currentMode)
+		{
+			case Mode.Pan:
+				PanCamera(previousMousePos, currentMousePos);
+				break;
+			case Mode.Orbit:
+				OrbitCamera(previousMousePos, currentMousePos);
+				break;
+			case Mode.Roll:
+				if (IsMouseOnCenterArea(currentMousePos))
+				{
+					// 画面中央寄りに入ったらOrbitに変更、外周寄りはRollのままにする
+					SetCameraControlMode(Mode.Orbit);
+					OrbitCamera(previousMousePos, currentMousePos);
+				}
+				else
+				{
+					RollCamera(previousMousePos, currentMousePos);
+				}
+				break;
+			case Mode.Zoom:
+				ZoomCamera(previousMousePos, currentMousePos);
+				break;
+		}
+	}
+
+	private void OnViewportSizeChanged()
+	{
+		RefreshTrackballParameters();
+	}
+
+	private void RefreshTrackballParameters()
+	{
+		Rect2 rect = GetViewport().GetVisibleRect();
+		ScreenCenter = rect.Position + rect.Size * 0.5f;
+		TrackballRadius = rect.Size.Y * _rollRegionRadiusRatio;
+		EmitSignal(SignalName.ViewPortSizeChanged);
+	}
 
 	private float GetPerspectiveDistanceFromOrthographicSize()
 	{
@@ -450,10 +448,6 @@ public partial class CameraController : Node
 		return Mathf.Tan(fovRadians / 2.0f) * 2.0f; // Z=1のときのサイズを計算
 	}
 
-	#endregion
-
-	#region Internal Helpers
-	
 	private bool IsMouseOnCenterArea(Vector2 mousePos)
 	{
 		// Orbit/Roll の分岐用に、画面中央の円領域判定を行う。
@@ -580,10 +574,6 @@ public partial class CameraController : Node
 			new Vector3(p.X + s.X, p.Y + s.Y, p.Z + s.Z)
 		};
 	}
-
-	#endregion
-
-	#region Internal Helpers
 
 	private void FocusAtMouse(Vector2 screenPos)
 	{
@@ -730,11 +720,17 @@ public partial class CameraController : Node
 				startPos.Lerp(endPos, t)
 			);
 		}), 0f, 1f, _tweenDuration);
+
+		if (targetPosition.HasValue)
+		{
+			EmitSignal(SignalName.FocalPointTranslated, targetPosition.Value);
+		}
+		if (targetRotation.HasValue)
+		{
+			EmitSignal(SignalName.FocalPointRotated, targetRotation.Value);
+		}
+
 	}
-
-	#endregion
-
-	#region Internal Helpers
 
 	/// <summary>
 	/// カメラ状態を JSON 文字列として保存します。

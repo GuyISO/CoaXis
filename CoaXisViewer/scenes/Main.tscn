@@ -2,12 +2,14 @@
 
 [ext_resource type="Script" uid="uid://c4tbljjhha7ii" path="res://src/viewer/GameManager.cs" id="1_wp0k4"]
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="2_bjd11"]
+[ext_resource type="Script" uid="uid://cb8mh34mjm1hk" path="res://src/loader/ModelLoader.cs" id="2_mwfav"]
 [ext_resource type="Script" uid="uid://bv1qjj2yvm6xc" path="res://src/test/SendIpc.cs" id="3_qmy6f"]
 [ext_resource type="Script" uid="uid://b5keyjh3gtsfo" path="res://src/test/ButtonSendHttp.cs" id="4_mwfav"]
 [ext_resource type="PackedScene" uid="uid://clxjf10cr4uh2" path="res://scenes/viewer/CameraController.tscn" id="5_3p2gp"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewer/AxisNavigator.tscn" id="6_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewer/CameraNavigator.tscn" id="7_ft6cd"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/test/FpsUi.cs" id="8_bb450"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/viewer/SpecificationTree.cs" id="8_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/CameraUi.tscn" id="9_nfivy"]
 [ext_resource type="Script" uid="uid://1us0ficbltrg" path="res://src/test/IpcClient.cs" id="10_1nqs0"]
 [ext_resource type="Script" uid="uid://bjvgo4vnk6a40" path="res://src/test/HttpClient.cs" id="11_1iba3"]
@@ -41,24 +43,30 @@ environment = SubResource("Environment_2xmat")
 transform = Transform3D(0.14644663, 0.8535534, -0.5, -0.50000006, 0.50000006, 0.70710677, 0.8535534, 0.14644662, 0.5, 0, 0, 0)
 
 [node name="Models" type="Node3D" parent="." unique_id=2131541972]
+script = ExtResource("2_mwfav")
 
-[node name="Cube" type="StaticBody3D" parent="Models" unique_id=722696110]
+[node name="Cube" type="Node3D" parent="Models" unique_id=2086981542]
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Cube" unique_id=1111657438]
 material_override = ExtResource("2_bjd11")
 mesh = SubResource("BoxMesh_o6tqf")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Cube" unique_id=1783050876]
+[node name="StaticBody3D" type="StaticBody3D" parent="Models/Cube" unique_id=722696110]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Cube/StaticBody3D" unique_id=1783050876]
 shape = SubResource("BoxShape3D_5x7yu")
 
-[node name="Cube2" type="StaticBody3D" parent="Models" unique_id=1514251133]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
+[node name="Sphere" type="Node3D" parent="Models" unique_id=1772479710]
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Cube2" unique_id=1374449570]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Sphere" unique_id=1374449570]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
 material_override = ExtResource("2_bjd11")
 mesh = SubResource("SphereMesh_nco0u")
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Cube2" unique_id=402133486]
+[node name="StaticBody3D" type="StaticBody3D" parent="Models/Sphere" unique_id=1514251133]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Sphere/StaticBody3D" unique_id=402133486]
 shape = SubResource("SphereShape3D_f2lfd")
 
 [node name="Canvas" type="Control" parent="." unique_id=1073936096]
@@ -157,23 +165,30 @@ layout_mode = 1
 _cameraController = NodePath("../SubViewportContainer/SubViewport/CameraController")
 
 [node name="SpecificationTree" type="Control" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=1498716255]
-visible = false
-layout_mode = 1
-anchors_preset = 9
+anchors_preset = 0
+anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="ScrollContainer" type="ScrollContainer" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SpecificationTree" unique_id=210432633]
-custom_minimum_size = Vector2(60, 0)
 layout_mode = 1
-anchors_preset = 9
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
+grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+draw_focus_border = true
+vertical_scroll_mode = 2
 
 [node name="Tree" type="Tree" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SpecificationTree/ScrollContainer" unique_id=1837406890]
+custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_horizontal = 2
 size_flags_vertical = 3
+script = ExtResource("8_qmy6f")
 
 [node name="RightBar" type="HBoxContainer" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=398377360]
 custom_minimum_size = Vector2(48, 0)
@@ -219,6 +234,7 @@ _defaultFitTargetNode = NodePath("../../Models")
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
+mouse_filter = 2
 script = ExtResource("13_mwfav")
 _label = NodePath("RichTextLabel")
 

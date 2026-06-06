@@ -45,14 +45,7 @@ public partial class CameraNavigator : Control
 	/// </summary>
 	public override void _Ready()
 	{
-		// 外部参照ノードがエディターで設定されていない場合は、シーンツリーから取得する。
-		_cameraController = ResolveCameraController();
-		if (_cameraController == null)
-		{
-			GD.PushWarning("CameraNavigator: CameraController not found. Navigation rendering is disabled.");
-			return;
-		}
-
+		
 		// シーン内の子ノードを取得する。
 		_centerAxis = GetNode<Control>("CenterAxis");
 		_axisXPositive = _centerAxis.GetNode<Line2D>("LineXPositive");
@@ -143,29 +136,6 @@ public partial class CameraNavigator : Control
 	private void OnViewPortSizeChanged()
 	{
 		DrawCircle();
-	}
-
-	// Export 未設定でも動作するよう、相対パス・絶対パス・全体探索の順で CameraController を解決する。
-	private CameraController ResolveCameraController()
-	{
-		if (_cameraController != null)
-		{
-			return _cameraController;
-		}
-
-		CameraController controller = GetNodeOrNull<CameraController>("../SubViewportContainer/SubViewport/CameraController");
-		if (controller != null)
-		{
-			return controller;
-		}
-
-		controller = GetNodeOrNull<CameraController>("/root/Main/Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/CameraController");
-		if (controller != null)
-		{
-			return controller;
-		}
-
-		return GetTree()?.Root?.FindChild("CameraController", true, false) as CameraController;
 	}
 
 	#endregion

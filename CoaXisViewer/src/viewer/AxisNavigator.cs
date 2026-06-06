@@ -25,12 +25,11 @@ public partial class AxisNavigator : Control
 	/// </summary>
 	public override void _Ready()
 	{
-		_cameraController = ResolveCameraController();
 
-		_focalPoint = GetNodeOrNull<Node3D>("FocalPoint");
-		_camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
 		_subViewportContainer = FindChild("SubViewportContainer") as SubViewportContainer;
 		_subViewport = _subViewportContainer?.GetNodeOrNull<SubViewport>("SubViewport");
+		_focalPoint = _subViewport?.GetNodeOrNull<Node3D>("FocalPoint");
+		_camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
 
 		if (_cameraController == null || _focalPoint == null || _camera == null || _subViewportContainer == null || _subViewport == null)
 		{
@@ -102,6 +101,16 @@ public partial class AxisNavigator : Control
 		}
 	}
 
+	private void OnCameraTransformed()
+	{
+		if (_cameraController == null || _focalPoint == null)
+		{
+			return;
+		}
+
+		_focalPoint.Rotation = _cameraController.FocalPoint.Rotation;
+	}
+
 	#endregion
 
 	#region Internal Helpers
@@ -116,29 +125,6 @@ public partial class AxisNavigator : Control
 			_cameraController.MoveFocalPoint(null, quaternion, true);
 		}
 
-	}
-
-	// Export 未設定でも動作するよう、相対パス・絶対パス・全体探索の順で CameraController を解決する。
-	private CameraController ResolveCameraController()
-	{
-		if (_cameraController != null)
-		{
-			return _cameraController;
-		}
-
-		CameraController controller = GetNodeOrNull<CameraController>("../SubViewportContainer/SubViewport/CameraController");
-		if (controller != null)
-		{
-			return controller;
-		}
-
-		controller = GetNodeOrNull<CameraController>("/root/Main/Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/CameraController");
-		if (controller != null)
-		{
-			return controller;
-		}
-
-		return GetTree()?.Root?.FindChild("CameraController", true, false) as CameraController;
 	}
 
 	// ノード名の "x, y, z" 表記を回転角（度）として解釈する。

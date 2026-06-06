@@ -13,6 +13,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
+mouse_filter = 2
 script = ExtResource("1_3a0ha")
 
 [node name="CenterAxis" type="Control" parent="." unique_id=1023449478]
@@ -25,6 +26,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="LineXPositive" type="Line2D" parent="CenterAxis" unique_id=18559204]
 points = PackedVector2Array(-20, 0, 20, 0)
@@ -60,6 +62,7 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
 [node name="LineX" type="Line2D" parent="Trackball" unique_id=1962218186]
 width = 1.0
@@ -79,3 +82,4 @@ anchor_right = 0.5
 anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
