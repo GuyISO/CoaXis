@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://cf06e5oyn7g2i"]
 
-[ext_resource type="Script" uid="uid://dynirh5eygkkb" path="res://src/viewer/CameraNavigator.cs" id="1_3a0ha"]
+[ext_resource type="Script" uid="uid://dynirh5eygkkb" path="res://src/camera/CameraControlOverlay.cs" id="1_3a0ha"]
 
-[node name="CameraNavigator" type="Control" unique_id=440684067]
+[node name="CameraControlOverlay" type="Control" unique_id=440684067]
 layout_mode = 3
 anchors_preset = 8
 anchor_left = 0.5
@@ -52,7 +52,7 @@ default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
 width = 1.0
 default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
 
-[node name="Trackball" type="Control" parent="." unique_id=118312232]
+[node name="ArcballCross" type="Control" parent="." unique_id=118312232]
 visible = false
 layout_mode = 1
 anchors_preset = 8
@@ -64,15 +64,15 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="LineX" type="Line2D" parent="Trackball" unique_id=1962218186]
+[node name="LineX" type="Line2D" parent="ArcballCross" unique_id=1962218186]
 width = 1.0
 default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
 
-[node name="LineY" type="Line2D" parent="Trackball" unique_id=681871742]
+[node name="LineY" type="Line2D" parent="ArcballCross" unique_id=681871742]
 width = 1.0
 default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
 
-[node name="Circle" type="Control" parent="." unique_id=430721055]
+[node name="ArcballOutline" type="Control" parent="." unique_id=430721055]
 visible = false
 layout_mode = 1
 anchors_preset = 8

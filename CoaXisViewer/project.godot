@@ -18,7 +18,12 @@ config/icon="res://assets/icon/icon.svg"
 
 [autoload]
 
+SceneManager="*uid://bdww21xtruf8m"
+SelectionManager="*uid://dngenqpeyo83v"
 EventHub="*uid://dx5t10ibmi7k1"
+ConfigService="*uid://c4xtxi5qc52w1"
+RayCastService="*uid://cym3s6hqs3x03"
+IpcService="*uid://cw6vp0knouk1l"
 
 [display]
 

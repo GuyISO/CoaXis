@@ -5,15 +5,16 @@
 [ext_resource type="Script" uid="uid://cb8mh34mjm1hk" path="res://src/loader/ModelLoader.cs" id="2_mwfav"]
 [ext_resource type="Script" uid="uid://bv1qjj2yvm6xc" path="res://src/test/SendIpc.cs" id="3_qmy6f"]
 [ext_resource type="Script" uid="uid://b5keyjh3gtsfo" path="res://src/test/ButtonSendHttp.cs" id="4_mwfav"]
-[ext_resource type="PackedScene" uid="uid://clxjf10cr4uh2" path="res://scenes/viewer/CameraController.tscn" id="5_3p2gp"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewer/AxisNavigator.tscn" id="6_cvmbd"]
-[ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewer/CameraNavigator.tscn" id="7_ft6cd"]
+[ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/camera/CameraRig.cs" id="7_cvmbd"]
+[ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewer/CameraControlOverlay.tscn" id="7_ft6cd"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/test/FpsUi.cs" id="8_bb450"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/viewer/SpecificationTree.cs" id="8_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/CameraUi.tscn" id="9_nfivy"]
 [ext_resource type="Script" uid="uid://1us0ficbltrg" path="res://src/test/IpcClient.cs" id="10_1nqs0"]
 [ext_resource type="Script" uid="uid://bjvgo4vnk6a40" path="res://src/test/HttpClient.cs" id="11_1iba3"]
 [ext_resource type="Script" uid="uid://stjlfvm4o4dh" path="res://src/test/DebugConsole.cs" id="13_mwfav"]
+[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/camera/ViewportInputHandler.cs" id="14_3t3px"]
 
 [sub_resource type="Environment" id="Environment_2xmat"]
 background_mode = 1
@@ -153,16 +154,23 @@ stretch = true
 handle_input_locally = false
 size = Vector2i(1816, 976)
 render_target_update_mode = 4
+script = ExtResource("14_3t3px")
 
-[node name="CameraController" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport" unique_id=668215330 instance=ExtResource("5_3p2gp")]
+[node name="CameraRig" type="Node3D" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport" unique_id=335083594]
+script = ExtResource("7_cvmbd")
 
-[node name="AxisNavigator" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=1854996461 node_paths=PackedStringArray("_cameraController") instance=ExtResource("6_cvmbd")]
+[node name="Camera3D" type="Camera3D" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/CameraRig" unique_id=691029672]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+cull_mask = 1048573
+current = true
+fov = 35.0
+near = 0.001
+
+[node name="AxisNavigator" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=1854996461 instance=ExtResource("6_cvmbd")]
 layout_mode = 1
-_cameraController = NodePath("../SubViewportContainer/SubViewport/CameraController")
 
-[node name="CameraNavigator" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=440684067 node_paths=PackedStringArray("_cameraController") instance=ExtResource("7_ft6cd")]
+[node name="CameraControlOverlay" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=440684067 instance=ExtResource("7_ft6cd")]
 layout_mode = 1
-_cameraController = NodePath("../SubViewportContainer/SubViewport/CameraController")
 
 [node name="SpecificationTree" type="Control" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=1498716255]
 anchors_preset = 0
@@ -217,17 +225,16 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 vertical_alignment = 2
 
-[node name="CameraUi" parent="Canvas" unique_id=1240710847 node_paths=PackedStringArray("_cameraController", "_defaultFitTargetNode") instance=ExtResource("9_nfivy")]
+[node name="CameraUi" parent="Canvas" unique_id=1240710847 node_paths=PackedStringArray("_defaultFitTargetNode") instance=ExtResource("9_nfivy")]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -273.0
-offset_top = 25.0
-offset_right = -273.0
-offset_bottom = 25.0
+offset_left = -320.0
+offset_top = 66.0
+offset_right = -320.0
+offset_bottom = 66.0
 grow_horizontal = 0
-_cameraController = NodePath("../VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/CameraController")
 _defaultFitTargetNode = NodePath("../../Models")
 
 [node name="DebugConsole" type="Control" parent="Canvas" unique_id=1338117560 node_paths=PackedStringArray("_label")]
