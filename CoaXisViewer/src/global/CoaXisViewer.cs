@@ -2,6 +2,17 @@ using Godot;
 using System;
 
 /// <summary>
+/// ログレベルを表す列挙型です。
+/// </summary>
+public enum LogLevel
+{
+    Debug,
+    Info,
+    Warn,
+    Error
+}
+
+/// <summary>
 /// カメラの入力制御モードです。
 /// </summary>
 public enum CameraControlMode
@@ -17,10 +28,6 @@ public enum CameraControlMode
 	/// <summary>ズーム操作。</summary>
 	Zoom
 }
-
-
-
-
 
 /// <summary>
 /// レイキャストのヒット情報を表す構造体です。

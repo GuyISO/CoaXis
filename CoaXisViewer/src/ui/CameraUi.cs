@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// カメラ操作用 UI（投影切替、Fit、Roll、状態表示）を管理します。
 /// </summary>
-public partial class CameraUi : Control
+public partial class CameraUi : Window
 {
 	#region Fields
 

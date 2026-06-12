@@ -2,6 +2,7 @@ using Godot;
 
 /// <summary>
 /// カメラ関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、カメラの状態変更や操作のリクエストを通知するためのシグナルを提供します。これにより、カメラ操作のロジックを分散させずに一元管理できます。
+/// Autoloadに登録してシングルトン参照することを前提としていますが、複数インスタンスが存在する可能性も考慮して実装されています。
 /// </summary>
 public partial class CameraEventHub : Node
 {
@@ -15,7 +16,23 @@ public partial class CameraEventHub : Node
 	/// </summary>
 	public override void _EnterTree()
 	{
-		I = this;
+		// AutoLoad をデフォルト参照として維持するため、未設定時のみ I を確立する。
+		if (I == null)
+		{
+			I = this;
+		}
+	}
+
+	/// <summary>
+	/// シーンツリー離脱時に、現在インスタンスがシングルトン参照なら解放します。
+	/// </summary>
+	public override void _ExitTree()
+	{
+		// 複数インスタンスが存在し得るため、自身が I の場合のみ解放する。
+		if (ReferenceEquals(I, this))
+		{
+			I = null;
+		}
 	}
 
 	#region --------------------------------------- Request ---------------------------------------

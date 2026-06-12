@@ -17,6 +17,7 @@ public partial class CameraControlOverlay : Control
 	private const float CenterAxisGap = 16.0f;
 	private const float ArcballCrossAngularSize = 0.20f;
 	private const int ArcballCrossCurveSegments = 12;
+	private const float Epsilon = 1e-6f;
 
 	[Export] private Color _lineColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);
 
@@ -136,6 +137,7 @@ public partial class CameraControlOverlay : Control
 	private void OnArcballHandleNotified(Vector3 position)
 	{
 		ComputeArcballHandleRotation(position);
+		DrawArcballCross();
 	}
 
 	#endregion
@@ -148,7 +150,8 @@ public partial class CameraControlOverlay : Control
 	/// <param name="rotation">適用する回転です。</param>
 	private void RotateArcball(Quaternion rotation)
 	{
-		_arcballHandleRotation = rotation * _arcballHandleRotation;
+		// Overlay はカメラ操作に対して見た目上逆向きに追従させる。
+		_arcballHandleRotation = rotation.Inverse() * _arcballHandleRotation;
 		DrawArcballCross();
 	}
 
@@ -198,31 +201,40 @@ public partial class CameraControlOverlay : Control
 	/// <param name="handlePosition">通知されたアークボールのハンドル位置です。</param>
 	private void ComputeArcballHandleRotation(Vector3 handlePosition)
 	{
-		Vector3 from = Vector3.Forward;
-		Vector3 to = handlePosition.Normalized();
-		float dot = Mathf.Clamp(from.Dot(to), -1.0f, 1.0f);
-
-		if (dot > 0.9999f)
+		if (handlePosition.LengthSquared() <= Epsilon * Epsilon)
 		{
 			_arcballHandleRotation = Quaternion.Identity;
 			return;
 		}
 
-		if (dot < -0.9999f)
+		Vector3 anchor = handlePosition.Normalized();
+
+		// 画面投影で中心方向（-x, -y）を向く接線を作る。
+		Vector3 desiredTowardCenter = new Vector3(-anchor.X, -anchor.Y, 0.0f);
+		Vector3 tangentX = desiredTowardCenter - anchor * desiredTowardCenter.Dot(anchor);
+		if (tangentX.LengthSquared() <= Epsilon * Epsilon)
 		{
-			Vector3 fallbackAxis = from.Cross(Vector3.Up);
-			if (fallbackAxis.LengthSquared() < 1e-8f)
+			Vector3 fallback = Vector3.Right - anchor * Vector3.Right.Dot(anchor);
+			if (fallback.LengthSquared() <= Epsilon * Epsilon)
 			{
-				fallbackAxis = from.Cross(Vector3.Right);
+				fallback = Vector3.Up - anchor * Vector3.Up.Dot(anchor);
 			}
 
-			_arcballHandleRotation = new Quaternion(fallbackAxis.Normalized(), Mathf.Pi);
-			return;
+			tangentX = fallback;
 		}
 
-		Vector3 axis = from.Cross(to).Normalized();
-		float angle = Mathf.Acos(dot);
-		_arcballHandleRotation = new Quaternion(axis, angle);
+		tangentX = tangentX.Normalized();
+		Vector3 zAxis = -anchor;
+		Vector3 yAxis = zAxis.Cross(tangentX).Normalized();
+		if (yAxis.LengthSquared() <= Epsilon * Epsilon)
+		{
+			yAxis = Vector3.Up;
+		}
+
+		// 直交化して安定した姿勢を作る。
+		Vector3 xAxis = yAxis.Cross(zAxis).Normalized();
+		Basis basis = new Basis(xAxis, yAxis, zAxis).Orthonormalized();
+		_arcballHandleRotation = basis.GetRotationQuaternion();
 	}
 
 	/// <summary>
@@ -305,22 +317,46 @@ public partial class CameraControlOverlay : Control
 	/// </summary>
 	private void DrawArcballCross()
 	{
-		if (_arcballRadius <= 1e-6f)
+		if (_arcballRadius <= Epsilon)
 		{
 			SetLinePoints(_ballX, Vector2.Zero, Vector2.Zero);
 			SetLinePoints(_ballY, Vector2.Zero, Vector2.Zero);
 			return;
 		}
 
-		Vector3 anchor = (_arcballHandleRotation * Vector3.Forward).Normalized();
-		Vector3 tangentX = (_arcballHandleRotation * Vector3.Right).Normalized();
-		Vector3 tangentY = (_arcballHandleRotation * Vector3.Up).Normalized();
+		// ハンドルの回転を正規化して安定させる。正規化されていない回転は、回転軸の計算で不安定な結果を引き起こす可能性がある。
+		Quaternion normalizedHandleRotation = EnsureNormalizedQuaternion(_arcballHandleRotation);
+		Vector3 anchor = (normalizedHandleRotation * Vector3.Forward).Normalized();
+		Vector3 tangentX = (normalizedHandleRotation * Vector3.Right).Normalized();
+		Vector3 tangentY = (normalizedHandleRotation * Vector3.Up).Normalized();
 
 		// 球面上の接線方向を回転軸へ変換し、短い円弧をサンプリングして描画する。
 		Vector3 axisX = anchor.Cross(tangentX).Normalized();
 		Vector3 axisY = anchor.Cross(tangentY).Normalized();
 		SetCurvedArcballLine(_ballX, anchor, axisX, ArcballCrossAngularSize);
 		SetCurvedArcballLine(_ballY, anchor, axisY, ArcballCrossAngularSize);
+	}
+
+	/// <summary>
+	/// Quaternion を単位長に正規化して返します。ゼロ長に近い値は Identity にフォールバックします。
+	/// </summary>
+	/// <param name="rotation">正規化する Quaternion です。</param>
+	/// <returns>正規化済みの Quaternion です。</returns>
+	private static Quaternion EnsureNormalizedQuaternion(Quaternion rotation)
+	{
+		float lengthSquared = rotation.X * rotation.X + rotation.Y * rotation.Y + rotation.Z * rotation.Z + rotation.W * rotation.W;
+		if (lengthSquared <= Epsilon * Epsilon)
+		{
+			return Quaternion.Identity;
+		}
+
+		if (Mathf.Abs(lengthSquared - 1.0f) <= Epsilon)
+		{
+			return rotation;
+		}
+
+		float invLength = 1.0f / Mathf.Sqrt(lengthSquared);
+		return new Quaternion(rotation.X * invLength, rotation.Y * invLength, rotation.Z * invLength, rotation.W * invLength);
 	}
 
 	/// <summary>

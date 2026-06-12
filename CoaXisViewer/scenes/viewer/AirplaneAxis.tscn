@@ -156,7 +156,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="Label3D" type="Label3D" parent="Cube/0, 0, 0" unique_id=166784477]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
 transparency = 0.2
 double_sided = false
@@ -172,7 +172,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="Label3D" type="Label3D" parent="Cube/0, 180, 0" unique_id=1817025608]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
 transparency = 0.2
 double_sided = false
@@ -188,7 +188,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="Label3D" type="Label3D" parent="Cube/90, 180, 0" unique_id=679063772]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
 transparency = 0.2
 double_sided = false
@@ -204,7 +204,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="Label3D" type="Label3D" parent="Cube/-90, 0, 0" unique_id=665958380]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
 transparency = 0.2
 double_sided = false
@@ -221,7 +221,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="Label3D" type="Label3D" parent="Cube/0, -90, 0" unique_id=1233380915]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
 transparency = 0.2
 double_sided = false
@@ -237,7 +237,7 @@ collision_layer = 2
 collision_mask = 2
 
 [node name="Label3D" type="Label3D" parent="Cube/0, 90, 0" unique_id=823956200]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.5)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
 transparency = 0.2
 double_sided = false

@@ -156,10 +156,10 @@ size = Vector2i(1816, 976)
 render_target_update_mode = 4
 script = ExtResource("14_3t3px")
 
-[node name="CameraRig" type="Node3D" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport" unique_id=335083594]
+[node name="FocalPoint" type="Node3D" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport" unique_id=335083594]
 script = ExtResource("7_cvmbd")
 
-[node name="Camera3D" type="Camera3D" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/CameraRig" unique_id=691029672]
+[node name="Camera3D" type="Camera3D" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport/FocalPoint" unique_id=691029672]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
 cull_mask = 1048573
 current = true
@@ -225,19 +225,8 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 vertical_alignment = 2
 
-[node name="CameraUi" parent="Canvas" unique_id=1240710847 node_paths=PackedStringArray("_defaultFitTargetNode") instance=ExtResource("9_nfivy")]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -320.0
-offset_top = 66.0
-offset_right = -320.0
-offset_bottom = 66.0
-grow_horizontal = 0
-_defaultFitTargetNode = NodePath("../../Models")
-
 [node name="DebugConsole" type="Control" parent="Canvas" unique_id=1338117560 node_paths=PackedStringArray("_label")]
+layout_mode = 1
 anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
@@ -260,3 +249,7 @@ script = ExtResource("10_1nqs0")
 
 [node name="HttpClient" type="Node" parent="." unique_id=1638969947]
 script = ExtResource("11_1iba3")
+
+[node name="CameraUi" parent="." unique_id=1240710847 node_paths=PackedStringArray("_defaultFitTargetNode") instance=ExtResource("9_nfivy")]
+position = Vector2i(0, 53)
+_defaultFitTargetNode = NodePath("../Models")

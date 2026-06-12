@@ -11,6 +11,9 @@ using System;
 public partial class ClassName : Node3D
 {
 	#region Fields
+
+	private bool _isInitialized = false; // 初期化状態を示すフラグ
+
 	#endregion
 
 	#region Properties
@@ -20,18 +23,24 @@ public partial class ClassName : Node3D
 
 	public override void _Ready()
 	{
-		
+		// 関連ノードのキャッシュ
+
+		// イベント購読の登録
 	}
 
     public override void _ExitTree()
 	{
-		
+		// イベント購読の解除
 	}
 
 
 	public override void _Process(double delta)
 	{
-		
+		if (!_isInitialized)
+		{
+			// 初期化処理
+			_isInitialized = true;
+		}
 	}
 
 	#endregion
@@ -46,20 +55,6 @@ public partial class ClassName : Node3D
 	private void OnEventRequested(int argument)
 	{
 		// 内部メソッドのロジックをここに実装します。
-	}
-
-	#endregion
-
-	#region Public API
-
-	/// <summary>
-	/// PublicMethod の説明をここに記述します。
-	/// </summary>
-	/// <param name="argument">引数の説明をここに記述します。</param>
-	/// <returns>戻り値の説明をここに記述します。</returns>
-	public int PublicMethod(int argument)
-	{
-		return argument;
 	}
 
 	#endregion
