@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// カメラ操作用 UI（投影切替、Fit、Roll、状態表示）を管理します。
 /// </summary>
-public partial class CameraUi : Window
+public partial class CameraWindow : Window
 {
 	#region Fields
 
@@ -13,6 +13,7 @@ public partial class CameraUi : Window
 	private bool _isInitialized = false; // カメラの全状態の通知をリクエストしてUIを初期化したかどうかのフラグ
 
 	// 関連ノードのキャッシュ
+	private Container _rootContainer;
 	private Label _labelMode;
 	private Label _labelProjection;
 	private Button _buttonToggleProjection;
@@ -37,6 +38,7 @@ public partial class CameraUi : Window
 	public override void _Ready()
 	{
 		// 関連ノードのキャッシュ
+		_rootContainer = FindChild("PanelContainer", true) as Container;
 		_labelMode = FindChild("LabelValueMode", true) as Label;
 		_labelProjection = FindChild("LabelValueProjection", true) as Label;
 		_buttonToggleProjection = FindChild("ButtonToggleProjection", true) as Button;
@@ -69,10 +71,18 @@ public partial class CameraUi : Window
 		CameraEventHub.I.SizeNotified += OnSizeNotified;
 		CameraEventHub.I.FovNotified += OnFovNotified;
 		CameraEventHub.I.ProjectionTypeNotified += OnProjectionTypeNotified;
+
+		CloseRequested += OnCloseRequested; // 閉じるボタンが押されたときのイベントハンドラを登録
+		_rootContainer.MinimumSizeChanged += OnMinimumSizeChanged; // UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを登録
+
+		Resize(); // 最初にサイズを調整しておく
 	}
 
 	public override void _ExitTree()
 	{
+		// UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを解除
+		_rootContainer.MinimumSizeChanged -= OnMinimumSizeChanged;
+
 		// UIイベントの解除
 		_buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
 		_buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
@@ -102,6 +112,16 @@ public partial class CameraUi : Window
 	#endregion
 
 	#region Events
+
+	private void OnCloseRequested()
+	{
+		QueueFree(); // ウィンドウを閉じる（シーンツリーから削除してメモリも解放する）
+	}
+
+	private void OnMinimumSizeChanged()
+	{
+        Resize();
+	}
 
 	/// <summary>
 	/// 投影切替ボタンのクリックイベントハンドラです。カメラの投影タイプ切替をリクエストします。
@@ -227,6 +247,20 @@ public partial class CameraUi : Window
 	}
 
 	#endregion
+
+	#region Internal Helpers
+
+	private void Resize()
+	{
+        // 子コンテナの最小サイズを取得
+        var min = _rootContainer.GetCombinedMinimumSize();
+
+        // Window のサイズに反映
+        Size = new Vector2I((int)min.X, (int)min.Y);
+	}
+
+	#endregion
+
 }
 
 

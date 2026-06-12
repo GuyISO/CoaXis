@@ -1,19 +1,17 @@
 [gd_scene format=3 uid="uid://dvoc2r3mse54i"]
 
-[ext_resource type="Script" uid="uid://c4tbljjhha7ii" path="res://src/viewer/GameManager.cs" id="1_wp0k4"]
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="2_bjd11"]
 [ext_resource type="Script" uid="uid://cb8mh34mjm1hk" path="res://src/loader/ModelLoader.cs" id="2_mwfav"]
 [ext_resource type="Script" uid="uid://bv1qjj2yvm6xc" path="res://src/test/SendIpc.cs" id="3_qmy6f"]
 [ext_resource type="Script" uid="uid://b5keyjh3gtsfo" path="res://src/test/ButtonSendHttp.cs" id="4_mwfav"]
+[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/viewer/SceneCommandButton.cs" id="5_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewer/AxisNavigator.tscn" id="6_cvmbd"]
 [ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/camera/CameraRig.cs" id="7_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewer/CameraControlOverlay.tscn" id="7_ft6cd"]
-[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/test/FpsUi.cs" id="8_bb450"]
+[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/ui/FpsUi.cs" id="8_bb450"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/viewer/SpecificationTree.cs" id="8_qmy6f"]
-[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/CameraUi.tscn" id="9_nfivy"]
 [ext_resource type="Script" uid="uid://1us0ficbltrg" path="res://src/test/IpcClient.cs" id="10_1nqs0"]
-[ext_resource type="Script" uid="uid://bjvgo4vnk6a40" path="res://src/test/HttpClient.cs" id="11_1iba3"]
-[ext_resource type="Script" uid="uid://stjlfvm4o4dh" path="res://src/test/DebugConsole.cs" id="13_mwfav"]
+[ext_resource type="Script" uid="uid://stjlfvm4o4dh" path="res://src/ui/MessageWindow.cs" id="13_mwfav"]
 [ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/camera/ViewportInputHandler.cs" id="14_3t3px"]
 
 [sub_resource type="Environment" id="Environment_2xmat"]
@@ -33,7 +31,6 @@ reflected_light_source = 1
 [sub_resource type="SphereShape3D" id="SphereShape3D_f2lfd"]
 
 [node name="Main" type="Node" unique_id=807387639]
-script = ExtResource("1_wp0k4")
 
 [node name="Environments" type="Node3D" parent="." unique_id=1323646672]
 
@@ -105,6 +102,29 @@ tooltip_text = "httpリクエストの通信テストを行います"
 theme_override_font_sizes/font_size = 24
 text = "SendHttp"
 script = ExtResource("4_mwfav")
+_httpClientPath = NodePath("")
+
+[node name="ButtonShowCameraWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1370305409]
+layout_mode = 2
+tooltip_text = "カメラ制御用のウィンドウを表示します"
+theme_override_font_sizes/font_size = 24
+text = "Camera"
+script = ExtResource("5_qmy6f")
+
+[node name="ButtonShowMessageWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1591126494]
+layout_mode = 2
+tooltip_text = "メッセージウィンドウを表示します"
+theme_override_font_sizes/font_size = 24
+text = "Message
+"
+script = ExtResource("5_qmy6f")
+
+[node name="ButtonShowSettingWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=410961990]
+layout_mode = 2
+tooltip_text = "設定ウィンドウを表示します"
+theme_override_font_sizes/font_size = 24
+text = "Setting"
+script = ExtResource("5_qmy6f")
 
 [node name="Panel" type="Panel" parent="Canvas/VBoxContainer/TopBar" unique_id=1046351606]
 layout_mode = 2
@@ -127,13 +147,13 @@ text = "D:\\Models\\Untitled.glb"
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LeftBar" type="HBoxContainer" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=1726486487]
+[node name="LeftBar" type="VBoxContainer" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=111975531]
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 
 [node name="Panel" type="Panel" parent="Canvas/VBoxContainer/HBoxContainer/LeftBar" unique_id=160448743]
 layout_mode = 2
-size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="MainScreen" type="Control" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=103520381]
 layout_mode = 2
@@ -198,32 +218,22 @@ size_flags_horizontal = 2
 size_flags_vertical = 3
 script = ExtResource("8_qmy6f")
 
-[node name="RightBar" type="HBoxContainer" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=398377360]
+[node name="RightBar" type="VBoxContainer" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=360050019]
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 
 [node name="Panel" type="Panel" parent="Canvas/VBoxContainer/HBoxContainer/RightBar" unique_id=1236645313]
 layout_mode = 2
 size_flags_horizontal = 3
+size_flags_vertical = 3
 
 [node name="BottomBar" type="HBoxContainer" parent="Canvas/VBoxContainer" unique_id=297927296]
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 
-[node name="LabelFps" type="Label" parent="Canvas/VBoxContainer/BottomBar" unique_id=91824014]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-vertical_alignment = 2
-script = ExtResource("8_bb450")
-
 [node name="Panel" type="Panel" parent="Canvas/VBoxContainer/BottomBar" unique_id=196032915]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="LabelMessage" type="Label" parent="Canvas/VBoxContainer/BottomBar" unique_id=401995894]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-vertical_alignment = 2
 
 [node name="DebugConsole" type="Control" parent="Canvas" unique_id=1338117560 node_paths=PackedStringArray("_label")]
 layout_mode = 1
@@ -244,12 +254,14 @@ mouse_filter = 2
 fit_content = true
 scroll_following = true
 
+[node name="LabelFps" type="Label" parent="Canvas/DebugConsole" unique_id=91824014]
+layout_mode = 0
+offset_top = 1039.0
+offset_right = 1.0
+offset_bottom = 1073.0
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 2
+script = ExtResource("8_bb450")
+
 [node name="IpcClient" type="Node" parent="." unique_id=1710088594]
 script = ExtResource("10_1nqs0")
-
-[node name="HttpClient" type="Node" parent="." unique_id=1638969947]
-script = ExtResource("11_1iba3")
-
-[node name="CameraUi" parent="." unique_id=1240710847 node_paths=PackedStringArray("_defaultFitTargetNode") instance=ExtResource("9_nfivy")]
-position = Vector2i(0, 53)
-_defaultFitTargetNode = NodePath("../Models")

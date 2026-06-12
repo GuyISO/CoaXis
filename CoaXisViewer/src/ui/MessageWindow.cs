@@ -2,9 +2,9 @@
 using System.Text;
 
 /// <summary>
-/// シーン内のデバッグログ表示を担う簡易コンソールです。
+/// シーン内のデバッグログ表示を担う簡易ウィンドウです。
 /// </summary>
-public partial class DebugConsole : Control
+public partial class MessageWindow : Control
 {
 	#region Fields
 
@@ -18,9 +18,9 @@ public partial class DebugConsole : Control
 	#region Properties
 
     /// <summary>
-    /// 現在アクティブなデバッグコンソールインスタンスです。
+    /// 現在アクティブなデバッグウィンドウインスタンスです。
     /// </summary>
-    public static DebugConsole Instance { get; private set; }
+    public static MessageWindow I { get; private set; }
 
 	#endregion
 
@@ -31,7 +31,7 @@ public partial class DebugConsole : Control
     /// </summary>
     public override void _EnterTree()
     {
-        Instance = this;
+        I = this;
     }
 
     /// <summary>
@@ -39,8 +39,8 @@ public partial class DebugConsole : Control
     /// </summary>
     public override void _ExitTree()
     {
-        if (Instance == this)
-            Instance = null;
+        if (I == this)
+            I = null;
     }
 
     /// <summary>
@@ -85,13 +85,13 @@ public partial class DebugConsole : Control
     }
 
     /// <summary>
-    /// 標準出力とデバッグコンソールへ同時にログを出力します。
+    /// 標準出力とデバッグウィンドウへ同時にログを出力します。
     /// </summary>
     /// <param name="msg">出力するメッセージ。</param>
     public static void Log(string msg)
     {
         GD.Print(msg);
-        DebugConsole.Instance?.AddLine(msg);
+        MessageWindow.I?.AddLine(msg);
     }
 
 	#endregion

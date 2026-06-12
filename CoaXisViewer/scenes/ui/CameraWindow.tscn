@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ctjbhouwd3kn7"]
 
-[ext_resource type="Script" uid="uid://nsubyc0mi4rb" path="res://src/ui/CameraUi.cs" id="1_04dsb"]
+[ext_resource type="Script" uid="uid://nsubyc0mi4rb" path="res://src/ui/CameraWindow.cs" id="1_04dsb"]
 
 [sub_resource type="Theme" id="Theme_iww46"]
 default_font_size = 0
@@ -8,7 +8,7 @@ default_font_size = 0
 [node name="CameraUi" type="Window" unique_id=365726274]
 oversampling_override = 1.0
 position = Vector2i(0, 36)
-size = Vector2i(397, 442)
+size = Vector2i(197, 445)
 script = ExtResource("1_04dsb")
 
 [node name="PanelContainer" type="PanelContainer" parent="." unique_id=1128003110]
