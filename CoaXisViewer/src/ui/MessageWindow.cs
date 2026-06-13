@@ -4,7 +4,7 @@ using System.Text;
 /// <summary>
 /// シーン内のデバッグログ表示を担う簡易ウィンドウです。
 /// </summary>
-public partial class MessageWindow : Control
+public partial class MessageWindow : Window
 {
 	#region Fields
 

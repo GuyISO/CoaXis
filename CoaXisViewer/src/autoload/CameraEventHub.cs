@@ -102,25 +102,27 @@ public partial class CameraEventHub : Node
 		EmitSignal(SignalName.SetFovRequested, fov, useTween);
 	}
 
-	[Signal] public delegate void TranslateRequestedEventHandler(Vector3 translation, bool useTween);
+	[Signal] public delegate void TranslateRequestedEventHandler(Vector3 translation, SpaceMode spaceMode, bool useTween);
 	/// <summary>
 	/// カメラの平行移動をリクエストします。
 	/// </summary> <param name="translation">カメラの平行移動量です。</param>
+	/// <param name="spaceMode">平行移動の基準となる座標系です。</param>
 	/// <param name="useTween">移動にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestTranslate(Vector3 translation, bool useTween = false)
+	public void RequestTranslate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
 	{
-		EmitSignal(SignalName.TranslateRequested, translation, useTween);
+		EmitSignal(SignalName.TranslateRequested, translation, (int)spaceMode, useTween);
 	}
 
-	[Signal] public delegate void RotateRequestedEventHandler(Quaternion rotation, bool useTween);
+	[Signal] public delegate void RotateRequestedEventHandler(Quaternion rotation, SpaceMode spaceMode, bool useTween);
 	/// <summary>
 	/// カメラの回転をリクエストします。
 	/// </summary>
 	/// <param name="rotation">設定するカメラの回転です。</param>
+	/// <param name="spaceMode">回転の基準となる座標系です。</param>
 	/// <param name="useTween">回転にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestRotate(Quaternion rotation, bool useTween = false)
+	public void RequestRotate(Quaternion rotation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
 	{
-		EmitSignal(SignalName.RotateRequested, rotation, useTween);
+		EmitSignal(SignalName.RotateRequested, rotation, (int)spaceMode, useTween);
 	}
 
 	[Signal] public delegate void ZoomRequestedEventHandler(float exponent, bool useTween);

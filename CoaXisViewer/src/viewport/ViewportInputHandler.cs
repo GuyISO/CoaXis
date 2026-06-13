@@ -14,10 +14,12 @@ public partial class ViewportInputHandler : SubViewport
 	[ExportGroup("Settings")]
 	[Export] private float _zoomFactor = 1.0f; // ズーム倍率変更時の係数
 	[Export] private float _rollRegionRadiusRatio = 0.45f; // 画面サイズに対する、Orbit/Rollの切り替え用の円領域の半径比率
+	[Export] private Material _defaultMaterial; // 通常表示用のマテリアル（将来の拡張で使用予定）
+	[Export] private Material _selectedMaterial; // 選択ハイライト用のマテリアル（将来の拡張で使用予定）
 
 	private CameraControlMode _currentMode = CameraControlMode.None; // 現在の操作モード
 	private Vector2 _lastMousePos = Vector2.Zero; // マウス移動量算出のために前フレームの座標を保持
-	private bool _hasMoved = false; // 中ボタンを押してからマウスを移動操作したかのフラグ。クリックと移動の区別に使用
+	private bool _hasMoved = false; // ボタンを押してからマウスを移動操作したかのフラグ。クリックと移動の区別に使用
 	private Vector2 _screenCenter; // 画面中心座標のキャッシュ
 	private float _arcballRadius; // アークボール半径のキャッシュ
 
@@ -76,7 +78,7 @@ public partial class ViewportInputHandler : SubViewport
 			return;
 		}
 
-		HandleMouseButton(button);
+		OnMouseButtonClicked(button);
 	}
 
 	#endregion
@@ -101,6 +103,25 @@ public partial class ViewportInputHandler : SubViewport
 		CameraEventHub.I.NotifyArcballHandle(new Vector3(0, 0, 1)); // アークボールハンドルは初期状態では画面正面方向にしておく
 	}
 
+	/// <summary>
+	/// マウスボタン入力に応じた処理を行います。
+	/// </summary>
+	/// <param name="button">マウスボタン入力イベントです。</param>
+	private void OnMouseButtonClicked(InputEventMouseButton button)
+	{
+		// 入力状態遷移:
+		// None --(中押下)--> Pan --(左右押下)--> Orbit/Roll --(左右離し)--> Zoom --(中離し)--> None
+		// 現在モードに応じて遷移ルールを切り替える。
+		if (_currentMode == CameraControlMode.None)
+		{
+			HandleIdleModeInput(button);
+		}
+		else
+		{
+			HandleActiveModeInput(button);
+		}
+	}
+
 	#endregion
 
 	#region Internal Helpers
@@ -121,40 +142,30 @@ public partial class ViewportInputHandler : SubViewport
 	}
 
 	/// <summary>
-	/// マウスボタン入力に応じて、カメラ操作モードの遷移や注視点の移動を処理します。
-	/// </summary>
-	/// <param name="button">マウスボタン入力イベントです。</param>
-	private void HandleMouseButton(InputEventMouseButton button)
-	{
-		// 入力状態遷移:
-		// None --(中押下)--> Pan --(左右押下)--> Orbit/Roll --(左右離し)--> Zoom --(中離し)--> None
-		// 現在モードに応じて遷移ルールを切り替える。
-		if (_currentMode == CameraControlMode.None)
-		{
-			HandleIdleModeInput(button);
-		}
-		else
-		{
-			HandleActiveModeInput(button);
-		}
-	}
-
-	/// <summary>
 	/// カメラ操作モードが None のときのマウス入力を処理します。
 	/// </summary>
 	/// <param name="button">マウスボタン入力イベントです。</param>
 	private void HandleIdleModeInput(InputEventMouseButton button)
 	{
-		// 中ボタンのクリック開始を検知したら、移動フラグをリセットしてカメラコントロール開始
-		if (!button.Pressed || button.ButtonIndex != MouseButton.Middle)
-		{
-			return;
-		}
 
-		// 中ボタンを押した瞬間はまだ移動していないので、クリックと移動の区別のためにフラグをリセットしておく
-		_hasMoved = false;
-		_lastMousePos = button.Position;
-		SetCameraControlMode(CameraControlMode.Pan);
+		// 中ボタンのクリック開始を検知したら、移動フラグをリセットしてカメラコントロール開始
+		if (button.Pressed && button.ButtonIndex == MouseButton.Middle)
+		{
+			_hasMoved = false;
+			_lastMousePos = button.Position;
+			SetCameraControlMode(CameraControlMode.Pan);
+		}
+		else if (button.Pressed && button.ButtonIndex == MouseButton.Left)
+		{
+			// 左クリックで選択する
+			TrySelect(button.Position);
+		}
+		else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
+		{
+			// 右クリックで注視点にフォーカス後、法線方向にカメラを整列させる
+			TryFocusAt(button.Position, true);
+			TryAlignNormalTo(button.Position, true);
+		}
 	}
 
 	/// <summary>
@@ -176,7 +187,10 @@ public partial class ViewportInputHandler : SubViewport
 		{
 			if (!_hasMoved)
 			{
-				FocusAt(button.Position);
+				if(!TryFocusAt(button.Position, true))
+				{
+					PanCamera(_screenCenter, button.Position); // フォーカスできなかったら、クリック位置にパン扱いとする
+				}
 			}
 			SetCameraControlMode(CameraControlMode.None);
 			return;
@@ -243,7 +257,9 @@ public partial class ViewportInputHandler : SubViewport
 	/// 画面上の指定された位置に注視点を移動します。
 	/// </summary>
 	/// <param name="screenPos">スクリーン座標</param>
-	private void FocusAt(Vector2 screenPos)
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
+	/// <returns>注視点を移動できた場合は true、レイキャストがヒットしなかったなどで移動できなかった場合は false を返します。</returns>
+	private bool TryFocusAt(Vector2 screenPos, bool useTween = false)
 	{
 		// レイキャストしてヒット情報を取得
 		var hit = RaycastService.RaycastFromScreen(GetCamera3D(), screenPos);
@@ -251,12 +267,34 @@ public partial class ViewportInputHandler : SubViewport
 		if (hit.HasHit)
 		{
 			// ヒットしたら注視点を移動
-			CameraEventHub.I.RequestMovePositionTo(hit.Position);
+			CameraEventHub.I.RequestMovePositionTo(hit.Position, useTween);
+			return true;
 		}
 		else
 		{
-			// ヒットしなかったらクリックした座標までのPan扱い
-			PanCamera(screenPos, _screenCenter);
+			return false;
+		}
+	}
+
+	/// <summary>
+	/// 画面上の指定された位置の法線にカメラの向きを合わせます。
+	/// </summary>
+	/// <param name="screenPos">スクリーン座標</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
+	/// <returns>法線にカメラを合わせられた場合は true、レイキャストがヒットしなかった場合は false を返します。</returns>
+	private bool TryAlignNormalTo(Vector2 screenPos, bool useTween = false)
+	{
+		// レイキャストしてヒット情報を取得
+		var hit = RaycastService.RaycastFromScreen(GetCamera3D(), screenPos);
+
+		if (hit.HasHit)
+		{
+			CameraEventHub.I.RequestAlignNormalTo(hit.Normal, useTween);
+			return true;
+		}
+		else
+		{
+			return false;
 		}
 	}
 
@@ -270,14 +308,13 @@ public partial class ViewportInputHandler : SubViewport
 		// 同一深度平面で、スクリーン座標 from -> to に対応するワールド移動量を求める。
 		// これにより、画面サイズ・Orthogonal の Size・Perspective の FOV/Z 距離を自動で吸収する。
 		Camera3D camera = GetCamera3D();
-		Node3D focalPoint = camera.GetParent() as Node3D;
 		float panDepth = camera.Position.Z;
 		Vector3 fromWorld = camera.ProjectPosition(fromScreenPos, panDepth);
 		Vector3 toWorld = camera.ProjectPosition(toScreenPos, panDepth);
 		// ドラッグ方向に見た目が追従するよう、差分を逆向きで適用する。
 		Vector3 move = fromWorld - toWorld;
 
-		CameraEventHub.I.RequestMovePositionTo(focalPoint.Position + move);
+		CameraEventHub.I.RequestTranslate(move, SpaceMode.World);
 	}
 
 	/// <summary>
@@ -294,7 +331,7 @@ public partial class ViewportInputHandler : SubViewport
 		Vector3 p1 = GetPositionOnArcballSphere(currentPos);
 		Quaternion rotation = ComputeArcballRotation(p0, p1);
 
-		CameraEventHub.I.RequestRotate(rotation);
+		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint);
 	}
 
 	/// <summary>
@@ -310,7 +347,7 @@ public partial class ViewportInputHandler : SubViewport
 		Vector3 p1 = GetPositionOnArcballEquator(currentPos);
 		Quaternion rotation = ComputeArcballRotation(p0, p1);
 
-		CameraEventHub.I.RequestRotate(rotation);
+		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint);
 	}
 
 	/// <summary>
@@ -438,6 +475,18 @@ public partial class ViewportInputHandler : SubViewport
 			axis = axis.Normalized();
 		}
 		return new Quaternion(axis, angle);
+	}
+
+	private void TrySelect(Vector2 screenPos)
+	{
+		var hit = RaycastService.RaycastFromScreen(GetCamera3D(), screenPos);
+
+		if (hit.HasHit)
+		{
+			Node3D selectedNode = hit.Collider.GetParentOrNull<Node3D>();
+			Selection.Set(selectedNode);
+			GD.Print($"Selected: {selectedNode?.Name}");
+		}
 	}
 
 	#endregion

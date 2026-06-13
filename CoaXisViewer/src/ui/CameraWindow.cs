@@ -157,7 +157,7 @@ public partial class CameraWindow : Window
 	private void OnButtonRollLeftPressed()
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-		CameraEventHub.I.RequestRotate(rotation, true); // 90度左にロール
+		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度左にロール
 	}
 
 	/// <summary>
@@ -166,7 +166,7 @@ public partial class CameraWindow : Window
 	private void OnButtonRollRightPressed()
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-		CameraEventHub.I.RequestRotate(rotation, true); // 90度右にロール
+		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度右にロール
 	}
 
 	/// <summary>

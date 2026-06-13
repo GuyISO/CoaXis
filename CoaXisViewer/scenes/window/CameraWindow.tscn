@@ -5,8 +5,9 @@
 [sub_resource type="Theme" id="Theme_iww46"]
 default_font_size = 0
 
-[node name="CameraUi" type="Window" unique_id=365726274]
+[node name="WindowCamera" type="Window" unique_id=365726274]
 oversampling_override = 1.0
+title = "Camera"
 position = Vector2i(0, 36)
 size = Vector2i(197, 445)
 script = ExtResource("1_04dsb")

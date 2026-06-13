@@ -6,7 +6,7 @@
 /// <remarks>
 /// 描画対象のオブジェクトは常に保持しているため、描画の更新はイベント駆動で行います。カメラの状態が変化したときにイベントを発行してもらい、そのイベントを受け取ったときに表示状態に反映します。
 /// </remarks>
-public partial class CameraControlOverlay : Control
+public partial class ViewportOverlay : Control
 {
 	#region Fields
 
@@ -15,9 +15,8 @@ public partial class CameraControlOverlay : Control
 	private const int MinArcballOutlineDashCount = 8;
 	private const float CenterAxisLength = 32.0f;
 	private const float CenterAxisGap = 16.0f;
-	private const float ArcballCrossAngularSize = 0.20f;
+	private const float ArcballCrossAngularSize = 0.24f;
 	private const int ArcballCrossCurveSegments = 12;
-	private const float Epsilon = 1e-6f;
 
 	[Export] private Color _lineColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);
 
@@ -91,13 +90,17 @@ public partial class CameraControlOverlay : Control
 	/// カメラの回転の設定がリクエストされたときに呼び出されるイベントハンドラです。アークボールの接線ベクトルを回転に合わせて回転させます。
 	/// </summary>
 	/// <param name="rotation">リクエストされた回転です。</param>
+	/// <param name="spaceMode">回転の基準となる座標系です。</param>
 	/// <param name="useTween">回転に補間を使用するかどうかを示すフラグです。</param>
 	/// <remarks>
 	/// Arcball操作は回転結果を拾って処理するのが難しいため、リクエスト量を拾って処理します。
 	/// </remarks>
-	private void OnRotateRequested(Quaternion rotation, bool useTween)
+	private void OnRotateRequested(Quaternion rotation, SpaceMode spaceMode, bool useTween)
 	{
-		RotateArcball(rotation);
+		if (spaceMode == SpaceMode.FocalPoint)
+		{
+			RotateArcball(rotation);
+		}
 	}
 
 	/// <summary>
@@ -201,7 +204,7 @@ public partial class CameraControlOverlay : Control
 	/// <param name="handlePosition">通知されたアークボールのハンドル位置です。</param>
 	private void ComputeArcballHandleRotation(Vector3 handlePosition)
 	{
-		if (handlePosition.LengthSquared() <= Epsilon * Epsilon)
+		if (handlePosition.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
 		{
 			_arcballHandleRotation = Quaternion.Identity;
 			return;
@@ -212,10 +215,10 @@ public partial class CameraControlOverlay : Control
 		// 画面投影で中心方向（-x, -y）を向く接線を作る。
 		Vector3 desiredTowardCenter = new Vector3(-anchor.X, -anchor.Y, 0.0f);
 		Vector3 tangentX = desiredTowardCenter - anchor * desiredTowardCenter.Dot(anchor);
-		if (tangentX.LengthSquared() <= Epsilon * Epsilon)
+		if (tangentX.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
 		{
 			Vector3 fallback = Vector3.Right - anchor * Vector3.Right.Dot(anchor);
-			if (fallback.LengthSquared() <= Epsilon * Epsilon)
+			if (fallback.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
 			{
 				fallback = Vector3.Up - anchor * Vector3.Up.Dot(anchor);
 			}
@@ -226,7 +229,7 @@ public partial class CameraControlOverlay : Control
 		tangentX = tangentX.Normalized();
 		Vector3 zAxis = -anchor;
 		Vector3 yAxis = zAxis.Cross(tangentX).Normalized();
-		if (yAxis.LengthSquared() <= Epsilon * Epsilon)
+		if (yAxis.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
 		{
 			yAxis = Vector3.Up;
 		}
@@ -317,7 +320,7 @@ public partial class CameraControlOverlay : Control
 	/// </summary>
 	private void DrawArcballCross()
 	{
-		if (_arcballRadius <= Epsilon)
+		if (_arcballRadius <= Mathf.Epsilon)
 		{
 			SetLinePoints(_ballX, Vector2.Zero, Vector2.Zero);
 			SetLinePoints(_ballY, Vector2.Zero, Vector2.Zero);
@@ -345,12 +348,12 @@ public partial class CameraControlOverlay : Control
 	private static Quaternion EnsureNormalizedQuaternion(Quaternion rotation)
 	{
 		float lengthSquared = rotation.X * rotation.X + rotation.Y * rotation.Y + rotation.Z * rotation.Z + rotation.W * rotation.W;
-		if (lengthSquared <= Epsilon * Epsilon)
+		if (lengthSquared <= Mathf.Epsilon * Mathf.Epsilon)
 		{
 			return Quaternion.Identity;
 		}
 
-		if (Mathf.Abs(lengthSquared - 1.0f) <= Epsilon)
+		if (Mathf.Abs(lengthSquared - 1.0f) <= Mathf.Epsilon)
 		{
 			return rotation;
 		}

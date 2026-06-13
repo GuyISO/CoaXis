@@ -31,13 +31,14 @@ public partial class CameraRig : Node3D
 		CameraEventHub.I.NotifyStateRequested += OnNotifyStateRequested;
 		CameraEventHub.I.MovePositionToRequested += OnMovePositionToRequested;
 		CameraEventHub.I.MoveRotationToRequested += OnMoveRotationToRequested;
-		CameraEventHub.I.ZoomRequested += OnZoomRequested;
-		CameraEventHub.I.RotateRequested += OnRotateRequested;
-		CameraEventHub.I.SetDistanceRequested += OnSetDistanceRequested;
 		CameraEventHub.I.SetSizeRequested += OnSetSizeRequested;
-		CameraEventHub.I.ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
-		CameraEventHub.I.SetProjectionTypeRequested += OnSetProjectionTypeRequested;
+		CameraEventHub.I.SetDistanceRequested += OnSetDistanceRequested;
 		CameraEventHub.I.SetFovRequested += OnSetFovRequested;
+		CameraEventHub.I.SetProjectionTypeRequested += OnSetProjectionTypeRequested;
+		CameraEventHub.I.TranslateRequested += OnTranslateRequested;
+		CameraEventHub.I.RotateRequested += OnRotateRequested;
+		CameraEventHub.I.ZoomRequested += OnZoomRequested;
+		CameraEventHub.I.ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
 		CameraEventHub.I.FitRequested += OnFitRequested;
 		CameraEventHub.I.AlignNormalToRequested += OnAlignNormalToRequested;
 	}
@@ -48,13 +49,14 @@ public partial class CameraRig : Node3D
 		CameraEventHub.I.NotifyStateRequested -= OnNotifyStateRequested;
 		CameraEventHub.I.MovePositionToRequested -= OnMovePositionToRequested;
 		CameraEventHub.I.MoveRotationToRequested -= OnMoveRotationToRequested;
-		CameraEventHub.I.ZoomRequested -= OnZoomRequested;
-		CameraEventHub.I.RotateRequested -= OnRotateRequested;
-		CameraEventHub.I.SetDistanceRequested -= OnSetDistanceRequested;
 		CameraEventHub.I.SetSizeRequested -= OnSetSizeRequested;
-		CameraEventHub.I.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
-		CameraEventHub.I.SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
+		CameraEventHub.I.SetDistanceRequested -= OnSetDistanceRequested;
 		CameraEventHub.I.SetFovRequested -= OnSetFovRequested;
+		CameraEventHub.I.SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
+		CameraEventHub.I.TranslateRequested -= OnTranslateRequested;
+		CameraEventHub.I.RotateRequested -= OnRotateRequested;
+		CameraEventHub.I.ZoomRequested -= OnZoomRequested;
+		CameraEventHub.I.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
 		CameraEventHub.I.FitRequested -= OnFitRequested;
 		CameraEventHub.I.AlignNormalToRequested -= OnAlignNormalToRequested;
 	}
@@ -97,23 +99,13 @@ public partial class CameraRig : Node3D
 	}
 
 	/// <summary>
-	/// カメラのズームがリクエストされたときに呼び出されるイベントハンドラです。
+	/// カメラのサイズの設定がリクエストされたときに呼び出されるイベントハンドラです。
 	/// </summary>
-	/// <param name="exponent">ズームの指数値です。</param>
+	/// <param name="size">設定するサイズです。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void OnZoomRequested(float exponent, bool useTween)
+	private void OnSetSizeRequested(float size, bool useTween)
 	{
-		Zoom(exponent, useTween);
-	}
-
-	/// <summary>
-	/// カメラの回転がリクエストされたときに呼び出されるイベントハンドラです。
-	/// </summary>
-	/// <param name="rotation">回転先の姿勢です。</param>
-	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void OnRotateRequested(Quaternion rotation, bool useTween)
-	{
-		Rotate(rotation, useTween);
+		SetSize(size, useTween);
 	}
 
 	/// <summary>
@@ -123,25 +115,17 @@ public partial class CameraRig : Node3D
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
 	private void OnSetDistanceRequested(float distance, bool useTween)
 	{
-		MoveDistanceTo(distance, useTween);
+		SetDistance(distance, useTween);
 	}
 
 	/// <summary>
-	/// カメラのサイズの設定がリクエストされたときに呼び出されるイベントハンドラです。
+	/// カメラの視野角（FOV）の設定がリクエストされたときに呼び出されるイベントハンドラです。
 	/// </summary>
-	/// <param name="size">設定するサイズです。</param>
+	/// <param name="fov">設定する視野角です。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void OnSetSizeRequested(float size, bool useTween)
+	private void OnSetFovRequested(float fov, bool useTween)
 	{
-		ChangeSizeTo(size, useTween);
-	}
-
-	/// <summary>
-	/// カメラの投影タイプの切り替えがリクエストされたときに呼び出されるイベントハンドラです。
-	/// </summary>
-	private void OnToggleProjectionTypeRequested()
-	{
-		ToggleProjectionType();
+		SetFov(fov, useTween);
 	}
 
 	/// <summary>
@@ -154,13 +138,43 @@ public partial class CameraRig : Node3D
 	}
 
 	/// <summary>
-	/// カメラの視野角（FOV）の設定がリクエストされたときに呼び出されるイベントハンドラです。
+	/// カメラの平行移動がリクエストされたときに呼び出されるイベントハンドラです。
 	/// </summary>
-	/// <param name="fov">設定する視野角です。</param>
+	/// <param name="translation">移動量です。</param>
+	/// <param name="spaceMode">移動の基準となる座標系です。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void OnSetFovRequested(float fov, bool useTween)
+	private void OnTranslateRequested(Vector3 translation, SpaceMode spaceMode, bool useTween)
 	{
-		SetFov(fov, useTween);
+		Translate(translation, spaceMode, useTween);
+	}
+
+	/// <summary>
+	/// カメラの回転がリクエストされたときに呼び出されるイベントハンドラです。
+	/// </summary>
+	/// <param name="rotation">回転先の姿勢です。</param>
+	/// <param name="spaceMode">回転の基準となる座標系です。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
+	private void OnRotateRequested(Quaternion rotation, SpaceMode spaceMode, bool useTween)
+	{
+		Rotate(rotation, spaceMode, useTween);
+	}
+
+	/// <summary>
+	/// カメラのズームがリクエストされたときに呼び出されるイベントハンドラです。
+	/// </summary>
+	/// <param name="exponent">ズームの指数値です。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
+	private void OnZoomRequested(float exponent, bool useTween)
+	{
+		Zoom(exponent, useTween);
+	}
+
+	/// <summary>
+	/// カメラの投影タイプの切り替えがリクエストされたときに呼び出されるイベントハンドラです。
+	/// </summary>
+	private void OnToggleProjectionTypeRequested()
+	{
+		ToggleProjectionType();
 	}
 
 	/// <summary>
@@ -190,7 +204,7 @@ public partial class CameraRig : Node3D
 	/// <summary>
 	/// 注視点の位置を更新します。
 	/// </summary>
-	/// <param name="posision">移動先位置。<see langword="null"/> の場合は現在位置を維持。</param>
+	/// <param name="posision">移動先位置。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
 	private void MovePositionTo(Vector3 posision, bool useTween = false)
 	{
@@ -224,51 +238,11 @@ public partial class CameraRig : Node3D
 	}
 
 	/// <summary>
-	/// 現在の回転に対して、さらに回転を加算します。
-	/// </summary>
-	/// <param name="rotation">加算する回転。</param>
-	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
-	private void Rotate(Quaternion rotation, bool useTween = false)
-	{
-		Quaternion nowRotation = Transform.Basis.GetRotationQuaternion();
-		Quaternion newRotation = nowRotation * rotation;
-		MoveRotationTo(newRotation, useTween);
-	}
-
-	/// <summary>
-	/// ズーム操作を実行します。等角投影の場合はサイズを、透視投影の場合はカメラのZ距離を変更してズームを表現します。
-	/// </summary>
-	/// <param name="exponent">ズームの指数値です。</param>
-	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void Zoom(float exponent, bool useTween = false)
-	{
-		float scale = Mathf.Pow(_zoomBase, exponent);
-		// 投影方式ごとにズーム表現が異なるため、変更先を分ける。
-		if (_camera.Projection == Camera3D.ProjectionType.Orthogonal)
-		{
-			// 等角投影の場合はサイズを変更してズームを表現する
-			float newSize = _camera.Size * scale;
-			// サイズが小さくなりすぎて見えなくなるのを防止するため、最小値を設定する
-			float fixedSize = Mathf.Max(newSize, _minZoomValue);
-			ChangeSizeTo(fixedSize, useTween);
-		}
-		else
-		{
-			// 透視投影の場合はカメラのZ距離を変更してズームを表現する
-			float distance = _camera.Position.Z;
-			float newDistance = Mathf.Max(distance * scale, _minZoomValue);
-			// 距離が近すぎて見えなくなるのを防止するため、最小値を設定する
-			float fixedDistance = Mathf.Max(newDistance, _minZoomValue);
-			MoveDistanceTo(fixedDistance, useTween);
-		}
-	}
-
-	/// <summary>
 	/// カメラの距離を設定します。
 	/// </summary>
 	/// <param name="distance">設定する距離です。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void MoveDistanceTo(float distance, bool useTween = false)
+	private void SetDistance(float distance, bool useTween = false)
 	{
 		if (useTween)
 		{
@@ -286,7 +260,7 @@ public partial class CameraRig : Node3D
 	/// </summary>
 	/// <param name="size">設定するサイズです。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void ChangeSizeTo(float size, bool useTween = false)
+	private void SetSize(float size, bool useTween = false)
 	{
 		if (useTween)
 		{
@@ -297,48 +271,6 @@ public partial class CameraRig : Node3D
 			_camera.Size = size;
 			CameraEventHub.I.NotifySize(_camera.Size);
 		}
-	}
-
-	/// <summary>
-	/// カメラの投影方式を設定します。
-	/// </summary>
-	/// <param name="projectionType">切り替え先の投影方式です。</param>
-	private void SetProjectionType(Camera3D.ProjectionType projectionType)
-	{
-		if (_camera.Projection == projectionType)
-		{
-			return;
-		}
-
-		if (projectionType == Camera3D.ProjectionType.Perspective)
-		{
-			float distance = GetPerspectiveDistanceFromOrthographicSize();
-			MoveDistanceTo(distance, false);
-		}
-		else
-		{
-			float size = GetOrthographicSizeFromPerspectiveDistance();
-			ChangeSizeTo(size, false);
-
-			// 投影物がカメラの視界から出ないようにNearとFarの中間あたりに注視点を置く
-			float farZ = (_camera.Near + _camera.Far) / 2.0f;
-			MoveDistanceTo(farZ, false);
-		}
-
-		_camera.Projection = projectionType;
-		CameraEventHub.I.NotifyProjectionType(projectionType);
-	}
-
-	/// <summary>
-	/// 現在の投影方式を Perspective/Orthogonal でトグルします。
-	/// </summary>
-	private void ToggleProjectionType()
-	{
-		// 現在の投影方式をトグルして、内部で必要な補正を行う。
-		Camera3D.ProjectionType nextProjection = _camera.Projection == Camera3D.ProjectionType.Perspective
-			? Camera3D.ProjectionType.Orthogonal
-			: Camera3D.ProjectionType.Perspective;
-		SetProjectionType(nextProjection);
 	}
 
 	/// <summary>
@@ -360,88 +292,135 @@ public partial class CameraRig : Node3D
 	}
 
 	/// <summary>
-	/// 指定ノード配下を画角内に収めるようカメラを調整します。
+	/// カメラの投影方式を設定します。
 	/// </summary>
-	/// <param name="targetRoot">フィット対象のルートノード。</param>
-	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
-	/// <returns>フィット対象の AABB を取得できた場合は <see langword="true"/>。</returns>
-	private bool Fit(Node targetRoot, bool useTween = false)
+	/// <param name="projectionType">切り替え先の投影方式です。</param>
+	private void SetProjectionType(Camera3D.ProjectionType projectionType)
 	{
-		if (!TryGetAabb(targetRoot, out Aabb worldAabb))
+		if (_camera.Projection == projectionType)
 		{
-			return false;
+			return;
 		}
 
-		Vector3 center = worldAabb.Position + worldAabb.Size * 0.5f;
-		MovePositionTo(center, useTween);
-
-		Basis inverseBasis = Transform.Basis.Inverse();
-		Rect2 viewportRect = GetViewport().GetVisibleRect();
-		float aspect = Mathf.Max(viewportRect.Size.X / Mathf.Max(viewportRect.Size.Y, 1.0f), 0.01f);
-
-		float maxAbsX = 0.0f;
-		float maxAbsY = 0.0f;
-		float maxZ = float.NegativeInfinity;
-		float requiredDistance = 0.0f;
-
-		if (_camera.Projection == Camera3D.ProjectionType.Perspective)
+		if (projectionType == Camera3D.ProjectionType.Perspective)
 		{
-			float halfVerticalFov = Mathf.DegToRad(_camera.Fov) * 0.5f;
-			float tanHalfY = Mathf.Max(Mathf.Tan(halfVerticalFov), 1e-5f);
-			float tanHalfX = Mathf.Max(tanHalfY * aspect, 1e-5f);
-
-			foreach (Vector3 corner in GetAabbCorners(worldAabb))
-			{
-				Vector3 local = inverseBasis * (corner - center);
-				requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.X) / tanHalfX);
-				requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.Y) / tanHalfY);
-				maxZ = Mathf.Max(maxZ, local.Z);
-			}
-
-			requiredDistance = Mathf.Max(requiredDistance, maxZ + _camera.Near * 1.5f);
-			requiredDistance = Mathf.Max(requiredDistance * _fitPadding, _minZoomValue);
-
-			MoveDistanceTo(requiredDistance, useTween);
+			float distance = GetPerspectiveDistanceFromOrthographicSize();
+			SetDistance(distance, false);
 		}
 		else
 		{
-			foreach (Vector3 corner in GetAabbCorners(worldAabb))
-			{
-				Vector3 local = inverseBasis * (corner - center);
-				maxAbsX = Mathf.Max(maxAbsX, Mathf.Abs(local.X));
-				maxAbsY = Mathf.Max(maxAbsY, Mathf.Abs(local.Y));
-			}
+			float size = GetOrthographicSizeFromPerspectiveDistance();
+			SetSize(size, false);
 
-			float requiredHeight = 2.0f * Mathf.Max(maxAbsY, maxAbsX / aspect);
-			float targetSize = Mathf.Max(requiredHeight * _fitPadding, _minZoomValue);
-
-			ChangeSizeTo(targetSize, useTween);
+			// 投影物がカメラの視界から出ないようにNearとFarの中間あたりに注視点を置く
+			float farZ = (_camera.Near + _camera.Far) / 2.0f;
+			SetDistance(farZ, false);
 		}
 
-		return true;
+		_camera.Projection = projectionType;
+		CameraEventHub.I.NotifyProjectionType(projectionType);
 	}
 
 	/// <summary>
-	/// カメラの法線方向を指定したベクトルに整列させるよう回転を調整します。
+	/// 指定した基準で移動します。
 	/// </summary>
-	/// <param name="normal">整列先の法線方向を表すベクトルです。</param>
+	/// <param name="translation">移動量です。</param>
+	/// <param name="spaceMode">移動の基準となる座標系です。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
+	private void Translate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
+	{
+		Vector3 newPosition;
+		switch (spaceMode)
+		{
+			case SpaceMode.World:
+				// ワールド基準の平行移動は、そのまま移動量を加算すれば実現できる。
+				newPosition = Transform.Origin + translation;
+				MovePositionTo(newPosition, useTween);
+				break;
+			case SpaceMode.FocalPoint: case SpaceMode.Camera:
+				// 注視点基準の平行移動は、カメラの向きに応じて移動量を回転させる必要がある。
+				Vector3 rotatedTranslation = Transform.Basis * translation;
+				Transform = Transform.Translated(rotatedTranslation);
+				MovePositionTo(Transform.Origin, useTween);
+				break;
+		}
+	}
+
+	/// <summary>
+	/// 指定した基準で回転します。
+	/// </summary>
+	/// <param name="rotation">加算する回転。</param>
+	/// <param name="spaceMode">回転の基準となる座標系です。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
-	private void AlignNormalTo(Vector3 normal, bool useTween = false)
+	private void Rotate(Quaternion rotation, SpaceMode spaceMode, bool useTween = false)
 	{
-		Quaternion rotation = new Quaternion();
-		// ☆将来的に実装予定☆
-		MoveRotationTo(rotation, useTween);
+		Quaternion nowRotation = Transform.Basis.GetRotationQuaternion();
+		Quaternion newRotation;
+		switch (spaceMode)
+		{
+			case SpaceMode.World:
+				// ワールド基準の回転は、回転を先に掛けることで実現できる。
+				newRotation = rotation * nowRotation;
+				MoveRotationTo(newRotation, useTween);
+				break;
+			case SpaceMode.FocalPoint:
+				// 注視点基準の回転は、回転を後に掛けることで実現できる。
+				newRotation = nowRotation * rotation;
+				MoveRotationTo(newRotation, useTween);
+				break;
+			case SpaceMode.Camera:
+				// カメラ基準で回転しているかのようにFocalPointを回しながら移動させる。
+				newRotation = nowRotation * rotation;
+				// 透視投影の場合は現在のカメラ座標はGlobalPositionで求めることもできるが、並行投影の場合はZ距離を限りなく大きくしているため、GlobalPositionから求めることができない。そのため、Sizeを距離に換算し、距離を考慮してカメラ位置を計算する。
+				Vector3 distance = new Vector3(0, 0, _camera.Projection == Camera3D.ProjectionType.Perspective ? _camera.Position.Z : GetPerspectiveDistanceFromOrthographicSize());
+				Vector3 nowCameraPossition = Position + Transform.Basis.GetRotationQuaternion() * distance;
+				Vector3 rotatedDistance = newRotation * distance;
+				// 回転後のカメラ位置は、回転前のカメラ位置から、回転前の距離ベクトルを回転後の距離ベクトルに置き換えた分だけ移動した位置になる。
+				Vector3 newPosition = nowCameraPossition - rotatedDistance;
+				MovePositionTo(newPosition, useTween);
+				MoveRotationTo(newRotation, useTween);
+				break;
+		}
 	}
 
 	/// <summary>
-	/// Tween を構築するための共通処理です。Tween の設定はこれで作成すると統一されます。
+	/// ズーム操作を実行します。等角投影の場合はサイズを、透視投影の場合はカメラのZ距離を変更してズームを表現します。
 	/// </summary>
-	/// <returns>構築された Tween オブジェクト。</returns>
-	private Tween BuildTween()
+	/// <param name="exponent">ズームの指数値です。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
+	private void Zoom(float exponent, bool useTween = false)
 	{
-		return CreateTween()
-			.SetTrans(Tween.TransitionType.Cubic)
-			.SetEase(Tween.EaseType.Out);
+		float scale = Mathf.Pow(_zoomBase, exponent);
+		// 投影方式ごとにズーム表現が異なるため、変更先を分ける。
+		if (_camera.Projection == Camera3D.ProjectionType.Orthogonal)
+		{
+			// 等角投影の場合はサイズを変更してズームを表現する
+			float newSize = _camera.Size * scale;
+			// サイズが小さくなりすぎて見えなくなるのを防止するため、最小値を設定する
+			float fixedSize = Mathf.Max(newSize, _minZoomValue);
+			SetSize(fixedSize, useTween);
+		}
+		else
+		{
+			// 透視投影の場合はカメラのZ距離を変更してズームを表現する
+			float distance = _camera.Position.Z;
+			float newDistance = Mathf.Max(distance * scale, _minZoomValue);
+			// 距離が近すぎて見えなくなるのを防止するため、最小値を設定する
+			float fixedDistance = Mathf.Max(newDistance, _minZoomValue);
+			SetDistance(fixedDistance, useTween);
+		}
+	}
+
+	/// <summary>
+	/// 現在の投影方式を Perspective/Orthogonal でトグルします。
+	/// </summary>
+	private void ToggleProjectionType()
+	{
+		// 現在の投影方式をトグルして、内部で必要な補正を行う。
+		Camera3D.ProjectionType nextProjection = _camera.Projection == Camera3D.ProjectionType.Perspective
+			? Camera3D.ProjectionType.Orthogonal
+			: Camera3D.ProjectionType.Perspective;
+		SetProjectionType(nextProjection);
 	}
 
 	/// <summary>
@@ -520,6 +499,119 @@ public partial class CameraRig : Node3D
 			_camera.Fov = fov;
 			CameraEventHub.I.NotifyFov(fov);
 		}), startFov, fov, _tweenDuration);
+	}
+
+	/// <summary>
+	/// 指定ノード配下を画角内に収めるようカメラを調整します。
+	/// </summary>
+	/// <param name="targetRoot">フィット対象のルートノード。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
+	/// <returns>フィット対象の AABB を取得できた場合は <see langword="true"/>。</returns>
+	private bool Fit(Node targetRoot, bool useTween = false)
+	{
+		if (!TryGetAabb(targetRoot, out Aabb worldAabb))
+		{
+			return false;
+		}
+
+		Vector3 center = worldAabb.Position + worldAabb.Size * 0.5f;
+		MovePositionTo(center, useTween);
+
+		Basis inverseBasis = Transform.Basis.Inverse();
+		Rect2 viewportRect = GetViewport().GetVisibleRect();
+		float aspect = Mathf.Max(viewportRect.Size.X / Mathf.Max(viewportRect.Size.Y, 1.0f), 0.01f);
+
+		float maxAbsX = 0.0f;
+		float maxAbsY = 0.0f;
+		float maxZ = float.NegativeInfinity;
+		float requiredDistance = 0.0f;
+
+		if (_camera.Projection == Camera3D.ProjectionType.Perspective)
+		{
+			float halfVerticalFov = Mathf.DegToRad(_camera.Fov) * 0.5f;
+			float tanHalfY = Mathf.Max(Mathf.Tan(halfVerticalFov), 1e-5f);
+			float tanHalfX = Mathf.Max(tanHalfY * aspect, 1e-5f);
+
+			foreach (Vector3 corner in GetAabbCorners(worldAabb))
+			{
+				Vector3 local = inverseBasis * (corner - center);
+				requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.X) / tanHalfX);
+				requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.Y) / tanHalfY);
+				maxZ = Mathf.Max(maxZ, local.Z);
+			}
+
+			requiredDistance = Mathf.Max(requiredDistance, maxZ + _camera.Near * 1.5f);
+			requiredDistance = Mathf.Max(requiredDistance * _fitPadding, _minZoomValue);
+
+			SetDistance(requiredDistance, useTween);
+		}
+		else
+		{
+			foreach (Vector3 corner in GetAabbCorners(worldAabb))
+			{
+				Vector3 local = inverseBasis * (corner - center);
+				maxAbsX = Mathf.Max(maxAbsX, Mathf.Abs(local.X));
+				maxAbsY = Mathf.Max(maxAbsY, Mathf.Abs(local.Y));
+			}
+
+			float requiredHeight = 2.0f * Mathf.Max(maxAbsY, maxAbsX / aspect);
+			float targetSize = Mathf.Max(requiredHeight * _fitPadding, _minZoomValue);
+
+			SetSize(targetSize, useTween);
+		}
+
+		return true;
+	}
+
+	/// <summary>
+	/// カメラの法線方向を指定したベクトルに整列させるよう回転を調整します。
+	/// </summary>
+	/// <param name="normal">整列先の法線方向を表すベクトルです。</param>
+	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
+	private void AlignNormalTo(Vector3 normal, bool useTween = false)
+	{
+		if (normal.LengthSquared() < Mathf.Epsilon)
+		{
+			return;
+		}
+
+		// 注視点からカメラへの方向（ローカル +Z）を法線方向へ合わせる。
+		Vector3 targetBack = normal.Normalized();
+		Vector3 currentUp = Transform.Basis.Y.Normalized();
+
+		// 現在の画面上向きを、法線に直交する平面へ射影してロール方向を引き継ぐ。
+		Vector3 projectedUp = currentUp - targetBack * currentUp.Dot(targetBack);
+		if (projectedUp.LengthSquared() < Mathf.Epsilon)
+		{
+			Vector3 currentRight = Transform.Basis.X.Normalized();
+			Vector3 projectedRight = currentRight - targetBack * currentRight.Dot(targetBack);
+			if (projectedRight.LengthSquared() < Mathf.Epsilon)
+			{
+				projectedRight = Mathf.Abs(targetBack.Dot(Vector3.Up)) < 0.999f ? Vector3.Up.Cross(targetBack) : Vector3.Right.Cross(targetBack);
+			}
+
+			Vector3 rightFromProjection = projectedRight.Normalized();
+			projectedUp = targetBack.Cross(rightFromProjection);
+		}
+
+		Vector3 up = projectedUp.Normalized();
+		Vector3 right = up.Cross(targetBack).Normalized();
+		up = targetBack.Cross(right).Normalized();
+
+		Basis targetBasis = new Basis(right, up, targetBack);
+		Quaternion rotation = targetBasis.GetRotationQuaternion();
+		MoveRotationTo(rotation, useTween);
+	}
+
+	/// <summary>
+	/// Tween を構築するための共通処理です。Tween の設定はこれで作成すると統一されます。
+	/// </summary>
+	/// <returns>構築された Tween オブジェクト。</returns>
+	private Tween BuildTween()
+	{
+		return CreateTween()
+			.SetTrans(Tween.TransitionType.Cubic)
+			.SetEase(Tween.EaseType.Out);
 	}
 
 	/// <summary>
