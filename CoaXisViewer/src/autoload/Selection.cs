@@ -67,6 +67,7 @@ public partial class Selection : Node
 		if (I._nodes.Add(node))
 		{
 			I.EmitSignal(SignalName.NotifySelected, node);
+			LogHub.I.Info($"Selected: {node.Name}");
 			return true;
 		}
 		return false;
@@ -93,6 +94,7 @@ public partial class Selection : Node
 		if (I._nodes.Remove(node))
 		{
 			I.EmitSignal(SignalName.NotifyDeselected, node);
+			LogHub.I.Info($"Deselected: {node.Name}");
 			return true;
 		}
 		return false;

@@ -13,13 +13,14 @@ public partial class ViewportInputHandler : SubViewport
 	
 	[ExportGroup("Settings")]
 	[Export] private float _zoomFactor = 1.0f; // ズーム倍率変更時の係数
-	[Export] private float _rollRegionRadiusRatio = 0.45f; // 画面サイズに対する、Orbit/Rollの切り替え用の円領域の半径比率
+	[Export] private float _arcballRegionRatio = 0.45f; // 画面サイズに対する、Orbit/Rollの切り替え用の円領域の半径比率
 	[Export] private Material _defaultMaterial; // 通常表示用のマテリアル（将来の拡張で使用予定）
 	[Export] private Material _selectedMaterial; // 選択ハイライト用のマテリアル（将来の拡張で使用予定）
 
-	private CameraControlMode _currentMode = CameraControlMode.None; // 現在の操作モード
-	private Vector2 _lastMousePos = Vector2.Zero; // マウス移動量算出のために前フレームの座標を保持
-	private bool _hasMoved = false; // ボタンを押してからマウスを移動操作したかのフラグ。クリックと移動の区別に使用
+	private ViewportInputMode _mode = ViewportInputMode.None; // 現在の操作モード
+	private Vector2 _lastPosition = Vector2.Zero; // 移動量算出のために前フレームの操作座標を保持
+	private Vector2 _startPosition = Vector2.Zero; // 操作開始点の座標を保持
+	private bool _hasMoved = false; // ボタンを押してから移動操作したかのフラグ。マウスのクリックと移動の区別に使用
 	private Vector2 _screenCenter; // 画面中心座標のキャッシュ
 	private float _arcballRadius; // アークボール半径のキャッシュ
 
@@ -33,7 +34,7 @@ public partial class ViewportInputHandler : SubViewport
 		SizeChanged += OnSizeChanged;
 		
 		// イベントの購読
-		CameraEventHub.I.NotifyStateRequested += OnNotifyStateRequested;
+		ViewportEventHub.I.NotifyStateRequested += OnNotifyStateRequested;
 
 		// ビューポートサイズに基づいて、アークボールのパラメータを初期化する。
 		RefreshArcballParameters();
@@ -45,27 +46,27 @@ public partial class ViewportInputHandler : SubViewport
 		SizeChanged -= OnSizeChanged;
 
 		// イベントの購読解除
-		CameraEventHub.I.NotifyStateRequested -= OnNotifyStateRequested;
+		ViewportEventHub.I.NotifyStateRequested -= OnNotifyStateRequested;
 	}
 
 	public override void _Process(double delta)
 	{
 
-		// モード中のみマウス移動に応じたカメラ操作を行う。
-		if (_currentMode == CameraControlMode.None)
+		// 入力モードが None のときは、マウス移動の検知やカメラ操作の適用を行わない。
+		if (_mode == ViewportInputMode.None)
 		{
 			return;
 		}
 
-		// マウス位置の変化を検知して、変化があればカメラ操作を適用する。
-		Vector2 currentMousePos = GetMousePosition();
-		if (currentMousePos != _lastMousePos)
+		// マウス位置の変化を検知して、変化があれば操作を適用する。
+		Vector2 currentPos = GetMousePosition();
+		if (currentPos != _lastPosition)
 		{
 			_hasMoved = true;
-			ApplyCameraOperation(currentMousePos, _lastMousePos);
+			ApplyOperation(_lastPosition, currentPos);
 			
 			// 現在のマウス位置を保存して次フレームに備える。
-			_lastMousePos = currentMousePos;
+			_lastPosition = currentPos;
 		}
 
 	}
@@ -98,9 +99,9 @@ public partial class ViewportInputHandler : SubViewport
 	/// </summary>
 	private void OnNotifyStateRequested()
 	{
-		CameraEventHub.I.NotifyControlMode(_currentMode);
-		CameraEventHub.I.NotifyArcballRadius(_arcballRadius);
-		CameraEventHub.I.NotifyArcballHandle(new Vector3(0, 0, 1)); // アークボールハンドルは初期状態では画面正面方向にしておく
+		ViewportEventHub.I.NotifyInputMode(_mode);
+		ViewportEventHub.I.NotifyArcballRadius(_arcballRadius);
+		ViewportEventHub.I.NotifyArcballHandle(new Vector3(0, 0, 1)); // アークボールハンドルは初期状態では画面正面方向にしておく
 	}
 
 	/// <summary>
@@ -109,16 +110,21 @@ public partial class ViewportInputHandler : SubViewport
 	/// <param name="button">マウスボタン入力イベントです。</param>
 	private void OnMouseButtonClicked(InputEventMouseButton button)
 	{
-		// 入力状態遷移:
-		// None --(中押下)--> Pan --(左右押下)--> Orbit/Roll --(左右離し)--> Zoom --(中離し)--> None
-		// 現在モードに応じて遷移ルールを切り替える。
-		if (_currentMode == CameraControlMode.None)
+		// 入力モードに応じて、マウス入力の処理を分岐する。
+		if (_mode == ViewportInputMode.None)
 		{
+			// None モードのときは、カメラ操作開始のトリガーを検知するための処理を行う。
 			HandleIdleModeInput(button);
+		}
+		else if (_mode == ViewportInputMode.SelectRect)
+		{
+			// Selectモードのときは、矩形選択操作の開始・終了を検知するための処理を行う。
+			HandleSelectModeInput(button);
 		}
 		else
 		{
-			HandleActiveModeInput(button);
+			// CameraControlモードのときは、カメラ操作の開始・終了を検知するための処理を行う。
+			HandleCameraControlModeInput(button);
 		}
 	}
 
@@ -127,38 +133,39 @@ public partial class ViewportInputHandler : SubViewport
 	#region Internal Helpers
 	
 	/// <summary>
-	/// カメラ操作モードを切り替え、EventHub を通じて変更を通知します。
+	/// 操作モードを切り替え、EventHub を通じて変更を通知します。
 	/// </summary>
-	/// <param name="mode">新しいカメラ操作モードです。</param>
-	private void SetCameraControlMode(CameraControlMode mode)
+	/// <param name="mode">新しい操作モードです。</param>
+	private void SetMode(ViewportInputMode mode)
 	{
-		if (_currentMode == mode)
+		if (_mode == mode)
 		{
 			return;
 		}
 
-		_currentMode = mode;
-		CameraEventHub.I.NotifyControlMode(mode);
+		_mode = mode;
+		ViewportEventHub.I.NotifyInputMode(mode);
 	}
 
 	/// <summary>
-	/// カメラ操作モードが None のときのマウス入力を処理します。
+	/// 入力モードが None のときのマウス入力を処理します。
 	/// </summary>
 	/// <param name="button">マウスボタン入力イベントです。</param>
 	private void HandleIdleModeInput(InputEventMouseButton button)
 	{
-
 		// 中ボタンのクリック開始を検知したら、移動フラグをリセットしてカメラコントロール開始
 		if (button.Pressed && button.ButtonIndex == MouseButton.Middle)
 		{
 			_hasMoved = false;
-			_lastMousePos = button.Position;
-			SetCameraControlMode(CameraControlMode.Pan);
+			_lastPosition = button.Position;
+			SetMode(ViewportInputMode.CameraPan);
 		}
+		// 左ボタンのクリック開始を検知したら、矩形選択操作を行う
 		else if (button.Pressed && button.ButtonIndex == MouseButton.Left)
 		{
-			// 左クリックで選択する
-			TrySelect(button.Position);
+			_hasMoved = false;
+			_startPosition = button.Position;
+			SetMode(ViewportInputMode.SelectRect);
 		}
 		else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
 		{
@@ -168,17 +175,44 @@ public partial class ViewportInputHandler : SubViewport
 		}
 	}
 
-	/// <summary>
-	/// カメラ操作モードが Pan/Orbit/Roll/Zoom のときのマウス入力を処理します。
-	/// </summary>
-	/// <param name="button">マウスボタン入力イベントです。</param>
-	private void HandleActiveModeInput(InputEventMouseButton button)
+	private void HandleSelectModeInput(InputEventMouseButton button)
 	{
 		// ウィンドウフォーカス喪失などのキャンセル時は即時終了。
 		if (button.Canceled)
 		{
 			// 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する。
-			SetCameraControlMode(CameraControlMode.None);
+			SetMode(ViewportInputMode.None);
+			return;
+		}
+
+		// 左ボタンのクリック終了を検知したら、矩形選択操作を終了
+		if (!button.Pressed && button.ButtonIndex == MouseButton.Left)
+		{
+			if (_hasMoved)
+			{
+				/////////////////////////////////////////////矩形選択を実装予定////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+			}
+			else
+			{
+				// ドラッグしていない場合は、クリックとみなして単一選択を行う。
+				TrySelect(button.Position);
+			}
+
+			SetMode(ViewportInputMode.None);
+		}
+	}
+
+	/// <summary>
+	/// カメラ操作モード中のマウス入力を処理します。
+	/// </summary>
+	/// <param name="button">マウスボタン入力イベントです。</param>
+	private void HandleCameraControlModeInput(InputEventMouseButton button)
+	{
+		// ウィンドウフォーカス喪失などのキャンセル時は即時終了。
+		if (button.Canceled)
+		{
+			// 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する。
+			SetMode(ViewportInputMode.None);
 			return;
 		}
 
@@ -187,12 +221,12 @@ public partial class ViewportInputHandler : SubViewport
 		{
 			if (!_hasMoved)
 			{
-				if(!TryFocusAt(button.Position, true))
+				if(!TryFocusAt(button.Position))
 				{
 					PanCamera(_screenCenter, button.Position); // フォーカスできなかったら、クリック位置にパン扱いとする
 				}
 			}
-			SetCameraControlMode(CameraControlMode.None);
+			SetMode(ViewportInputMode.None);
 			return;
 		}
 
@@ -206,40 +240,40 @@ public partial class ViewportInputHandler : SubViewport
 		if (button.Pressed)
 		{
 			_hasMoved = true; // クリック操作したら注視点移動しないようににするため、移動フラグを立てる
-			SetCameraControlMode(IsOnArcball(button.Position) ? CameraControlMode.Orbit : CameraControlMode.Roll);
+			SetMode(IsOnArcball(button.Position) ? ViewportInputMode.CameraOrbit : ViewportInputMode.CameraRoll);
 			Vector3 positionOnArcball = GetPositionOnArcballSphere(button.Position);
-			CameraEventHub.I.NotifyArcballHandle(positionOnArcball);
+			ViewportEventHub.I.NotifyArcballHandle(positionOnArcball);
 			return;
 		}
 		
 		// 中ボタンを押したまま右or左クリック終了を検知したら、Zoomモードに切り替え
-		SetCameraControlMode(CameraControlMode.Zoom);
+		SetMode(ViewportInputMode.CameraZoom);
 	}
 
 	/// <summary>
-	///  カメラ操作モード中のマウス移動に応じて、EventHub を通じて注視点の移動や回転をリクエストします。
+	/// 入力モード中の移動量に応じて、EventHub を通じて注視点の移動や回転をリクエストします。
 	/// </summary>
-	/// <param name="currentPos">現在のマウス位置です。</param>
-	/// <param name="previousPos">前フレームのマウス位置です。</param>
+	/// <param name="previousPos">前フレームの画面上位置です。</param>
+	/// <param name="currentPos">現在の画面上位置です。</param>
 	/// <remarks>
-	/// _currentModeがNoneのときは呼び出されない前提です。
-	/// currentPos と previousPos は、マウスの移動量を算出するために使用され、移動がない場合は呼び出されません。
+	/// _modeがNoneのときは呼び出されない前提です。
+	/// currentPos と previousPos は、画面上の移動量を算出するために使用され、移動がない場合は呼び出されません。
 	/// </remarks>
-	private void ApplyCameraOperation(Vector2 currentPos, Vector2 previousPos)
+	private void ApplyOperation(Vector2 previousPos, Vector2 currentPos)
 	{
-		switch (_currentMode)
+		switch (_mode)
 		{
-			case CameraControlMode.Pan:
+			case ViewportInputMode.CameraPan:
 				PanCamera(previousPos, currentPos);
 				break;
-			case CameraControlMode.Orbit:
+			case ViewportInputMode.CameraOrbit:
 				OrbitCamera(previousPos, currentPos);
 				break;
-			case CameraControlMode.Roll:
+			case ViewportInputMode.CameraRoll:
 				if (IsOnArcball(currentPos))
 				{
 					// 画面中央寄りに入ったらOrbitに変更、外周寄りはRollのままにする
-					SetCameraControlMode(CameraControlMode.Orbit);
+					SetMode(ViewportInputMode.CameraOrbit);
 					OrbitCamera(previousPos, currentPos);
 				}
 				else
@@ -247,7 +281,7 @@ public partial class ViewportInputHandler : SubViewport
 					RollCamera(previousPos, currentPos);
 				}
 				break;
-			case CameraControlMode.Zoom:
+			case ViewportInputMode.CameraZoom:
 				ZoomCamera(previousPos, currentPos);
 				break;
 		}
@@ -267,7 +301,7 @@ public partial class ViewportInputHandler : SubViewport
 		if (hit.HasHit)
 		{
 			// ヒットしたら注視点を移動
-			CameraEventHub.I.RequestMovePositionTo(hit.Position, useTween);
+			ViewportEventHub.I.RequestMovePositionTo(hit.Position, useTween);
 			return true;
 		}
 		else
@@ -289,7 +323,7 @@ public partial class ViewportInputHandler : SubViewport
 
 		if (hit.HasHit)
 		{
-			CameraEventHub.I.RequestAlignNormalTo(hit.Normal, useTween);
+			ViewportEventHub.I.RequestAlignNormalTo(hit.Normal, useTween);
 			return true;
 		}
 		else
@@ -314,52 +348,54 @@ public partial class ViewportInputHandler : SubViewport
 		// ドラッグ方向に見た目が追従するよう、差分を逆向きで適用する。
 		Vector3 move = fromWorld - toWorld;
 
-		CameraEventHub.I.RequestTranslate(move, SpaceMode.World);
+		ViewportEventHub.I.RequestTranslate(move, SpaceMode.World);
 	}
 
 	/// <summary>
 	/// カメラをオービット回転させます。
 	/// </summary>
-	/// <param name="previousPos">前フレームのマウス位置です。</param>
-	/// <param name="currentPos">現在のマウス位置です。</param>
+	/// <param name="previousPos">前フレームの画面上位置です。</param>
+	/// <param name="currentPos">現在の画面上位置です。</param>
 	private void OrbitCamera(Vector2 previousPos, Vector2 currentPos)
 	{
 		// 仮想アークボール（アークボール）方式でFocalPointを回転させる。
 		// Orbit/Roll判定と同じ円を球面半径として使い、
 		// 2点の球面座標から回転軸・角度を求めてFocalPointのローカル軸で回転する。
-		Vector3 p0 = GetPositionOnArcballSphere(previousPos);
-		Vector3 p1 = GetPositionOnArcballSphere(currentPos);
+		// FocalPointの回転はArcballの回転と逆向きになるように計算する。
+		Vector3 p0 = GetPositionOnArcballSphere(currentPos);
+		Vector3 p1 = GetPositionOnArcballSphere(previousPos);
 		Quaternion rotation = ComputeArcballRotation(p0, p1);
 
-		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint);
+		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint);
 	}
 
 	/// <summary>
 	/// カメラをロール回転させます。
 	/// </summary>
-	/// <param name="previousPos">前フレームのマウス位置です。</param>
-	/// <param name="currentPos">現在のマウス位置です。</param>
+	/// <param name="previousPos">前フレームの画面上位置です。</param>
+	/// <param name="currentPos">現在の画面上位置です。</param>
 	private void RollCamera(Vector2 previousPos, Vector2 currentPos)
 	{
 		// 画面中心から見た角度差を使ってロール量を計算する。
-		// 前フレームと今フレームのマウス位置ベクトル（中心基準）
-		Vector3 p0 = GetPositionOnArcballEquator(previousPos);
-		Vector3 p1 = GetPositionOnArcballEquator(currentPos);
+		// 前フレームと今フレームの画面上位置ベクトル（中心基準）
+		// FocalPointの回転はArcballの回転と逆向きになるように計算する。
+		Vector3 p0 = GetPositionOnArcballEquator(currentPos);
+		Vector3 p1 = GetPositionOnArcballEquator(previousPos);
 		Quaternion rotation = ComputeArcballRotation(p0, p1);
 
-		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint);
+		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint);
 	}
 
 	/// <summary>
 	/// カメラをズームさせます。
-	/// </summary> <param name="previousPos">前フレームのマウス位置です。</param>
-	/// <param name="currentPos">現在のマウス位置です。</param>
+	/// </summary> <param name="previousPos">前フレームの画面上位置です。</param>
+	/// <param name="currentPos">現在の画面上位置です。</param>
 	private void ZoomCamera(Vector2 previousPos, Vector2 currentPos)
 	{
 		float deltaY = (currentPos.Y - previousPos.Y);
 		float exponent = deltaY * _zoomFactor;
 
-		CameraEventHub.I.RequestZoom(exponent);
+		ViewportEventHub.I.RequestZoom(exponent);
 	}
 
 	/// <summary>
@@ -369,9 +405,9 @@ public partial class ViewportInputHandler : SubViewport
 	{
 		Rect2 rect = GetVisibleRect();
 		_screenCenter = rect.Position + rect.Size * 0.5f;
-		_arcballRadius = rect.Size.Y * _rollRegionRadiusRatio;
+		_arcballRadius = rect.Size.Y * _arcballRegionRatio;
 
-		CameraEventHub.I.NotifyArcballRadius(_arcballRadius);
+		ViewportEventHub.I.NotifyArcballRadius(_arcballRadius);
 	}
 
 	/// <summary>
@@ -455,14 +491,13 @@ public partial class ViewportInputHandler : SubViewport
 	/// </summary>
 	/// <param name="p0">アークボール上の最初の点です。</param>
 	/// <param name="p1">アークボール上の2番目の点です。</param>
-	/// <returns>アークボール上の点から点への回転を表すクォータニオンを返します。</returns>
-	/// <remarks>
-	/// カメラ操作に反映することを想定しているため、実際のp0からp1への回転とは逆向きを表すクォータニオンを計算します。
+	/// <returns>アークボール上の点p0からp1への回転を表すクォータニオンを返します。</returns>
+	/// <remarks>。
 	/// この関数は、p0とp1が同一位置の場合や、ほぼ同一位置の場合にも安定して回転を計算できるように設計されています。
 	/// </remarks>
 	private static Quaternion ComputeArcballRotation(Vector3 p0, Vector3 p1)
 	{
-		Vector3 axis = p1.Cross(p0);
+		Vector3 axis = p0.Cross(p1);
 		float dot = Mathf.Clamp(p0.Dot(p1), -1.0f, 1.0f);
 		float angle = Mathf.Acos(dot);
 
@@ -485,7 +520,6 @@ public partial class ViewportInputHandler : SubViewport
 		{
 			Node3D selectedNode = hit.Collider.GetParentOrNull<Node3D>();
 			Selection.Set(selectedNode);
-			GD.Print($"Selected: {selectedNode?.Name}");
 		}
 	}
 

@@ -4,7 +4,7 @@
 /// 画面中央のナビゲータ（中心軸・アークボール補助表示）を描画します。
 /// </summary>
 /// <remarks>
-/// 描画対象のオブジェクトは常に保持しているため、描画の更新はイベント駆動で行います。カメラの状態が変化したときにイベントを発行してもらい、そのイベントを受け取ったときに表示状態に反映します。
+/// 描画対象のオブジェクトは常に保持しているため、描画の更新はイベント駆動で行います。ビューポートの状態が変化したときにイベントを発行してもらい、そのイベントを受け取ったときに表示状態に反映します。
 /// </remarks>
 public partial class ViewportOverlay : Control
 {
@@ -20,7 +20,7 @@ public partial class ViewportOverlay : Control
 
 	[Export] private Color _lineColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);
 
-	private bool _isInitialized = false; // カメラの初期状態を取得してUIに反映するためのフラグ
+	private bool _isInitialized = false; // ビューポートの初期状態を取得してUIに反映するためのフラグ
 	private float _arcballRadius = 0.0f; // アークボールの半径
 	private Quaternion _arcballHandleRotation = Quaternion.Identity;
 
@@ -55,21 +55,21 @@ public partial class ViewportOverlay : Control
 		_arcballOutline = GetNode<Control>("ArcballOutline");
 
 		// イベントの購読登録
-		CameraEventHub.I.RotateRequested += OnRotateRequested;
-		CameraEventHub.I.RotationNotified += OnRotationNotified;
-		CameraEventHub.I.ControlModeNotified += OnControlModeNotified;
-		CameraEventHub.I.ArcballRadiusNotified += OnArcballRadiusNotified;
-		CameraEventHub.I.ArcballHandleNotified += OnArcballHandleNotified;
+		ViewportEventHub.I.RotateRequested += OnRotateRequested;
+		ViewportEventHub.I.RotationNotified += OnRotationNotified;
+		ViewportEventHub.I.InputModeNotified += OnInputModeNotified;
+		ViewportEventHub.I.ArcballRadiusNotified += OnArcballRadiusNotified;
+		ViewportEventHub.I.ArcballHandleNotified += OnArcballHandleNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		CameraEventHub.I.RotateRequested -= OnRotateRequested;
-		CameraEventHub.I.RotationNotified -= OnRotationNotified;
-		CameraEventHub.I.ControlModeNotified -= OnControlModeNotified;
-		CameraEventHub.I.ArcballRadiusNotified -= OnArcballRadiusNotified;
-		CameraEventHub.I.ArcballHandleNotified -= OnArcballHandleNotified;
+		ViewportEventHub.I.RotateRequested -= OnRotateRequested;
+		ViewportEventHub.I.RotationNotified -= OnRotationNotified;
+		ViewportEventHub.I.InputModeNotified -= OnInputModeNotified;
+		ViewportEventHub.I.ArcballRadiusNotified -= OnArcballRadiusNotified;
+		ViewportEventHub.I.ArcballHandleNotified -= OnArcballHandleNotified;
 	}
 	
 	public override void _Process(double delta)
@@ -77,7 +77,7 @@ public partial class ViewportOverlay : Control
 		if (!_isInitialized)
 		{
 			// カメラの初期状態を取得してUIに反映する。
-			CameraEventHub.I.RequestNotifyState();
+			ViewportEventHub.I.RequestNotifyState();
 			_isInitialized = true;
 		}
 	}
@@ -106,17 +106,17 @@ public partial class ViewportOverlay : Control
 	/// <summary>
 	/// カメラの回転が通知されたときに呼び出されるイベントハンドラです。中心軸の表示を更新します。
 	/// </summary>
-	/// <param name="rotation"></param>
+	/// <param name="rotation">通知されたカメラの回転です。</param>
 	private void OnRotationNotified(Quaternion rotation)
 	{
 		DrawCenterAxis(rotation);
 	}
 
 	/// <summary>
-	/// カメラの操作モードが通知されたときに呼び出されるイベントハンドラです。中心軸とアークボール補助表示の表示を切り替えます。
+	/// カメラの入力モードが通知されたときに呼び出されるイベントハンドラです。中心軸とアークボール補助表示の表示を切り替えます。
 	/// </summary>
-	/// <param name="mode">通知されたカメラの操作モードです。</param>
-	private void OnControlModeNotified(CameraControlMode mode)
+	/// <param name="mode">通知されたカメラの入力モードです。</param>
+	private void OnInputModeNotified(ViewportInputMode mode)
 	{
 		_arcballOutline.Visible = IsArcballMode(mode);
 		_centerAxis.Visible = IsCenterAxisMode(mode);
@@ -399,23 +399,23 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// CameraControlMode がアークボール操作モード（Orbit または Roll）かどうかを判定します。
+	/// ViewportInputMode がアークボール操作モード（Orbit または Roll）かどうかを判定します。
 	/// </summary>
-	/// <param name="mode">判定する CameraControlMode です。</param>
+	/// <param name="mode">判定する ViewportInputMode です。</param>
 	/// <returns>アークボール操作モードであれば true を返します。</returns>
-	private bool IsArcballMode(CameraControlMode mode)
+	private bool IsArcballMode(ViewportInputMode mode)
 	{
-		return mode == CameraControlMode.Orbit || mode == CameraControlMode.Roll;
+		return mode == ViewportInputMode.CameraOrbit || mode == ViewportInputMode.CameraRoll;
 	}
 
 	/// <summary>
-	/// CameraControlMode が中心軸表示モード（Orbit、Pan、Zoom、Roll）かどうかを判定します。
+	/// ViewportInputMode が中心軸表示モード（Orbit、Pan、Zoom、Roll）かどうかを判定します。
 	/// </summary>
-	/// <param name="mode">判定する CameraControlMode です。</param>
+	/// <param name="mode">判定する ViewportInputMode です。</param>
 	/// <returns>中心軸表示モードであれば true を返します。</returns>
-	private bool IsCenterAxisMode(CameraControlMode mode)
+	private bool IsCenterAxisMode(ViewportInputMode mode)
 	{
-		return mode != CameraControlMode.None;
+		return mode == ViewportInputMode.CameraOrbit || mode == ViewportInputMode.CameraPan || mode == ViewportInputMode.CameraZoom || mode == ViewportInputMode.CameraRoll;
 	}
 
 	#endregion

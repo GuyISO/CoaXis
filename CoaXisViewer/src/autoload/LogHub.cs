@@ -6,9 +6,9 @@ using System.IO;
 /// ログ関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、ログの通知や出力を管理します。これにより、ログ操作のロジックを分散させずに一元管理できます。
 /// Autoloadに登録してシングルトン参照することを前提としていますが、複数インスタンスが存在する可能性も考慮して実装されています。
 /// </summary>
-public partial class Logger : Node
+public partial class LogHub : Node
 {
-    public static Logger I { get; private set; } // シングルトン参照
+    public static LogHub I { get; private set; } // シングルトン参照
 
     private StreamWriter _fileWriter;
     private string _logFilePath = string.Empty;

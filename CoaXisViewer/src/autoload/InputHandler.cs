@@ -1,5 +1,9 @@
 using Godot;
+using System;
 
+/// <summary>
+/// ユーザーのキーボードやコントローラー入力を処理するノードです。Autoloadに登録され、常にシーンツリーに存在します。
+/// </summary>
 public partial class InputHandler : Node
 {
 	#region Fields
@@ -21,7 +25,7 @@ public partial class InputHandler : Node
 	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if (CameraEventHub.I == null)
+		if (ViewportEventHub.I == null)
 		{
 			return;
 		}
@@ -35,6 +39,10 @@ public partial class InputHandler : Node
 
 	#region Internal Helpers
 
+	/// <summary>
+	/// ユーザーの入力に基づいてカメラの平行移動をリクエストします。
+	/// </summary>
+	/// <param name="delta">前のフレームからの経過時間（秒）</param>
 	private void HandleTranslationInput(float delta)
 	{
 		float x = GetAxis("camera_translate_left", "camera_translate_right");
@@ -53,9 +61,13 @@ public partial class InputHandler : Node
 		}
 
 		Vector3 translation = translationDirection * (_translateSpeed * delta);
-		CameraEventHub.I.RequestTranslate(translation, SpaceMode.Camera);
+		ViewportEventHub.I.RequestTranslate(translation, SpaceMode.Camera);
 	}
 
+	/// <summary>
+	/// ユーザーの入力に基づいてカメラの回転をリクエストします。
+	/// </summary>
+	/// <param name="delta">前のフレームからの経過時間（秒）</param>
 	private void HandleRotationInput(float delta)
 	{
 		float yawInput = GetAxis("camera_rotate_right", "camera_rotate_left");
@@ -75,9 +87,15 @@ public partial class InputHandler : Node
 		Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
 		Quaternion rotation = yaw * pitch * roll;
 
-		CameraEventHub.I.RequestRotate(rotation, SpaceMode.Camera);
+		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.Camera);
 	}
 
+	/// <summary>
+	/// 指定されたアクションに基づいて軸の値を取得します。
+	/// </summary>
+	/// <param name="negativeAction">負の方向のアクション名</param>
+	/// <param name="positiveAction">正の方向のアクション名</param>
+	/// <returns>軸の値（-1.0から1.0の範囲）</returns>
 	private static float GetAxis(string negativeAction, string positiveAction)
 	{
 		return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);

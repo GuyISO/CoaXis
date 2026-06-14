@@ -1,0 +1,250 @@
+[gd_scene format=3 uid="uid://ctjbhouwd3kn7"]
+
+[ext_resource type="Script" uid="uid://nsubyc0mi4rb" path="res://src/ui/ViewportInteractionPanel.cs" id="1_vtpwr"]
+
+[sub_resource type="Theme" id="Theme_iww46"]
+default_font_size = 0
+
+[node name="PanelViewportInteraction" type="PanelContainer" unique_id=1128003110]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_vtpwr")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1489839012]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=62594949]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="GridContainer3" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=19912793]
+layout_mode = 2
+columns = 2
+
+[node name="LabelTitileMode" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1327173843]
+layout_mode = 2
+text = "Mode"
+vertical_alignment = 1
+
+[node name="LabelValueMode" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1710622010]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ColorRect2" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=1402923992]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=11384246]
+layout_mode = 2
+columns = 2
+
+[node name="LabelTitileProjection" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=2000178488]
+layout_mode = 2
+theme = SubResource("Theme_iww46")
+text = "Projection"
+vertical_alignment = 1
+
+[node name="LabelValueProjection" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1677999638]
+layout_mode = 2
+size_flags_horizontal = 3
+theme = SubResource("Theme_iww46")
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="ButtonToggleProjection" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1085575699]
+layout_mode = 2
+tooltip_text = "平行投影と透視投影を切り替えます"
+text = "ToggleProjection"
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=1058617193]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="GridContainer2" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=717064049]
+layout_mode = 2
+columns = 3
+
+[node name="LabelTitilePositionX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1371243210]
+layout_mode = 2
+text = "PositionX"
+vertical_alignment = 1
+
+[node name="LabelValuePositionX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=274111136]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=871067573]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitilePositionY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=357605412]
+layout_mode = 2
+text = "PositionY"
+vertical_alignment = 1
+
+[node name="LabelValuePositionY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1179798322]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=2023728101]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitilePositionZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=101175573]
+layout_mode = 2
+text = "PositionZ"
+vertical_alignment = 1
+
+[node name="LabelValuePositionZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=725205114]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1147034285]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileRotationX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=284817832]
+layout_mode = 2
+text = "RotationX"
+vertical_alignment = 1
+
+[node name="LabelValueRotationX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=693449247]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitRotationX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=126295703]
+layout_mode = 2
+text = "deg"
+vertical_alignment = 1
+
+[node name="LabelTitileRotationY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=83970917]
+layout_mode = 2
+text = "RotationY"
+vertical_alignment = 1
+
+[node name="LabelValueRotationY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=2016394533]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitRotationY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=758922823]
+layout_mode = 2
+text = "deg"
+vertical_alignment = 1
+
+[node name="LabelTitileRotationZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1997315446]
+layout_mode = 2
+text = "RotationZ"
+vertical_alignment = 1
+
+[node name="LabelValueRotationZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=474733403]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitRotationZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1403648399]
+layout_mode = 2
+text = "deg"
+vertical_alignment = 1
+
+[node name="LabelTitileSize" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1562951672]
+layout_mode = 2
+text = "Size"
+vertical_alignment = 1
+
+[node name="LabelValueSize" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=49807680]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitSize" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=321682875]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileDistance" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=702687610]
+layout_mode = 2
+text = "Distance"
+vertical_alignment = 1
+
+[node name="LabelValueDistance" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1559116282]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitDistance" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1756492656]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileFov" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1336462327]
+layout_mode = 2
+text = "FOV"
+vertical_alignment = 1
+
+[node name="LabelValueFov" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1846914231]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitFov" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1115960214]
+layout_mode = 2
+text = "deg"
+vertical_alignment = 1
+
+[node name="HSliderFov" type="HSlider" parent="MarginContainer/VBoxContainer" unique_id=1050566436]
+layout_mode = 2
+min_value = 5.0
+max_value = 120.0
+value = 35.0
+
+[node name="ColorRect3" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=1960033863]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="ButtonFitAllIn" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1566134602]
+layout_mode = 2
+tooltip_text = "モデル全体が画面に収まるようにカメラを調整します"
+text = "FitAllIn"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1678572172]
+layout_mode = 2
+alignment = 1
+
+[node name="ButtonRollRight" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1780015491]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "左に90度回転します"
+text = "RollLeft"
+
+[node name="ButtonRollLeft" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1453521557]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "右に90度回転します"
+text = "RollRight"

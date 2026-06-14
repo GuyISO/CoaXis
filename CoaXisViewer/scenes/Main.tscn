@@ -12,9 +12,10 @@
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/ui/FpsUi.cs" id="8_bb450"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/viewer/SpecificationTree.cs" id="8_qmy6f"]
 [ext_resource type="Script" uid="uid://1us0ficbltrg" path="res://src/test/IpcClient.cs" id="10_1nqs0"]
-[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/window/MessageWindow.tscn" id="14_3p2gp"]
+[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/ui/MessagePanel.tscn" id="14_3p2gp"]
 [ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/viewport/ViewportInputHandler.cs" id="14_3t3px"]
-[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/window/CameraWindow.tscn" id="15_cvmbd"]
+[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/ViewportInteractionPanel.tscn" id="15_cvmbd"]
+[ext_resource type="PackedScene" uid="uid://djgnpihsaft66" path="res://scenes/ui/UiWindow.tscn" id="15_ft6cd"]
 
 [sub_resource type="Environment" id="Environment_2xmat"]
 background_mode = 1
@@ -246,8 +247,10 @@ script = ExtResource("8_bb450")
 [node name="IpcClient" type="Node" parent="." unique_id=1710088594]
 script = ExtResource("10_1nqs0")
 
-[node name="WindowMessage" parent="." unique_id=4617889 instance=ExtResource("14_3p2gp")]
-visible = false
+[node name="WindowViewportInteraction" parent="." unique_id=940691164 instance=ExtResource("15_ft6cd")]
 
-[node name="WindowCamera" parent="." unique_id=365726274 node_paths=PackedStringArray("_defaultFitTargetNode") instance=ExtResource("15_cvmbd")]
-_defaultFitTargetNode = NodePath("../Models")
+[node name="PanelViewportInteraction" parent="WindowViewportInteraction" unique_id=1128003110 instance=ExtResource("15_cvmbd")]
+
+[node name="WindowMessage" parent="." unique_id=1764545528 instance=ExtResource("15_ft6cd")]
+
+[node name="PanelMessage" parent="WindowMessage" unique_id=115086409 instance=ExtResource("14_3p2gp")]

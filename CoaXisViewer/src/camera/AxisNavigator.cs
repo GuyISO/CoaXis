@@ -17,7 +17,7 @@ public partial class AxisNavigator : Control
 	private Node3D _focalPoint = null!;
 	private Camera3D _camera = null!;
 
-	private bool _isInitialized = false; // カメラの初期状態を取得してUIに反映するためのフラグ
+	private bool _isInitialized = false; // メインビューポートのカメラの初期状態を取得してUIに反映するためのフラグ
 
 	#endregion
 
@@ -32,13 +32,13 @@ public partial class AxisNavigator : Control
 		_camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
 
 		// イベント購読の登録
-		CameraEventHub.I.RotationNotified += OnRotationNotified;
+		ViewportEventHub.I.RotationNotified += OnRotationNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベント購読の解除
-		CameraEventHub.I.RotationNotified -= OnRotationNotified;
+		ViewportEventHub.I.RotationNotified -= OnRotationNotified;
 	}
 
 	public override void _Process(double delta)
@@ -46,7 +46,7 @@ public partial class AxisNavigator : Control
 		if (!_isInitialized)
 		{
 			// カメラの初期回転を取得して軸ナビゲータに反映する。
-			CameraEventHub.I.RequestNotifyState();
+			ViewportEventHub.I.RequestNotifyState();
 			_isInitialized = true;
 		}
 	}
@@ -105,7 +105,7 @@ public partial class AxisNavigator : Control
 			// _cameraController.MoveFocalPoint(null, quaternion, true);
 
 			// カメラ回転要求イベントを発行
-			CameraEventHub.I.RequestMoveRotationTo(quaternion, true);
+			ViewportEventHub.I.RequestMoveRotationTo(quaternion, true);
 		}
 	}
 

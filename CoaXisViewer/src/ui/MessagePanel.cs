@@ -1,10 +1,11 @@
 ﻿using Godot;
+using System;
 using System.Text;
 
 /// <summary>
-/// シーン内のデバッグログ表示を担う簡易ウィンドウです。
+/// シーン内のデバッグログ表示を担う簡易パネルです。
 /// </summary>
-public partial class MessageWindow : Window
+public partial class MessagePanel : PanelContainer
 {
 	#region Fields
 
@@ -20,40 +21,32 @@ public partial class MessageWindow : Window
     /// <summary>
     /// 現在アクティブなデバッグウィンドウインスタンスです。
     /// </summary>
-    public static MessageWindow I { get; private set; }
+    public static MessagePanel I { get; private set; }
 
 	#endregion
 
 	#region Lifecycle
 
-    /// <summary>
-    /// シーン参加時にシングルトン参照を設定します。
-    /// </summary>
-    public override void _EnterTree()
-    {
-        I = this;
-    }
-
-    /// <summary>
-    /// シーン離脱時にシングルトン参照を解除します。
-    /// </summary>
-    public override void _ExitTree()
-    {
-        if (I == this)
-            I = null;
-    }
-
-    /// <summary>
-    /// 出力先ラベルを解決します。
-    /// </summary>
     public override void _Ready()
     {
+        // 関連ノードのキャッシュ
         if (_label == null)
         {
             _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
             _label ??= FindChild("RichTextLabel", true, false) as RichTextLabel;
         }
 
+        // イベント購読の登録
+        LogHub.I.Logged += OnLogged;
+    }
+
+    public override void _ExitTree()
+    {
+        // イベント購読の解除
+        LogHub.I.Logged -= OnLogged;
+
+        if (I == this)
+            I = null;
     }
 
 	#endregion
@@ -88,10 +81,10 @@ public partial class MessageWindow : Window
     /// 標準出力とデバッグウィンドウへ同時にログを出力します。
     /// </summary>
     /// <param name="msg">出力するメッセージ。</param>
-    public static void Log(string msg)
+    public static void OnLogged(LogLevel level, string msg)
     {
-        GD.Print(msg);
-        MessageWindow.I?.AddLine(msg);
+        string line = $"{DateTime.Now:HH:mm:ss} [{level}] {msg}";
+        MessagePanel.I?.AddLine(line);
     }
 
 	#endregion

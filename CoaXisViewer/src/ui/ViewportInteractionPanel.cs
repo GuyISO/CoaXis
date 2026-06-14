@@ -2,18 +2,18 @@
 using System;
 
 /// <summary>
-/// カメラ操作用 UI（投影切替、Fit、Roll、状態表示）を管理します。
+/// メインのビューポート状態表示と操作用のパネルです。
 /// </summary>
-public partial class CameraWindow : Window
+public partial class ViewportInteractionPanel : PanelContainer
 {
 	#region Fields
 
+	// これなんとかしたい /////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 	[Export] private Node3D _defaultFitTargetNode;
 
-	private bool _isInitialized = false; // カメラの全状態の通知をリクエストしてUIを初期化したかどうかのフラグ
+	private bool _isInitialized = false; // 全状態の通知をリクエストしてUIを初期化したかどうかのフラグ
 
 	// 関連ノードのキャッシュ
-	private Container _rootContainer;
 	private Label _labelMode;
 	private Label _labelProjection;
 	private Button _buttonToggleProjection;
@@ -38,7 +38,6 @@ public partial class CameraWindow : Window
 	public override void _Ready()
 	{
 		// 関連ノードのキャッシュ
-		_rootContainer = FindChild("PanelContainer", true) as Container;
 		_labelMode = FindChild("LabelValueMode", true) as Label;
 		_labelProjection = FindChild("LabelValueProjection", true) as Label;
 		_buttonToggleProjection = FindChild("ButtonToggleProjection", true) as Button;
@@ -64,25 +63,17 @@ public partial class CameraWindow : Window
 		_sliderFov.ValueChanged += OnSliderFovValueChanged;
 
 		// イベント購読の登録
-		CameraEventHub.I.ControlModeNotified += OnControlModeNotified;
-		CameraEventHub.I.PositionNotified += OnPositionNotified;
-		CameraEventHub.I.RotationNotified += OnRotationNotified;
-		CameraEventHub.I.DistanceNotified += OnDistanceNotified;
-		CameraEventHub.I.SizeNotified += OnSizeNotified;
-		CameraEventHub.I.FovNotified += OnFovNotified;
-		CameraEventHub.I.ProjectionTypeNotified += OnProjectionTypeNotified;
-
-		CloseRequested += OnCloseRequested; // 閉じるボタンが押されたときのイベントハンドラを登録
-		_rootContainer.MinimumSizeChanged += OnMinimumSizeChanged; // UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを登録
-
-		Resize(); // 最初にサイズを調整しておく
+		ViewportEventHub.I.InputModeNotified += OnInputModeNotified;
+		ViewportEventHub.I.PositionNotified += OnPositionNotified;
+		ViewportEventHub.I.RotationNotified += OnRotationNotified;
+		ViewportEventHub.I.DistanceNotified += OnDistanceNotified;
+		ViewportEventHub.I.SizeNotified += OnSizeNotified;
+		ViewportEventHub.I.FovNotified += OnFovNotified;
+		ViewportEventHub.I.ProjectionTypeNotified += OnProjectionTypeNotified;
 	}
 
 	public override void _ExitTree()
 	{
-		// UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを解除
-		_rootContainer.MinimumSizeChanged -= OnMinimumSizeChanged;
-
 		// UIイベントの解除
 		_buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
 		_buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
@@ -91,20 +82,20 @@ public partial class CameraWindow : Window
 		_sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
 		// イベント購読の解除
-		CameraEventHub.I.ControlModeNotified -= OnControlModeNotified;
-		CameraEventHub.I.PositionNotified -= OnPositionNotified;
-		CameraEventHub.I.RotationNotified -= OnRotationNotified;
-		CameraEventHub.I.DistanceNotified -= OnDistanceNotified;
-		CameraEventHub.I.SizeNotified -= OnSizeNotified;
-		CameraEventHub.I.FovNotified -= OnFovNotified;
-		CameraEventHub.I.ProjectionTypeNotified -= OnProjectionTypeNotified;
+		ViewportEventHub.I.InputModeNotified -= OnInputModeNotified;
+		ViewportEventHub.I.PositionNotified -= OnPositionNotified;
+		ViewportEventHub.I.RotationNotified -= OnRotationNotified;
+		ViewportEventHub.I.DistanceNotified -= OnDistanceNotified;
+		ViewportEventHub.I.SizeNotified -= OnSizeNotified;
+		ViewportEventHub.I.FovNotified -= OnFovNotified;
+		ViewportEventHub.I.ProjectionTypeNotified -= OnProjectionTypeNotified;
 	}
 
 	public override void _Process(double delta)
 	{
 		if (!_isInitialized)
 		{
-			CameraEventHub.I.RequestNotifyState(); // カメラの全状態の通知をリクエストして、UIを初期化する
+			ViewportEventHub.I.RequestNotifyState(); // 全状態の通知をリクエストして、UIを初期化する
 			_isInitialized = true;
 		}
 	}
@@ -113,22 +104,12 @@ public partial class CameraWindow : Window
 
 	#region Events
 
-	private void OnCloseRequested()
-	{
-		QueueFree(); // ウィンドウを閉じる（シーンツリーから削除してメモリも解放する）
-	}
-
-	private void OnMinimumSizeChanged()
-	{
-        Resize();
-	}
-
 	/// <summary>
 	/// 投影切替ボタンのクリックイベントハンドラです。カメラの投影タイプ切替をリクエストします。
 	/// </summary>
 	private void OnButtonToggleProjectionPressed()
 	{
-		CameraEventHub.I.RequestToggleProjectionType();
+		ViewportEventHub.I.RequestToggleProjectionType();
 	}
 
 	/// <summary>
@@ -148,7 +129,7 @@ public partial class CameraWindow : Window
 			return;
 		}
 
-		CameraEventHub.I.RequestFit(targetNode, true);
+		ViewportEventHub.I.RequestFit(targetNode, true);
 	}
 
 	/// <summary>
@@ -157,7 +138,7 @@ public partial class CameraWindow : Window
 	private void OnButtonRollLeftPressed()
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度左にロール
+		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度左にロール
 	}
 
 	/// <summary>
@@ -166,7 +147,7 @@ public partial class CameraWindow : Window
 	private void OnButtonRollRightPressed()
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-		CameraEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度右にロール
+		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度右にロール
 	}
 
 	/// <summary>
@@ -174,14 +155,14 @@ public partial class CameraWindow : Window
 	/// </summary>
 	private void OnSliderFovValueChanged(double value)
 	{
-		CameraEventHub.I.RequestSetFov((float)value);
+		ViewportEventHub.I.RequestSetFov((float)value);
 	}
 
 	/// <summary>
-	/// カメラの操作モードが通知されたときに呼び出されるイベントハンドラです。
+	/// ビューポートへの入力モードが通知されたときに呼び出されるイベントハンドラです。
 	/// </summary>
-	/// <param name="mode">カメラの操作モードです。</param>
-	private void OnControlModeNotified(CameraControlMode mode)
+	/// <param name="mode">ビューポートの入力モードです。</param>
+	private void OnInputModeNotified(ViewportInputMode mode)
 	{
 		_labelMode.Text = mode.ToString();
 	}
@@ -247,20 +228,6 @@ public partial class CameraWindow : Window
 	}
 
 	#endregion
-
-	#region Internal Helpers
-
-	private void Resize()
-	{
-        // 子コンテナの最小サイズを取得
-        var min = _rootContainer.GetCombinedMinimumSize();
-
-        // Window のサイズに反映
-        Size = new Vector2I((int)min.X, (int)min.Y);
-	}
-
-	#endregion
-
 }
 
 

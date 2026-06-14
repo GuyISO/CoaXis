@@ -1,15 +1,15 @@
 using Godot;
 
 /// <summary>
-/// カメラ関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、カメラの状態変更や操作のリクエストを通知するためのシグナルを提供します。これにより、カメラ操作のロジックを分散させずに一元管理できます。
+/// ビューポート関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、ビューポートの状態変更や操作のリクエストを通知するためのシグナルを提供します。これにより、ビューポート操作のロジックを分散させずに一元管理できます。
 /// Autoloadに登録してシングルトン参照することを前提としていますが、複数インスタンスが存在する可能性も考慮して実装されています。
 /// </summary>
-public partial class CameraEventHub : Node
+public partial class ViewportEventHub : Node
 {
 	/// <summary>
 	/// シングルトン参照です。
 	/// </summary>
-	public static CameraEventHub I { get; private set; }
+	public static ViewportEventHub I { get; private set; }
 
 	/// <summary>
 	/// シーンツリー参加時にシングルトン参照を確立します。
@@ -39,7 +39,7 @@ public partial class CameraEventHub : Node
 
 	[Signal] public delegate void NotifyStateRequestedEventHandler();
 	/// <summary>
-	/// カメラ関連の状態の通知をリクエストします。
+	/// ビューポート関連の状態の通知をリクエストします。
 	/// </summary>
 	public void RequestNotifyState()
 	{
@@ -181,14 +181,14 @@ public partial class CameraEventHub : Node
 
 	#region --------------------------------------- Notification ---------------------------------------
 
-	[Signal] public delegate void ControlModeNotifiedEventHandler(CameraControlMode mode);
+	[Signal] public delegate void InputModeNotifiedEventHandler(ViewportInputMode mode);
 	/// <summary>
-	/// カメラ操作モードを通知するシグナルです。
+	/// 操作モードを通知するシグナルです。
 	/// </summary>
-	/// <param name="mode">カメラ操作モードです。</param>
-	public void NotifyControlMode(CameraControlMode mode)
+	/// <param name="mode">操作モードです。</param>
+	public void NotifyInputMode(ViewportInputMode mode)
 	{
-		EmitSignal(SignalName.ControlModeNotified, (int)mode);
+		EmitSignal(SignalName.InputModeNotified, (int)mode);
 	}
 
 	[Signal] public delegate void PositionNotifiedEventHandler(Vector3 position);

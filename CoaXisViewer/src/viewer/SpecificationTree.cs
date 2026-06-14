@@ -46,8 +46,7 @@ public partial class SpecificationTree : Tree
             Node3D node = selectedItem.GetMetadata(0).As<Node3D>();
             if (node != null)
             {
-                GD.Print($"Selected: {node.Name}");
-                // ここで選択されたノードに対して何らかの操作を行うことができます。
+                Selection.Set(node);
             }
         }
     }
