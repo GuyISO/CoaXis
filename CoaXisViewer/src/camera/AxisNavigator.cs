@@ -65,11 +65,10 @@ public partial class AxisNavigator : Control
 				return;
 			}
 
-			RaycastHitInfo hit = RaycastService.RaycastFromScreen(_camera, localMouse, 1u << 1); // mask 2 only
-			if (hit.HasHit)
+			PickResult pickResult = PickService.PickByRay(_camera, localMouse, 1u << 1); // mask 2 only
+			if (pickResult.HasHit)
 			{
-				var collider = hit.Collider;
-				ViewLookAt(collider);
+				ViewLookAt(pickResult.Collider);
 				
 				// クリックイベントを処理した後、他の UI 要素にイベントが伝播しないようにする。
 				@event.Dispose();

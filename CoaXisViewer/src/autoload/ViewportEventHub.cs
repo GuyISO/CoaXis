@@ -1,4 +1,6 @@
 using Godot;
+using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// ビューポート関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、ビューポートの状態変更や操作のリクエストを通知するためのシグナルを提供します。これにより、ビューポート操作のロジックを分散させずに一元管理できます。
@@ -155,15 +157,16 @@ public partial class ViewportEventHub : Node
 		EmitSignal(SignalName.ToggleProjectionTypeRequested);
 	}
 
-	[Signal] public delegate void FitRequestedEventHandler(Node3D targetNode, bool useTween);
+	[Signal] public delegate void FitRequestedEventHandler(Node3D[] targetNodes, bool useTween);
 	/// <summary>
-	/// カメラをシーン全体にフィットさせる操作をリクエストします。
+	/// カメラを指定ノード群全体にフィットさせる操作をリクエストします。
 	/// </summary>
-	/// <param name="targetNode">フィットさせたいターゲットノードです。</param>
+	/// <param name="targetNodes">フィットさせたいターゲットノード群です。</param>
 	/// <param name="useTween">フィット操作にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestFit(Node3D targetNode, bool useTween = false)
+	public void RequestFit(IEnumerable<Node3D> targetNodes, bool useTween = false)
 	{
-		EmitSignal(SignalName.FitRequested, targetNode, useTween);
+		Node3D[] targets = targetNodes as Node3D[] ?? (targetNodes == null ? Array.Empty<Node3D>() : new List<Node3D>(targetNodes).ToArray());
+		EmitSignal(SignalName.FitRequested, targets, useTween);
 	}
 
 	[Signal] public delegate void AlignNormalToRequestedEventHandler(Vector3 normal, bool useTween);

@@ -233,6 +233,12 @@ layout_mode = 2
 tooltip_text = "モデル全体が画面に収まるようにカメラを調整します"
 text = "FitAllIn"
 
+[node name="ButtonFitToSelection" type="Button" parent="MarginContainer/VBoxContainer" unique_id=401644862]
+layout_mode = 2
+tooltip_text = "選択中のモデルが画面に収まるようにカメラを調整します"
+text = "FitToSelection
+"
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1678572172]
 layout_mode = 2
 alignment = 1

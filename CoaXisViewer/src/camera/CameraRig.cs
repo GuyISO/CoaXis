@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// カメラの位置と向きを制御し、イベントハブを通じて他コンポーネントと連携します。
@@ -180,11 +181,11 @@ public partial class CameraRig : Node3D
 	/// <summary>
 	/// カメラのフィット操作がリクエストされたときに呼び出されるイベントハンドラです。
 	/// </summary>
-	/// <param name="targetNode">フィット対象のノードです。</param>
+	/// <param name="targetNodes">フィット対象のノード群です。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用します。</param>
-	private void OnFitRequested(Node targetNode, bool useTween)
+	private void OnFitRequested(Node3D[] targetNodes, bool useTween)
 	{
-		Fit(targetNode, useTween);
+		Fit(targetNodes, useTween);
 	}
 
 	/// <summary>
@@ -502,14 +503,14 @@ public partial class CameraRig : Node3D
 	}
 
 	/// <summary>
-	/// 指定ノード配下を画角内に収めるようカメラを調整します。
+	/// 指定ノード群配下を画角内に収めるようカメラを調整します。
 	/// </summary>
-	/// <param name="targetRoot">フィット対象のルートノード。</param>
+	/// <param name="targetRoots">フィット対象のルートノード群。</param>
 	/// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用。</param>
 	/// <returns>フィット対象の AABB を取得できた場合は <see langword="true"/>。</returns>
-	private bool Fit(Node targetRoot, bool useTween = false)
+	private bool Fit(IEnumerable<Node3D> targetRoots, bool useTween = false)
 	{
-		if (!TryGetAabb(targetRoot, out Aabb worldAabb))
+		if (!TryGetAabb(targetRoots, out Aabb worldAabb))
 		{
 			return false;
 		}
@@ -670,6 +671,41 @@ public partial class CameraRig : Node3D
 		aabb = default;
 		bool hasMeshAabb = false;
 		GetAabbRecursive(node, ref aabb, ref hasMeshAabb);
+		return hasMeshAabb;
+	}
+
+	/// <summary>
+	/// 指定ノード群配下の MeshInstance3D から AABB を合算して取得します。
+	/// </summary>
+	/// <param name="nodes">AABB を取得する対象のノード群です。</param>
+	/// <param name="aabb">合算された AABB を格納する変数です。</param>
+	/// <returns>有効な AABB が1つ以上取得できた場合は <see langword="true"/>。</returns>
+	private bool TryGetAabb(IEnumerable<Node3D> nodes, out Aabb aabb)
+	{
+		aabb = default;
+		bool hasMeshAabb = false;
+
+		if (nodes == null)
+		{
+			return false;
+		}
+
+		foreach (Node3D node in nodes)
+		{
+			if (node == null)
+			{
+				continue;
+			}
+
+			if (!TryGetAabb(node, out Aabb nodeAabb))
+			{
+				continue;
+			}
+
+			aabb = hasMeshAabb ? aabb.Merge(nodeAabb) : nodeAabb;
+			hasMeshAabb = true;
+		}
+
 		return hasMeshAabb;
 	}
 

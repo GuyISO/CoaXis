@@ -17,18 +17,10 @@ public partial class DeviceInputHandler : Node
 
 	#region Lifecycle
 
-	// Called when the node enters the scene tree for the first time.
-	public override void _Ready()
-	{
-	}
-
-	// Called every frame. 'delta' is the elapsed time since the previous frame.
 	public override void _Process(double delta)
 	{
-		if (ViewportEventHub.I == null)
-		{
-			return;
-		}
+		// マルチセレクトモードの状態を毎フレーム更新して通知
+		Selection.IsMultiSelectMode = Input.IsActionPressed("select_multiple");
 
 		float dt = (float)delta;
 		HandleTranslationInput(dt);
@@ -45,9 +37,9 @@ public partial class DeviceInputHandler : Node
 	/// <param name="delta">前のフレームからの経過時間（秒）</param>
 	private void HandleTranslationInput(float delta)
 	{
-		float x = GetAxis("camera_translate_left", "camera_translate_right");
-		float y = GetAxis("camera_translate_down", "camera_translate_up");
-		float z = GetAxis("camera_translate_forward", "camera_translate_backward");
+		float x = GetAxis("translate_camera_left", "translate_camera_right");
+		float y = GetAxis("translate_camera_down", "translate_camera_up");
+		float z = GetAxis("translate_camera_forward", "translate_camera_backward");
 
 		Vector3 translationDirection = new Vector3(x, y, z);
 		if (translationDirection.LengthSquared() <= Mathf.Epsilon)
@@ -70,9 +62,9 @@ public partial class DeviceInputHandler : Node
 	/// <param name="delta">前のフレームからの経過時間（秒）</param>
 	private void HandleRotationInput(float delta)
 	{
-		float yawInput = GetAxis("camera_rotate_right", "camera_rotate_left");
-		float pitchInput = GetAxis("camera_rotate_down", "camera_rotate_up");
-		float rollInput = GetAxis("camera_rotate_clockwise", "camera_rotate_counterclockwise");
+		float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
+		float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
+		float rollInput = GetAxis("rotate_camera_clockwise", "rotate_camera_counterclockwise");
 
 		if (Mathf.IsZeroApprox(yawInput) && Mathf.IsZeroApprox(pitchInput) && Mathf.IsZeroApprox(rollInput))
 		{

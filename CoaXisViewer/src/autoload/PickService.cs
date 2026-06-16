@@ -1,0 +1,140 @@
+using Godot;
+using Godot.Collections;
+using System;
+using System.Collections.Generic;
+
+
+public partial class PickService : Node
+{
+	/// <summary>
+	/// 指定したカメラからスクリーン座標に向けてレイキャストを行い、ヒット情報を返します。
+	/// </summary>
+	/// <param name="camera">レイを発射するカメラ。</param>
+	/// <param name="screenPosition">レイのスクリーン座標。</param>
+	/// <param name="collisionMask">レイキャストの衝突マスク。デフォルトはカメラのカリングマスク。</param>
+	/// <param name="excludeRids">レイキャストから除外するオブジェクトのRIDリスト。</param>
+	/// <returns>レイのヒット情報を含む PickResult 構造体。</returns>
+	public static PickResult PickByRay(Camera3D camera, Vector2 screenPosition, uint? collisionMask = null, List<Rid> excludeRids = null)
+	{
+		var origin = camera.ProjectRayOrigin(screenPosition);
+		var dir = camera.ProjectRayNormal(screenPosition).Normalized();
+		var end = origin + dir * camera.Far;
+
+		var space = camera.GetWorld3D().DirectSpaceState;
+		var query = PhysicsRayQueryParameters3D.Create(origin, end);
+		query.CollisionMask = collisionMask ?? camera.CullMask; // カメラのカリングマスクを使用して衝突マスクを設定
+		if (excludeRids != null)
+		{
+			query.Exclude = new Array<Rid>(excludeRids);
+		}
+		var result = space.IntersectRay(query);
+
+		if (result.Count == 0)
+			return new PickResult { HasHit = false };
+
+		return new PickResult
+		{
+			HasHit = true,
+			Collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
+			Rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default,
+			Node = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<Node3D>() : null,
+			Position = (Vector3)result["position"],
+			Normal = result.ContainsKey("normal") ? (Vector3)result["normal"] : Vector3.Zero,
+			Distance = origin.DistanceTo((Vector3)result["position"])
+		};
+	}
+
+	/// <summary>
+	/// 指定したカメラからスクリーン座標に向けてレイキャストを行い、すべてのヒット情報をリストで返します。
+	/// </summary>
+	/// <param name="camera">レイを発射するカメラ。</param>
+	/// <param name="screenPosition">レイのスクリーン座標。</param>
+	/// <param name="collisionMask">レイキャストの衝突マスク。デフォルトはカメラのカリングマスク。</param>
+	/// <param name="excludeRids">レイキャストから除外するオブジェクトのRIDリスト。</param>
+	/// <returns>レイのヒット情報を含む PickResult のリスト。</returns>
+	/// <remarks>Godotには貫通レイキャストがないため単体レイキャストを繰り返し呼び出し、すべてのヒットを収集することで実装しています。</remarks>
+	public static List<PickResult> PickAllByRay(Camera3D camera, Vector2 screenPosition, uint? collisionMask = null, List<Rid> excludeRids = null)
+	{
+		// 引数で受け取った除外リストに、レイキャスト情報を取得するたびに除外品目を追加していくため複製して使用
+		var exclude = excludeRids != null
+			? new List<Rid>(excludeRids)
+			: new List<Rid>();
+
+		var results = new List<PickResult>();
+
+		while (true)
+		{
+			PickResult result = PickByRay(camera, screenPosition, collisionMask, exclude);
+
+			if (!result.HasHit)
+			{
+				break; // ヒットがなくなったら終了
+			}
+
+			results.Add(result);
+
+			// 次のレイキャストでこのヒットを除外
+			if (result.Rid.IsValid)
+				exclude.Add(result.Rid);
+			else
+				break; // 除外できない謎のものにヒットしたなら無限ループ防止のため終了
+		}
+
+		// 距離順で取得されているはずだが、念のためヒット距離でソート
+		results.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+
+		return results;
+	}
+
+	/// <summary>
+	/// 指定したカメラから、指定した形状を使用して空間内のオブジェクトを取得します。
+	/// </summary>
+	/// <param name="camera">形状クエリを行うカメラ。</param>
+	/// <param name="shape">使用する形状、ワールド座標系での配置を想定。</param>
+	/// <param name="requireFullContainment">形状に完全に内包されているオブジェクトのみを取得するかどうか。true の場合、形状の内側に完全に含まれているオブジェクトのみがヒットとみなされます。false の場合、形状と交差していればヒットとみなされます。</param>
+	/// <param name="collisionMask">クエリの衝突マスク。デフォルトはカメラのカリングマスク。</param>
+	/// <param name="excludeRids">クエリから除外するオブジェクトのRIDリスト。</param>
+	/// <returns>クエリのヒット情報を含む PickResult のリスト。</returns>
+	public static List<PickResult> PickByShape(Camera3D camera,	Shape3D shape, bool requireFullContainment , uint? collisionMask = null, List<Rid> excludeRids = null)
+	{
+		var space = camera.GetWorld3D().DirectSpaceState;
+
+		var query = new PhysicsShapeQueryParameters3D
+		{
+			Shape = shape,
+			Transform = Transform3D.Identity, // 形状のローカル原点をワールド空間のどこに配置するか。例えば、矩形選択の場合は、カメラの位置と向きに基づいて形状を配置するための Transform3D を使用します。
+			CollisionMask = collisionMask ?? camera.CullMask
+		};
+
+		if (excludeRids != null)
+		{
+			query.Exclude = new Array<Rid>(excludeRids);
+		}
+		var results = space.IntersectShape(query);
+
+		// GodotのIntersectShapeは、ヒットしたオブジェクトの位置や法線などの詳細な情報を返さないため、ノードへの参照のみをPickResultに格納
+		// 指定したShapeと交差したオブジェクトがすべて取得される
+		var pickResults = new List<PickResult>();
+		foreach (var result in results)
+		{
+			pickResults.Add(new PickResult
+			{
+				HasHit = true,
+				Collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
+				Rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default,
+				Node = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<Node3D>() : null,
+				Position = Vector3.Zero, // IntersectShape は position を返さない
+				Normal = Vector3.Zero,
+				Distance = 0f
+			});
+		}
+
+		// requireFullContainment が true の場合、さらにフィルタリングして完全に内包されているオブジェクトのみを残す
+		if (requireFullContainment)
+		{
+			// 難しいので、いつか実装したい
+		}
+
+		return pickResults;
+	}
+}

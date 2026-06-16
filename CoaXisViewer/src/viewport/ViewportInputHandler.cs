@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// メインの3Dビューの入力を受け取り、EventHub へ中継します。
@@ -204,12 +205,13 @@ public partial class ViewportInputHandler : SubViewport
 		{
 			if (_hasMoved)
 			{
-				ViewportEventHub.I.RequestDecideSelectionRect(_startPosition, button.Position);
+				// ドラッグしていた場合は、矩形選択を行う。
+				SelectByRect(_startPosition, button.Position);
 			}
 			else
 			{
 				// ドラッグしていない場合は、クリックとみなして単一選択を行う。
-				TrySelect(button.Position);
+				SelectByPoint(button.Position);
 			}
 
 			SetMode(ViewportInputMode.None);
@@ -313,12 +315,12 @@ public partial class ViewportInputHandler : SubViewport
 	private bool TryFocusAt(Vector2 screenPos, bool useTween = false)
 	{
 		// レイキャストしてヒット情報を取得
-		var hit = RaycastService.RaycastFromScreen(GetCamera3D(), screenPos);
+		var pickResult = PickService.PickByRay(GetCamera3D(), screenPos);
 
-		if (hit.HasHit)
+		if (pickResult.HasHit)
 		{
 			// ヒットしたら注視点を移動
-			ViewportEventHub.I.RequestMovePositionTo(hit.Position, useTween);
+			ViewportEventHub.I.RequestMovePositionTo(pickResult.Position, useTween);
 			return true;
 		}
 		else
@@ -336,11 +338,11 @@ public partial class ViewportInputHandler : SubViewport
 	private bool TryAlignNormalTo(Vector2 screenPos, bool useTween = false)
 	{
 		// レイキャストしてヒット情報を取得
-		var hit = RaycastService.RaycastFromScreen(GetCamera3D(), screenPos);
+		var pickResult = PickService.PickByRay(GetCamera3D(), screenPos);
 
-		if (hit.HasHit)
+		if (pickResult.HasHit)
 		{
-			ViewportEventHub.I.RequestAlignNormalTo(hit.Normal, useTween);
+			ViewportEventHub.I.RequestAlignNormalTo(pickResult.Normal, useTween);
 			return true;
 		}
 		else
@@ -529,15 +531,102 @@ public partial class ViewportInputHandler : SubViewport
 		return new Quaternion(axis, angle);
 	}
 
-	private void TrySelect(Vector2 screenPos)
+	/// <summary>
+	/// 画面上の指定された位置をクリックして、そこにあるオブジェクトを選択します。
+	/// </summary>
+	/// <param name="screenPos">スクリーン座標</param>
+	private void SelectByPoint(Vector2 screenPos)
 	{
-		var hit = RaycastService.RaycastFromScreen(GetCamera3D(), screenPos);
+		var pickResult = PickService.PickByRay(GetCamera3D(), screenPos);
 
-		if (hit.HasHit)
+		if (pickResult.HasHit)
 		{
-			Node3D selectedNode = hit.Collider.GetParentOrNull<Node3D>();
-			Selection.Set(selectedNode);
+			if (Selection.IsMultiSelectMode)
+			{
+				Selection.Toggle(pickResult.Node);
+			}
+			else
+			{
+				Selection.Set(pickResult.Node);
+			}
 		}
+		else
+		{
+			if (!Selection.IsMultiSelectMode)
+			{
+				Selection.Clear();
+			}
+		}
+	}
+
+	/// <summary>
+	/// 画面上の矩形領域をドラッグして、その領域内にあるオブジェクトを選択します。
+	/// </summary>
+	/// <param name="topLeft">矩形の左上座標</param>
+	/// <param name="bottomRight">矩形の右下座標</param>
+	private void SelectByRect(Vector2 topLeft, Vector2 bottomRight)
+	{
+		// 画面上の矩形領域をカメラの視錐台として、そこに含まれるオブジェクトを選択する。
+		var frustumShape = CreateFrustumShape(topLeft, bottomRight);
+		var camera = GetCamera3D();
+		var pickResults = PickService.PickByShape(camera, frustumShape, true);
+
+		// ヒットしたオブジェクトから Node3D を抜き取る
+		List<Node3D> pickedNodes = new List<Node3D>();
+		foreach (var result in pickResults)
+		{
+			pickedNodes.Add(result.Collider.GetParentOrNull<Node3D>());
+		}
+
+		if (Selection.IsMultiSelectMode)
+		{
+			Selection.Add(pickedNodes);
+		}
+		else
+		{
+			Selection.Set(pickedNodes);
+		}
+	}
+
+	/// <summary>
+	/// カメラの視錐台を表す凸多面体形状を作成します。
+	/// </summary>
+	/// <param name="topLeftPosition">画面上の矩形の左上座標</param>
+	/// <param name="bottomRightPosition">画面上の矩形の右下座標</param>
+	/// <returns>視錐台を表す凸多面体形状</returns>
+	private ConvexPolygonShape3D CreateFrustumShape(Vector2 topLeftPosition, Vector2 bottomRightPosition)
+	{
+		Camera3D camera = GetCamera3D();
+
+		// 画面上の矩形を正規化（左上・右下を揃える）
+		var rect = new Rect2(topLeftPosition, bottomRightPosition - topLeftPosition).Abs();
+
+		// 矩形の4隅（スクリーン座標）
+		Vector2 topLeft     = rect.Position;
+		Vector2 topRight    = rect.Position + new Vector2(rect.Size.X, 0);
+		Vector2 bottomLeft  = rect.Position + new Vector2(0, rect.Size.Y);
+		Vector2 bottomRight = rect.Position + rect.Size;
+
+		// near/far の8点を作る
+		Vector3[] points = new Vector3[8];
+
+		// near plane（カメラの近距離）
+		points[0] = camera.ProjectRayOrigin(topLeft);
+		points[1] = camera.ProjectRayOrigin(topRight);
+		points[2] = camera.ProjectRayOrigin(bottomRight);
+		points[3] = camera.ProjectRayOrigin(bottomLeft);
+
+		// far plane（カメラの遠距離）
+		points[4] = points[0] + camera.ProjectRayNormal(topLeft)     * camera.Far;
+		points[5] = points[1] + camera.ProjectRayNormal(topRight)    * camera.Far;
+		points[6] = points[2] + camera.ProjectRayNormal(bottomRight) * camera.Far;
+		points[7] = points[3] + camera.ProjectRayNormal(bottomLeft)  * camera.Far;
+
+		// ConvexPolygonShape3D に詰める
+		var shape = new ConvexPolygonShape3D();
+		shape.Points = points;
+
+		return shape;
 	}
 
 	#endregion

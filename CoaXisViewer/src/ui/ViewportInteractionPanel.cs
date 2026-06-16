@@ -18,6 +18,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 	private Label _labelProjection;
 	private Button _buttonToggleProjection;
 	private Button _buttonFitAllIn;
+	private Button _buttonFitToSelection;
 	private Button _buttonRollLeft;
 	private Button _buttonRollRight;
 	private Label _labelPositionX;
@@ -42,6 +43,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 		_labelProjection = FindChild("LabelValueProjection", true) as Label;
 		_buttonToggleProjection = FindChild("ButtonToggleProjection", true) as Button;
 		_buttonFitAllIn = FindChild("ButtonFitAllIn", true) as Button;
+		_buttonFitToSelection = FindChild("ButtonFitToSelection", true) as Button;
 		_buttonRollLeft = FindChild("ButtonRollLeft", true) as Button;
 		_buttonRollRight = FindChild("ButtonRollRight", true) as Button;
 		_labelPositionX = FindChild("LabelValuePositionX", true) as Label;
@@ -58,6 +60,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 		// UIイベントの登録
 		_buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
 		_buttonFitAllIn.Pressed += OnButtonFitAllInPressed;
+		_buttonFitToSelection.Pressed += OnButtonFitToSelectionPressed;
 		_buttonRollLeft.Pressed += OnButtonRollLeftPressed;
 		_buttonRollRight.Pressed += OnButtonRollRightPressed;
 		_sliderFov.ValueChanged += OnSliderFovValueChanged;
@@ -77,6 +80,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 		// UIイベントの解除
 		_buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
 		_buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
+		_buttonFitToSelection.Pressed -= OnButtonFitToSelectionPressed;
 		_buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
 		_buttonRollRight.Pressed -= OnButtonRollRightPressed;
 		_sliderFov.ValueChanged -= OnSliderFovValueChanged;
@@ -116,8 +120,8 @@ public partial class ViewportInteractionPanel : PanelContainer
 	/// Fit All In ボタンのクリックイベントハンドラです。カメラのフィット操作をリクエストします。
 	/// </summary>
 	/// <remarks>
-	/// フィットの対象は、まず _defaultFitTargetNode で、そこからさらに "../../Models" ノードを探して見つかった方を使用します。
-	///  /// どちらも見つからない場合は警告を出してフィット操作をリクエストしません。
+	/// 全体Fitの対象は、まず _defaultFitTargetNode で、そこからさらに "../../Models" ノードを探して見つかった方を使用します。
+	/// どちらも見つからない場合は警告を出してフィット操作をリクエストしません。
 	/// </remarks>
 	private void OnButtonFitAllInPressed()
 	{
@@ -129,7 +133,21 @@ public partial class ViewportInteractionPanel : PanelContainer
 			return;
 		}
 
-		ViewportEventHub.I.RequestFit(targetNode, true);
+		ViewportEventHub.I.RequestFit(new[] { targetNode }, true);
+	}
+
+	/// <summary>
+	/// Fit To Selection ボタンのクリックイベントハンドラです。選択中ノードへのFitをリクエストします。
+	/// </summary>
+	private void OnButtonFitToSelectionPressed()
+	{
+		Node3D[] fitTargets = Selection.GetNodesArray();
+		if (fitTargets.Length == 0)
+		{
+			return;
+		}
+
+		ViewportEventHub.I.RequestFit(fitTargets, true);
 	}
 
 	/// <summary>

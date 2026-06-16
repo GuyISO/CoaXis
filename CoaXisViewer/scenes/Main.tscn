@@ -33,6 +33,10 @@ reflected_light_source = 1
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_f2lfd"]
 
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_cvmbd"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ft6cd"]
+
 [node name="Main" type="Node" unique_id=807387639]
 
 [node name="Environments" type="Node3D" parent="." unique_id=1323646672]
@@ -58,17 +62,28 @@ mesh = SubResource("BoxMesh_cvmbd")
 shape = SubResource("BoxShape3D_5x7yu")
 
 [node name="Sphere" type="Node3D" parent="Models" unique_id=1772479710]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Sphere" unique_id=1374449570]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
 material_override = ExtResource("3_cvmbd")
 mesh = SubResource("SphereMesh_cvmbd")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="Models/Sphere" unique_id=1514251133]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
 
 [node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Sphere/StaticBody3D" unique_id=402133486]
 shape = SubResource("SphereShape3D_f2lfd")
+
+[node name="Capsule" type="Node3D" parent="Models" unique_id=1748147158]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Capsule" unique_id=1907078487]
+material_override = ExtResource("2_bjd11")
+mesh = SubResource("CapsuleMesh_cvmbd")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Models/Capsule" unique_id=1191354939]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Capsule/StaticBody3D" unique_id=1731708693]
+shape = SubResource("CapsuleShape3D_ft6cd")
 
 [node name="Canvas" type="Control" parent="." unique_id=1073936096]
 layout_mode = 3
@@ -249,9 +264,13 @@ script = ExtResource("8_bb450")
 script = ExtResource("10_1nqs0")
 
 [node name="WindowViewportInteraction" parent="." unique_id=940691164 instance=ExtResource("15_ft6cd")]
+initial_position = 0
+position = Vector2i(1427, 147)
 
 [node name="PanelViewportInteraction" parent="WindowViewportInteraction" unique_id=1128003110 instance=ExtResource("15_cvmbd")]
 
 [node name="WindowMessage" parent="." unique_id=1764545528 instance=ExtResource("15_ft6cd")]
+initial_position = 0
+position = Vector2i(1466, 490)
 
 [node name="PanelMessage" parent="WindowMessage" unique_id=115086409 instance=ExtResource("14_3p2gp")]

@@ -11,8 +11,11 @@ public partial class Selection : Node
 {
     public static Selection I { get; private set; }
 
+	public static bool IsMultiSelectMode { get; set; } = false;
+
 	private HashSet<Node3D> _nodes = new HashSet<Node3D>();
 
+	[Signal] public delegate void RequestSetMultiSelectModeEventHandler(bool enable);
 	[Signal] public delegate void NotifySelectedEventHandler(Node3D node);
 	[Signal] public delegate void NotifyDeselectedEventHandler(Node3D node);
 
@@ -33,6 +36,19 @@ public partial class Selection : Node
 	/// 現在の選択ノードの数を取得します。
 	/// </summary>
 	public static int Count => I._nodes.Count;
+
+	/// <summary>
+	/// Fit処理に使用可能な選択ノードの配列を取得します。
+	/// </summary>
+	/// <remarks>
+	/// 解放済みノードやツリー外ノードを除外したスナップショットを返します。
+	/// </remarks>
+	public static Node3D[] GetNodesArray()
+	{
+		return I._nodes
+			.Where(node => node != null && GodotObject.IsInstanceValid(node) && node.IsInsideTree())
+			.ToArray();
+	}
 
 	/// <summary>
 	/// 指定したノードのみの選択状態にします（既存の選択はすべて解除されます）。
@@ -158,6 +174,7 @@ public partial class Selection : Node
 		foreach (var node in nodesToDeselect)
 		{
 			I.EmitSignal(SignalName.NotifyDeselected, node);
+			LogHub.I.Info($"Deselected: {node.Name}");
 		}
 		I._nodes.Clear();
 		return true;
