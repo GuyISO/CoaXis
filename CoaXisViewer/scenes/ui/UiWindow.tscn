@@ -5,4 +5,5 @@
 [node name="WindowUi" type="Window" unique_id=940691164]
 oversampling_override = 1.0
 initial_position = 2
+unfocusable = true
 script = ExtResource("1_2ly6m")

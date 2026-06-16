@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// ユーザーのキーボードやコントローラー入力を処理するノードです。Autoloadに登録され、常にシーンツリーに存在します。
 /// </summary>
-public partial class InputHandler : Node
+public partial class DeviceInputHandler : Node
 {
 	#region Fields
 

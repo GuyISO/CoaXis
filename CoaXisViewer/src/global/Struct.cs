@@ -26,4 +26,8 @@ public struct RaycastHitInfo
     /// レイがヒットした距離です。
     /// </summary>
     public float Distance;
+	 /// <summary>
+	/// レイがヒットしたオブジェクトのRIDです。
+	/// </summary>
+	public Rid Rid;
 }

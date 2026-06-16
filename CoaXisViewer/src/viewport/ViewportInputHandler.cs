@@ -14,6 +14,8 @@ public partial class ViewportInputHandler : SubViewport
 	[ExportGroup("Settings")]
 	[Export] private float _zoomFactor = 1.0f; // ズーム倍率変更時の係数
 	[Export] private float _arcballRegionRatio = 0.45f; // 画面サイズに対する、Orbit/Rollの切り替え用の円領域の半径比率
+	[Export] private float _moveThreshold = 1.0f; // マウス移動の閾値（この値未満の移動は移動なしとみなす）
+	[ExportGroup("Materials")]
 	[Export] private Material _defaultMaterial; // 通常表示用のマテリアル（将来の拡張で使用予定）
 	[Export] private Material _selectedMaterial; // 選択ハイライト用のマテリアル（将来の拡張で使用予定）
 
@@ -51,8 +53,7 @@ public partial class ViewportInputHandler : SubViewport
 
 	public override void _Process(double delta)
 	{
-
-		// 入力モードが None のときは、マウス移動の検知やカメラ操作の適用を行わない。
+		// 入力モードが None のときは、マウス移動の検知やカメラ操作の適用を行わない、なるべくリソースを節約するためにここで早期リターンする。
 		if (_mode == ViewportInputMode.None)
 		{
 			return;
@@ -60,15 +61,19 @@ public partial class ViewportInputHandler : SubViewport
 
 		// マウス位置の変化を検知して、変化があれば操作を適用する。
 		Vector2 currentPos = GetMousePosition();
-		if (currentPos != _lastPosition)
+		float deltaDistance = currentPos.DistanceTo(_lastPosition);
+
+		// 小数点以下の微小な移動を無視するため、1pixel未満の移動は移動なしとみなす。
+		if (deltaDistance < _moveThreshold)
 		{
-			_hasMoved = true;
-			ApplyOperation(_lastPosition, currentPos);
-			
-			// 現在のマウス位置を保存して次フレームに備える。
-			_lastPosition = currentPos;
+			return;
 		}
 
+		_hasMoved = true;
+		ApplyOperation(_lastPosition, currentPos);
+		
+		// 現在のマウス位置を保存して次フレームに備える。
+		_lastPosition = currentPos;
 	}
 
 	public override void _UnhandledInput(InputEvent @event)
@@ -116,10 +121,10 @@ public partial class ViewportInputHandler : SubViewport
 			// None モードのときは、カメラ操作開始のトリガーを検知するための処理を行う。
 			HandleIdleModeInput(button);
 		}
-		else if (_mode == ViewportInputMode.SelectRect)
+		else if (_mode == ViewportInputMode.SelectionRect)
 		{
-			// Selectモードのときは、矩形選択操作の開始・終了を検知するための処理を行う。
-			HandleSelectModeInput(button);
+			// SelectionRectモードのときは、矩形選択操作の開始・終了を検知するための処理を行う。
+			HandleSelectionModeInput(button);
 		}
 		else
 		{
@@ -156,6 +161,7 @@ public partial class ViewportInputHandler : SubViewport
 		// 中ボタンのクリック開始を検知したら、移動フラグをリセットしてカメラコントロール開始
 		if (button.Pressed && button.ButtonIndex == MouseButton.Middle)
 		{
+			// カメラ操作しているかどうかは、移動量が閾値を超えたかで判定するため、ここでは移動フラグをリセットして現在位置も更新しておく。
 			_hasMoved = false;
 			_lastPosition = button.Position;
 			SetMode(ViewportInputMode.CameraPan);
@@ -163,9 +169,13 @@ public partial class ViewportInputHandler : SubViewport
 		// 左ボタンのクリック開始を検知したら、矩形選択操作を行う
 		else if (button.Pressed && button.ButtonIndex == MouseButton.Left)
 		{
+			// ドラッグしているかどうかは、移動量が閾値を超えたかで判定するため、ここでは移動フラグをリセットして現在位置も更新しておく。
 			_hasMoved = false;
+			_lastPosition = button.Position;
+			// 矩形選択の開始点を保存
 			_startPosition = button.Position;
-			SetMode(ViewportInputMode.SelectRect);
+			SetMode(ViewportInputMode.SelectionRect);
+			ViewportEventHub.I.NotifySelectionRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
 		}
 		else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
 		{
@@ -175,7 +185,11 @@ public partial class ViewportInputHandler : SubViewport
 		}
 	}
 
-	private void HandleSelectModeInput(InputEventMouseButton button)
+	/// <summary>
+	/// 入力モードがSelectionXXXのときのマウス入力を処理します。
+	/// </summary>
+	/// <param name="button">マウスボタン入力イベントです。</param>
+	private void HandleSelectionModeInput(InputEventMouseButton button)
 	{
 		// ウィンドウフォーカス喪失などのキャンセル時は即時終了。
 		if (button.Canceled)
@@ -190,7 +204,7 @@ public partial class ViewportInputHandler : SubViewport
 		{
 			if (_hasMoved)
 			{
-				/////////////////////////////////////////////矩形選択を実装予定////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+				ViewportEventHub.I.RequestDecideSelectionRect(_startPosition, button.Position);
 			}
 			else
 			{
@@ -203,7 +217,7 @@ public partial class ViewportInputHandler : SubViewport
 	}
 
 	/// <summary>
-	/// カメラ操作モード中のマウス入力を処理します。
+	/// 入力モードがCameraXXXのときのマウス入力を処理します。
 	/// </summary>
 	/// <param name="button">マウスボタン入力イベントです。</param>
 	private void HandleCameraControlModeInput(InputEventMouseButton button)
@@ -283,6 +297,9 @@ public partial class ViewportInputHandler : SubViewport
 				break;
 			case ViewportInputMode.CameraZoom:
 				ZoomCamera(previousPos, currentPos);
+				break;
+			case ViewportInputMode.SelectionRect:
+				ViewportEventHub.I.NotifySelectionRect(_startPosition, currentPos);
 				break;
 		}
 	}

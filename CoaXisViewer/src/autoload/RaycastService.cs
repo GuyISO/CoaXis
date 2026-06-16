@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 public partial class RaycastService : Node
 {
@@ -30,7 +31,8 @@ public partial class RaycastService : Node
 			Position = (Vector3)result["position"],
 			Normal = result.ContainsKey("normal") ? (Vector3)result["normal"] : Vector3.Zero,
 			Collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
-			Distance = origin.DistanceTo((Vector3)result["position"])
+			Distance = origin.DistanceTo((Vector3)result["position"]),
+			Rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default
 		};
 	}
 }

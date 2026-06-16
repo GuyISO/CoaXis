@@ -2,13 +2,11 @@
 
 [ext_resource type="Script" uid="uid://dynirh5eygkkb" path="res://src/viewport/ViewportOverlay.cs" id="1_3a0ha"]
 
-[node name="CameraControlOverlay" type="Control" unique_id=440684067]
+[node name="ViewportOverlay" type="Control" unique_id=440684067]
 layout_mode = 3
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 4
@@ -83,3 +81,25 @@ anchor_bottom = 0.5
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
+
+[node name="SelectionRect" type="Control" parent="." unique_id=1573564257]
+visible = false
+layout_mode = 1
+anchors_preset = 0
+mouse_filter = 2
+
+[node name="LineHorizontal1" type="Line2D" parent="SelectionRect" unique_id=2102222506]
+width = 1.0
+default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
+
+[node name="LineHorizontal2" type="Line2D" parent="SelectionRect" unique_id=1090205538]
+width = 1.0
+default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
+
+[node name="LineVertical1" type="Line2D" parent="SelectionRect" unique_id=1237095732]
+width = 1.0
+default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
+
+[node name="LineVertical2" type="Line2D" parent="SelectionRect" unique_id=617276273]
+width = 1.0
+default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)

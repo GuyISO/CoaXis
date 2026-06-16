@@ -107,11 +107,11 @@ text = "SendHttp"
 script = ExtResource("4_mwfav")
 _httpClientPath = NodePath("")
 
-[node name="ButtonShowCameraWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1370305409]
+[node name="ButtonShowViewportInteractionWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1370305409]
 layout_mode = 2
-tooltip_text = "カメラ制御用のウィンドウを表示します"
+tooltip_text = "ビュー操作用のウィンドウを表示します"
 theme_override_font_sizes/font_size = 24
-text = "Camera"
+text = "ViewportInteraction"
 script = ExtResource("5_qmy6f")
 
 [node name="ButtonShowMessageWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1591126494]
@@ -219,6 +219,7 @@ custom_minimum_size = Vector2(500, 0)
 layout_mode = 2
 size_flags_horizontal = 2
 size_flags_vertical = 3
+allow_reselect = true
 script = ExtResource("8_qmy6f")
 
 [node name="RightBar" type="VBoxContainer" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=360050019]

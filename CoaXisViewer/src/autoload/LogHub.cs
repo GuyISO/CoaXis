@@ -15,7 +15,7 @@ public partial class LogHub : Node
     private bool _enableFileLog = false;
     private bool _enableDebugConsole = true;
 
-    [Signal] public delegate void LoggedEventHandler(LogLevel level, string message);
+    [Signal] public delegate void LoggedEventHandler(string line);
 
     public override void _Ready()
     {
@@ -33,17 +33,23 @@ public partial class LogHub : Node
     /// <param name="message">ログメッセージです。</param> 
     public void Log(LogLevel level, string message)
     {
-        string line = $"{DateTime.Now:HH:mm:ss} [{level}] {message}";
+        string line = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} [{level}] {message}";
 
-        GD.Print(line);
+        // デバッグコンソールへの出力
+        if (_enableDebugConsole)
+        {
+            GD.Print(line);
+        }
 
-        I.EmitSignal(SignalName.Logged, (int)level, message);
-
+        // ファイルへの出力
         if (I._enableFileLog)
         {
             I._fileWriter.WriteLine(line);
             I._fileWriter.Flush();
         }
+        
+        // イベントの発行
+        I.EmitSignal(SignalName.Logged, line);
     }
 
     /// <summary>

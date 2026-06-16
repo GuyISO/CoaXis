@@ -24,7 +24,7 @@ ViewportEventHub="*uid://dx5t10ibmi7k1"
 ConfigService="*uid://c4xtxi5qc52w1"
 RaycastService="*uid://cym3s6hqs3x03"
 IpcService="*uid://cw6vp0knouk1l"
-InputHandler="*uid://vwxli71heajm"
+DeviceInputHandler="*uid://vwxli71heajm"
 LogHub="*uid://5o16r7usgjmh"
 
 [display]

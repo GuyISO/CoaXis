@@ -26,15 +26,20 @@ public partial class ViewportOverlay : Control
 
 	// 関連ノードのキャッシュ
 	private Control _centerAxis;
-	private Line2D _axisXPositive;
-	private Line2D _axisXNegative;
-	private Line2D _axisYPositive;
-	private Line2D _axisYNegative;
-	private Line2D _axisZ;
+	private Line2D _centerAxisLineXPositive;
+	private Line2D _centerAxisLineXNegative;
+	private Line2D _centerAxisLineYPositive;
+	private Line2D _centerAxisLineYNegative;
+	private Line2D _centerAxisLineZ;
 	private Control _arcballCross;
-	private Line2D _ballX;
-	private Line2D _ballY;
+	private Line2D _arcballCrossLineX;
+	private Line2D _arcballCrossLineY;
 	private Control _arcballOutline;
+	private Control _selectionRect;
+	private Line2D _selectionRectLineHorizontal1;
+	private Line2D _selectionRectLineHorizontal2;
+	private Line2D _selectionRectLineVertical1;
+	private Line2D _selectionRectLineVertical2;
 
 	#endregion
 
@@ -44,15 +49,20 @@ public partial class ViewportOverlay : Control
 	{
 		// 関連ノードのキャッシュ
 		_centerAxis = GetNode<Control>("CenterAxis");
-		_axisXPositive = _centerAxis.GetNode<Line2D>("LineXPositive");
-		_axisXNegative = _centerAxis.GetNode<Line2D>("LineXNegative");
-		_axisYPositive = _centerAxis.GetNode<Line2D>("LineYPositive");
-		_axisYNegative = _centerAxis.GetNode<Line2D>("LineYNegative");
-		_axisZ = _centerAxis.GetNode<Line2D>("LineZ");
+		_centerAxisLineXPositive = _centerAxis.GetNode<Line2D>("LineXPositive");
+		_centerAxisLineXNegative = _centerAxis.GetNode<Line2D>("LineXNegative");
+		_centerAxisLineYPositive = _centerAxis.GetNode<Line2D>("LineYPositive");
+		_centerAxisLineYNegative = _centerAxis.GetNode<Line2D>("LineYNegative");
+		_centerAxisLineZ = _centerAxis.GetNode<Line2D>("LineZ");
 		_arcballCross = GetNode<Control>("ArcballCross");
-		_ballX = _arcballCross.GetNode<Line2D>("LineX");
-		_ballY = _arcballCross.GetNode<Line2D>("LineY");
+		_arcballCrossLineX = _arcballCross.GetNode<Line2D>("LineX");
+		_arcballCrossLineY = _arcballCross.GetNode<Line2D>("LineY");
 		_arcballOutline = GetNode<Control>("ArcballOutline");
+		_selectionRect = GetNode<Control>("SelectionRect");
+		_selectionRectLineHorizontal1 = _selectionRect.GetNode<Line2D>("LineHorizontal1");
+		_selectionRectLineHorizontal2 = _selectionRect.GetNode<Line2D>("LineHorizontal2");
+		_selectionRectLineVertical1 = _selectionRect.GetNode<Line2D>("LineVertical1");
+		_selectionRectLineVertical2 = _selectionRect.GetNode<Line2D>("LineVertical2");
 
 		// イベントの購読登録
 		ViewportEventHub.I.RotateRequested += OnRotateRequested;
@@ -60,6 +70,7 @@ public partial class ViewportOverlay : Control
 		ViewportEventHub.I.InputModeNotified += OnInputModeNotified;
 		ViewportEventHub.I.ArcballRadiusNotified += OnArcballRadiusNotified;
 		ViewportEventHub.I.ArcballHandleNotified += OnArcballHandleNotified;
+		ViewportEventHub.I.SelectionRectNotified += OnSelectionRectNotified;
 	}
 
 	public override void _ExitTree()
@@ -70,6 +81,7 @@ public partial class ViewportOverlay : Control
 		ViewportEventHub.I.InputModeNotified -= OnInputModeNotified;
 		ViewportEventHub.I.ArcballRadiusNotified -= OnArcballRadiusNotified;
 		ViewportEventHub.I.ArcballHandleNotified -= OnArcballHandleNotified;
+		ViewportEventHub.I.SelectionRectNotified -= OnSelectionRectNotified;
 	}
 	
 	public override void _Process(double delta)
@@ -121,6 +133,7 @@ public partial class ViewportOverlay : Control
 		_arcballOutline.Visible = IsArcballMode(mode);
 		_centerAxis.Visible = IsCenterAxisMode(mode);
 		_arcballCross.Visible = IsArcballMode(mode);
+		_selectionRect.Visible = IsSelectionRectMode(mode);
 	}
 
 	/// <summary>
@@ -141,6 +154,16 @@ public partial class ViewportOverlay : Control
 	{
 		ComputeArcballHandleRotation(position);
 		DrawArcballCross();
+	}
+
+	/// <summary>
+	/// 矩形選択の範囲が通知されたときに呼び出されるイベントハンドラです。矩形選択の表示を更新します。
+	/// </summary>
+	/// <param name="startPosition">通知された矩形選択の開始位置です。</param>
+	/// <param name="endPosition">通知された矩形選択の終了位置です。</param>
+	private void OnSelectionRectNotified(Vector2 startPosition, Vector2 endPosition)
+	{
+		DrawSelectionRect(startPosition, endPosition);
 	}
 
 	#endregion
@@ -254,11 +277,11 @@ public partial class ViewportOverlay : Control
 		Vector2 axisY = ProjectWorldAxisToScreen(cameraInverseBasis * Vector3.Right);
 		Vector2 axisZ = ProjectWorldAxisToScreen(cameraInverseBasis * Vector3.Up);
 
-		SetSplitAxisLines(_axisXPositive, _axisXNegative, axisX);
+		SetSplitAxisLines(_centerAxisLineXPositive, _centerAxisLineXNegative, axisX);
 		// CATIA風の見た目に寄せるため、Y の正方向だけ中心ギャップを少し詰める。
-		SetSplitAxisLines(_axisYPositive, _axisYNegative, axisY, 0.5f);
+		SetSplitAxisLines(_centerAxisLineYPositive, _centerAxisLineYNegative, axisY, 0.5f);
 		// CATIA風の見た目に寄せるため、Z は負方向だけ短くして前後の奥行き感を強める。
-		SetLinePoints(_axisZ, -axisZ * 0.5f, axisZ);
+		SetLinePoints(_centerAxisLineZ, -axisZ * 0.5f, axisZ);
 
 	}
 
@@ -276,11 +299,11 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// 中心軸の正負両方のラインを、指定された軸方向に基づいて設定します。軸方向の長さに応じて、ラインの長さと中心ギャップが調整されます。
+	/// Line2D オブジェクトのポイントを、指定された開始点と終了点に基づいて設定します。ラインは、開始点から終了点へと描画されます。
 	/// </summary>
-	/// <param name="line"></param>
-	/// <param name="from"></param>
-	/// <param name="to"></param>
+	/// <param name="line">ポイントを設定する Line2D オブジェクトです。</param>
+	/// <param name="from">ラインの開始点です。</param>
+	/// <param name="to">ラインの終了点です。</param>
 	private static void SetLinePoints(Line2D line, Vector2 from, Vector2 to)
 	{
 		line.ClearPoints();
@@ -322,8 +345,8 @@ public partial class ViewportOverlay : Control
 	{
 		if (_arcballRadius <= Mathf.Epsilon)
 		{
-			SetLinePoints(_ballX, Vector2.Zero, Vector2.Zero);
-			SetLinePoints(_ballY, Vector2.Zero, Vector2.Zero);
+			SetLinePoints(_arcballCrossLineX, Vector2.Zero, Vector2.Zero);
+			SetLinePoints(_arcballCrossLineY, Vector2.Zero, Vector2.Zero);
 			return;
 		}
 
@@ -336,8 +359,8 @@ public partial class ViewportOverlay : Control
 		// 球面上の接線方向を回転軸へ変換し、短い円弧をサンプリングして描画する。
 		Vector3 axisX = anchor.Cross(tangentX).Normalized();
 		Vector3 axisY = anchor.Cross(tangentY).Normalized();
-		SetCurvedArcballLine(_ballX, anchor, axisX, ArcballCrossAngularSize);
-		SetCurvedArcballLine(_ballY, anchor, axisY, ArcballCrossAngularSize);
+		SetCurvedArcballLine(_arcballCrossLineX, anchor, axisX, ArcballCrossAngularSize);
+		SetCurvedArcballLine(_arcballCrossLineY, anchor, axisY, ArcballCrossAngularSize);
 	}
 
 	/// <summary>
@@ -398,6 +421,19 @@ public partial class ViewportOverlay : Control
 		return new Vector2(pointOnArcball.X, -pointOnArcball.Y) * _arcballRadius;
 	}
 
+	/// <summary>>
+	/// 矩形選択の表示を更新します。矩形は、指定された開始位置と終了位置を対角線の端点とする矩形として描画されます。
+	/// </summary>
+	/// <param name="startPosition">矩形選択の開始位置です。</param>
+	/// <param name="endPosition">矩形選択の終了位置です。</param>
+	private void DrawSelectionRect(Vector2 startPosition, Vector2 endPosition)
+	{
+		SetLinePoints(_selectionRectLineHorizontal1, new Vector2(startPosition.X, startPosition.Y), new Vector2(endPosition.X, startPosition.Y));
+		SetLinePoints(_selectionRectLineHorizontal2, new Vector2(startPosition.X, endPosition.Y), new Vector2(endPosition.X, endPosition.Y));
+		SetLinePoints(_selectionRectLineVertical1, new Vector2(startPosition.X, startPosition.Y), new Vector2(startPosition.X, endPosition.Y));
+		SetLinePoints(_selectionRectLineVertical2, new Vector2(endPosition.X, startPosition.Y), new Vector2(endPosition.X, endPosition.Y));
+	}
+
 	/// <summary>
 	/// ViewportInputMode がアークボール操作モード（Orbit または Roll）かどうかを判定します。
 	/// </summary>
@@ -416,6 +452,16 @@ public partial class ViewportOverlay : Control
 	private bool IsCenterAxisMode(ViewportInputMode mode)
 	{
 		return mode == ViewportInputMode.CameraOrbit || mode == ViewportInputMode.CameraPan || mode == ViewportInputMode.CameraZoom || mode == ViewportInputMode.CameraRoll;
+	}
+
+	/// <summary>
+	/// ViewportInputMode が選択矩形表示モード（Select）かどうかを判定します。
+	/// </summary>
+	/// <param name="mode">判定する ViewportInputMode です。</param>
+	/// <returns>選択矩形表示モードであれば true を返します。</returns>
+	private bool IsSelectionRectMode(ViewportInputMode mode)
+	{
+		return mode == ViewportInputMode.SelectionRect;
 	}
 
 	#endregion

@@ -38,5 +38,5 @@ public enum ViewportInputMode
 	/// <summary>カメラのズーム操作。</summary>
 	CameraZoom,
 	/// <summary>選択矩形操作。</summary>
-	SelectRect
+	SelectionRect
 }

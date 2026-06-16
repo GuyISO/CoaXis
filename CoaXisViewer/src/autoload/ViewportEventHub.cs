@@ -177,6 +177,16 @@ public partial class ViewportEventHub : Node
 		EmitSignal(SignalName.AlignNormalToRequested, normal, useTween);
 	}
 	
+	[Signal] public delegate void DecideSelectionRectRequestedEventHandler(Vector2 startPosition, Vector2 endPosition);
+	/// <summary>
+	/// 矩形選択の確定を通知するシグナルです。
+	/// </summary> <param name="startPosition">矩形選択の開始位置です。</param>
+	/// <param name="endPosition">矩形選択の終了位置です。</param>
+	public void RequestDecideSelectionRect(Vector2 startPosition, Vector2 endPosition)
+	{
+		EmitSignal(SignalName.DecideSelectionRectRequested, startPosition, endPosition);
+	}
+
 	#endregion
 
 	#region --------------------------------------- Notification ---------------------------------------
@@ -267,6 +277,16 @@ public partial class ViewportEventHub : Node
 	public void NotifyArcballHandle(Vector3 position)
 	{
 		EmitSignal(SignalName.ArcballHandleNotified, position);
+	}
+
+	[Signal] public delegate void SelectionRectNotifiedEventHandler(Vector2 startPosition, Vector2 endPosition);
+	/// <summary>
+	/// 矩形選択の範囲を通知するシグナルです。
+	/// </summary> <param name="startPosition">矩形選択の開始位置です。</param>
+	/// <param name="endPosition">矩形選択の終了位置です。</param>
+	public void NotifySelectionRect(Vector2 startPosition, Vector2 endPosition)
+	{
+		EmitSignal(SignalName.SelectionRectNotified, startPosition, endPosition);
 	}
 
 	#endregion

@@ -3,25 +3,19 @@ using System;
 using System.Text;
 
 /// <summary>
-/// シーン内のデバッグログ表示を担う簡易パネルです。
+/// 実行中のコンソール表示の代わりを担う簡易パネルです。
 /// </summary>
 public partial class MessagePanel : PanelContainer
 {
 	#region Fields
 
-	private const int MaxLines = 200;
+    [Export] private int _maxLines = 999;
 
-    [Export] private RichTextLabel _label;
+    // 関連ノードのキャッシュ
+    private RichTextLabel _label;
+
+    // ログのバッファ
     private StringBuilder _buffer = new StringBuilder();
-
-	#endregion
-
-	#region Properties
-
-    /// <summary>
-    /// 現在アクティブなデバッグウィンドウインスタンスです。
-    /// </summary>
-    public static MessagePanel I { get; private set; }
 
 	#endregion
 
@@ -33,7 +27,6 @@ public partial class MessagePanel : PanelContainer
         if (_label == null)
         {
             _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
-            _label ??= FindChild("RichTextLabel", true, false) as RichTextLabel;
         }
 
         // イベント購読の登録
@@ -44,20 +37,30 @@ public partial class MessagePanel : PanelContainer
     {
         // イベント購読の解除
         LogHub.I.Logged -= OnLogged;
-
-        if (I == this)
-            I = null;
     }
 
 	#endregion
 
-	#region Public API
+	#region Events
 
+    /// <summary>
+    /// ログ出力と同時に画面へログを表示します。
+    /// </summary>
+    /// <param name="line">記録されたメッセージ。</param>
+    private void OnLogged(string line)
+    {
+        AddLine(line);
+    }
+
+	#endregion
+
+    #region Helper Methods
+    
     /// <summary>
     /// 1行ログを画面へ追加します。
     /// </summary>
     /// <param name="text">追加する文字列。</param>
-    public void AddLine(string text)
+    private void AddLine(string text)
     {
         if (_label == null)
             return;
@@ -66,10 +69,10 @@ public partial class MessagePanel : PanelContainer
 
         // 行数制限
         var lines = _buffer.ToString().Split('\n');
-        if (lines.Length > MaxLines)
+        if (lines.Length > _maxLines)
         {
             _buffer.Clear();
-            for (int i = lines.Length - MaxLines; i < lines.Length; i++)
+            for (int i = lines.Length - _maxLines; i < lines.Length; i++)
                 _buffer.AppendLine(lines[i]);
         }
 
@@ -77,17 +80,7 @@ public partial class MessagePanel : PanelContainer
         _label.ScrollToLine(Mathf.Max(_label.GetLineCount() - 1, 0));
     }
 
-    /// <summary>
-    /// 標準出力とデバッグウィンドウへ同時にログを出力します。
-    /// </summary>
-    /// <param name="msg">出力するメッセージ。</param>
-    public static void OnLogged(LogLevel level, string msg)
-    {
-        string line = $"{DateTime.Now:HH:mm:ss} [{level}] {msg}";
-        MessagePanel.I?.AddLine(line);
-    }
-
-	#endregion
+    #endregion
 }
 
 
