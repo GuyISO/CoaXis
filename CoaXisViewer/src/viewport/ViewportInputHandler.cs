@@ -239,7 +239,7 @@ public partial class ViewportInputHandler : SubViewport
 			{
 				if(!TryFocusAt(button.Position))
 				{
-					PanCamera(_screenCenter, button.Position); // フォーカスできなかったら、クリック位置にパン扱いとする
+					PanCamera(button.Position, _screenCenter); // フォーカスできなかったら、クリック位置にパン扱いとする
 				}
 			}
 			SetMode(ViewportInputMode.None);

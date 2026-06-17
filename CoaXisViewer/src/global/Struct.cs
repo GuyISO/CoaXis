@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// レイキャストなどで空間上から取得した情報を表す構造体です。

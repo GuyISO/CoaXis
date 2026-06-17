@@ -83,6 +83,7 @@ public partial class Selection : Node
 		if (I._nodes.Add(node))
 		{
 			I.EmitSignal(SignalName.NotifySelected, node);
+			HighLightNode(node);
 			LogHub.I.Info($"Selected: {node.Name}");
 			return true;
 		}
@@ -110,6 +111,7 @@ public partial class Selection : Node
 		if (I._nodes.Remove(node))
 		{
 			I.EmitSignal(SignalName.NotifyDeselected, node);
+			UnHighLightNode(node);
 			LogHub.I.Info($"Deselected: {node.Name}");
 			return true;
 		}
@@ -174,10 +176,46 @@ public partial class Selection : Node
 		foreach (var node in nodesToDeselect)
 		{
 			I.EmitSignal(SignalName.NotifyDeselected, node);
+			UnHighLightNode(node);
 			LogHub.I.Info($"Deselected: {node.Name}");
 		}
 		I._nodes.Clear();
 		return true;
+	}
+
+	private static void HighLightNode(Node3D node)
+	{
+		var meshInstances = GetMeshInstancesRecursively(node);
+		foreach (var mesh in meshInstances)
+		{
+			mesh.MaterialOverride = ResourceLoader.Load<StandardMaterial3D>("res://assets/materials/selected.tres");
+		}
+	}
+
+	private static void UnHighLightNode(Node3D node)
+	{
+		var meshInstances = GetMeshInstancesRecursively(node);
+		foreach (var mesh in meshInstances)
+		{
+			mesh.MaterialOverride = null;
+		}
+	}
+
+	private static List<MeshInstance3D> GetMeshInstancesRecursively(Node node)
+	{
+		var meshInstances = new List<MeshInstance3D>();
+
+		if (node is MeshInstance3D meshInstance)
+		{
+			meshInstances.Add(meshInstance);
+		}
+
+		foreach (Node child in node.GetChildren())
+		{
+			meshInstances.AddRange(GetMeshInstancesRecursively(child));
+		}
+
+		return meshInstances;
 	}
 
 	#endregion

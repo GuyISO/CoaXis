@@ -6,6 +6,9 @@ using System.Linq;
 
 public partial class ModelLoader : Node3D
 {
+
+	[Export] public TextEdit TextEditModelPath = null;
+
 	// Called when the node enters the scene tree for the first time.
 	public override void _Ready()
 	{
@@ -20,7 +23,12 @@ public partial class ModelLoader : Node3D
     {
 		if (@event.IsActionPressed("load"))
 		{
-			string path = "res://models/teapot.obj";
+			if (TextEditModelPath == null)
+			{
+				LogHub.I.Error("TextEditModelPath is not assigned.");
+				return;
+			}
+			string path = TextEditModelPath.Text;
 			await LoadModelAsync(path);
 		}
 	}
@@ -28,7 +36,7 @@ public partial class ModelLoader : Node3D
 	public async Task LoadModelAsync(string path)
 	{
 		// 所要時間計測開始
-		GD.Print($"Start loading model: {path}");
+		LogHub.I.Info($"Start loading model: {path}");
 		var sw = System.Diagnostics.Stopwatch.StartNew();
 
 		// 非同期でglTFモデルを読み込む
@@ -40,23 +48,26 @@ public partial class ModelLoader : Node3D
 		{
 			// 読み込んだモデルのシーン作成はメインスレッドで行う、まだメインシーンに追加せずキャッシュしておく
 			var scene = (Node3D)doc.GenerateScene(state);
-			GD.Print($"Successfully loaded model: {path}");
+			LogHub.I.Info($"Successfully loaded model: {path}");
 
-			// 新規StaticBodyを作成して、その直下に読み込んだモデルを配置
+			// 新規Node3Dを作成して、その直下に読み込んだモデルの配置
+			Node3D node = new Node3D();
+			node.AddChild(scene);
+
 			StaticBody3D staticBody = new StaticBody3D();
-			staticBody.AddChild(scene);
+			node.AddChild(staticBody);
 
 			// glTFモデルの単位系、剤行刑をGodotに合わせる
-			scene.Scale = new Vector3(0.001f, 0.001f, 0.001f);
-			scene.RotationDegrees = new Vector3(-90, -90, 0);
+			// scene.Scale = new Vector3(0.001f, 0.001f, 0.001f);
+			// scene.RotationDegrees = new Vector3(-90, -90, 0);
 
 			// StaticBodyにCollisionShape3Dを追加して、モデルの衝突形状を設定
 			CollisionShape3D collisionShape = new CollisionShape3D();
 			staticBody.AddChild(collisionShape);
 
 			// ここでようやくメインスレッドでモデルをシーンに追加、これ以降はメインスレッドででの処理必須
-			AddChild(staticBody);
-			GD.Print($"Model added to scene: {path}");
+			AddChild(node);
+			LogHub.I.Info($"Model added to scene: {path}");
 
 			// モデルの衝突形状を設定するために、1フレーム待つ
 			await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
@@ -69,7 +80,7 @@ public partial class ModelLoader : Node3D
 			int index = 0;
 
 			// StaticBody空間へ変換するための逆行列
-			var inverseTransform = staticBody.GlobalTransform.AffineInverse();
+			var inverseTransform = node.GlobalTransform.AffineInverse();
 
 			foreach (var mi in meshes)
 			{
@@ -96,13 +107,13 @@ public partial class ModelLoader : Node3D
 		}
 		else
 		{
-			GD.PrintErr($"Failed to load model: {path}, error code: {error}");
+			LogHub.I.Error($"Failed to load model: {path}, error code: {error}");
 
 		}
 
 		// 所要時間計測終了
 		sw.Stop();
-		GD.Print($"Finished loading model: {path} in {sw.ElapsedMilliseconds} ms");
+		LogHub.I.Info($"Finished loading model: {path} in {sw.ElapsedMilliseconds} ms");
 	}
 
 	private void CollectMeshes(Node node, List<MeshInstance3D> list)
