@@ -9,7 +9,7 @@
 [ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/camera/CameraRig.cs" id="7_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/ViewportOverlay.tscn" id="7_ft6cd"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/ui/FpsUi.cs" id="8_bb450"]
-[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/viewer/SpecificationTree.cs" id="8_qmy6f"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/viewer/HierarchyTree.cs" id="8_qmy6f"]
 [ext_resource type="Script" uid="uid://1us0ficbltrg" path="res://src/test/IpcClient.cs" id="10_1nqs0"]
 [ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/ui/MessagePanel.tscn" id="14_3p2gp"]
 [ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/viewport/ViewportInputHandler.cs" id="14_3t3px"]
@@ -159,7 +159,7 @@ custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
 tooltip_text = "glbファイルのパスを指定してください"
 theme_override_font_sizes/font_size = 24
-text = "res://assets/models/kawasaki_h2_rr.glb"
+text = "res://assets/models/car.glb"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Canvas/VBoxContainer" unique_id=856436193]
 layout_mode = 2
@@ -204,37 +204,21 @@ current = true
 fov = 35.0
 near = 0.001
 
-[node name="AxisNavigator" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=1854996461 instance=ExtResource("6_cvmbd")]
-layout_mode = 1
+[node name="ViewportOverlay" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport" unique_id=440684067 instance=ExtResource("7_ft6cd")]
 
-[node name="ViewportOverlay" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=440684067 instance=ExtResource("7_ft6cd")]
-layout_mode = 1
+[node name="AxisNavigator" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SubViewportContainer/SubViewport" unique_id=1854996461 instance=ExtResource("6_cvmbd")]
 
-[node name="SpecificationTree" type="Control" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=1498716255]
-anchors_preset = 0
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-
-[node name="ScrollContainer" type="ScrollContainer" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SpecificationTree" unique_id=210432633]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-draw_focus_border = true
-vertical_scroll_mode = 2
-
-[node name="Tree" type="Tree" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen/SpecificationTree/ScrollContainer" unique_id=1837406890]
+[node name="HierarchyTree" type="Tree" parent="Canvas/VBoxContainer/HBoxContainer/MainScreen" unique_id=1837406890]
 custom_minimum_size = Vector2(500, 0)
-layout_mode = 2
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 16.0
+grow_vertical = 2
 size_flags_horizontal = 2
 size_flags_vertical = 3
-allow_reselect = true
+columns = 2
+select_mode = 2
 script = ExtResource("8_qmy6f")
 
 [node name="RightBar" type="VBoxContainer" parent="Canvas/VBoxContainer/HBoxContainer" unique_id=360050019]
@@ -265,12 +249,12 @@ script = ExtResource("10_1nqs0")
 
 [node name="WindowViewportInteraction" parent="." unique_id=940691164 instance=ExtResource("15_ft6cd")]
 initial_position = 0
-position = Vector2i(681, 90)
+position = Vector2i(526, 36)
 
 [node name="PanelViewportInteraction" parent="WindowViewportInteraction" unique_id=1128003110 instance=ExtResource("15_cvmbd")]
 
 [node name="WindowMessage" parent="." unique_id=1764545528 instance=ExtResource("15_ft6cd")]
 initial_position = 0
-position = Vector2i(25, 560)
+position = Vector2i(25, 36)
 
 [node name="PanelMessage" parent="WindowMessage" unique_id=115086409 instance=ExtResource("14_3p2gp")]

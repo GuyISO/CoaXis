@@ -169,7 +169,7 @@ public partial class IpcClient : Node
 			}
 
 			await WriteMessageAsync(pipe, message, cancellationToken);
-			LogHub.I.Info($"[IPC][Send] {message}");
+			LogHub.Info($"[IPC][Send] {message}");
 			return true;
 		}
 		catch (OperationCanceledException)
@@ -234,7 +234,7 @@ public partial class IpcClient : Node
 					_connectedPipe = client;
 				}
 
-				LogHub.I.Info($"[IPC] Connected to server: {_pipeName}");
+				LogHub.Info($"[IPC] Connected to server: {_pipeName}");
 
 				while (!cancellationToken.IsCancellationRequested && client.IsConnected)
 				{
@@ -289,7 +289,7 @@ public partial class IpcClient : Node
 	// 受信時の共通入口。ログ・コールバック・シグナル通知の順を固定して観測性を維持する。
 	private void DispatchReceivedMessage(string message)
 	{
-		LogHub.I.Info($"[IPC][Recv] {message}");
+		LogHub.Info($"[IPC][Recv] {message}");
 		_receiveHandler?.Invoke(message);
 		EmitSignal(SignalName.MessageReceived, message);
 	}
@@ -297,7 +297,7 @@ public partial class IpcClient : Node
 	// エラー通知の経路を一本化し、UIとログの不整合を防ぐ。
 	private void DispatchClientError(string errorMessage)
 	{
-		LogHub.I.Error($"IPC client error: {errorMessage}");
+		LogHub.Error($"IPC client error: {errorMessage}");
 		EmitSignal(SignalName.ClientError, errorMessage);
 	}
 

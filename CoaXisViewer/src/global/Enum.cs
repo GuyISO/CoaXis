@@ -13,13 +13,32 @@ public enum LogLevel
 }
 
 /// <summary>
-/// 基準となる座標系を表す列挙型です。
+/// 座標系の基準を表す列挙型です。
 /// </summary>
 public enum SpaceMode
 {
 	World,
 	FocalPoint,
 	Camera
+}
+
+/// <summary>
+/// HierarchyTree の列を表す列挙型です。
+/// </summary>
+public enum HierarchyTreeColumn
+{
+	Name,
+	VisibleButton,
+}
+
+/// <summary>
+/// Viewportのレイヤーを表す列挙型です、Raycast用のビットマスクとしても使用されます。
+/// </summary>
+public enum ViewportLayer
+{
+	None 			= 0b_0000_0000_0000_0000_0000,
+	Default 		= 0b_0000_0000_0000_0000_0001,
+	AxisNavigator 	= 0b_0000_0000_0000_0000_0010,
 }
 
 /// <summary>

@@ -32,7 +32,7 @@ public partial class UiWindow : Window
 		// それ以外の場合は、エラーを出力する（複数の子ノードが存在する、または子ノードがContainerクラスを継承していない）
 		else
 		{
-			LogHub.I.Error("UiWindow: Invalid child nodes. A UiWindow can only have one child of type Container.");
+			LogHub.Error("UiWindow: Invalid child nodes. A UiWindow can only have one child of type Container.");
 		}
 	}
 

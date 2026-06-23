@@ -15,11 +15,6 @@ public partial class Selection : Node
 
 	private HashSet<Node3D> _nodes = new HashSet<Node3D>();
 
-	[Signal] public delegate void RequestSetMultiSelectModeEventHandler(bool enable);
-	[Signal] public delegate void NotifySelectedEventHandler(Node3D node);
-	[Signal] public delegate void NotifyDeselectedEventHandler(Node3D node);
-
-
     public override void _Ready()
     {
         I = this;
@@ -82,9 +77,9 @@ public partial class Selection : Node
 	{
 		if (I._nodes.Add(node))
 		{
-			I.EmitSignal(SignalName.NotifySelected, node);
-			HighLightNode(node);
-			LogHub.I.Info($"Selected: {node.Name}");
+			ModelEventHub.RequestSelectModel(node);
+			HighLightNode(node, true);
+			LogHub.Info($"Selected: {node.Name}");
 			return true;
 		}
 		return false;
@@ -110,9 +105,9 @@ public partial class Selection : Node
 	{
 		if (I._nodes.Remove(node))
 		{
-			I.EmitSignal(SignalName.NotifyDeselected, node);
-			UnHighLightNode(node);
-			LogHub.I.Info($"Deselected: {node.Name}");
+			ModelEventHub.RequestDeselectModel(node);
+			HighLightNode(node, false);
+			LogHub.Info($"Deselected: {node.Name}");
 			return true;
 		}
 		return false;
@@ -150,7 +145,7 @@ public partial class Selection : Node
 	public static void Toggle(IEnumerable<Node3D> nodes)
 	{
 		// 切り替えるノードがない場合は何もしない
-		if (nodes.Count() == 0)
+		if (!nodes.Any())
 		{
 			return;
 		}
@@ -173,34 +168,89 @@ public partial class Selection : Node
 		}
 
 		var nodesToDeselect = I._nodes.ToArray();
+		
+		// 先にクリアしてからシグナル発報することで、シグナルハンドラ内で選択状態確認した際の整合性を保つ
+		I._nodes.Clear();
+
+		// ノードの選択解除シグナルとハイライト解除は個々に行う
 		foreach (var node in nodesToDeselect)
 		{
-			I.EmitSignal(SignalName.NotifyDeselected, node);
-			UnHighLightNode(node);
-			LogHub.I.Info($"Deselected: {node.Name}");
+			ModelEventHub.RequestDeselectModel(node);
+			HighLightNode(node, false);
+			LogHub.Info($"Deselected: {node.Name}");
 		}
-		I._nodes.Clear();
 		return true;
 	}
 
-	private static void HighLightNode(Node3D node)
+	/// <summary>
+	/// 指定したノードの選択状態を切り替えます。
+	/// </summary>
+	/// <param name="node">切り替えるノードです。</param>
+	/// <param name="enable">選択状態を有効にする場合はtrue、無効にする場合はfalseです。</param>
+	private static void HighLightNode(Node3D node, bool enable = true)
 	{
-		var meshInstances = GetMeshInstancesRecursively(node);
-		foreach (var mesh in meshInstances)
+		var node3Ds = GetNode3DsRecursively(node);
+		foreach (var node3D in node3Ds)
 		{
-			mesh.MaterialOverride = ResourceLoader.Load<StandardMaterial3D>("res://assets/materials/selected.tres");
+			HighlightMesh(node3D, enable);
 		}
 	}
 
-	private static void UnHighLightNode(Node3D node)
+	/// <summary>
+	/// 指定したノードのハイライト状態を切り替えます。
+	/// </summary>
+	/// <param name="node">切り替えるノードです。</param>
+	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalseです。</param>
+	private static void HighlightMesh(Node3D node, bool enable = true)
 	{
-		var meshInstances = GetMeshInstancesRecursively(node);
-		foreach (var mesh in meshInstances)
+		if (enable)
 		{
-			mesh.MaterialOverride = null;
+			// 選択状態の適用は子孫のMeshInstance3Dすべてにとりあえず適用すればよい
+			var meshInstances = GetMeshInstancesRecursively(node);
+			foreach (var mesh in meshInstances)			{
+				mesh.MaterialOverride = ResourceLoader.Load<StandardMaterial3D>("res://assets/materials/selected.tres");
+			}
+		}
+		else
+		{
+			// 選択状態の解除は、祖先のNode3Dに選択状態のものがいなければ子孫のMeshInstance3Dすべてから選択状態を解除する判定が必要
+			if (!HasSelectedAncestor(node))
+			{
+				var meshInstances = GetMeshInstancesRecursively(node);
+				foreach (var mesh in meshInstances)
+				{
+					mesh.MaterialOverride = null;
+				}
+			}
 		}
 	}
 
+	/// <summary>
+	/// 指定したノードとその子孫から純粋なNode3Dを再帰的に取得します。
+	/// </summary>
+	/// <param name="node">取得対象のノードです。</param>
+	/// <returns>取得したNode3Dのリストです。</returns>
+	private static List<Node3D> GetNode3DsRecursively(Node node)
+	{
+		var node3Ds = new List<Node3D>();
+
+		if (node.GetType() == typeof(Node3D))
+		{
+			node3Ds.Add((Node3D)node);
+		}
+
+		foreach (Node child in node.GetChildren())
+		{
+			node3Ds.AddRange(GetNode3DsRecursively(child));
+		}
+
+		return node3Ds;
+	}
+
+	/// <summary>
+	/// 指定したノードとその子孫からMeshInstance3Dを再帰的に取得します。
+	/// </summary>
+	/// <param name="node">取得対象のノードです。</param>
 	private static List<MeshInstance3D> GetMeshInstancesRecursively(Node node)
 	{
 		var meshInstances = new List<MeshInstance3D>();
@@ -216,6 +266,24 @@ public partial class Selection : Node
 		}
 
 		return meshInstances;
+	}
+
+	/// <summary>
+	/// 指定したノードの祖先に選択状態のノードが存在するかどうかを判定します。
+	/// </summary>
+	/// <param name="node3D">判定対象のノードです。</param>
+	private static bool HasSelectedAncestor(Node node3D)
+	{
+		var node = node3D;
+		while (node != null)
+		{
+			if (I._nodes.Contains(node))
+			{
+				return true;
+			}
+			node = node.GetParent() as Node3D;
+		}
+		return false;
 	}
 
 	#endregion

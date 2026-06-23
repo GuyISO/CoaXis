@@ -13,9 +13,16 @@ public partial class DeviceInputHandler : Node
 	[Export] private float _rotateSpeedDegrees = 90.0f;
 	[Export] private float _rollSpeedDegrees = 120.0f;
 
+	private static DeviceInputHandler I;
+
 	#endregion
 
 	#region Lifecycle
+
+	public override void _Ready()
+	{
+		I = this;
+	}
 
 	public override void _Process(double delta)
 	{
@@ -35,7 +42,7 @@ public partial class DeviceInputHandler : Node
 	/// ユーザーの入力に基づいてカメラの平行移動をリクエストします。
 	/// </summary>
 	/// <param name="delta">前のフレームからの経過時間（秒）</param>
-	private void HandleTranslationInput(float delta)
+	private static void HandleTranslationInput(float delta)
 	{
 		float x = GetAxis("translate_camera_left", "translate_camera_right");
 		float y = GetAxis("translate_camera_down", "translate_camera_up");
@@ -52,15 +59,15 @@ public partial class DeviceInputHandler : Node
 			translationDirection = translationDirection.Normalized();
 		}
 
-		Vector3 translation = translationDirection * (_translateSpeed * delta);
-		ViewportEventHub.I.RequestTranslate(translation, SpaceMode.Camera);
+		Vector3 translation = translationDirection * (I._translateSpeed * delta);
+		ViewportEventHub.RequestTranslate(translation, SpaceMode.Camera);
 	}
 
 	/// <summary>
 	/// ユーザーの入力に基づいてカメラの回転をリクエストします。
 	/// </summary>
 	/// <param name="delta">前のフレームからの経過時間（秒）</param>
-	private void HandleRotationInput(float delta)
+	private static void HandleRotationInput(float delta)
 	{
 		float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
 		float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
@@ -71,15 +78,15 @@ public partial class DeviceInputHandler : Node
 			return;
 		}
 
-		float yawAngle = Mathf.DegToRad(yawInput * _rotateSpeedDegrees * delta);
-		float pitchAngle = Mathf.DegToRad(pitchInput * _rotateSpeedDegrees * delta);
-		float rollAngle = Mathf.DegToRad(rollInput * _rollSpeedDegrees * delta);
+		float yawAngle = Mathf.DegToRad(yawInput * I._rotateSpeedDegrees * delta);
+		float pitchAngle = Mathf.DegToRad(pitchInput * I._rotateSpeedDegrees * delta);
+		float rollAngle = Mathf.DegToRad(rollInput * I._rollSpeedDegrees * delta);
 		Quaternion yaw = new Quaternion(Vector3.Up, yawAngle);
 		Quaternion pitch = new Quaternion(Vector3.Right, pitchAngle);
 		Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
 		Quaternion rotation = yaw * pitch * roll;
 
-		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.Camera);
+		ViewportEventHub.RequestRotate(rotation, SpaceMode.Camera);
 	}
 
 	/// <summary>

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// ビューポート関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、ビューポートの状態変更や操作のリクエストを通知するためのシグナルを提供します。これにより、ビューポート操作のロジックを分散させずに一元管理できます。
-/// Autoloadに登録してシングルトン参照することを前提としていますが、複数インスタンスが存在する可能性も考慮して実装されています。
+/// Autoloadに登録してシングルトン参照することを前提としています。
 /// </summary>
 public partial class ViewportEventHub : Node
 {
@@ -43,9 +43,9 @@ public partial class ViewportEventHub : Node
 	/// <summary>
 	/// ビューポート関連の状態の通知をリクエストします。
 	/// </summary>
-	public void RequestNotifyState()
+	public static void RequestNotifyState()
 	{
-		EmitSignal(SignalName.NotifyStateRequested);
+		I.EmitSignal(SignalName.NotifyStateRequested);
 	}
 
 	[Signal] public delegate void MovePositionToRequestedEventHandler(Vector3 position, bool useTween);
@@ -55,9 +55,9 @@ public partial class ViewportEventHub : Node
 	/// <param name="position">設定する注視点の位置です。</param>
 	/// <param name="useTween">移動にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
 	/// <remarks>SetPositionという名前にしたいところですが、Node3Dの標準メソッドと区別するためにRequestMovePositionToという名前にしています。</remarks>
-	public void RequestMovePositionTo(Vector3 position, bool useTween = false)
+	public static void RequestMovePositionTo(Vector3 position, bool useTween = false)
 	{
-		EmitSignal(SignalName.MovePositionToRequested, position, useTween);
+		I.EmitSignal(SignalName.MovePositionToRequested, position, useTween);
 	}
 
 	[Signal] public delegate void MoveRotationToRequestedEventHandler(Quaternion rotation, bool useTween);
@@ -67,9 +67,9 @@ public partial class ViewportEventHub : Node
 	/// <param name="rotation">設定する注視点の回転です。</param>
 	/// <param name="useTween">移動にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
 	/// <remarks>SetRotationという名前にしたいところですが、Node3Dの標準メソッドと区別するためにRequestMoveRotationToという名前にしています。</remarks>
-	public void RequestMoveRotationTo(Quaternion rotation, bool useTween = false)
+	public static void RequestMoveRotationTo(Quaternion rotation, bool useTween = false)
 	{
-		EmitSignal(SignalName.MoveRotationToRequested, rotation, useTween);
+		I.EmitSignal(SignalName.MoveRotationToRequested, rotation, useTween);
 	}
 
 	[Signal] public delegate void SetDistanceRequestedEventHandler(float distance, bool useTween);
@@ -77,9 +77,9 @@ public partial class ViewportEventHub : Node
 	/// カメラの距離の設定をリクエストします。
 	/// </summary> <param name="distance">設定するカメラの距離です。透視投影の場合のみ有効です。</param>
 	/// <param name="useTween">移動にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestSetDistance(float distance, bool useTween = false)
+	public static void RequestSetDistance(float distance, bool useTween = false)
 	{
-		EmitSignal(SignalName.SetDistanceRequested, distance, useTween);
+		I.EmitSignal(SignalName.SetDistanceRequested, distance, useTween);
 	}
 
 	[Signal] public delegate void SetSizeRequestedEventHandler(float size, bool useTween);
@@ -88,9 +88,9 @@ public partial class ViewportEventHub : Node
 	/// </summary>
 	/// <param name="size">設定するカメラのサイズです。平行投影の場合のみ有効です。</param>
 	/// <param name="useTween">サイズ変更にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestSetSizeTo(float size, bool useTween = false)
+	public static void RequestSetSizeTo(float size, bool useTween = false)
 	{
-		EmitSignal(SignalName.SetSizeRequested, size, useTween);
+		I.EmitSignal(SignalName.SetSizeRequested, size, useTween);
 	}
 
 	[Signal] public delegate void SetFovRequestedEventHandler(float fov, bool useTween);
@@ -99,9 +99,9 @@ public partial class ViewportEventHub : Node
 	/// </summary>
 	/// <param name="fov">設定する FOV の値です。</param>
 	/// <param name="useTween">FOV変更にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestSetFov(float fov, bool useTween = false)
+	public static void RequestSetFov(float fov, bool useTween = false)
 	{
-		EmitSignal(SignalName.SetFovRequested, fov, useTween);
+		I.EmitSignal(SignalName.SetFovRequested, fov, useTween);
 	}
 
 	[Signal] public delegate void TranslateRequestedEventHandler(Vector3 translation, SpaceMode spaceMode, bool useTween);
@@ -110,9 +110,9 @@ public partial class ViewportEventHub : Node
 	/// </summary> <param name="translation">カメラの平行移動量です。</param>
 	/// <param name="spaceMode">平行移動の基準となる座標系です。</param>
 	/// <param name="useTween">移動にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestTranslate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
+	public static void RequestTranslate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
 	{
-		EmitSignal(SignalName.TranslateRequested, translation, (int)spaceMode, useTween);
+		I.EmitSignal(SignalName.TranslateRequested, translation, (int)spaceMode, useTween);
 	}
 
 	[Signal] public delegate void RotateRequestedEventHandler(Quaternion rotation, SpaceMode spaceMode, bool useTween);
@@ -122,9 +122,9 @@ public partial class ViewportEventHub : Node
 	/// <param name="rotation">設定するカメラの回転です。</param>
 	/// <param name="spaceMode">回転の基準となる座標系です。</param>
 	/// <param name="useTween">回転にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestRotate(Quaternion rotation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
+	public static void RequestRotate(Quaternion rotation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
 	{
-		EmitSignal(SignalName.RotateRequested, rotation, (int)spaceMode, useTween);
+		I.EmitSignal(SignalName.RotateRequested, rotation, (int)spaceMode, useTween);
 	}
 
 	[Signal] public delegate void ZoomRequestedEventHandler(float exponent, bool useTween);
@@ -133,9 +133,9 @@ public partial class ViewportEventHub : Node
 	/// </summary>
 	/// <param name="exponent">ズームの指数値です。1 より大きい値はズームイン、1 より小さい値はズームアウトを意味します。</param>
 	/// <param name="useTween">ズームにトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestZoom(float exponent, bool useTween = false)
+	public static void RequestZoom(float exponent, bool useTween = false)
 	{
-		EmitSignal(SignalName.ZoomRequested, exponent, useTween);
+		I.EmitSignal(SignalName.ZoomRequested, exponent, useTween);
 	}
 
 	[Signal] public delegate void SetProjectionTypeRequestedEventHandler(Camera3D.ProjectionType type);
@@ -143,18 +143,18 @@ public partial class ViewportEventHub : Node
 	/// 投影タイプの設定をリクエストします。
 	/// </summary>
 	/// <param name="type">設定する投影タイプです。</param>
-	public void RequestSetProjectionType(Camera3D.ProjectionType type)
+	public static void RequestSetProjectionType(Camera3D.ProjectionType type)
 	{
-		EmitSignal(SignalName.SetProjectionTypeRequested, (int)type);
+		I.EmitSignal(SignalName.SetProjectionTypeRequested, (int)type);
 	}
 
 	[Signal] public delegate void ToggleProjectionTypeRequestedEventHandler();
 	/// <summary>
 	/// 投影タイプの切り替えをリクエストします。
 	/// </summary>
-	public void RequestToggleProjectionType()
+	public static void RequestToggleProjectionType()
 	{
-		EmitSignal(SignalName.ToggleProjectionTypeRequested);
+		I.EmitSignal(SignalName.ToggleProjectionTypeRequested);
 	}
 
 	[Signal] public delegate void FitRequestedEventHandler(Node3D[] targetNodes, bool useTween);
@@ -163,10 +163,10 @@ public partial class ViewportEventHub : Node
 	/// </summary>
 	/// <param name="targetNodes">フィットさせたいターゲットノード群です。</param>
 	/// <param name="useTween">フィット操作にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestFit(IEnumerable<Node3D> targetNodes, bool useTween = false)
+	public static void RequestFit(IEnumerable<Node3D> targetNodes, bool useTween = false)
 	{
 		Node3D[] targets = targetNodes as Node3D[] ?? (targetNodes == null ? Array.Empty<Node3D>() : new List<Node3D>(targetNodes).ToArray());
-		EmitSignal(SignalName.FitRequested, targets, useTween);
+		I.EmitSignal(SignalName.FitRequested, targets, useTween);
 	}
 
 	[Signal] public delegate void AlignNormalToRequestedEventHandler(Vector3 normal, bool useTween);
@@ -175,9 +175,9 @@ public partial class ViewportEventHub : Node
 	/// </summary>
 	/// <param name="normal">カメラの向きを合わせたい法線ベクトルです。</param>
 	/// <param name="useTween">回転にトゥイーンを使用するかどうかのフラグです。デフォルトは false です。</param>
-	public void RequestAlignNormalTo(Vector3 normal, bool useTween = false)
+	public static void RequestAlignNormalTo(Vector3 normal, bool useTween = false)
 	{
-		EmitSignal(SignalName.AlignNormalToRequested, normal, useTween);
+		I.EmitSignal(SignalName.AlignNormalToRequested, normal, useTween);
 	}
 	
 	[Signal] public delegate void DecideSelectionRectRequestedEventHandler(Vector2 startPosition, Vector2 endPosition);
@@ -185,9 +185,9 @@ public partial class ViewportEventHub : Node
 	/// 矩形選択の確定を通知するシグナルです。
 	/// </summary> <param name="startPosition">矩形選択の開始位置です。</param>
 	/// <param name="endPosition">矩形選択の終了位置です。</param>
-	public void RequestDecideSelectionRect(Vector2 startPosition, Vector2 endPosition)
+	public static void RequestDecideSelectionRect(Vector2 startPosition, Vector2 endPosition)
 	{
-		EmitSignal(SignalName.DecideSelectionRectRequested, startPosition, endPosition);
+		I.EmitSignal(SignalName.DecideSelectionRectRequested, startPosition, endPosition);
 	}
 
 	#endregion
@@ -199,9 +199,9 @@ public partial class ViewportEventHub : Node
 	/// 操作モードを通知するシグナルです。
 	/// </summary>
 	/// <param name="mode">操作モードです。</param>
-	public void NotifyInputMode(ViewportInputMode mode)
+	public static void NotifyInputMode(ViewportInputMode mode)
 	{
-		EmitSignal(SignalName.InputModeNotified, (int)mode);
+		I.EmitSignal(SignalName.InputModeNotified, (int)mode);
 	}
 
 	[Signal] public delegate void PositionNotifiedEventHandler(Vector3 position);
@@ -209,9 +209,9 @@ public partial class ViewportEventHub : Node
 	/// 注視点の位置を通知するシグナルです。
 	/// </summary>
 	/// <param name="position">注視点の位置です。</param>
-	public void NotifyPosition(Vector3 position)
+	public static void NotifyPosition(Vector3 position)
 	{
-		EmitSignal(SignalName.PositionNotified, position);
+		I.EmitSignal(SignalName.PositionNotified, position);
 	}
 
 	[Signal] public delegate void RotationNotifiedEventHandler(Quaternion rotation);
@@ -219,9 +219,9 @@ public partial class ViewportEventHub : Node
 	/// 注視点の回転を通知するシグナルです。
 	/// </summary>
 	/// <param name="rotation">注視点の回転です。</param>
-	public void NotifyRotation(Quaternion rotation)
+	public static void NotifyRotation(Quaternion rotation)
 	{
-		EmitSignal(SignalName.RotationNotified, rotation);
+		I.EmitSignal(SignalName.RotationNotified, rotation);
 	}
 
 	[Signal] public delegate void DistanceNotifiedEventHandler(float distance);
@@ -229,9 +229,9 @@ public partial class ViewportEventHub : Node
 	/// カメラの距離を通知するシグナルです。
 	/// </summary>
 	/// <param name="distance">カメラの距離です。透視投影の場合のみ有効です。</param>
-	public void NotifyDistance(float distance)
+	public static void NotifyDistance(float distance)
 	{
-		EmitSignal(SignalName.DistanceNotified, distance);
+		I.EmitSignal(SignalName.DistanceNotified, distance);
 	}
 
 	[Signal] public delegate void SizeNotifiedEventHandler(float size);
@@ -239,27 +239,27 @@ public partial class ViewportEventHub : Node
 	/// カメラのズームレベルを通知するシグナルです。
 	/// </summary>
 	/// <param name="size">カメラのサイズ（ズームレベル）です。平行投影の場合のみ有効です。</param>
-	public void NotifySize(float size)
+	public static void NotifySize(float size)
 	{
-		EmitSignal(SignalName.SizeNotified, size);
+		I.EmitSignal(SignalName.SizeNotified, size);
 	}
 
 	[Signal] public delegate void FovNotifiedEventHandler(float fov);
 	/// <summary>
 	/// カメラの FOV（視野角）を通知するシグナルです。
 	/// </summary> <param name="fov">FOV の値です。</param>
-	public void NotifyFov(float fov)
+	public static void NotifyFov(float fov)
 	{
-		EmitSignal(SignalName.FovNotified, fov);
+		I.EmitSignal(SignalName.FovNotified, fov);
 	}
 
 	[Signal] public delegate void ProjectionTypeNotifiedEventHandler(Camera3D.ProjectionType type);
 	/// <summary>
 	/// カメラの投影タイプを通知するシグナルです。
 	/// </summary> <param name="type">投影タイプです。</param>
-	public void NotifyProjectionType(Camera3D.ProjectionType type)
+	public static void NotifyProjectionType(Camera3D.ProjectionType type)
 	{
-		EmitSignal(SignalName.ProjectionTypeNotified, (int)type);
+		I.EmitSignal(SignalName.ProjectionTypeNotified, (int)type);
 	}
 
 	[Signal] public delegate void ArcballRadiusNotifiedEventHandler(float radius);
@@ -267,9 +267,9 @@ public partial class ViewportEventHub : Node
 	/// アークボールの半径を通知するシグナルです。
 	/// </summary>
 	/// <param name="radius">アークボールの半径です。</param>
-	public void NotifyArcballRadius(float radius)
+	public static void NotifyArcballRadius(float radius)
 	{
-		EmitSignal(SignalName.ArcballRadiusNotified, radius);
+		I.EmitSignal(SignalName.ArcballRadiusNotified, radius);
 	}
 
 	[Signal] public delegate void ArcballHandleNotifiedEventHandler(Vector3 position);
@@ -277,9 +277,9 @@ public partial class ViewportEventHub : Node
 	/// アークボール操作の操作点を通知するシグナルです。
 	/// </summary>
 	/// <param name="position">アークボールの操作点の位置です。</param>
-	public void NotifyArcballHandle(Vector3 position)
+	public static void NotifyArcballHandle(Vector3 position)
 	{
-		EmitSignal(SignalName.ArcballHandleNotified, position);
+		I.EmitSignal(SignalName.ArcballHandleNotified, position);
 	}
 
 	[Signal] public delegate void SelectionRectNotifiedEventHandler(Vector2 startPosition, Vector2 endPosition);
@@ -287,9 +287,9 @@ public partial class ViewportEventHub : Node
 	/// 矩形選択の範囲を通知するシグナルです。
 	/// </summary> <param name="startPosition">矩形選択の開始位置です。</param>
 	/// <param name="endPosition">矩形選択の終了位置です。</param>
-	public void NotifySelectionRect(Vector2 startPosition, Vector2 endPosition)
+	public static void NotifySelectionRect(Vector2 startPosition, Vector2 endPosition)
 	{
-		EmitSignal(SignalName.SelectionRectNotified, startPosition, endPosition);
+		I.EmitSignal(SignalName.SelectionRectNotified, startPosition, endPosition);
 	}
 
 	#endregion

@@ -99,7 +99,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 	{
 		if (!_isInitialized)
 		{
-			ViewportEventHub.I.RequestNotifyState(); // 全状態の通知をリクエストして、UIを初期化する
+			ViewportEventHub.RequestNotifyState(); // 全状態の通知をリクエストして、UIを初期化する
 			_isInitialized = true;
 		}
 	}
@@ -113,7 +113,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 	/// </summary>
 	private void OnButtonToggleProjectionPressed()
 	{
-		ViewportEventHub.I.RequestToggleProjectionType();
+		ViewportEventHub.RequestToggleProjectionType();
 	}
 
 	/// <summary>
@@ -133,7 +133,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 			return;
 		}
 
-		ViewportEventHub.I.RequestFit(new[] { targetNode }, true);
+		ViewportEventHub.RequestFit(new[] { targetNode }, true);
 	}
 
 	/// <summary>
@@ -147,7 +147,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 			return;
 		}
 
-		ViewportEventHub.I.RequestFit(fitTargets, true);
+		ViewportEventHub.RequestFit(fitTargets, true);
 	}
 
 	/// <summary>
@@ -156,7 +156,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 	private void OnButtonRollLeftPressed()
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度左にロール
+		ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度左にロール
 	}
 
 	/// <summary>
@@ -165,7 +165,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 	private void OnButtonRollRightPressed()
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-		ViewportEventHub.I.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度右にロール
+		ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true); // 90度右にロール
 	}
 
 	/// <summary>
@@ -173,7 +173,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 	/// </summary>
 	private void OnSliderFovValueChanged(double value)
 	{
-		ViewportEventHub.I.RequestSetFov((float)value);
+		ViewportEventHub.RequestSetFov((float)value);
 	}
 
 	/// <summary>

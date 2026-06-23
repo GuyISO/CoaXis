@@ -95,8 +95,8 @@ public partial class HttpClient : Node
 			}
 
 			CallDeferred(nameof(DispatchReceivedMessage), responseBody);
-			LogHub.I.Debug($"[HTTP][Send] {message}");
-			LogHub.I.Debug($"[HTTP][Recv] {responseBody}");
+			LogHub.Debug($"[HTTP][Send] {message}");
+			LogHub.Debug($"[HTTP][Recv] {responseBody}");
 			return true;
 		}
 		catch (OperationCanceledException)

@@ -46,7 +46,7 @@ public partial class AxisNavigator : Control
 		if (!_isInitialized)
 		{
 			// カメラの初期回転を取得して軸ナビゲータに反映する。
-			ViewportEventHub.I.RequestNotifyState();
+			ViewportEventHub.RequestNotifyState();
 			_isInitialized = true;
 		}
 	}
@@ -69,11 +69,8 @@ public partial class AxisNavigator : Control
 			if (pickResult.HasHit)
 			{
 				ViewLookAt(pickResult.Collider);
-				
-				// クリックイベントを処理した後、他の UI 要素にイベントが伝播しないようにする。
-				@event.Dispose();
+				_subViewport.SetInputAsHandled(); // 入力イベントを消費する
 			}
-
 		}
 	}
 
@@ -104,7 +101,7 @@ public partial class AxisNavigator : Control
 			// _cameraController.MoveFocalPoint(null, quaternion, true);
 
 			// カメラ回転要求イベントを発行
-			ViewportEventHub.I.RequestMoveRotationTo(quaternion, true);
+			ViewportEventHub.RequestMoveRotationTo(quaternion, true);
 		}
 	}
 

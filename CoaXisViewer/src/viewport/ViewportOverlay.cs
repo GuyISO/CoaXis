@@ -89,7 +89,7 @@ public partial class ViewportOverlay : Control
 		if (!_isInitialized)
 		{
 			// カメラの初期状態を取得してUIに反映する。
-			ViewportEventHub.I.RequestNotifyState();
+			ViewportEventHub.RequestNotifyState();
 			_isInitialized = true;
 		}
 	}

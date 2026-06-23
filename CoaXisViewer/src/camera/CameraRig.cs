@@ -71,12 +71,12 @@ public partial class CameraRig : Node3D
 	/// </summary>
 	private void OnNotifyStateRequested()
 	{
-		ViewportEventHub.I.NotifyPosition(Position);
-		ViewportEventHub.I.NotifyRotation(Transform.Basis.GetRotationQuaternion());
-		ViewportEventHub.I.NotifySize(_camera.Size);
-		ViewportEventHub.I.NotifyDistance(_camera.Position.Z);
-		ViewportEventHub.I.NotifyFov(_camera.Fov);
-		ViewportEventHub.I.NotifyProjectionType(_camera.Projection);
+		ViewportEventHub.NotifyPosition(Position);
+		ViewportEventHub.NotifyRotation(Transform.Basis.GetRotationQuaternion());
+		ViewportEventHub.NotifySize(_camera.Size);
+		ViewportEventHub.NotifyDistance(_camera.Position.Z);
+		ViewportEventHub.NotifyFov(_camera.Fov);
+		ViewportEventHub.NotifyProjectionType(_camera.Projection);
 	}
 
 	/// <summary>
@@ -216,7 +216,7 @@ public partial class CameraRig : Node3D
 		else
 		{
 			Transform = new Transform3D(Transform.Basis, posision);
-			ViewportEventHub.I.NotifyPosition(Position);
+			ViewportEventHub.NotifyPosition(Position);
 		}
 	}
 
@@ -234,7 +234,7 @@ public partial class CameraRig : Node3D
 		else
 		{
 			Transform = new Transform3D(new Basis(rotation), Transform.Origin);
-			ViewportEventHub.I.NotifyRotation(Transform.Basis.GetRotationQuaternion());
+			ViewportEventHub.NotifyRotation(Transform.Basis.GetRotationQuaternion());
 		}
 	}
 
@@ -252,7 +252,7 @@ public partial class CameraRig : Node3D
 		else
 		{
 			_camera.Position = new Vector3(0, 0, distance);
-			ViewportEventHub.I.NotifyDistance(_camera.Position.Z);
+			ViewportEventHub.NotifyDistance(_camera.Position.Z);
 		}
 	}
 
@@ -270,7 +270,7 @@ public partial class CameraRig : Node3D
 		else
 		{
 			_camera.Size = size;
-			ViewportEventHub.I.NotifySize(_camera.Size);
+			ViewportEventHub.NotifySize(_camera.Size);
 		}
 	}
 
@@ -288,7 +288,7 @@ public partial class CameraRig : Node3D
 		else
 		{
 			_camera.Fov = fov;
-			ViewportEventHub.I.NotifyFov(fov);
+			ViewportEventHub.NotifyFov(fov);
 		}
 	}
 
@@ -319,7 +319,7 @@ public partial class CameraRig : Node3D
 		}
 
 		_camera.Projection = projectionType;
-		ViewportEventHub.I.NotifyProjectionType(projectionType);
+		ViewportEventHub.NotifyProjectionType(projectionType);
 	}
 
 	/// <summary>
@@ -435,7 +435,7 @@ public partial class CameraRig : Node3D
 		tween.TweenMethod(Callable.From<float>(t =>
 		{
 			Position = startPos.Lerp(position, t);
-			ViewportEventHub.I.NotifyPosition(Position);
+			ViewportEventHub.NotifyPosition(Position);
 		}), 0f, 1f, _tweenDuration);
 	}
 
@@ -453,7 +453,7 @@ public partial class CameraRig : Node3D
 				new Basis(startRot.Slerp(rotation, t)),
 				Transform.Origin
 			);
-			ViewportEventHub.I.NotifyRotation(Transform.Basis.GetRotationQuaternion());
+			ViewportEventHub.NotifyRotation(Transform.Basis.GetRotationQuaternion());
 		}), 0f, 1f, _tweenDuration);
 	}
 
@@ -468,7 +468,7 @@ public partial class CameraRig : Node3D
 		tween.TweenMethod(Callable.From<float>(distance =>
 		{
 			_camera.Position = new Vector3(0, 0, distance);
-			ViewportEventHub.I.NotifyDistance(distance);
+			ViewportEventHub.NotifyDistance(distance);
 		}), startDistance, distance, _tweenDuration);
 	}
 
@@ -483,7 +483,7 @@ public partial class CameraRig : Node3D
 		tween.TweenMethod(Callable.From<float>(size =>
 		{
 			_camera.Size = size;
-			ViewportEventHub.I.NotifySize(size);
+			ViewportEventHub.NotifySize(size);
 		}), startSize, size, _tweenDuration);
 	}
 
@@ -498,7 +498,7 @@ public partial class CameraRig : Node3D
 		tween.TweenMethod(Callable.From<float>(fov =>
 		{
 			_camera.Fov = fov;
-			ViewportEventHub.I.NotifyFov(fov);
+			ViewportEventHub.NotifyFov(fov);
 		}), startFov, fov, _tweenDuration);
 	}
 

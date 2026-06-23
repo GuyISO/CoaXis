@@ -4,7 +4,7 @@ using System.IO;
 
 /// <summary>
 /// ログ関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、ログの通知や出力を管理します。これにより、ログ操作のロジックを分散させずに一元管理できます。
-/// Autoloadに登録してシングルトン参照することを前提としていますが、複数インスタンスが存在する可能性も考慮して実装されています。
+/// Autoloadに登録してシングルトン参照することを前提としています。
 /// </summary>
 public partial class LogHub : Node
 {
@@ -13,7 +13,6 @@ public partial class LogHub : Node
     private StreamWriter _fileWriter;
     private string _logFilePath = string.Empty;
     private bool _enableFileLog = false;
-    private bool _enableDebugConsole = true;
 
     [Signal] public delegate void LoggedEventHandler(string line);
 
@@ -31,15 +30,12 @@ public partial class LogHub : Node
     /// </summary>
     /// <param name="level">ログレベルです。</param>
     /// <param name="message">ログメッセージです。</param> 
-    public void Log(LogLevel level, string message)
+    public static void Log(LogLevel level, string message)
     {
         string line = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} [{level}] {message}";
 
         // デバッグコンソールへの出力
-        if (_enableDebugConsole)
-        {
-            GD.Print(line);
-        }
+        GD.Print(line);
 
         // ファイルへの出力
         if (I._enableFileLog)
@@ -56,23 +52,23 @@ public partial class LogHub : Node
     /// デバッグレベルのログを出力します。
     /// </summary>
     /// <param name="msg">ログメッセージです。</param>
-    public void Debug(string msg) => Log(LogLevel.Debug, msg);
+    public static void Debug(string msg) => Log(LogLevel.Debug, msg);
 
     /// <summary>
     /// 情報レベルのログを出力します。
     /// </summary>
     /// <param name="msg">ログメッセージです。</param>
-    public void Info(string msg)  => Log(LogLevel.Info, msg);
+    public static void Info(string msg)  => Log(LogLevel.Info, msg);
 
     /// <summary>
     /// 警告レベルのログを出力します。
     /// </summary>
     /// <param name="msg">ログメッセージです。</param>
-    public void Warn(string msg)  => Log(LogLevel.Warn, msg);
+    public static void Warn(string msg)  => Log(LogLevel.Warn, msg);
 
     /// <summary>
     /// エラーレベルのログを出力します。
     /// </summary>
     /// <param name="msg">ログメッセージです。</param>
-    public void Error(string msg) => Log(LogLevel.Error, msg);
+    public static void Error(string msg) => Log(LogLevel.Error, msg);
 }
