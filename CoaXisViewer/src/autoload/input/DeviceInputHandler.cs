@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// ユーザーのキーボードやコントローラー入力を処理するノードです。Autoloadに登録され、常にシーンツリーに存在します。
+/// ユーザーのキーボードやコントローラー入力を処理するノードです。Autoloadに登録され、常にシーンツリーに存在します、シングルトンです。
 /// </summary>
 public partial class DeviceInputHandler : Node
 {

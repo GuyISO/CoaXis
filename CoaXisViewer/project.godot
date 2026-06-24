@@ -20,15 +20,16 @@ config/icon="res://assets/icon/icon.svg"
 
 ModelEventHub="*uid://guga46ph5l82"
 ViewportEventHub="*uid://dx5t10ibmi7k1"
-LogHub="*uid://5o16r7usgjmh"
-SceneManager="*uid://bdww21xtruf8m"
-Selection="*uid://dngenqpeyo83v"
-ConfigService="*uid://c4xtxi5qc52w1"
-PickService="*uid://cym3s6hqs3x03"
 DeviceInputHandler="*uid://vwxli71heajm"
-IpcService="*uid://cw6vp0knouk1l"
+ConfigService="*uid://c4xtxi5qc52w1"
 HierarchyBinder="*uid://dgrwggwf23ysx"
 HighlightService="*uid://c72re42r7nlfn"
+ModelManager="*uid://d1n1qmtftohtm"
+PickService="*uid://cym3s6hqs3x03"
+Selection="*uid://dngenqpeyo83v"
+UiManager="*uid://bdww21xtruf8m"
+IpcService="*uid://cw6vp0knouk1l"
+LogHub="*uid://5o16r7usgjmh"
 
 [display]
 

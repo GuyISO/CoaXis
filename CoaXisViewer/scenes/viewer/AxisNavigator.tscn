@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://clg4ivxpqifho"]
 
-[ext_resource type="Script" uid="uid://1e4air8juy4y" path="res://src/camera/AxisNavigator.cs" id="1_r05hx"]
+[ext_resource type="Script" uid="uid://1e4air8juy4y" path="res://src/features/view/AxisNavigator.cs" id="1_r05hx"]
 [ext_resource type="PackedScene" uid="uid://dan222xlokome" path="res://scenes/viewer/AirplaneAxis.tscn" id="2_1dmx6"]
 
 [node name="AxisNavigator" type="Control" unique_id=1990463361]
