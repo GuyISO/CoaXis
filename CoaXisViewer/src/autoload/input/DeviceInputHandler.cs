@@ -7,107 +7,112 @@ using System;
 /// </summary>
 public partial class DeviceInputHandler : Node
 {
-	#region Fields
+    #region Fields
 
-	[ExportGroup("Settings")]
-	[Export] private float _translateSpeed = 8.0f;
-	[Export] private float _rotateSpeedDegrees = 90.0f;
-	[Export] private float _rollSpeedDegrees = 120.0f;
+    [ExportGroup("Settings")]
+    [Export] private float _translateSpeed = 8.0f;
+    [Export] private float _rotateSpeedDegrees = 90.0f;
+    [Export] private float _rollSpeedDegrees = 120.0f;
 
-	private bool _isMultiSelectMode = false;
+    private bool _isMultiSelectMode = false;
 
-	public static DeviceInputHandler Instance { get; private set; }
+    public static DeviceInputHandler Instance { get; private set; }
 
-	#endregion
+    #endregion
 
-	#region Lifecycle
+    #region Lifecycle
 
-	public override void _Ready()
-	{
-		Instance = this;
-	}
+    public override void _EnterTree()
+    {
+        Instance = this;
+    }
 
-	public override void _Process(double delta)
-	{
-		// マルチセレクトモードの状態を更新する
-		bool wasMultiSelectMode = _isMultiSelectMode;
-		_isMultiSelectMode = Input.IsActionPressed("select_multiple");
-		if (wasMultiSelectMode != _isMultiSelectMode)
-		{
-			ModelEventHub.RequestSetMultiSelectMode(_isMultiSelectMode);
-		}
+    public override void _ExitTree()
+    {
+        Instance = null;
+    }
 
-		// ユーザーの入力に基づいてカメラの平行移動と回転をリクエストする
-		float dt = (float)delta;
-		HandleTranslationInput(dt);
-		HandleRotationInput(dt);
-	}
+    public override void _Process(double delta)
+    {
+        // マルチセレクトモードの状態を更新する
+        bool wasMultiSelectMode = _isMultiSelectMode;
+        _isMultiSelectMode = Input.IsActionPressed("select_multiple");
+        if (wasMultiSelectMode != _isMultiSelectMode)
+        {
+            ModelEventHub.RequestSetMultiSelectMode(_isMultiSelectMode);
+        }
 
-	#endregion
+        // ユーザーの入力に基づいてカメラの平行移動と回転をリクエストする
+        float dt = (float)delta;
+        HandleTranslationInput(dt);
+        HandleRotationInput(dt);
+    }
 
-	#region Internal Helpers
+    #endregion
 
-	/// <summary>
-	/// ユーザーの入力に基づいてカメラの平行移動をリクエストする
-	/// </summary>
-	/// <param name="delta">前のフレームからの経過時間（秒）</param>
-	private static void HandleTranslationInput(float delta)
-	{
-		float x = GetAxis("translate_camera_left", "translate_camera_right");
-		float y = GetAxis("translate_camera_down", "translate_camera_up");
-		float z = GetAxis("translate_camera_forward", "translate_camera_backward");
+    #region Internal Helpers
 
-		Vector3 translationDirection = new Vector3(x, y, z);
-		if (translationDirection.LengthSquared() <= Mathf.Epsilon)
-		{
-			return;
-		}
+    /// <summary>
+    /// ユーザーの入力に基づいてカメラの平行移動をリクエストする
+    /// </summary>
+    /// <param name="delta">前のフレームからの経過時間（秒）</param>
+    private static void HandleTranslationInput(float delta)
+    {
+        float x = GetAxis("translate_camera_left", "translate_camera_right");
+        float y = GetAxis("translate_camera_down", "translate_camera_up");
+        float z = GetAxis("translate_camera_forward", "translate_camera_backward");
 
-		if (translationDirection.LengthSquared() > 1.0f)
-		{
-			translationDirection = translationDirection.Normalized();
-		}
+        Vector3 translationDirection = new Vector3(x, y, z);
+        if (translationDirection.LengthSquared() <= Mathf.Epsilon)
+        {
+            return;
+        }
 
-		Vector3 translation = translationDirection * (Instance._translateSpeed * delta);
-		ViewportEventHub.RequestTranslate(translation, SpaceMode.Camera);
-	}
+        if (translationDirection.LengthSquared() > 1.0f)
+        {
+            translationDirection = translationDirection.Normalized();
+        }
 
-	/// <summary>
-	/// ユーザーの入力に基づいてカメラの回転をリクエストする
-	/// </summary>
-	/// <param name="delta">前のフレームからの経過時間（秒）</param>
-	private static void HandleRotationInput(float delta)
-	{
-		float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
-		float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
-		float rollInput = GetAxis("rotate_camera_clockwise", "rotate_camera_counterclockwise");
+        Vector3 translation = translationDirection * (Instance._translateSpeed * delta);
+        ViewportEventHub.RequestTranslate(translation, SpaceMode.Camera);
+    }
 
-		if (Mathf.IsZeroApprox(yawInput) && Mathf.IsZeroApprox(pitchInput) && Mathf.IsZeroApprox(rollInput))
-		{
-			return;
-		}
+    /// <summary>
+    /// ユーザーの入力に基づいてカメラの回転をリクエストする
+    /// </summary>
+    /// <param name="delta">前のフレームからの経過時間（秒）</param>
+    private static void HandleRotationInput(float delta)
+    {
+        float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
+        float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
+        float rollInput = GetAxis("rotate_camera_clockwise", "rotate_camera_counterclockwise");
 
-		float yawAngle = Mathf.DegToRad(yawInput * Instance._rotateSpeedDegrees * delta);
-		float pitchAngle = Mathf.DegToRad(pitchInput * Instance._rotateSpeedDegrees * delta);
-		float rollAngle = Mathf.DegToRad(rollInput * Instance._rollSpeedDegrees * delta);
-		Quaternion yaw = new Quaternion(Vector3.Up, yawAngle);
-		Quaternion pitch = new Quaternion(Vector3.Right, pitchAngle);
-		Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
-		Quaternion rotation = yaw * pitch * roll;
+        if (Mathf.IsZeroApprox(yawInput) && Mathf.IsZeroApprox(pitchInput) && Mathf.IsZeroApprox(rollInput))
+        {
+            return;
+        }
 
-		ViewportEventHub.RequestRotate(rotation, SpaceMode.Camera);
-	}
+        float yawAngle = Mathf.DegToRad(yawInput * Instance._rotateSpeedDegrees * delta);
+        float pitchAngle = Mathf.DegToRad(pitchInput * Instance._rotateSpeedDegrees * delta);
+        float rollAngle = Mathf.DegToRad(rollInput * Instance._rollSpeedDegrees * delta);
+        Quaternion yaw = new Quaternion(Vector3.Up, yawAngle);
+        Quaternion pitch = new Quaternion(Vector3.Right, pitchAngle);
+        Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
+        Quaternion rotation = yaw * pitch * roll;
 
-	/// <summary>
-	/// 指定されたアクションに基づいて軸の値を取得する
-	/// </summary>
-	/// <param name="negativeAction">負の方向のアクション名</param>
-	/// <param name="positiveAction">正の方向のアクション名</param>
-	/// <returns>軸の値（-1.0から1.0の範囲）</returns>
-	private static float GetAxis(string negativeAction, string positiveAction)
-	{
-		return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);
-	}
+        ViewportEventHub.RequestRotate(rotation, SpaceMode.Camera);
+    }
 
-	#endregion
+    /// <summary>
+    /// 指定されたアクションに基づいて軸の値を取得する
+    /// </summary>
+    /// <param name="negativeAction">負の方向のアクション名</param>
+    /// <param name="positiveAction">正の方向のアクション名</param>
+    /// <returns>軸の値（-1.0から1.0の範囲）</returns>
+    private static float GetAxis(string negativeAction, string positiveAction)
+    {
+        return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);
+    }
+
+    #endregion
 }

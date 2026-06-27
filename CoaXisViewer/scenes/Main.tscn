@@ -43,6 +43,7 @@ environment = SubResource("Environment_2xmat")
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environments" unique_id=543980358]
 transform = Transform3D(0.14644663, 0.8535534, -0.5, -0.50000006, 0.50000006, 0.70710677, 0.8535534, 0.14644662, 0.5, 0, 0, 0)
+layers = 1048573
 
 [node name="Models" type="Node3D" parent="." unique_id=2131541972]
 script = ExtResource("1_3p2gp")
@@ -126,6 +127,13 @@ layout_mode = 2
 tooltip_text = "設定ウィンドウを表示します"
 theme_override_font_sizes/font_size = 24
 text = "Setting"
+script = ExtResource("5_qmy6f")
+
+[node name="ButtonShowMeasurementWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=615800761]
+layout_mode = 2
+tooltip_text = "測定ウィンドウを表示します"
+theme_override_font_sizes/font_size = 24
+text = "Measurement"
 script = ExtResource("5_qmy6f")
 
 [node name="Panel" type="Panel" parent="Canvas/VBoxContainer/TopBar" unique_id=1046351606]

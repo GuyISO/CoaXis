@@ -16,13 +16,23 @@ public partial class LogHub : Node
 
     [Signal] public delegate void LoggedEventHandler(string line);
 
-    public override void _Ready()
+    public override void _EnterTree()
     {
         Instance = this;
+    }
 
+    public override void _Ready()
+    {
         _logFilePath = ProjectSettings.GlobalizePath("user://app.log");
         _fileWriter = new StreamWriter(_logFilePath, append: true);
         _enableFileLog = true;
+    }
+
+    public override void _ExitTree()
+    {
+        _enableFileLog = false;
+        _fileWriter?.Dispose();
+        Instance = null;
     }
 
     /// <summary>
@@ -34,6 +44,13 @@ public partial class LogHub : Node
     {
         string line = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} [{level}] {message}";
 
+        if (Instance == null)
+        {
+            GD.PrintErr("LogHub is not initialized.");
+            GD.Print(line);
+            return;
+        }
+
         // デバッグコンソールへの出力
         GD.Print(line);
 
@@ -43,7 +60,7 @@ public partial class LogHub : Node
             Instance._fileWriter.WriteLine(line);
             Instance._fileWriter.Flush();
         }
-        
+
         // イベントの発行
         Instance.EmitSignal(SignalName.Logged, line);
     }
@@ -58,13 +75,13 @@ public partial class LogHub : Node
     /// 情報レベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    public static void Info(string msg)  => Log(LogLevel.Info, msg);
+    public static void Info(string msg) => Log(LogLevel.Info, msg);
 
     /// <summary>
     /// 警告レベルのログを出力する
     /// </summary>
-    /// <param name="msg">ログメッセージ/param>
-    public static void Warn(string msg)  => Log(LogLevel.Warn, msg);
+    /// <param name="msg">ログメッセージ</param>
+    public static void Warn(string msg) => Log(LogLevel.Warn, msg);
 
     /// <summary>
     /// エラーレベルのログを出力する

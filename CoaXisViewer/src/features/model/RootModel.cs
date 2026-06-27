@@ -6,44 +6,49 @@ using System;
 /// </summary>
 public partial class RootModel : AnyModel
 {
-	#region Lifecycle
+    #region Lifecycle
 
-	public override void _Ready()
-	{
-		// イベントハンドラの登録
-		ModelEventHub.Instance.LoadModelRequested += OnLoadModelRequested;
-	}
+    public override void _Ready()
+    {
+        // イベントハンドラの登録
+        ModelEventHub.Instance.LoadModelRequested += OnLoadModelRequested;
+    }
 
-	public override void _ExitTree()
-	{
-		// イベントハンドラの登録解除
-		ModelEventHub.Instance.LoadModelRequested -= OnLoadModelRequested;
-	}
+    public override void _ExitTree()
+    {
+        // イベントハンドラの登録解除
+        ModelEventHub.Instance.LoadModelRequested -= OnLoadModelRequested;
+    }
 
-	#endregion
+    #endregion
 
-	#region Events
+    #region Events
 
-	/// <summary>
-	/// モデルロード要求イベントのハンドラで ModelLoader を使用して非同期でモデルをロードし、ロード完了後にシーンへ追加する
-	/// </summary>
-	/// <param name="path">ロードするモデルのパス</param>
-	private async void OnLoadModelRequested(string path)
-	{
-		AnyModel model = new AnyModel();
-		model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
-		AddChild(model);
+    /// <summary>
+    /// モデルロード要求イベントのハンドラで ModelLoader を使用して非同期でモデルをロードし、ロード完了後にシーンへ追加する
+    /// </summary>
+    /// <param name="path">ロードするモデルのパス</param>
+    private async void OnLoadModelRequested(string path)
+    {
+        AnyModel model = new AnyModel();
+        model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
+        AddChild(model);
 
-		await ModelLoader.LoadModelAsync(model, path);
-		
-		// モデルの衝突形状を設定するために、1フレーム待つ
-		await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+        bool loaded = await ModelLoader.LoadModelAsync(model, path);
+        if (!loaded)
+        {
+            model.QueueFree();
+            return;
+        }
 
-		ModelColliderBuilder.AddCollider(model);
+        // モデルの衝突形状を設定するために、1フレーム待つ
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
 
-		ModelEventHub.RequestAddModel(model, this);
+        ModelColliderBuilder.AddCollider(model);
 
-	}
+        ModelEventHub.RequestAddModel(model, this);
 
-	#endregion
+    }
+
+    #endregion
 }

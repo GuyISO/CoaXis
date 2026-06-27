@@ -23,11 +23,11 @@ ViewportEventHub="*uid://dx5t10ibmi7k1"
 DeviceInputHandler="*uid://vwxli71heajm"
 HighlightService="*uid://c72re42r7nlfn"
 ModelBinder="*uid://dgrwggwf23ysx"
-PickService="*uid://cym3s6hqs3x03"
 Selection="*uid://dngenqpeyo83v"
 UiManager="*uid://bdww21xtruf8m"
 IpcService="*uid://cw6vp0knouk1l"
 LogHub="*uid://5o16r7usgjmh"
+SettingsService="*res://src/autoload/service/SettingsService.cs"
 
 [display]
 

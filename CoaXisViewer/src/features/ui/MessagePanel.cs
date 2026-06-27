@@ -7,7 +7,7 @@ using System.Text;
 /// </summary>
 public partial class MessagePanel : PanelContainer
 {
-	#region Fields
+    #region Fields
 
     [Export] private int _maxLines = 999;
 
@@ -17,9 +17,9 @@ public partial class MessagePanel : PanelContainer
     // ログのバッファ
     private readonly StringBuilder _buffer = new StringBuilder();
 
-	#endregion
+    #endregion
 
-	#region Lifecycle
+    #region Lifecycle
 
     public override void _Ready()
     {
@@ -39,7 +39,7 @@ public partial class MessagePanel : PanelContainer
         LogHub.Instance.Logged -= OnLogged;
     }
 
-	#endregion
+    #endregion
 
     #region Events
 
@@ -52,10 +52,10 @@ public partial class MessagePanel : PanelContainer
         AddLine(line);
     }
 
-	#endregion
+    #endregion
 
     #region Internal Helpers
-    
+
     /// <summary>
     /// 1行ログを画面へ追加する
     /// </summary>

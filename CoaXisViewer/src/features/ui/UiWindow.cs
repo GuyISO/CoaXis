@@ -6,127 +6,127 @@ using System;
 /// </summary>
 public partial class UiWindow : Window
 {
-	#region Fields
+    #region Fields
 
-	private Container _rootContainer = null; // コンテンツを配置するためのルートコンテナ
+    private Container _rootContainer = null; // コンテンツを配置するためのルートコンテナ
 
     #endregion
 
     #region Lifecycle
 
-	public override void _Ready()
-	{
-		// ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラを登録
-		CloseRequested += OnCloseRequested;
+    public override void _Ready()
+    {
+        // ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラを登録
+        CloseRequested += OnCloseRequested;
 
-		// 子ノードが存在しない場合は何もしない
-		if (GetChildCount() == 0)
-		{
-			return;
-		}
-		// すでにContainerクラスを継承した子ノードが1このみ存在する場合はそれをルートコンテナとして使用する
-		else if (GetChildCount() == 1 && GetChild(0) is Container existingContainer)
-		{
-			SetContainer(existingContainer);
-		}
-		// それ以外の場合はエラーを出力する（複数の子ノードが存在するか、子ノードが Container を継承していない）
-		else
-		{
-			LogHub.Error("UiWindow: Invalid child nodes. A UiWindow can only have one child of type Container.");
-		}
-	}
+        // 子ノードが存在しない場合は何もしない
+        if (GetChildCount() == 0)
+        {
+            return;
+        }
+        // すでにContainerクラスを継承した子ノードが1このみ存在する場合はそれをルートコンテナとして使用する
+        else if (GetChildCount() == 1 && GetChild(0) is Container existingContainer)
+        {
+            SetContainer(existingContainer);
+        }
+        // それ以外の場合はエラーを出力する（複数の子ノードが存在するか、子ノードが Container を継承していない）
+        else
+        {
+            LogHub.Error("UiWindow: Invalid child nodes. A UiWindow can only have one child of type Container.");
+        }
+    }
 
-	public override void _ExitTree()
-	{
-		// ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラを解除
-		CloseRequested -= OnCloseRequested;
+    public override void _ExitTree()
+    {
+        // ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラを解除
+        CloseRequested -= OnCloseRequested;
 
-		ClearContent(); // コンテンツをクリアしてリソースを解放
-	}
+        ClearContent(); // コンテンツをクリアしてリソースを解放
+    }
 
-	#endregion
+    #endregion
 
-	#region Events
+    #region Events
 
-	/// <summary>
-	/// ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラウィンドウを閉じるための処理を行う
-	/// </summary>
-	private void OnCloseRequested()
-	{
-		QueueFree();
-	}
+    /// <summary>
+    /// ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラ
+    /// </summary>
+    private void OnCloseRequested()
+    {
+        QueueFree();
+    }
 
-	/// <summary>
-	/// ウィンドウの最小サイズが変更されたときに呼び出されるイベントハンドラで、ウィンドウサイズを子コンテナの最小サイズに合わせて調整する
-	/// </summary>
-	private void OnMinimumSizeChanged()
-	{
+    /// <summary>
+    /// ウィンドウの最小サイズが変更されたときに呼び出されるイベントハンドラで、ウィンドウサイズを子コンテナの最小サイズに合わせて調整する
+    /// </summary>
+    private void OnMinimumSizeChanged()
+    {
         Resize();
-	}
+    }
 
-	#endregion
-	
-	#region Public API
+    #endregion
 
-	/// <summary>
-	/// ウィンドウのコンテンツを指定されたコンテナに置き換え、ウィンドウ内の UI を新しいコンテナ内容へ更新する
-	/// </summary>
-	/// <param name="container">新しいコンテナ</param>
-	public void SetContainer(Container container)
-	{
-		ClearContent();
+    #region Public API
 
-		// 新しいコンテンツを追加
-		if (container != null)
-		{
-			_rootContainer = container;
-			_rootContainer.Owner = this; // シーンツリー上で正しく管理されるようにオーナーを設定
-			Resize(); // コンテンツのサイズに合わせてウィンドウのサイズを調整
-			// UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを登録
-			_rootContainer.MinimumSizeChanged += OnMinimumSizeChanged;
+    /// <summary>
+    /// ウィンドウのコンテンツを指定されたコンテナに置き換え、ウィンドウ内の UI を新しいコンテナ内容へ更新する
+    /// </summary>
+    /// <param name="container">新しいコンテナ</param>
+    public void SetContainer(Container container)
+    {
+        ClearContent();
 
-			// コンテナ名がPanelで始まる場合は除去してタイトルにする（必要に応じて変更可能）
-			if (container.Name.ToString().StartsWith("Panel"))
-			{
-				Title = container.Name.ToString().Substring("Panel".Length);
-			}
-			else
-			{
-				Title = container.Name.ToString(); // ウィンドウのタイトルをコンテナの名前に設定（必要に応じて変更可能）
-			}
+        // 新しいコンテンツを追加
+        if (container != null)
+        {
+            _rootContainer = container;
+            _rootContainer.Owner = this; // シーンツリー上で正しく管理されるようにオーナーを設定
+            Resize(); // コンテンツのサイズに合わせてウィンドウのサイズを調整
+                      // UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを登録
+            _rootContainer.MinimumSizeChanged += OnMinimumSizeChanged;
 
-		}
-	}
+            // コンテナ名がPanelで始まる場合は除去してタイトルにする（必要に応じて変更可能）
+            if (container.Name.ToString().StartsWith("Panel"))
+            {
+                Title = container.Name.ToString().Substring("Panel".Length);
+            }
+            else
+            {
+                Title = container.Name.ToString(); // ウィンドウのタイトルをコンテナの名前に設定（必要に応じて変更可能）
+            }
 
-	/// <summary>
-	/// ウィンドウのコンテンツをクリアし、現在のコンテンツを削除してウィンドウを空にする
-	/// </summary>
-	public void ClearContent()
-	{
-		if (_rootContainer != null)
-		{
-			// UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを解除
-			_rootContainer.MinimumSizeChanged -= OnMinimumSizeChanged;
-			_rootContainer.QueueFree();
-			_rootContainer = null;
-		}
-	}
+        }
+    }
 
-	#endregion
+    /// <summary>
+    /// ウィンドウのコンテンツをクリアし、現在のコンテンツを削除してウィンドウを空にする
+    /// </summary>
+    public void ClearContent()
+    {
+        if (_rootContainer != null)
+        {
+            // UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを解除
+            _rootContainer.MinimumSizeChanged -= OnMinimumSizeChanged;
+            _rootContainer.QueueFree();
+            _rootContainer = null;
+        }
+    }
 
-	#region Internal Helpers
+    #endregion
 
-	/// <summary>
-	/// ウィンドウサイズを子コンテナの最小サイズに合わせて調整し、コンテンツに適したサイズで表示できるようにする
-	/// </summary>
-	private void Resize()
-	{
+    #region Internal Helpers
+
+    /// <summary>
+    /// ウィンドウサイズを子コンテナの最小サイズに合わせて調整し、コンテンツに適したサイズで表示できるようにする
+    /// </summary>
+    private void Resize()
+    {
         // 子コンテナの最小サイズを取得
         var min = _rootContainer.GetCombinedMinimumSize();
 
         // Window のサイズに反映
         Size = new Vector2I((int)min.X, (int)min.Y);
-	}
+    }
 
-	#endregion
+    #endregion
 }

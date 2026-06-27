@@ -4,5 +4,6 @@
   },
   "search.exclude": {
     "**/*.uid": true
-  }
+  },
+  "editor.formatOnSave": true
 }

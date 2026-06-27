@@ -9,242 +9,264 @@ using System.Collections.Generic;
 /// </summary>
 public partial class Selection : Node
 {
-	#region Fields
+    #region Fields
 
     public static Selection Instance { get; private set; }
 
-	private static bool _isMultiSelectMode = false;
-	private HashSet<AnyModel> _models = new HashSet<AnyModel>();
+    private static bool _isMultiSelectMode = false;
+    private HashSet<AnyModel> _models = new HashSet<AnyModel>();
 
-	#endregion
+    #endregion
 
-	#region Lifecycle
+    #region Lifecycle
+
+    public override void _EnterTree()
+    {
+        Instance = this;
+    }
 
     public override void _Ready()
     {
-        Instance = this;
+        if (ModelEventHub.Instance == null)
+        {
+            LogHub.Warn("Selection: ModelEventHub is not initialized.");
+            return;
+        }
 
-		// イベントの購読開始
-		ModelEventHub.Instance.SetMultiSelectModeRequested += OnSetMultiSelectModeRequested;
-		ModelEventHub.Instance.SelectModelRequested += OnSelectModelRequested;
-		ModelEventHub.Instance.SelectModelsRequested += OnSelectModelsRequested;
-		ModelEventHub.Instance.ClearSelectionRequested += OnClearSelectionRequested;
+        // イベントの購読開始
+        ModelEventHub.Instance.SetMultiSelectModeRequested += OnSetMultiSelectModeRequested;
+        ModelEventHub.Instance.SelectModelRequested += OnSelectModelRequested;
+        ModelEventHub.Instance.SelectModelsRequested += OnSelectModelsRequested;
+        ModelEventHub.Instance.ClearSelectionRequested += OnClearSelectionRequested;
     }
 
-	public override void _ExitTree()
-	{
-		// イベントの購読解除
-		ModelEventHub.Instance.SetMultiSelectModeRequested -= OnSetMultiSelectModeRequested;
-		ModelEventHub.Instance.SelectModelRequested -= OnSelectModelRequested;
-		ModelEventHub.Instance.SelectModelsRequested -= OnSelectModelsRequested;
-		ModelEventHub.Instance.ClearSelectionRequested -= OnClearSelectionRequested;
-	}
+    public override void _ExitTree()
+    {
+        if (ModelEventHub.Instance == null)
+        {
+            return;
+        }
 
-	#endregion
+        // イベントの購読解除
+        ModelEventHub.Instance.SetMultiSelectModeRequested -= OnSetMultiSelectModeRequested;
+        ModelEventHub.Instance.SelectModelRequested -= OnSelectModelRequested;
+        ModelEventHub.Instance.SelectModelsRequested -= OnSelectModelsRequested;
+        ModelEventHub.Instance.ClearSelectionRequested -= OnClearSelectionRequested;
 
-	#region Events
+        Instance = null;
+    }
 
-	private void OnSetMultiSelectModeRequested(bool enable)
-	{
-		_isMultiSelectMode = enable;
-	}
+    #endregion
 
-	private void OnSelectModelRequested(AnyModel model)
-	{
-		if (_isMultiSelectMode)
-		{
-			Toggle(model);
-		}
-		else
-		{
-			Set(model);
-		}
-	}
+    #region Events
 
-	private void OnSelectModelsRequested(AnyModel[] models)
-	{	
-		if (_isMultiSelectMode)
-		{
-			Toggle(models);
-		}
-		else
-		{
-			Set(models);
-		}
-	}
+    private void OnSetMultiSelectModeRequested(bool enable)
+    {
+        _isMultiSelectMode = enable;
+    }
 
-	private void OnClearSelectionRequested()
-	{
-		Clear();
-	}
+    private void OnSelectModelRequested(AnyModel model)
+    {
+        if (_isMultiSelectMode)
+        {
+            Toggle(model);
+        }
+        else
+        {
+            Set(model);
+        }
+    }
 
-	#endregion
+    private void OnSelectModelsRequested(AnyModel[] models)
+    {
+        if (_isMultiSelectMode)
+        {
+            Toggle(models);
+        }
+        else
+        {
+            Set(models);
+        }
+    }
 
-	#region Public API
+    private void OnClearSelectionRequested()
+    {
+        Clear();
+    }
 
-	/// <summary>
-	/// 現在の選択モデルのコレクションの複製を取得する
-	/// </summary>
-	public static IReadOnlyCollection<AnyModel> Models => Instance._models.ToList().AsReadOnly();
+    #endregion
 
-	/// <summary>
-	/// 現在の選択モデルの数を取得する
-	/// </summary>
-	public static int Count => Instance._models.Count;
+    #region Public API
 
-	/// <summary>
-	/// 指定したモデルが選択されているかどうかを確認する
-	/// </summary>
-	/// <param name="model">確認するモデル</param>
-	/// <returns>モデルが選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
-	public static bool Contains(AnyModel model) => Instance._models.Contains(model);
+    /// <summary>
+    /// 現在の選択モデルのコレクションの複製を取得する
+    /// </summary>
+    public static IReadOnlyCollection<AnyModel> Models => Instance._models.ToList().AsReadOnly();
 
-	/// <summary>
-	/// Fit処理に使用可能な選択モデルの配列を取得する
-	/// </summary>
-	/// <remarks>
-	/// 解放済みモデルやツリー外モデルを除外したスナップショットを返す
-	/// </remarks>
-	public static AnyModel[] GetNodesArray()
-	{
-		return Instance._models
-			.Where(model => model != null && GodotObject.IsInstanceValid(model) && model.IsInsideTree())
-			.ToArray();
-	}
+    /// <summary>
+    /// 現在の選択モデルの数を取得する
+    /// </summary>
+    public static int Count => Instance._models.Count;
 
-	/// <summary>
-	/// 指定したモデルのみの選択状態にし（既存の選択はすべて解除され）
-	/// </summary>
-	/// <param name="model">選択するモデル</param>
-	public static void Set(AnyModel model)
-	{
-		Clear();
-		Add(model);
-	}
+    /// <summary>
+    /// 指定したモデルが選択されているかどうかを確認する
+    /// </summary>
+    /// <param name="model">確認するモデル</param>
+    /// <returns>モデルが選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
+    public static bool Contains(AnyModel model) => Instance._models.Contains(model);
 
-	/// <summary>
-	/// 指定したモデル群のみの選択状態にし（既存の選択はすべて解除され）
-	/// </summary>
-	/// <param name="models">選択するモデルの配列</param>
-	public static void Set(AnyModel[] models)
-	{
-		Clear();
-		foreach (var model in models)
-		{
-			Add(model);
-		}
-	}
+    /// <summary>
+    /// Fit処理に使用可能な選択モデルの配列を取得する
+    /// </summary>
+    /// <remarks>
+    /// 解放済みモデルやツリー外モデルを除外したスナップショットを返す
+    /// </remarks>
+    public static AnyModel[] GetNodesArray()
+    {
+        return Instance._models
+            .Where(model => model != null && GodotObject.IsInstanceValid(model) && model.IsInsideTree())
+            .ToArray();
+    }
 
-	/// <summary>
-	/// 指定したモデルを選択状態にする
-	/// </summary> <param name="model">選択するモデル</param>
-	/// <returns>モデルが新たに選択された場合はtrue、それ以外の場合はfalseを返す</returns>
-	/// <remarks>モデルがすでに選択されている場合は何も起こりません</remarks>
+    /// <summary>
+    /// 指定したモデルのみの選択状態にし（既存の選択はすべて解除され）
+    /// </summary>
+    /// <param name="model">選択するモデル</param>
+    public static void Set(AnyModel model)
+    {
+        Clear();
+        Add(model);
+    }
+
+    /// <summary>
+    /// 指定したモデル群のみの選択状態にし（既存の選択はすべて解除され）
+    /// </summary>
+    /// <param name="models">選択するモデルの配列</param>
+    public static void Set(AnyModel[] models)
+    {
+        Clear();
+        foreach (var model in models)
+        {
+            Add(model);
+        }
+    }
+
+    /// <summary>
+    /// 指定したモデルを選択状態にする
+    /// </summary>
+    /// <param name="model">選択するモデル</param>
+    /// <returns>モデルが新たに選択された場合はtrue、それ以外の場合はfalseを返す</returns>
+    /// <remarks>モデルがすでに選択されている場合は何も起こりません</remarks>
     public static bool Add(AnyModel model)
-	{
-		if (Instance._models.Add(model))
-		{
-			ModelEventHub.NotifyModelSelectionState(model, true);
-			LogHub.Info($"Selected: {model.Name}");
-			return true;
-		}
-		return false;
-	}
+    {
+        if (Instance._models.Add(model))
+        {
+            ModelEventHub.NotifyModelSelectionState(model, true);
+            LogHub.Info($"Selected: {model.Name}");
+            return true;
+        }
+        return false;
+    }
 
-	/// <summary>
-	/// 指定したモデル群を選択状態にする
-	/// </summary> <param name="models">選択するモデルの配列</param>
-	public static void Add(AnyModel[] models)
-	{
-		foreach (var model in models)
-		{
-			Add(model);
-		}
-	}
+    /// <summary>
+    /// 指定したモデル群を選択状態にする
+    /// </summary>
+    /// <param name="models">選択するモデルの配列</param>
+    public static void Add(AnyModel[] models)
+    {
+        foreach (var model in models)
+        {
+            Add(model);
+        }
+    }
 
-	/// <summary>
-	/// 指定したモデルを選択から外す
-	/// </summary> <param name="model">選択から外すモデル</param>
-	/// <returns>モデルが選択から外された場合はtrue、それ以外の場合はfalseを返す</returns>
-	/// <remarks>モデルが選択されていない場合は何も起こりません</remarks>
-	public static bool Remove(AnyModel model)
-	{
-		if (Instance._models.Remove(model))
-		{
-			ModelEventHub.NotifyModelSelectionState(model, false);
-			LogHub.Info($"Deselected: {model.Name}");
-			return true;
-		}
-		return false;
-	}
+    /// <summary>
+    /// 指定したモデルを選択から外す
+    /// </summary>
+    /// <param name="model">選択から外すモデル</param>
+    /// <returns>モデルが選択から外された場合はtrue、それ以外の場合はfalseを返す</returns>
+    /// <remarks>モデルが選択されていない場合は何も起こりません</remarks>
+    public static bool Remove(AnyModel model)
+    {
+        if (Instance._models.Remove(model))
+        {
+            ModelEventHub.NotifyModelSelectionState(model, false);
+            LogHub.Info($"Deselected: {model.Name}");
+            return true;
+        }
+        return false;
+    }
 
-	/// <summary>
-	/// 指定したモデル群を選択から外す
-	/// </summary> <param name="models">選択から外すモデルの配列</param>
-	public static void Remove(AnyModel[] models)
-	{
-		foreach (var model in models)
-		{
-			Remove(model);
-		}
-	}
+    /// <summary>
+    /// 指定したモデル群を選択から外す
+    /// </summary>
+    /// <param name="models">選択から外すモデルの配列</param>
+    public static void Remove(AnyModel[] models)
+    {
+        foreach (var model in models)
+        {
+            Remove(model);
+        }
+    }
 
-	/// <summary>
-	/// 指定したモデルの選択状態を切り替える
-	/// </summary> <param name="model">切り替えるモデル</param>
-	public static void Toggle(AnyModel model)
-	{
-		if (Instance._models.Contains(model))
-		{
-			Remove(model);
-		}
-		else
-		{
-			Add(model);
-		}
-	}
+    /// <summary>
+    /// 指定したモデルの選択状態を切り替える
+    /// </summary>
+    /// <param name="model">切り替えるモデル</param>
+    public static void Toggle(AnyModel model)
+    {
+        if (Instance._models.Contains(model))
+        {
+            Remove(model);
+        }
+        else
+        {
+            Add(model);
+        }
+    }
 
-	/// <summary>
-	/// 指定したモデル群の選択状態を切り替える
-	/// </summary> <param name="models">切り替えるモデルの列挙体</param>
-	public static void Toggle(AnyModel[] models)
-	{
-		// 切り替えるモデルがない場合は何もしない
-		if (models == null || models.Length == 0)
-		{
-			return;
-		}
+    /// <summary>
+    /// 指定したモデル群の選択状態を切り替える
+    /// </summary>
+    /// <param name="models">切り替えるモデルの列挙体</param>
+    public static void Toggle(AnyModel[] models)
+    {
+        // 切り替えるモデルがない場合は何もしない
+        if (models == null || models.Length == 0)
+        {
+            return;
+        }
 
-		foreach (var model in models)
-		{
-			Toggle(model);
-		}
-	}
+        foreach (var model in models)
+        {
+            Toggle(model);
+        }
+    }
 
-	/// <summary>
-	/// すべての選択を解除する
-	/// </summary>
-	/// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返す</returns>
-	public static bool Clear()
-	{
-		if (Instance._models.Count == 0)
-		{
-			return false;
-		}
+    /// <summary>
+    /// すべての選択を解除する
+    /// </summary>
+    /// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返す</returns>
+    public static bool Clear()
+    {
+        if (Instance._models.Count == 0)
+        {
+            return false;
+        }
 
-		var modelsToDeselect = Instance._models.ToArray();
-		
-		// 先にクリアしてからシグナル発報することで、シグナルハンドラ内で選択状態確認した際の整合性を保つ
-		Instance._models.Clear();
+        var modelsToDeselect = Instance._models.ToArray();
 
-		// モデルの選択解除シグナルとハイライト解除は個々に行う
-		foreach (var model in modelsToDeselect)
-		{
-			ModelEventHub.NotifyModelSelectionState(model, false);
-			LogHub.Info($"Deselected: {model.Name}");
-		}
-		return true;
-	}
+        // 先にクリアしてからシグナル発報することで、シグナルハンドラ内で選択状態確認した際の整合性を保つ
+        Instance._models.Clear();
 
-	#endregion
+        // モデルの選択解除シグナルとハイライト解除は個々に行う
+        foreach (var model in modelsToDeselect)
+        {
+            ModelEventHub.NotifyModelSelectionState(model, false);
+            LogHub.Info($"Deselected: {model.Name}");
+        }
+        return true;
+    }
+
+    #endregion
 }

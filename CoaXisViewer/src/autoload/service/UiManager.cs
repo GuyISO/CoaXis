@@ -8,108 +8,101 @@ using System;
 /// </summary>
 public partial class UiManager : Node
 {
-	#region Properties
+    #region Properties
 
-	/// <summary>
-	/// シングルトン参照
-	/// </summary>
-	public static UiManager? Instance { get; private set; }
+    /// <summary>
+    /// シングルトン参照
+    /// </summary>
+    public static UiManager? Instance { get; private set; }
 
-	#endregion
+    #endregion
 
-	#region Lifecycle
+    #region Lifecycle
 
-	/// <summary>
-	/// シーンツリー参加時にシングルトン参照を確立する
-	/// </summary>
-	public override void _EnterTree()
-	{
-		// AutoLoad をデフォルト参照として維持するため、未設定時のみ参照を確立する
-		if (Instance == null)
-		{
-			Instance = this;
-		}
-	}
+    /// <summary>
+    /// シーンツリー参加時にシングルトン参照を確立する
+    /// </summary>
+    public override void _EnterTree()
+    {
+        Instance = this;
+    }
 
-	/// <summary>
-	/// シーンツリー離脱時にシングルトン参照を破棄する
-	/// </summary>
-	public override void _ExitTree()
-	{
-		if (ReferenceEquals(Instance, this))
-		{
-			Instance = null;
-		}
-	}
+    /// <summary>
+    /// シーンツリー離脱時にシングルトン参照を破棄する
+    /// </summary>
+    public override void _ExitTree()
+    {
+        Instance = null;
+    }
 
-	#endregion
+    #endregion
 
-	#region Public API
+    #region Public API
 
-	/// <summary>
-	/// 指定されたコマンド名に対応する処理を実行する
-	/// </summary>
-	/// <param name="commandName">実行するコマンドの名前</param>
-	/// <param name="source">コマンドを発行したノード</param>
-	public void ExecuteCommand(string commandName, Node? source = null)
-	{
-		_ = source;
+    /// <summary>
+    /// 指定されたコマンド名に対応する処理を実行する
+    /// </summary>
+    /// <param name="commandName">実行するコマンドの名前</param>
+    /// <param name="source">コマンドを発行したノード</param>
+    public void ExecuteCommand(string commandName, Node? source = null)
+    {
+        _ = source;
 
-		switch (commandName)
-		{
-			case "ShowViewportInteractionWindow":
-				ShowWindow("WindowViewportInteraction");
-				break;
-			case "ShowMessageWindow":
-				ShowWindow("WindowMessage");
-				break;
-			case "ShowSettingWindow":
-				LogHub.Warn("UiManager: settings window is not implemented yet.");
-				break;
-			case "Load":
-				RequestModelLoadFromMainScene();
-				break;
-			default:
-				LogHub.Warn($"UiManager: unknown command '{commandName}'.");
-				break;
-		}
-	}
+        switch (commandName)
+        {
+            case "ShowViewportInteractionWindow":
+                ShowWindow("WindowViewportInteraction");
+                break;
+            case "ShowMessageWindow":
+                ShowWindow("WindowMessage");
+                break;
+            case "ShowSettingWindow":
+                LogHub.Warn("UiManager: settings window is not implemented yet.");
+                break;
+            case "Load":
+                RequestModelLoadFromMainScene();
+                break;
+            default:
+                LogHub.Warn($"UiManager: unknown command '{commandName}'.");
+                break;
+        }
+    }
 
-	#endregion
+    #endregion
 
-	#region Internal Helpers
+    #region Internal Helpers
 
-	// Main シーン上の既存 Window ノードを表示し、存在しない scene 参照を排除する
-	private void ShowWindow(string windowName)
-	{
-		Window? window = GetTree().Root.GetNodeOrNull<Window>($"Main/{windowName}");
-		if (window == null)
-		{
-			LogHub.Warn($"UiManager: window '{windowName}' was not found under Main.");
-			return;
-		}
+    // Main シーン上の既存 Window ノードを表示し、存在しない scene 参照を排除する
+    private void ShowWindow(string windowName)
+    {
+        Window? window = GetTree().Root.GetNodeOrNull<Window>($"Main/{windowName}");
+        if (window == null)
+        {
+            LogHub.Warn($"UiManager: window '{windowName}' was not found under Main.");
+            return;
+        }
 
-		window.Show();
-		window.GrabFocus();
-	}
+        window.Show();
+        window.GrabFocus();
+    }
 
-	// ロード対象パスは Main シーン上の TextEdit から取得し、未設定なら警告して終了する
-	private static void RequestModelLoadFromMainScene()
-	{
-		TextEdit? pathEditor = Engine.GetMainLoop() is SceneTree sceneTree
-			? sceneTree.Root.GetNodeOrNull<TextEdit>("Main/Canvas/VBoxContainer/TopBar/TextGlbPath")
-			: null;
+    // ロード対象パスは Main シーン上の TextEdit から取得し、未設定なら警告して終了する
+    private static void RequestModelLoadFromMainScene()
+    {
+        TextEdit? pathEditor = Engine.GetMainLoop() is SceneTree sceneTree
+            ? sceneTree.Root.GetNodeOrNull<TextEdit>("Main/Canvas/VBoxContainer/TopBar/TextGlbPath")
+            : null;
 
-		string path = pathEditor?.Text?.Trim() ?? string.Empty;
-		if (string.IsNullOrWhiteSpace(path))
-		{
-			LogHub.Warn("UiManager: model path is empty.");
-			return;
-		}
+        string path = pathEditor?.Text?.Trim() ?? string.Empty;
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            LogHub.Warn("UiManager: model path is empty.");
+            return;
+        }
 
-		ModelEventHub.RequestLoadModel(path);
-	}
+        ModelEventHub.RequestLoadModel(path);
+    }
 
-	#endregion
+    #endregion
 
 }

@@ -1,0 +1,6 @@
+{
+  "Ipc": {
+    "PipeName": "CoaXisViewerPipe",
+    "StartPipeServerOnReady": true
+  }
+}

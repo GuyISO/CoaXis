@@ -8,63 +8,63 @@ using System.Linq;
 /// </summary>
 public partial class AnyModel : Node3D
 {
-	#region Properties
+    #region Properties
 
-	/// <summary>
-	/// このモデルのメッシュを保持する Node3D で、動的ロード後はこの中にメッシュが追加される
-	/// </summary>
-	/// <returns>メッシュを保持する Node3D</returns>
-	public Node3D Mesh { get; private set; }
+    /// <summary>
+    /// このモデルのメッシュを保持する Node3D で、動的ロード後はこの中にメッシュが追加される
+    /// </summary>
+    /// <returns>メッシュを保持する Node3D</returns>
+    public Node3D Mesh { get; private set; }
 
-	/// <summary>
-	/// このモデルがメッシュを持っているかどうかを示す
-	/// </summary>
-	/// <returns>メッシュが存在する場合は true、存在しない場合は false を返す</returns>
-	public bool HasMesh => Mesh.GetChildCount() > 0;
+    /// <summary>
+    /// このモデルがメッシュを持っているかどうかを示す
+    /// </summary>
+    /// <returns>メッシュが存在する場合は true、存在しない場合は false を返す</returns>
+    public bool HasMesh => Mesh.GetChildCount() > 0;
 
-	/// <summary>
-	/// このモデルの衝突形状を保持する StaticBody3D 
-	/// </summary>
-	/// <returns>衝突形状を保持する StaticBody3D</returns>
-	public StaticBody3D Collider { get; private set; }
+    /// <summary>
+    /// このモデルの衝突形状を保持する StaticBody3D 
+    /// </summary>
+    /// <returns>衝突形状を保持する StaticBody3D</returns>
+    public StaticBody3D Collider { get; private set; }
 
-	/// <summary>
-	/// このモデルが衝突形状を持っているかどうかを示す
-	/// </summary>
-	/// <returns>衝突形状が存在する場合は true、存在しない場合は false を返す</returns>
-	public bool HasCollider => Collider.GetChildCount() > 0;
+    /// <summary>
+    /// このモデルが衝突形状を持っているかどうかを示す
+    /// </summary>
+    /// <returns>衝突形状が存在する場合は true、存在しない場合は false を返す</returns>
+    public bool HasCollider => Collider.GetChildCount() > 0;
 
-	/// <summary>
-	/// このモデルの親モデルを取得する、親モデルが存在しない場合は null を返す
-	/// </summary>
-	/// <returns>親モデル、存在しない場合は null</returns>
-	public AnyModel ParentModel => GetParentOrNull<AnyModel>();
+    /// <summary>
+    /// このモデルの親モデルを取得する、親モデルが存在しない場合は null を返す
+    /// </summary>
+    /// <returns>親モデル、存在しない場合は null</returns>
+    public AnyModel ParentModel => GetParentOrNull<AnyModel>();
 
-	/// <summary>
-	/// このモデルの子モデルのリストを取得する、子モデルが存在しない場合は空のリストを返す
-	/// </summary>
-	/// <returns>子モデルのリスト、存在しない場合は空のリスト</returns>
-	public List<AnyModel> ChildModels => GetChildren().OfType<AnyModel>().ToList();
+    /// <summary>
+    /// このモデルの子モデルのリストを取得する、子モデルが存在しない場合は空のリストを返す
+    /// </summary>
+    /// <returns>子モデルのリスト、存在しない場合は空のリスト</returns>
+    public List<AnyModel> ChildModels => GetChildren().OfType<AnyModel>().ToList();
 
-	#endregion
+    #endregion
 
-	#region Lifecycle
+    #region Lifecycle
 
-	public override void _Ready()
-	{
-		Mesh = new Node3D();
-		Mesh.Name = "Mesh";
-		AddChild(Mesh);
-		Collider = new StaticBody3D();
-		Collider.Name = "Collider";
-		AddChild(Collider);
-	}
+    public override void _Ready()
+    {
+        Mesh = new Node3D();
+        Mesh.Name = "Mesh";
+        AddChild(Mesh);
+        Collider = new StaticBody3D();
+        Collider.Name = "Collider";
+        AddChild(Collider);
+    }
 
-	#endregion
+    #endregion
 
-	#region Internal Helpers
+    #region Internal Helpers
 
 
 
-	#endregion
+    #endregion
 }

@@ -12,9 +12,14 @@ public partial class UndoManager : Node
     private readonly Stack<CommandBase> _undoStack = new();
     private readonly Stack<CommandBase> _redoStack = new();
 
-    public override void _Ready()
+    public override void _EnterTree()
     {
         Instance = this;
+    }
+
+    public override void _ExitTree()
+    {
+        Instance = null;
     }
 
     /// <summary>
