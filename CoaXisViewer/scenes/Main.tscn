@@ -3,15 +3,12 @@
 [ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://src/features/model/RootModel.cs" id="1_3p2gp"]
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="2_bjd11"]
 [ext_resource type="Script" uid="uid://co6erwykahhud" path="res://src/features/model/AnyModel.cs" id="2_cvmbd"]
-[ext_resource type="Script" uid="uid://bv1qjj2yvm6xc" path="res://src/test/SendIpc.cs" id="3_qmy6f"]
-[ext_resource type="Script" uid="uid://b5keyjh3gtsfo" path="res://src/test/ButtonSendHttp.cs" id="4_mwfav"]
-[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/ui/SceneCommandButton.cs" id="5_qmy6f"]
+[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/features/ui/SceneCommandButton.cs" id="5_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewer/AxisNavigator.tscn" id="6_cvmbd"]
 [ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/features/view/CameraRig.cs" id="7_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/ViewportOverlay.tscn" id="7_ft6cd"]
-[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/ui/FpsUi.cs" id="8_bb450"]
-[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/ui/HierarchyTree.cs" id="8_qmy6f"]
-[ext_resource type="Script" uid="uid://1us0ficbltrg" path="res://src/test/IpcClient.cs" id="10_1nqs0"]
+[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/features/ui/FpsUi.cs" id="8_bb450"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/features/ui/HierarchyTree.cs" id="8_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/ui/MessagePanel.tscn" id="14_3p2gp"]
 [ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/features/view/ViewportInputHandler.cs" id="14_3t3px"]
 [ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/ViewportInteractionPanel.tscn" id="15_cvmbd"]
@@ -109,22 +106,6 @@ grow_vertical = 2
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 
-[node name="ButtonSendIpc" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=368943670]
-layout_mode = 2
-tooltip_text = "NamedPipeの通信テストを行います"
-theme_override_font_sizes/font_size = 24
-text = "SendIpc"
-script = ExtResource("3_qmy6f")
-_ipcClientPath = NodePath("../../../../IpcClient")
-
-[node name="ButtonSendHttp" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=576924412]
-layout_mode = 2
-tooltip_text = "httpリクエストの通信テストを行います"
-theme_override_font_sizes/font_size = 24
-text = "SendHttp"
-script = ExtResource("4_mwfav")
-_httpClientPath = NodePath("")
-
 [node name="ButtonShowViewportInteractionWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1370305409]
 layout_mode = 2
 tooltip_text = "ビュー操作用のウィンドウを表示します"
@@ -156,6 +137,7 @@ layout_mode = 2
 tooltip_text = "指定したパスからモデルをロードします"
 theme_override_font_sizes/font_size = 24
 text = "LoadModel"
+script = ExtResource("5_qmy6f")
 
 [node name="TextGlbPath" type="TextEdit" parent="Canvas/VBoxContainer/TopBar" unique_id=1210780805]
 custom_minimum_size = Vector2(600, 0)
@@ -246,9 +228,6 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 vertical_alignment = 2
 script = ExtResource("8_bb450")
-
-[node name="IpcClient" type="Node" parent="." unique_id=1710088594]
-script = ExtResource("10_1nqs0")
 
 [node name="WindowViewportInteraction" parent="." unique_id=940691164 instance=ExtResource("15_ft6cd")]
 initial_position = 0

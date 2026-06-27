@@ -42,6 +42,21 @@
 
 ---
 
+### [2026-06-27] EventHub の Request/Notification region 体裁を正式ルール化
+
+- 背景: `ModelEventHub` と `ViewportEventHub` は、`Request` と `Notification` を分離した装飾付き region で運用されており、責務境界が読み取りやすい状態になっている。
+- 問題: 一般規約の region 名統一だけを機械適用すると、EventHub の体裁が壊れ、意図した読みやすさが失われる。
+- 判断: EventHub クラスのみ、装飾付きの `Request` / `Notification` region を例外として許可する。
+- 判断理由: EventHub は「要求発行」と「状態通知」を同居させる集約点であり、2系統を視覚的に分けるメリットが大きい。
+- 採用しなかった代替案: すべてを `Public API` に統合する案は、規約の単純さは高いが、EventHub では探索性が低下するため不採用。
+- 影響範囲: `CoaXisViewer/src/autoload/event/*EventHub.cs` と region 体裁リファクタ手順。
+- 実装/運用手順: EventHub 変更時は `Properties -> Lifecycle -> Request -> Notification` の順序を維持し、非 EventHub クラスには同装飾 region を持ち込まない。
+- 検証方法: `#region` 検索で EventHub 以外に装飾付き `Request` / `Notification` が存在しないことを確認する。
+- 関連ファイル/関連仕様: `docs/rules/implementation-conventions.md`, `CoaXisViewer/src/autoload/event/ModelEventHub.cs`, `CoaXisViewer/src/autoload/event/ViewportEventHub.cs`
+- 備考: 体裁統一の自動化を行う場合は、EventHub の例外パターンを除外条件に含める。
+
+---
+
 ### [2026-06-01] Viewer IPCメッセージをcommand/payloadエンベロープへ統一
 
 - 背景: CoaXisViewer の IPC 実装が PoC 段階の文字列送信中心で、仕様書のコマンド契約（LoadModel, ApplyCameraPreset など）と追跡しづらかった。

@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using System;
 
 public partial class HierarchyTree : Tree
@@ -16,8 +16,8 @@ public partial class HierarchyTree : Tree
 		CellSelected += OnCellSelected;
 
 		// イベントの購読
-		ModelEventHub.I.AddModelRequested += OnAddModelRequested;
-		ModelEventHub.I.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+		ModelEventHub.Instance.AddModelRequested += OnAddModelRequested;
+		ModelEventHub.Instance.ModelSelectionStateNotified += OnModelSelectionStateNotified;
 
 		// 関連ノードのキャッシュ
 		_rootModel = GetNode<RootModel>("/root/Main/Models");
@@ -39,8 +39,8 @@ public partial class HierarchyTree : Tree
 		CellSelected -= OnCellSelected;
 
 		// イベントの購読解除
-		ModelEventHub.I.AddModelRequested -= OnAddModelRequested;
-		ModelEventHub.I.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+		ModelEventHub.Instance.AddModelRequested -= OnAddModelRequested;
+		ModelEventHub.Instance.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
 	}
 
 	#region Events
@@ -129,7 +129,7 @@ public partial class HierarchyTree : Tree
 	/// <param name="parentTreeItem">親の TreeItem</param>
 	private void AddToTree(AnyModel model, TreeItem parentTreeItem = null)
 	{
-		// ツリーにアイテムを追加。親が null の場合はルートアイテムとして追加される便利仕様
+		// ツリーにアイテムを追加、親が null の場合はルートアイテムとして追加される便利仕様
 		TreeItem item = CreateItem(parentTreeItem);
 		item.SetText((int)HierarchyTreeColumn.Name, model.Name);
 

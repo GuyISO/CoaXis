@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 
 /// <summary>
-/// CoaXisViewer が扱う IPC コマンド名を定義します。
+/// CoaXisViewer が扱う IPC コマンド名を定義する
 /// </summary>
 public static class ViewerIpcCommand
 {
@@ -20,7 +20,7 @@ public static class ViewerIpcCommand
 }
 
 /// <summary>
-/// CoaXisViewer から Editor へ通知する IPC イベント名を定義します。
+/// CoaXisViewer から Editor へ通知する IPC イベント名を定義する
 /// </summary>
 public static class ViewerIpcEvent
 {
@@ -31,18 +31,18 @@ public static class ViewerIpcEvent
 }
 
 /// <summary>
-/// NamedPipe で送受信する JSON メッセージの共通エンベロープです。
+/// NamedPipe で送受信する JSON メッセージの共通エンベロープ
 /// </summary>
 public sealed class ViewerIpcEnvelope
 {
 	/// <summary>
-	/// 実行対象の IPC コマンドまたはイベント名です。
+	/// 実行対象の IPC コマンドまたはイベント名
 	/// </summary>
 	[JsonPropertyName("command")]
 	public string Command { get; init; } = string.Empty;
 
 	/// <summary>
-	/// コマンド固有の任意ペイロードです。
+	/// コマンド固有の任意ペイロード
 	/// </summary>
 	[JsonPropertyName("payload")]
 	public JsonElement? Payload { get; init; }

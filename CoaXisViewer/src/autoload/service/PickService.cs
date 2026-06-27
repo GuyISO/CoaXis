@@ -1,4 +1,4 @@
-using Godot;
+﻿using Godot;
 using Godot.Collections;
 using System;
 using System.Collections.Generic;
@@ -7,13 +7,13 @@ using System.Collections.Generic;
 public partial class PickService : Node
 {
 	/// <summary>
-	/// 指定したカメラからスクリーン座標に向けてレイキャストを行い、ヒット情報を返します。
+	/// 指定したカメラからスクリーン座標に向けてレイキャストを行い、ヒット情報を返す
 	/// </summary>
-	/// <param name="camera">レイを発射するカメラ。</param>
-	/// <param name="screenPosition">レイのスクリーン座標。</param>
-	/// <param name="collisionMask">レイキャストの衝突マスク。デフォルトはカメラのカリングマスク。</param>
-	/// <param name="excludeRids">レイキャストから除外するオブジェクトのRIDリスト。</param>
-	/// <returns>レイのヒット情報を含む PickResult 構造体。</returns>
+	/// <param name="camera">レイを発射するカメラ</param>
+	/// <param name="screenPosition">レイのスクリーン座標</param>
+	/// <param name="collisionMask">レイキャストの衝突マスク、デフォルトはカメラのカリングマスク</param>
+	/// <param name="excludeRids">レイキャストから除外すオブジェクトのRIDリスト</param>
+	/// <returns>レイのヒット情報を含む PickResult 構造体</returns>
 	public static PickResult PickByRay(Camera3D camera, Vector2 screenPosition, uint? collisionMask = null, List<Rid> excludeRids = null)
 	{
 		var origin = camera.ProjectRayOrigin(screenPosition);
@@ -45,14 +45,14 @@ public partial class PickService : Node
 	}
 
 	/// <summary>
-	/// 指定したカメラからスクリーン座標に向けてレイキャストを行い、すべてのヒット情報をリストで返します。
+	/// 指定したカメラからスクリーン座標に向けてレイキャストを行い、すべてのヒット情報をリストで返す
 	/// </summary>
-	/// <param name="camera">レイを発射するカメラ。</param>
-	/// <param name="screenPosition">レイのスクリーン座標。</param>
-	/// <param name="collisionMask">レイキャストの衝突マスク。デフォルトはカメラのカリングマスク。</param>
-	/// <param name="excludeRids">レイキャストから除外するオブジェクトのRIDリスト。</param>
-	/// <returns>レイのヒット情報を含む PickResult のリスト。</returns>
-	/// <remarks>Godotには貫通レイキャストがないため単体レイキャストを繰り返し呼び出し、すべてのヒットを収集することで実装しています。</remarks>
+	/// <param name="camera">レイを発射するカメラ</param>
+	/// <param name="screenPosition">レイのスクリーン座標</param>
+	/// <param name="collisionMask">レイキャストの衝突マスク、デフォルトはカメラのカリングマスク</param>
+	/// <param name="excludeRids">レイキャストから除外するオブジェクトのRIDリスト</param>
+	/// <returns>レイのヒット情報を含む PickResult のリスト</returns>
+	/// <remarks>Godotには貫通レイキャストがないため単体レイキャストを繰り返し呼び出し、すべてのヒットを収集することで実装している</remarks>
 	public static List<PickResult> PickAllByRay(Camera3D camera, Vector2 screenPosition, uint? collisionMask = null, List<Rid> excludeRids = null)
 	{
 		// 引数で受け取った除外リストに、レイキャスト情報を取得するたびに除外品目を追加していくため複製して使用
@@ -87,14 +87,14 @@ public partial class PickService : Node
 	}
 
 	/// <summary>
-	/// 指定したカメラから、指定した形状を使用して空間内のオブジェクトを取得します。
+	/// 指定したカメラから、指定した形状を使用して空間内のオブジェクトを取得する
 	/// </summary>
-	/// <param name="camera">形状クエリを行うカメラ。</param>
-	/// <param name="shape">使用する形状、ワールド座標系での配置を想定。</param>
-	/// <param name="requireFullContainment">形状に完全に内包されているオブジェクトのみを取得するかどうか。true の場合、形状の内側に完全に含まれているオブジェクトのみがヒットとみなされます。false の場合、形状と交差していればヒットとみなされます。</param>
-	/// <param name="collisionMask">クエリの衝突マスク。デフォルトはカメラのカリングマスク。</param>
-	/// <param name="excludeRids">クエリから除外するオブジェクトのRIDリスト。</param>
-	/// <returns>クエリのヒット情報を含む PickResult のリスト。</returns>
+	/// <param name="camera">形状クエリを行うカメラ</param>
+	/// <param name="shape">使用する形状、ワールド座標系での配置を想定</param>
+	/// <param name="requireFullContainment">形状に完全内包されたオブジェクトのみを取得するかどうか、true の場合は完全内包のみをヒットとみなし false の場合は形状と交差していればヒットとみなす</param>
+	/// <param name="collisionMask">クエリの衝突マスク、デフォルトはカメラのカリングマスク</param>
+	/// <param name="excludeRids">クエリから除外するオブジェクトのRIDリスト</param>
+	/// <returns>クエリのヒット情報を含む PickResult のリスト</returns>
 	public static List<PickResult> PickByShape(Camera3D camera,	Shape3D shape, bool requireFullContainment , uint? collisionMask = null, List<Rid> excludeRids = null)
 	{
 		var space = camera.GetWorld3D().DirectSpaceState;
@@ -102,7 +102,7 @@ public partial class PickService : Node
 		var query = new PhysicsShapeQueryParameters3D
 		{
 			Shape = shape,
-			Transform = Transform3D.Identity, // 形状のローカル原点をワールド空間のどこに配置するか。例えば、矩形選択の場合は、カメラの位置と向きに基づいて形状を配置するための Transform3D を使用します。
+			Transform = Transform3D.Identity, // 形状のローカル原点をワールド空間のどこに配置するか、例えば、矩形選択の場合は、カメラの位置と向きに基づいて形状を配置するための Transform3D を使用する
 			CollisionMask = collisionMask ?? camera.CullMask
 		};
 
@@ -112,7 +112,7 @@ public partial class PickService : Node
 		}
 		var results = space.IntersectShape(query);
 
-		// GodotのIntersectShapeは、ヒットしたオブジェクトの位置や法線などの詳細な情報を返さないため、ノードへの参照のみをPickResultに格納
+		// Godot の IntersectShape はヒット位置や法線などの詳細情報を返さないため、ノード参照のみを PickResult に格納する
 		// 指定したShapeと交差したオブジェクトがすべて取得される
 		var pickResults = new List<PickResult>();
 		foreach (var result in results)

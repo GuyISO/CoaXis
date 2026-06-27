@@ -1,8 +1,9 @@
-using Godot;
+﻿using Godot;
 using System;
 
 /// <summary>
-/// ユーザーのキーボードやコントローラー入力を処理するノードです。Autoloadに登録され、常にシーンツリーに存在します、シングルトンです。
+/// ユーザーのキーボードやコントローラー入力を処理するノード
+/// Autoload に登録され常にシーンツリーに存在し、シングルトン参照される
 /// </summary>
 public partial class DeviceInputHandler : Node
 {
@@ -15,7 +16,7 @@ public partial class DeviceInputHandler : Node
 
 	private bool _isMultiSelectMode = false;
 
-	public static DeviceInputHandler I { get; private set; }
+	public static DeviceInputHandler Instance { get; private set; }
 
 	#endregion
 
@@ -23,12 +24,12 @@ public partial class DeviceInputHandler : Node
 
 	public override void _Ready()
 	{
-		I = this;
+		Instance = this;
 	}
 
 	public override void _Process(double delta)
 	{
-		// マルチセレクトモードの状態を更新します。
+		// マルチセレクトモードの状態を更新する
 		bool wasMultiSelectMode = _isMultiSelectMode;
 		_isMultiSelectMode = Input.IsActionPressed("select_multiple");
 		if (wasMultiSelectMode != _isMultiSelectMode)
@@ -36,18 +37,10 @@ public partial class DeviceInputHandler : Node
 			ModelEventHub.RequestSetMultiSelectMode(_isMultiSelectMode);
 		}
 
-		// ユーザーの入力に基づいてカメラの平行移動と回転をリクエストします。
+		// ユーザーの入力に基づいてカメラの平行移動と回転をリクエストする
 		float dt = (float)delta;
 		HandleTranslationInput(dt);
 		HandleRotationInput(dt);
-	}
-
-    public override async void _UnhandledKeyInput(InputEvent @event)
-    {
-		if (@event.IsActionPressed("load"))
-		{
-			ModelEventHub.RequestLoadModel("res://assets/models/car.glb");
-		}
 	}
 
 	#endregion
@@ -55,7 +48,7 @@ public partial class DeviceInputHandler : Node
 	#region Internal Helpers
 
 	/// <summary>
-	/// ユーザーの入力に基づいてカメラの平行移動をリクエストします。
+	/// ユーザーの入力に基づいてカメラの平行移動をリクエストする
 	/// </summary>
 	/// <param name="delta">前のフレームからの経過時間（秒）</param>
 	private static void HandleTranslationInput(float delta)
@@ -75,12 +68,12 @@ public partial class DeviceInputHandler : Node
 			translationDirection = translationDirection.Normalized();
 		}
 
-		Vector3 translation = translationDirection * (I._translateSpeed * delta);
+		Vector3 translation = translationDirection * (Instance._translateSpeed * delta);
 		ViewportEventHub.RequestTranslate(translation, SpaceMode.Camera);
 	}
 
 	/// <summary>
-	/// ユーザーの入力に基づいてカメラの回転をリクエストします。
+	/// ユーザーの入力に基づいてカメラの回転をリクエストする
 	/// </summary>
 	/// <param name="delta">前のフレームからの経過時間（秒）</param>
 	private static void HandleRotationInput(float delta)
@@ -94,9 +87,9 @@ public partial class DeviceInputHandler : Node
 			return;
 		}
 
-		float yawAngle = Mathf.DegToRad(yawInput * I._rotateSpeedDegrees * delta);
-		float pitchAngle = Mathf.DegToRad(pitchInput * I._rotateSpeedDegrees * delta);
-		float rollAngle = Mathf.DegToRad(rollInput * I._rollSpeedDegrees * delta);
+		float yawAngle = Mathf.DegToRad(yawInput * Instance._rotateSpeedDegrees * delta);
+		float pitchAngle = Mathf.DegToRad(pitchInput * Instance._rotateSpeedDegrees * delta);
+		float rollAngle = Mathf.DegToRad(rollInput * Instance._rollSpeedDegrees * delta);
 		Quaternion yaw = new Quaternion(Vector3.Up, yawAngle);
 		Quaternion pitch = new Quaternion(Vector3.Right, pitchAngle);
 		Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
@@ -106,7 +99,7 @@ public partial class DeviceInputHandler : Node
 	}
 
 	/// <summary>
-	/// 指定されたアクションに基づいて軸の値を取得します。
+	/// 指定されたアクションに基づいて軸の値を取得する
 	/// </summary>
 	/// <param name="negativeAction">負の方向のアクション名</param>
 	/// <param name="positiveAction">正の方向のアクション名</param>

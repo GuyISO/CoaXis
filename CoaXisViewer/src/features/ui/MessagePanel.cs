@@ -3,7 +3,7 @@ using System;
 using System.Text;
 
 /// <summary>
-/// 実行中のコンソール表示の代わりを担う簡易パネルです。
+/// 実行中のコンソール表示の代わりを担う簡易パネル
 /// </summary>
 public partial class MessagePanel : PanelContainer
 {
@@ -15,7 +15,7 @@ public partial class MessagePanel : PanelContainer
     private RichTextLabel _label;
 
     // ログのバッファ
-    private StringBuilder _buffer = new StringBuilder();
+    private readonly StringBuilder _buffer = new StringBuilder();
 
 	#endregion
 
@@ -30,23 +30,23 @@ public partial class MessagePanel : PanelContainer
         }
 
         // イベント購読の登録
-        LogHub.I.Logged += OnLogged;
+        LogHub.Instance.Logged += OnLogged;
     }
 
     public override void _ExitTree()
     {
         // イベント購読の解除
-        LogHub.I.Logged -= OnLogged;
+        LogHub.Instance.Logged -= OnLogged;
     }
 
 	#endregion
 
-	#region Events
+    #region Events
 
     /// <summary>
-    /// ログ出力と同時に画面へログを表示します。
+    /// ログ出力と同時に画面へログを表示する
     /// </summary>
-    /// <param name="line">記録されたメッセージ。</param>
+    /// <param name="line">記録されたメッセージ</param>
     private void OnLogged(string line)
     {
         AddLine(line);
@@ -54,12 +54,12 @@ public partial class MessagePanel : PanelContainer
 
 	#endregion
 
-    #region Helper Methods
+    #region Internal Helpers
     
     /// <summary>
-    /// 1行ログを画面へ追加します。
+    /// 1行ログを画面へ追加する
     /// </summary>
-    /// <param name="text">追加する文字列。</param>
+    /// <param name="text">追加する文字列</param>
     private void AddLine(string text)
     {
         if (_label == null)

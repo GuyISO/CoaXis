@@ -1,12 +1,15 @@
-using Godot;
+﻿using Godot;
 using System;
 using System.Collections.Generic;
 
+/// <summary>
+/// モデル選択状態に応じてハイライト表示を切り替えるサービス
+/// </summary>
 public partial class HighlightService : Node
 {
 	#region Fields
 
-    public static HighlightService I { get; private set; }
+    public static HighlightService Instance { get; private set; }
 
 	#endregion
 
@@ -14,16 +17,16 @@ public partial class HighlightService : Node
 
     public override void _Ready()
     {
-        I = this;
+        Instance = this;
 
 		// イベントの購読開始
-		ModelEventHub.I.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+		ModelEventHub.Instance.ModelSelectionStateNotified += OnModelSelectionStateNotified;
     }
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		ModelEventHub.I.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+		ModelEventHub.Instance.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
 	}
 
 	#endregion
@@ -31,10 +34,10 @@ public partial class HighlightService : Node
 	#region Events
 
 	/// <summary>
-	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラです。
+	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ
 	/// </summary>
-	/// <param name="model">選択状態が変更されたモデルです。</param>
-	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalseです。</param>
+	/// <param name="model">選択状態が変更されたモデル</param>
+	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
 	private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
 	{
 		HighLightModel(model, isSelected);
@@ -42,13 +45,13 @@ public partial class HighlightService : Node
 
 	#endregion
 
-	#region Helper Methods
+	#region Internal Helpers
 
 	/// <summary>
-	/// 指定したモデルとその子孫のハイライト状態を切り替えます。
+	/// 指定したモデルとその子孫のハイライト状態を切り替える
 	/// </summary>
-	/// <param name="model">切り替えるモデルです。</param>
-	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalseです。</param>
+	/// <param name="model">切り替えるモデル</param>
+	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalse</param>
 	private static void HighLightModel(AnyModel model, bool enable = true)
 	{
 		// 指定したモデルとその子孫のモデルすべてにハイライト状態を適用する
@@ -60,10 +63,10 @@ public partial class HighlightService : Node
 	}
 
 	/// <summary>
-	/// 指定したモデルのハイライト状態を切り替えます。
+	/// 指定したモデルのハイライト状態を切り替える
 	/// </summary>
-	/// <param name="model">切り替えるモデルです。</param>
-	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalseです。</param>
+	/// <param name="model">切り替えるモデル</param>
+	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
 	private static void HighlightMesh(AnyModel model, bool enable = true)
 	{
 		if (enable)
@@ -89,10 +92,10 @@ public partial class HighlightService : Node
 	}
 
 	/// <summary>
-	/// 指定したモデルからモデルを再帰的に取得します。
+	/// 指定したモデルからモデルを再帰的に取得する
 	/// </summary>
-	/// <param name="model">取得対象のモデルです。</param>
-	/// <returns>取得したモデルのリストです。</returns>
+	/// <param name="model">取得対象のモデル</param>
+	/// <returns>取得したモデルのリスト</returns>
 	private static List<AnyModel> GetModelsRecursively(AnyModel model)
 	{
 		var models = new List<AnyModel>();
@@ -111,9 +114,9 @@ public partial class HighlightService : Node
 	}
 
 	/// <summary>
-	/// 指定したノードとその子孫からMeshInstance3Dを再帰的に取得します。
+	/// 指定したノードとその子孫からMeshInstance3Dを再帰的に取得する
 	/// </summary>
-	/// <param name="node">取得対象のノードです。</param>
+	/// <param name="node">取得対象のノード</param>
 	private static List<MeshInstance3D> GetMeshInstancesRecursively(Node node)
 	{
 		var meshInstances = new List<MeshInstance3D>();
@@ -132,9 +135,9 @@ public partial class HighlightService : Node
 	}
 
 	/// <summary>
-	/// 指定したモデルの祖先に選択状態のモデルが存在するかどうかを判定します。
+	/// 指定したモデルの祖先に選択状態のモデルが存在するかどうかを判定する
 	/// </summary>
-	/// <param name="model">判定対象のモデルです。</param>
+	/// <param name="model">判定対象のモデル</param>
 	private static bool HasSelectedAncestor(AnyModel model)
 	{
 		while (model != null)

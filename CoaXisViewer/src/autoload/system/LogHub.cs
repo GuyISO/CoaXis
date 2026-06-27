@@ -1,14 +1,14 @@
-using Godot;
+﻿using Godot;
 using System;
 using System.IO;
 
 /// <summary>
-/// ログ関連のイベント集約ハブです。AutoLoadノードとしてシーンツリーに配置し、ログの通知や出力を管理します。これにより、ログ操作のロジックを分散させずに一元管理できます。
-/// Autoloadに登録してシングルトン参照することを前提としています。
+/// ログ関連のイベント集約ハブで AutoLoad ノードとしてシーンツリーに配置し、ログ通知と出力を一元管理する
+/// Autoloadに登録してシングルトン参照することを前提としている
 /// </summary>
 public partial class LogHub : Node
 {
-    public static LogHub I { get; private set; } // シングルトン参照
+    public static LogHub Instance { get; private set; } // シングルトン参照
 
     private StreamWriter _fileWriter;
     private string _logFilePath = string.Empty;
@@ -18,7 +18,7 @@ public partial class LogHub : Node
 
     public override void _Ready()
     {
-        I = this;
+        Instance = this;
 
         _logFilePath = ProjectSettings.GlobalizePath("user://app.log");
         _fileWriter = new StreamWriter(_logFilePath, append: true);
@@ -26,10 +26,10 @@ public partial class LogHub : Node
     }
 
     /// <summary>
-    /// ログレベルとメッセージを指定してログを出力します。
+    /// ログレベルとメッセージを指定してログを出力する
     /// </summary>
-    /// <param name="level">ログレベルです。</param>
-    /// <param name="message">ログメッセージです。</param> 
+    /// <param name="level">ログレベル</param>
+    /// <param name="message">ログメッセージ</param> 
     public static void Log(LogLevel level, string message)
     {
         string line = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} [{level}] {message}";
@@ -38,37 +38,37 @@ public partial class LogHub : Node
         GD.Print(line);
 
         // ファイルへの出力
-        if (I._enableFileLog)
+        if (Instance._enableFileLog)
         {
-            I._fileWriter.WriteLine(line);
-            I._fileWriter.Flush();
+            Instance._fileWriter.WriteLine(line);
+            Instance._fileWriter.Flush();
         }
         
         // イベントの発行
-        I.EmitSignal(SignalName.Logged, line);
+        Instance.EmitSignal(SignalName.Logged, line);
     }
 
     /// <summary>
-    /// デバッグレベルのログを出力します。
+    /// デバッグレベルのログを出力する
     /// </summary>
-    /// <param name="msg">ログメッセージです。</param>
+    /// <param name="msg">ログメッセージ</param>
     public static void Debug(string msg) => Log(LogLevel.Debug, msg);
 
     /// <summary>
-    /// 情報レベルのログを出力します。
+    /// 情報レベルのログを出力する
     /// </summary>
-    /// <param name="msg">ログメッセージです。</param>
+    /// <param name="msg">ログメッセージ</param>
     public static void Info(string msg)  => Log(LogLevel.Info, msg);
 
     /// <summary>
-    /// 警告レベルのログを出力します。
+    /// 警告レベルのログを出力する
     /// </summary>
-    /// <param name="msg">ログメッセージです。</param>
+    /// <param name="msg">ログメッセージ/param>
     public static void Warn(string msg)  => Log(LogLevel.Warn, msg);
 
     /// <summary>
-    /// エラーレベルのログを出力します。
+    /// エラーレベルのログを出力する
     /// </summary>
-    /// <param name="msg">ログメッセージです。</param>
+    /// <param name="msg">ログメッセージ</param>
     public static void Error(string msg) => Log(LogLevel.Error, msg);
 }

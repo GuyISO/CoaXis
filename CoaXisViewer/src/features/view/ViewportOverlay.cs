@@ -1,10 +1,10 @@
 ﻿using Godot;
 
 /// <summary>
-/// 画面中央のナビゲータ（中心軸・アークボール補助表示）を描画します。
+/// 画面中央のナビゲータ（中心軸・アークボール補助表示）を描画する
 /// </summary>
 /// <remarks>
-/// 描画対象のオブジェクトは常に保持しているため、描画の更新はイベント駆動で行います。ビューポートの状態が変化したときにイベントを発行してもらい、そのイベントを受け取ったときに表示状態に反映します。
+/// 描画対象のオブジェクトは常に保持しているため描画更新はイベント駆動で行い、ビューポート状態の変化イベントを受け取ったときに表示状態へ反映する
 /// </remarks>
 public partial class ViewportOverlay : Control
 {
@@ -65,32 +65,31 @@ public partial class ViewportOverlay : Control
 		_selectionRectLineVertical2 = _selectionRect.GetNode<Line2D>("LineVertical2");
 
 		// イベントの購読登録
-		ViewportEventHub.I.RotateRequested += OnRotateRequested;
-		ViewportEventHub.I.RotationNotified += OnRotationNotified;
-		ViewportEventHub.I.InputModeNotified += OnInputModeNotified;
-		ViewportEventHub.I.ArcballRadiusNotified += OnArcballRadiusNotified;
-		ViewportEventHub.I.ArcballHandleNotified += OnArcballHandleNotified;
-		ViewportEventHub.I.SelectionRectNotified += OnSelectionRectNotified;
+		ViewportEventHub.Instance.RotateRequested += OnRotateRequested;
+		ViewportEventHub.Instance.RotationNotified += OnRotationNotified;
+		ViewportEventHub.Instance.InputModeNotified += OnInputModeNotified;
+		ViewportEventHub.Instance.ArcballRadiusNotified += OnArcballRadiusNotified;
+		ViewportEventHub.Instance.ArcballHandleNotified += OnArcballHandleNotified;
+		ViewportEventHub.Instance.SelectionRectNotified += OnSelectionRectNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		ViewportEventHub.I.RotateRequested -= OnRotateRequested;
-		ViewportEventHub.I.RotationNotified -= OnRotationNotified;
-		ViewportEventHub.I.InputModeNotified -= OnInputModeNotified;
-		ViewportEventHub.I.ArcballRadiusNotified -= OnArcballRadiusNotified;
-		ViewportEventHub.I.ArcballHandleNotified -= OnArcballHandleNotified;
-		ViewportEventHub.I.SelectionRectNotified -= OnSelectionRectNotified;
+		ViewportEventHub.Instance.RotateRequested -= OnRotateRequested;
+		ViewportEventHub.Instance.RotationNotified -= OnRotationNotified;
+		ViewportEventHub.Instance.InputModeNotified -= OnInputModeNotified;
+		ViewportEventHub.Instance.ArcballRadiusNotified -= OnArcballRadiusNotified;
+		ViewportEventHub.Instance.ArcballHandleNotified -= OnArcballHandleNotified;
+		ViewportEventHub.Instance.SelectionRectNotified -= OnSelectionRectNotified;
 	}
 	
 	public override void _Process(double delta)
 	{
 		if (!_isInitialized)
 		{
-			// カメラの初期状態を取得してUIに反映する。
+			// カメラの初期状態を取得してUIに反映する
 			ViewportEventHub.RequestNotifyState();
-			_isInitialized = true;
 		}
 	}
 
@@ -99,13 +98,13 @@ public partial class ViewportOverlay : Control
 	#region Events
 
 	/// <summary>
-	/// カメラの回転の設定がリクエストされたときに呼び出されるイベントハンドラです。アークボールの接線ベクトルを回転に合わせて回転させます。
+	/// カメラの回転設定がリクエストされたときに呼び出されるイベントハンドラ、アークボールの接線ベクトルを回転に合わせて更新する
 	/// </summary>
-	/// <param name="rotation">リクエストされた回転です。</param>
-	/// <param name="spaceMode">回転の基準となる座標系です。</param>
-	/// <param name="useTween">回転に補間を使用するかどうかを示すフラグです。</param>
+	/// <param name="rotation">リクエストされた回転</param>
+	/// <param name="spaceMode">回転の基準となる座標系</param>
+	/// <param name="useTween">回転に補間を使用するかどうかを示すフラグ</param>
 	/// <remarks>
-	/// Arcball操作は回転結果を拾って処理するのが難しいため、リクエスト量を拾って処理します。
+	/// Arcball操作は回転結果を拾って処理するのが難しいため、リクエスト量を拾って処理する
 	/// </remarks>
 	private void OnRotateRequested(Quaternion rotation, SpaceMode spaceMode, bool useTween)
 	{
@@ -116,18 +115,19 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// カメラの回転が通知されたときに呼び出されるイベントハンドラです。中心軸の表示を更新します。
+	/// カメラの回転が通知されたときに呼び出されるイベントハンドラ、中心軸の表示を更新する
 	/// </summary>
-	/// <param name="rotation">通知されたカメラの回転です。</param>
+	/// <param name="rotation">通知されたカメラの回転</param>
 	private void OnRotationNotified(Quaternion rotation)
 	{
+		_isInitialized = true;
 		DrawCenterAxis(rotation);
 	}
 
 	/// <summary>
-	/// カメラの入力モードが通知されたときに呼び出されるイベントハンドラです。中心軸とアークボール補助表示の表示を切り替えます。
+	/// カメラの入力モードが通知されたときに呼び出されるイベントハンドラ、中心軸とアークボール補助表示の表示を切り替える
 	/// </summary>
-	/// <param name="mode">通知されたカメラの入力モードです。</param>
+	/// <param name="mode">通知されたカメラの入力モード</param>
 	private void OnInputModeNotified(ViewportInputMode mode)
 	{
 		_arcballOutline.Visible = IsArcballMode(mode);
@@ -137,9 +137,9 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// カメラのアークボール操作の半径が通知されたときに呼び出されるイベントハンドラです。アークボールの補助表示を更新します。
+	/// カメラのアークボール操作の半径が通知されたときに呼び出されるイベントハンドラ、アークボールの補助表示を更新する
 	/// </summary>
-	/// <param name="radius">通知されたアークボールの半径です。</param>
+	/// <param name="radius">通知されたアークボールの半径</param>
 	private void OnArcballRadiusNotified(float radius)
 	{
 		_arcballRadius = radius;
@@ -147,9 +147,9 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// カメラのアークボール操作のハンドル位置が通知されたときに呼び出されるイベントハンドラです。アークボールの操作点を更新します。
+	/// カメラのアークボール操作のハンドル位置が通知されたときに呼び出されるイベントハンドラ、アークボールの操作点を更新する
 	/// </summary>
-	/// <param name="position">通知されたアークボールのハンドル位置です。</param>
+	/// <param name="position">通知されたアークボールのハンドル位置</param>
 	private void OnArcballHandleNotified(Vector3 position)
 	{
 		ComputeArcballHandleRotation(position);
@@ -157,10 +157,10 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// 矩形選択の範囲が通知されたときに呼び出されるイベントハンドラです。矩形選択の表示を更新します。
+	/// 矩形選択の範囲が通知されたときに呼び出されるイベントハンドラで、矩形選択の表示を更新する
 	/// </summary>
-	/// <param name="startPosition">通知された矩形選択の開始位置です。</param>
-	/// <param name="endPosition">通知された矩形選択の終了位置です。</param>
+	/// <param name="startPosition">通知された矩形選択の開始位置</param>
+	/// <param name="endPosition">通知された矩形選択の終了位置</param>
 	private void OnSelectionRectNotified(Vector2 startPosition, Vector2 endPosition)
 	{
 		DrawSelectionRect(startPosition, endPosition);
@@ -171,20 +171,20 @@ public partial class ViewportOverlay : Control
 	#region Internal Helpers
 
 	/// <summary>
-	/// アークボールの回転を更新します。回転は現在の回転に乗算されて累積されます。
+	/// アークボールの回転を更新する回転は現在の回転に乗算されて累積される
 	/// </summary>
-	/// <param name="rotation">適用する回転です。</param>
+	/// <param name="rotation">適用する回転</param>
 	private void RotateArcball(Quaternion rotation)
 	{
-		// Overlay はカメラ操作に対して見た目上逆向きに追従させる。
+		// Overlay はカメラ操作に対して見た目上逆向きに追従させる
 		_arcballHandleRotation = rotation.Inverse() * _arcballHandleRotation;
 		DrawArcballCross();
 	}
 
 	/// <summary>
-	/// アークボールの補助表示の円を描画します。円は指定された半径に基づいて構成されます。
+	/// アークボールの補助表示の円を描画する、円は指定した半径に基づいて構成する
 	/// </summary>
-	/// <param name="radius">描画する円の半径です。</param>
+	/// <param name="radius">描画する円の半径</param>
 	private void DrawArcballOutline()
 	{
 		float circumference = Mathf.Tau * _arcballRadius;
@@ -222,9 +222,9 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// アークボールのハンドル位置に基づいて、ハンドルの回転を計算して更新します。
+	/// アークボールのハンドル位置に基づいて、ハンドルの回転を計算して更新する
 	/// </summary>
-	/// <param name="handlePosition">通知されたアークボールのハンドル位置です。</param>
+	/// <param name="handlePosition">通知されたアークボールのハンドル位置</param>
 	private void ComputeArcballHandleRotation(Vector3 handlePosition)
 	{
 		if (handlePosition.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
@@ -235,7 +235,7 @@ public partial class ViewportOverlay : Control
 
 		Vector3 anchor = handlePosition.Normalized();
 
-		// 画面投影で中心方向（-x, -y）を向く接線を作る。
+		// 画面投影で中心方向（-x, -y）を向く接線を作る
 		Vector3 desiredTowardCenter = new Vector3(-anchor.X, -anchor.Y, 0.0f);
 		Vector3 tangentX = desiredTowardCenter - anchor * desiredTowardCenter.Dot(anchor);
 		if (tangentX.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
@@ -257,53 +257,53 @@ public partial class ViewportOverlay : Control
 			yAxis = Vector3.Up;
 		}
 
-		// 直交化して安定した姿勢を作る。
+		// 直交化して安定した姿勢を作る
 		Vector3 xAxis = yAxis.Cross(zAxis).Normalized();
 		Basis basis = new Basis(xAxis, yAxis, zAxis).Orthonormalized();
 		_arcballHandleRotation = basis.GetRotationQuaternion();
 	}
 
 	/// <summary>
-	/// 中心軸の表示を更新します。
+	/// 中心軸の表示を更新する
 	/// </summary>
-	/// <param name="rotation">カメラの回転です。</param>
+	/// <param name="rotation">カメラの回転</param>
 	private void DrawCenterAxis(Quaternion rotation)
 	{
 		Basis cameraInverseBasis = new Basis(rotation).Inverse();
 
-		// CATIA風の見た目に合わせて、表示軸と Godot 軸の対応を入れ替える。
+		// CATIA風の見た目に合わせて、表示軸と Godot 軸の対応を入れ替える
 		// LineX = Godot Z(back), LineY = Godot X(right), LineZ = Godot Y(up)
 		Vector2 axisX = ProjectWorldAxisToScreen(cameraInverseBasis * Vector3.Back);
 		Vector2 axisY = ProjectWorldAxisToScreen(cameraInverseBasis * Vector3.Right);
 		Vector2 axisZ = ProjectWorldAxisToScreen(cameraInverseBasis * Vector3.Up);
 
 		SetSplitAxisLines(_centerAxisLineXPositive, _centerAxisLineXNegative, axisX);
-		// CATIA風の見た目に寄せるため、Y の正方向だけ中心ギャップを少し詰める。
+		// CATIA風の見た目に寄せるため、Y の正方向だけ中心ギャップを少し詰める
 		SetSplitAxisLines(_centerAxisLineYPositive, _centerAxisLineYNegative, axisY, 0.5f);
-		// CATIA風の見た目に寄せるため、Z は負方向だけ短くして前後の奥行き感を強める。
+		// CATIA風の見た目に寄せるため、Z は負方向だけ短くして前後の奥行き感を強める
 		SetLinePoints(_centerAxisLineZ, -axisZ * 0.5f, axisZ);
 
 	}
 
 	/// <summary>
-	///  カメラ空間の軸ベクトルを画面空間に投影します。投影されたベクトルの長さは、軸の向きに応じて CenterAxisLength に基づいてスケーリングされます。
+	/// カメラ空間の軸ベクトルを画面空間に投影する、投影後のベクトル長は軸の向きに応じて CenterAxisLength を基準にスケーリングされる
 	/// </summary>
-	/// <param name="axisInCameraSpace">カメラ空間の軸ベクトルです。</param>
-	/// <returns>画面空間に投影された軸ベクトルです。</returns>
+	/// <param name="axisInCameraSpace">カメラ空間の軸ベクトル</param>
+	/// <returns>画面空間に投影された軸ベクトル</returns>
 	private Vector2 ProjectWorldAxisToScreen(Vector3 axisInCameraSpace)
 	{
 		Vector2 projected = new Vector2(axisInCameraSpace.X, -axisInCameraSpace.Y);
 
-		// 傾きに応じた投影長をそのまま画面上の軸長へ反映する。
+		// 傾きに応じた投影長をそのまま画面上の軸長へ反映する
 		return projected * CenterAxisLength;
 	}
 
 	/// <summary>
-	/// Line2D オブジェクトのポイントを、指定された開始点と終了点に基づいて設定します。ラインは、開始点から終了点へと描画されます。
+	/// Line2D オブジェクトのポイントを指定した開始点と終了点で設定する、ラインは開始点から終了点へ描画される
 	/// </summary>
-	/// <param name="line">ポイントを設定する Line2D オブジェクトです。</param>
-	/// <param name="from">ラインの開始点です。</param>
-	/// <param name="to">ラインの終了点です。</param>
+	/// <param name="line">ポイントを設定する Line2D オブジェクト</param>
+	/// <param name="from">ラインの開始点</param>
+	/// <param name="to">ラインの終了点</param>
 	private static void SetLinePoints(Line2D line, Vector2 from, Vector2 to)
 	{
 		line.ClearPoints();
@@ -312,12 +312,12 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// 中心軸の正負両方のラインを、指定された軸方向に基づいて設定します。
+	/// 中心軸の正負両方のラインを、指定された軸方向に基づいて設定する
 	/// </summary>
-	/// <param name="positiveLine">正方向のラインです。</param>
-	/// <param name="negativeLine">負方向のラインです。</param>
-	/// <param name="axisDirection">軸の方向を表すベクトルです。長さは軸の傾きに応じてスケーリングされます。</param>
-	/// <param name="positiveGapScale">正方向の中心ギャップをスケーリングするためのオプションのパラメータです。デフォルトは 1.0f で、値を小さくすると正方向の中心ギャップが縮小されます。</param>
+	/// <param name="positiveLine">正方向のライン</param>
+	/// <param name="negativeLine">負方向のライン</param>
+	/// <param name="axisDirection">軸の方向を表すベクトル、長さは軸の傾きに応じてスケーリングされる</param>
+	/// <param name="positiveGapScale">正方向の中心ギャップをスケーリングするためのパラメータでデフォルトは 1.0f、値を小さくすると正方向の中心ギャップが縮小される</param>
 	private static void SetSplitAxisLines(Line2D positiveLine, Line2D negativeLine, Vector2 axisDirection, float positiveGapScale = 1.0f)
 	{
 		float axisLength = axisDirection.Length();
@@ -339,7 +339,7 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// アークボールのハンドル位置に基づいて、アークボールの補助表示の十字線を描画します。十字線は、ハンドル位置を中心に、カメラの回転に合わせて回転されます。
+	/// アークボールのハンドル位置に基づいて補助表示の十字線を描画する、十字線はハンドル位置を中心にカメラ回転へ追従して回転する
 	/// </summary>
 	private void DrawArcballCross()
 	{
@@ -350,13 +350,13 @@ public partial class ViewportOverlay : Control
 			return;
 		}
 
-		// ハンドルの回転を正規化して安定させる。正規化されていない回転は、回転軸の計算で不安定な結果を引き起こす可能性がある。
+		// ハンドルの回転を正規化して安定させる、未正規化の回転は回転軸計算を不安定にする可能性がある
 		Quaternion normalizedHandleRotation = EnsureNormalizedQuaternion(_arcballHandleRotation);
 		Vector3 anchor = (normalizedHandleRotation * Vector3.Forward).Normalized();
 		Vector3 tangentX = (normalizedHandleRotation * Vector3.Right).Normalized();
 		Vector3 tangentY = (normalizedHandleRotation * Vector3.Up).Normalized();
 
-		// 球面上の接線方向を回転軸へ変換し、短い円弧をサンプリングして描画する。
+		// 球面上の接線方向を回転軸へ変換し、短い円弧をサンプリングして描画する
 		Vector3 axisX = anchor.Cross(tangentX).Normalized();
 		Vector3 axisY = anchor.Cross(tangentY).Normalized();
 		SetCurvedArcballLine(_arcballCrossLineX, anchor, axisX, ArcballCrossAngularSize);
@@ -364,10 +364,10 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// Quaternion を単位長に正規化して返します。ゼロ長に近い値は Identity にフォールバックします。
+	/// Quaternion を単位長に正規化して返す、ゼロ長に近い値は Identity へフォールバックする
 	/// </summary>
-	/// <param name="rotation">正規化する Quaternion です。</param>
-	/// <returns>正規化済みの Quaternion です。</returns>
+	/// <param name="rotation">正規化する Quaternion </param>
+	/// <returns>正規化済みの Quaternion </returns>
 	private static Quaternion EnsureNormalizedQuaternion(Quaternion rotation)
 	{
 		float lengthSquared = rotation.X * rotation.X + rotation.Y * rotation.Y + rotation.Z * rotation.Z + rotation.W * rotation.W;
@@ -386,12 +386,12 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// アークボールの補助表示の十字線の片方のラインを、指定された回転軸と角度に基づいて描画します。ラインは、アークボールのハンドル位置を中心に、回転軸を軸として、指定された角度の範囲で回転されます。
+	/// アークボール補助表示の十字線の片側ラインを指定した回転軸と角度で描画する、ラインはハンドル位置を中心に指定角度範囲で回転される
 	/// </summary>
-	/// <param name="line">描画するラインです。</param>
-	/// <param name="anchor">回転の中心点であるアークボールのハンドル位置です。</param>
-	/// <param name="rotationAxis">回転の軸です。回転軸がゼロベクトルに近い場合、回転は行われず、ラインはハンドル位置を中心とした直線になります。</param>
-	/// <param name="angularSize">回転の角度の範囲です。ラインは、ハンドル位置を中心に、回転軸を軸として、-angularSize から +angularSize の範囲で回転されます。</param>
+	/// <param name="line">描画するライン</param>
+	/// <param name="anchor">回転の中心点であるアークボールのハンドル位置</param>
+	/// <param name="rotationAxis">回転の軸、ゼロベクトルに近い場合は回転せずハンドル位置を中心とした直線になる</param>
+	/// <param name="angularSize">回転角度の範囲、ラインは -angularSize から +angularSize の範囲で回転される</param>
 	private void SetCurvedArcballLine(Line2D line, Vector3 anchor, Vector3 rotationAxis, float angularSize)
 	{
 		line.ClearPoints();
@@ -412,20 +412,20 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// アークボールの球面上の点を画面空間に投影します。投影された点は、アークボールの半径に基づいてスケーリングされます。
+	/// アークボール球面上の点を画面空間に投影する、投影後の点はアークボール半径に基づいてスケーリングされる
 	/// </summary>
-	/// <param name="pointOnArcball">アークボール上の点です。</param>
-	/// <returns>画面空間に投影された点です。</returns>
+	/// <param name="pointOnArcball">アークボール上の点</param>
+	/// <returns>画面空間に投影された点</returns>
 	private Vector2 ProjectArcballPointToScreen(Vector3 pointOnArcball)
 	{
 		return new Vector2(pointOnArcball.X, -pointOnArcball.Y) * _arcballRadius;
 	}
 
-	/// <summary>>
-	/// 矩形選択の表示を更新します。矩形は、指定された開始位置と終了位置を対角線の端点とする矩形として描画されます。
+	/// <summary>
+	/// 矩形選択の表示を更新する、矩形は指定した開始位置と終了位置を対角線の端点として描画される
 	/// </summary>
-	/// <param name="startPosition">矩形選択の開始位置です。</param>
-	/// <param name="endPosition">矩形選択の終了位置です。</param>
+	/// <param name="startPosition">矩形選択の開始位置</param>
+	/// <param name="endPosition">矩形選択の終了位置</param>
 	private void DrawSelectionRect(Vector2 startPosition, Vector2 endPosition)
 	{
 		SetLinePoints(_selectionRectLineHorizontal1, new Vector2(startPosition.X, startPosition.Y), new Vector2(endPosition.X, startPosition.Y));
@@ -435,30 +435,30 @@ public partial class ViewportOverlay : Control
 	}
 
 	/// <summary>
-	/// ViewportInputMode がアークボール操作モード（Orbit または Roll）かどうかを判定します。
+	/// ViewportInputMode がアークボール操作モード（Orbit または Roll）かどうかを判定する
 	/// </summary>
-	/// <param name="mode">判定する ViewportInputMode です。</param>
-	/// <returns>アークボール操作モードであれば true を返します。</returns>
+	/// <param name="mode">判定する ViewportInputMode </param>
+	/// <returns>アークボール操作モードであれば true を返す</returns>
 	private bool IsArcballMode(ViewportInputMode mode)
 	{
 		return mode == ViewportInputMode.CameraOrbit || mode == ViewportInputMode.CameraRoll;
 	}
 
 	/// <summary>
-	/// ViewportInputMode が中心軸表示モード（Orbit、Pan、Zoom、Roll）かどうかを判定します。
+	/// ViewportInputMode が中心軸表示モード（Orbit/Pan/Zoom/Roll）かどうかを判定する
 	/// </summary>
-	/// <param name="mode">判定する ViewportInputMode です。</param>
-	/// <returns>中心軸表示モードであれば true を返します。</returns>
+	/// <param name="mode">判定する ViewportInputMode </param>
+	/// <returns>中心軸表示モードであれば true を返す</returns>
 	private bool IsCenterAxisMode(ViewportInputMode mode)
 	{
 		return mode == ViewportInputMode.CameraOrbit || mode == ViewportInputMode.CameraPan || mode == ViewportInputMode.CameraZoom || mode == ViewportInputMode.CameraRoll;
 	}
 
 	/// <summary>
-	/// ViewportInputMode が選択矩形表示モード（Select）かどうかを判定します。
+	/// ViewportInputMode が選択矩形表示モード（Select）かどうかを判定する
 	/// </summary>
-	/// <param name="mode">判定する ViewportInputMode です。</param>
-	/// <returns>選択矩形表示モードであれば true を返します。</returns>
+	/// <param name="mode">判定する ViewportInputMode </param>
+	/// <returns>選択矩形表示モードであれば true を返す</returns>
 	private bool IsSelectionRectMode(ViewportInputMode mode)
 	{
 		return mode == ViewportInputMode.SelectionRect;

@@ -39,6 +39,22 @@ Godot C# / 非Godot C# の両方に適用します。
 - `Public API`
 - `Internal Helpers`
 
+### 3.1 EventHub クラスの例外
+
+`CoaXisViewer/src/autoload/event/*EventHub.cs` については、通知責務の見通しを優先して次の region 名を許可する。
+
+- `--------------------------------------- Request ---------------------------------------`
+- `--------------------------------------- Notification ---------------------------------------`
+
+この例外は EventHub クラスに限定し、他クラスでは使用しない。
+
+EventHub では次の順序を推奨する。
+
+1. `Properties`
+2. `Lifecycle`
+3. `Request` region
+4. `Notification` region
+
 禁止例（統一のため使用しない）:
 - `Event Handlers`
 - `Signal Handlers`
@@ -47,6 +63,9 @@ Godot C# / 非Godot C# の両方に適用します。
 - `State Management`
 - `Node Resolution`
 - `Parsing Helpers`
+
+補足:
+- `Request` / `Notification` の装飾付き region は EventHub 例外でのみ許可する。
 
 `Events` 以外で詳細分類が必要な場合は、`Internal Helpers` の中でメソッド順・コメントで意図を示す。
 

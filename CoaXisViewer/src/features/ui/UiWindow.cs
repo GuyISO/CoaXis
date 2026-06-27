@@ -1,8 +1,8 @@
-using Godot;
+﻿using Godot;
 using System;
 
 /// <summary>
-/// UIを埋め込んで使用するためのウィンドウです。
+/// UIを埋め込んで使用するためのウィンドウ
 /// </summary>
 public partial class UiWindow : Window
 {
@@ -29,7 +29,7 @@ public partial class UiWindow : Window
 		{
 			SetContainer(existingContainer);
 		}
-		// それ以外の場合は、エラーを出力する（複数の子ノードが存在する、または子ノードがContainerクラスを継承していない）
+		// それ以外の場合はエラーを出力する（複数の子ノードが存在するか、子ノードが Container を継承していない）
 		else
 		{
 			LogHub.Error("UiWindow: Invalid child nodes. A UiWindow can only have one child of type Container.");
@@ -49,7 +49,7 @@ public partial class UiWindow : Window
 	#region Events
 
 	/// <summary>
-	/// ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラです。ウィンドウを閉じるための処理を行います。
+	/// ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラウィンドウを閉じるための処理を行う
 	/// </summary>
 	private void OnCloseRequested()
 	{
@@ -57,7 +57,7 @@ public partial class UiWindow : Window
 	}
 
 	/// <summary>
-	/// ウィンドウの最小サイズが変更されたときに呼び出されるイベントハンドラです。ウィンドウのサイズを、子コンテナの最小サイズに合わせて調整します。
+	/// ウィンドウの最小サイズが変更されたときに呼び出されるイベントハンドラで、ウィンドウサイズを子コンテナの最小サイズに合わせて調整する
 	/// </summary>
 	private void OnMinimumSizeChanged()
 	{
@@ -66,10 +66,10 @@ public partial class UiWindow : Window
 
 	#endregion
 	
-	#region Public Methods
+	#region Public API
 
 	/// <summary>
-	/// ウィンドウのコンテンツを指定されたコンテナに置き換えます。これにより、ウィンドウ内のUIが新しいコンテナの内容に更新されます。
+	/// ウィンドウのコンテンツを指定されたコンテナに置き換え、ウィンドウ内の UI を新しいコンテナ内容へ更新する
 	/// </summary>
 	/// <param name="container">新しいコンテナ</param>
 	public void SetContainer(Container container)
@@ -99,7 +99,7 @@ public partial class UiWindow : Window
 	}
 
 	/// <summary>
-	/// ウィンドウのコンテンツをクリアします。これにより、現在のコンテンツが削除され、ウィンドウが空になります。
+	/// ウィンドウのコンテンツをクリアし、現在のコンテンツを削除してウィンドウを空にする
 	/// </summary>
 	public void ClearContent()
 	{
@@ -117,7 +117,7 @@ public partial class UiWindow : Window
 	#region Internal Helpers
 
 	/// <summary>
-	/// ウィンドウのサイズを、子コンテナの最小サイズに合わせて調整します。これにより、ウィンドウがコンテンツに適切なサイズで表示されるようになります。
+	/// ウィンドウサイズを子コンテナの最小サイズに合わせて調整し、コンテンツに適したサイズで表示できるようにする
 	/// </summary>
 	private void Resize()
 	{

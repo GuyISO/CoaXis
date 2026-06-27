@@ -2,10 +2,10 @@
 using System.Globalization;
 
 /// <summary>
-/// 画面隅の軸ナビゲータを制御し、クリックでカメラ向きを変更します。
+/// 画面隅の軸ナビゲータを制御し、クリックでカメラ向きを変更する
 /// </summary>
 /// <remarks>
-/// AxisNavigator関連のオブジェクトは表示も当たり判定もすべてマスクレイヤー2に配置して使用します。
+/// AxisNavigator関連のオブジェクトは表示も当たり判定もすべてマスクレイヤー2に配置して使用する
 /// </remarks>
 public partial class AxisNavigator : Control
 {
@@ -26,35 +26,34 @@ public partial class AxisNavigator : Control
 	public override void _Ready()
 	{
 		// 関連ノードのキャッシュ
-		_subViewportContainer = FindChild("SubViewportContainer") as SubViewportContainer;
+		_subViewportContainer = GetNodeOrNull<SubViewportContainer>("SubViewportContainer");
 		_subViewport = _subViewportContainer?.GetNodeOrNull<SubViewport>("SubViewport");
 		_focalPoint = _subViewport?.GetNodeOrNull<Node3D>("FocalPoint");
 		_camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
 
 		// イベント購読の登録
-		ViewportEventHub.I.RotationNotified += OnRotationNotified;
+		ViewportEventHub.Instance.RotationNotified += OnRotationNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベント購読の解除
-		ViewportEventHub.I.RotationNotified -= OnRotationNotified;
+		ViewportEventHub.Instance.RotationNotified -= OnRotationNotified;
 	}
 
 	public override void _Process(double delta)
 	{
 		if (!_isInitialized)
 		{
-			// カメラの初期回転を取得して軸ナビゲータに反映する。
+			// カメラの初期回転を取得して軸ナビゲータに反映する
 			ViewportEventHub.RequestNotifyState();
-			_isInitialized = true;
 		}
 	}
 
 	/// <summary>
-	/// 軸ナビゲータのクリックを検知し、対応する向きへカメラを移動します。
+	/// 軸ナビゲータのクリックを検知し、対応する向きへカメラを移動する
 	/// </summary>
-	/// <param name="@event">未処理入力イベント。</param>
+	/// <param name="@event">未処理入力イベント</param>
 	public override void _UnhandledInput(InputEvent @event)
 	{
 		if (@event is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
@@ -80,6 +79,7 @@ public partial class AxisNavigator : Control
 
 	private void OnRotationNotified(Quaternion rotation)
 	{
+		_isInitialized = true;
 		_focalPoint.Quaternion = rotation;
 	}
 
@@ -88,10 +88,10 @@ public partial class AxisNavigator : Control
 	#region Internal Helpers
 
 	/// <summary>
-	/// 指定されたノードの名前を回転角度（度）として解釈し、その向きにカメラを移動させます。
-	/// ノード名は "x, y, z" 形式の回転角度を表す想定で、クォータニオンに変換してカメラ回転要求イベントを発行します。
+	/// 指定されたノードの名前を回転角度（度）として解釈しその向きにカメラを移動させ
+	/// ノード名は "x, y, z" 形式の回転角度を表す想定で、クォータニオンに変換してカメラ回転要求イベントを発行する
 	/// </summary>
-	/// <param name="node">回転角度を表す名称を持つノード。</param>
+	/// <param name="node">回転角度を表す名称を持つノード</param>
 	private void ViewLookAt(Node3D node)
 	{
 		if (TryParseRotationDegreesFromName(node.Name, out Vector3 rotationDegrees))
@@ -106,14 +106,14 @@ public partial class AxisNavigator : Control
 	}
 
 	/// <summary>
-	/// ノード名を "x, y, z" 形式の回転角度（度）として解釈し、クォータニオンに変換します。
+	/// ノード名を "x, y, z" 形式の回転角度（度）として解釈し、クォータニオンに変換する
 	/// </summary>
 	/// <param name="name">ノード名</param>
 	/// <param name="rotationDegrees">変換された回転角度（度）</param>
-	/// <returns>変換に成功した場合は true、失敗した場合は false を返します。</returns>
+	/// <returns>変換に成功した場合は true、失敗した場合は false を返す</returns>
 	private static bool TryParseRotationDegreesFromName(string name, out Vector3 rotationDegrees)
 	{
-		// ノード名が "x, y, z" 形式の回転角度を表す想定で、Quaternion に変換する。
+		// ノード名が "x, y, z" 形式の回転角度を表す想定で、Quaternion に変換する
 		rotationDegrees = Vector3.Zero;
 		var parts = name.Split(',');
 		if (parts.Length != 3)

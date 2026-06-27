@@ -1,36 +1,44 @@
+#nullable enable
+
 using Godot;
+using System;
 
 /// <summary>
-/// UI管理用のシングルトンクラスです。AutoLoadノードとしてシーンツリーに配置します。
+/// UI管理用のシングルトンクラス、AutoLoadノードとしてシーンツリーに配置する
 /// </summary>
 public partial class UiManager : Node
 {
-	#region Fields
-
-	private Window _cameraWindow;
-
-	#endregion
-
 	#region Properties
 
 	/// <summary>
-	/// シングルトン参照です。
+	/// シングルトン参照
 	/// </summary>
-	public static UiManager I { get; private set; }
+	public static UiManager? Instance { get; private set; }
 
 	#endregion
 
 	#region Lifecycle
 
 	/// <summary>
-	/// シーンツリー参加時にシングルトン参照を確立します。
+	/// シーンツリー参加時にシングルトン参照を確立する
 	/// </summary>
 	public override void _EnterTree()
 	{
-		// AutoLoad をデフォルト参照として維持するため、未設定時のみ I を確立する。
-		if (I == null)
+		// AutoLoad をデフォルト参照として維持するため、未設定時のみ参照を確立する
+		if (Instance == null)
 		{
-			I = this;
+			Instance = this;
+		}
+	}
+
+	/// <summary>
+	/// シーンツリー離脱時にシングルトン参照を破棄する
+	/// </summary>
+	public override void _ExitTree()
+	{
+		if (ReferenceEquals(Instance, this))
+		{
+			Instance = null;
 		}
 	}
 
@@ -39,36 +47,67 @@ public partial class UiManager : Node
 	#region Public API
 
 	/// <summary>
-	/// 指定されたコマンド名に対応する処理を実行します。
+	/// 指定されたコマンド名に対応する処理を実行する
 	/// </summary>
 	/// <param name="commandName">実行するコマンドの名前</param>
-	public void ExecuteCommand(string commandName)
+	/// <param name="source">コマンドを発行したノード</param>
+	public void ExecuteCommand(string commandName, Node? source = null)
 	{
-		// コマンドの実行ロジックをここに実装
-		ShowCameraWindow();
+		_ = source;
+
+		switch (commandName)
+		{
+			case "ShowViewportInteractionWindow":
+				ShowWindow("WindowViewportInteraction");
+				break;
+			case "ShowMessageWindow":
+				ShowWindow("WindowMessage");
+				break;
+			case "ShowSettingWindow":
+				LogHub.Warn("UiManager: settings window is not implemented yet.");
+				break;
+			case "Load":
+				RequestModelLoadFromMainScene();
+				break;
+			default:
+				LogHub.Warn($"UiManager: unknown command '{commandName}'.");
+				break;
+		}
 	}
 
-	public void ShowCameraWindow()
+	#endregion
+
+	#region Internal Helpers
+
+	// Main シーン上の既存 Window ノードを表示し、存在しない scene 参照を排除する
+	private void ShowWindow(string windowName)
 	{
-
-		if (_cameraWindow == null)
+		Window? window = GetTree().Root.GetNodeOrNull<Window>($"Main/{windowName}");
+		if (window == null)
 		{
-			var packed = ResourceLoader.Load<PackedScene>("res://scenes/ui/CameraWindow.tscn");
-			_cameraWindow = packed.Instantiate<Window>();
-
-			// OSウィンドウとして追加
-			GetTree().Root.AddChild(_cameraWindow);
-
-			// Xボタンで閉じたときの処理
-			_cameraWindow.CloseRequested += () =>
-			{
-				_cameraWindow.Hide();
-			};
+			LogHub.Warn($"UiManager: window '{windowName}' was not found under Main.");
+			return;
 		}
 
-		_cameraWindow.Show();
-		// _cameraWindow.MoveToFront();
+		window.Show();
+		window.GrabFocus();
+	}
 
+	// ロード対象パスは Main シーン上の TextEdit から取得し、未設定なら警告して終了する
+	private static void RequestModelLoadFromMainScene()
+	{
+		TextEdit? pathEditor = Engine.GetMainLoop() is SceneTree sceneTree
+			? sceneTree.Root.GetNodeOrNull<TextEdit>("Main/Canvas/VBoxContainer/TopBar/TextGlbPath")
+			: null;
+
+		string path = pathEditor?.Text?.Trim() ?? string.Empty;
+		if (string.IsNullOrWhiteSpace(path))
+		{
+			LogHub.Warn("UiManager: model path is empty.");
+			return;
+		}
+
+		ModelEventHub.RequestLoadModel(path);
 	}
 
 	#endregion
