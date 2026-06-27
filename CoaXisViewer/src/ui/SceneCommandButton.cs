@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// Autoloadのシングルトンクラス、SceneManagerに対して、UIの表示やシーンの切り替えを行う指示を出すボタンにアタッチして使用する。
+/// Autoloadのシングルトンクラス、UiManagerに対して、UIの表示やシーンの切り替えを行う指示を出すボタンにアタッチして使用する。
 /// </summary>
 public partial class SceneCommandButton : Button
 {
@@ -20,7 +20,7 @@ public partial class SceneCommandButton : Button
 	#region Events
 	
 	/// <summary>
-	/// ボタンが押されたとき、SceneManagerに対して、自身のNameを送信し、同名の処理をプロパティで指定されたコマンドを実行するよう指示します。
+	/// ボタンが押されたとき、UiManagerに対して、自身のNameを送信し、同名の処理をプロパティで指定されたコマンドを実行するよう指示します。
 	/// NodeのNameの先頭文字が"Button"の場合は、先頭の"Button"を除いた文字列をコマンド名として送信します。
 	/// </summary>
 	private void OnPressed()
@@ -30,7 +30,7 @@ public partial class SceneCommandButton : Button
 		{
 			commandName = commandName.Substring("Button".Length);
 		}
-		SceneManager.I.ExecuteCommand(commandName);
+		UiManager.I.ExecuteCommand(commandName);
 	}
 
 	#endregion

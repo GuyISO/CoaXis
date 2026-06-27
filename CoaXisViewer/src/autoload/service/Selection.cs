@@ -9,150 +9,215 @@ using System.Collections.Generic;
 /// </summary>
 public partial class Selection : Node
 {
+	#region  Fields
+
     public static Selection I { get; private set; }
 
-	public static bool IsMultiSelectMode { get; set; } = false;
+	private static bool _isMultiSelectMode = false;
+	private HashSet<AnyModel> _models = new HashSet<AnyModel>();
 
-	private HashSet<Node3D> _nodes = new HashSet<Node3D>();
+	#endregion
+
+	#region Lifecycle
 
     public override void _Ready()
     {
         I = this;
+
+		// イベントの購読開始
+		ModelEventHub.I.SetMultiSelectModeRequested += OnSetMultiSelectModeRequested;
+		ModelEventHub.I.SelectModelRequested += OnSelectModelRequested;
+		ModelEventHub.I.SelectModelsRequested += OnSelectModelsRequested;
+		ModelEventHub.I.ClearSelectionRequested += OnClearSelectionRequested;
     }
+
+	public override void _ExitTree()
+	{
+		// イベントの購読解除
+		ModelEventHub.I.SetMultiSelectModeRequested -= OnSetMultiSelectModeRequested;
+		ModelEventHub.I.SelectModelRequested -= OnSelectModelRequested;
+		ModelEventHub.I.SelectModelsRequested -= OnSelectModelsRequested;
+		ModelEventHub.I.ClearSelectionRequested -= OnClearSelectionRequested;
+	}
+
+	#endregion
+
+	#region Event
+
+	private void OnSetMultiSelectModeRequested(bool enable)
+	{
+		_isMultiSelectMode = enable;
+	}
+
+	private void OnSelectModelRequested(AnyModel model)
+	{
+		if (_isMultiSelectMode)
+		{
+			Toggle(model);
+		}
+		else
+		{
+			Set(model);
+		}
+	}
+
+	private void OnSelectModelsRequested(AnyModel[] models)
+	{	
+		if (_isMultiSelectMode)
+		{
+			Toggle(models);
+		}
+		else
+		{
+			Set(models);
+		}
+	}
+
+	private void OnClearSelectionRequested()
+	{
+		Clear();
+	}
+
+	#endregion
 
 	#region Public API
 
 	/// <summary>
-	/// 現在の選択ノードのコレクションを取得します。外部向けに読み取り専用で提供されます。
+	/// 現在の選択モデルのコレクションを取得します。外部向けに読み取り専用で提供されます。
 	/// </summary>
-	public static IReadOnlyCollection<Node3D> Nodes => I._nodes;
+	public static IReadOnlyCollection<AnyModel> Models => I._models.ToList().AsReadOnly();
 
 	/// <summary>
-	/// 現在の選択ノードの数を取得します。
+	/// 現在の選択モデルの数を取得します。
 	/// </summary>
-	public static int Count => I._nodes.Count;
+	public static int Count => I._models.Count;
 
 	/// <summary>
-	/// Fit処理に使用可能な選択ノードの配列を取得します。
+	/// 指定したモデルが選択されているかどうかを確認します。
+	/// </summary>
+	/// <param name="model">確認するモデルです。</param>
+	/// <returns>モデルが選択されている場合はtrue、それ以外の場合はfalseを返します。</returns>
+	public static bool Contains(AnyModel model) => I._models.Contains(model);
+
+	/// <summary>
+	/// Fit処理に使用可能な選択モデルの配列を取得します。
 	/// </summary>
 	/// <remarks>
-	/// 解放済みノードやツリー外ノードを除外したスナップショットを返します。
+	/// 解放済みモデルやツリー外モデルを除外したスナップショットを返します。
 	/// </remarks>
-	public static Node3D[] GetNodesArray()
+	public static AnyModel[] GetNodesArray()
 	{
-		return I._nodes
-			.Where(node => node != null && GodotObject.IsInstanceValid(node) && node.IsInsideTree())
+		return I._models
+			.Where(model => model != null && GodotObject.IsInstanceValid(model) && model.IsInsideTree())
 			.ToArray();
 	}
 
 	/// <summary>
-	/// 指定したノードのみの選択状態にします（既存の選択はすべて解除されます）。
+	/// 指定したモデルのみの選択状態にします（既存の選択はすべて解除されます）。
 	/// </summary>
-	/// <param name="node">選択するノードです。</param>
-	public static void Set(Node3D node)
+	/// <param name="model">選択するモデルです。</param>
+	public static void Set(AnyModel model)
 	{
 		Clear();
-		Add(node);
+		Add(model);
 	}
 
 	/// <summary>
-	/// 指定したノード群のみの選択状態にします（既存の選択はすべて解除されます）。
+	/// 指定したモデル群のみの選択状態にします（既存の選択はすべて解除されます）。
 	/// </summary>
-	/// <param name="nodes">選択するノードの列挙体です。</param>
-	public static void Set(IEnumerable<Node3D> nodes)
+	/// <param name="models">選択するモデルの配列です。</param>
+	public static void Set(AnyModel[] models)
 	{
 		Clear();
-		foreach (var node in nodes)
+		foreach (var model in models)
 		{
-			Add(node);
+			Add(model);
 		}
 	}
 
 	/// <summary>
-	/// 指定したノードを選択状態にします。
-	/// </summary> <param name="node">選択するノードです。</param>
-	/// <returns>ノードが新たに選択された場合はtrue、それ以外の場合はfalseを返します。</returns>
-	/// <remarks>ノードがすでに選択されている場合は何も起こりません。</remarks>
-    public static bool Add(Node3D node)
+	/// 指定したモデルを選択状態にします。
+	/// </summary> <param name="model">選択するモデルです。</param>
+	/// <returns>モデルが新たに選択された場合はtrue、それ以外の場合はfalseを返します。</returns>
+	/// <remarks>モデルがすでに選択されている場合は何も起こりません。</remarks>
+    public static bool Add(AnyModel model)
 	{
-		if (I._nodes.Add(node))
+		if (I._models.Add(model))
 		{
-			ModelEventHub.RequestSelectModel(node);
-			HighLightNode(node, true);
-			LogHub.Info($"Selected: {node.Name}");
+			ModelEventHub.NotifyModelSelectionState(model, true);
+			LogHub.Info($"Selected: {model.Name}");
 			return true;
 		}
 		return false;
 	}
 
 	/// <summary>
-	/// 指定したノード群を選択状態にします。
-	/// </summary> <param name="nodes">選択するノードの列挙体です。</param>
-	public static void Add(IEnumerable<Node3D> nodes)
+	/// 指定したモデル群を選択状態にします。
+	/// </summary> <param name="models">選択するモデルの配列です。</param>
+	public static void Add(AnyModel[] models)
 	{
-		foreach (var node in nodes)
+		foreach (var model in models)
 		{
-			Add(node);
+			Add(model);
 		}
 	}
 
 	/// <summary>
-	/// 指定したノードを選択から外します。
-	/// </summary> <param name="node">選択から外すノードです。</param>
-	/// <returns>ノードが選択から外された場合はtrue、それ以外の場合はfalseを返します。</returns>
-	/// <remarks>ノードが選択されていない場合は何も起こりません。</remarks>
-	public static bool Remove(Node3D node)
+	/// 指定したモデルを選択から外します。
+	/// </summary> <param name="model">選択から外すモデルです。</param>
+	/// <returns>モデルが選択から外された場合はtrue、それ以外の場合はfalseを返します。</returns>
+	/// <remarks>モデルが選択されていない場合は何も起こりません。</remarks>
+	public static bool Remove(AnyModel model)
 	{
-		if (I._nodes.Remove(node))
+		if (I._models.Remove(model))
 		{
-			ModelEventHub.RequestDeselectModel(node);
-			HighLightNode(node, false);
-			LogHub.Info($"Deselected: {node.Name}");
+			ModelEventHub.NotifyModelSelectionState(model, false);
+			LogHub.Info($"Deselected: {model.Name}");
 			return true;
 		}
 		return false;
 	}
 
 	/// <summary>
-	/// 指定したノード群を選択から外します。
-	/// </summary> <param name="nodes">選択から外すノードの列挙体です。</param>
-	public static void Remove(IEnumerable<Node3D> nodes)
+	/// 指定したモデル群を選択から外します。
+	/// </summary> <param name="models">選択から外すモデルの配列です。</param>
+	public static void Remove(AnyModel[] models)
 	{
-		foreach (var node in nodes)
+		foreach (var model in models)
 		{
-			Remove(node);
+			Remove(model);
 		}
 	}
 
 	/// <summary>
-	/// 指定したノードの選択状態を切り替えます。
-	/// </summary> <param name="node">切り替えるノードです。</param>
-	public static void Toggle(Node3D node)
+	/// 指定したモデルの選択状態を切り替えます。
+	/// </summary> <param name="model">切り替えるモデルです。</param>
+	public static void Toggle(AnyModel model)
 	{
-		if (I._nodes.Contains(node))
+		if (I._models.Contains(model))
 		{
-			Remove(node);
+			Remove(model);
 		}
 		else
 		{
-			Add(node);
+			Add(model);
 		}
 	}
 
 	/// <summary>
-	/// 指定したノード群の選択状態を切り替えます。
-	/// </summary> <param name="nodes">切り替えるノードの列挙体です。</param>
-	public static void Toggle(IEnumerable<Node3D> nodes)
+	/// 指定したモデル群の選択状態を切り替えます。
+	/// </summary> <param name="models">切り替えるモデルの列挙体です。</param>
+	public static void Toggle(AnyModel[] models)
 	{
-		// 切り替えるノードがない場合は何もしない
-		if (!nodes.Any())
+		// 切り替えるモデルがない場合は何もしない
+		if (models == null || models.Length == 0)
 		{
 			return;
 		}
 
-		foreach (var node in nodes)
+		foreach (var model in models)
 		{
-			Toggle(node);
+			Toggle(model);
 		}
 	}
 
@@ -162,128 +227,23 @@ public partial class Selection : Node
 	/// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返します。</returns>
 	public static bool Clear()
 	{
-		if (I._nodes.Count == 0)
+		if (I._models.Count == 0)
 		{
 			return false;
 		}
 
-		var nodesToDeselect = I._nodes.ToArray();
+		var modelsToDeselect = I._models.ToArray();
 		
 		// 先にクリアしてからシグナル発報することで、シグナルハンドラ内で選択状態確認した際の整合性を保つ
-		I._nodes.Clear();
+		I._models.Clear();
 
-		// ノードの選択解除シグナルとハイライト解除は個々に行う
-		foreach (var node in nodesToDeselect)
+		// モデルの選択解除シグナルとハイライト解除は個々に行う
+		foreach (var model in modelsToDeselect)
 		{
-			ModelEventHub.RequestDeselectModel(node);
-			HighLightNode(node, false);
-			LogHub.Info($"Deselected: {node.Name}");
+			ModelEventHub.NotifyModelSelectionState(model, false);
+			LogHub.Info($"Deselected: {model.Name}");
 		}
 		return true;
-	}
-
-	/// <summary>
-	/// 指定したノードの選択状態を切り替えます。
-	/// </summary>
-	/// <param name="node">切り替えるノードです。</param>
-	/// <param name="enable">選択状態を有効にする場合はtrue、無効にする場合はfalseです。</param>
-	private static void HighLightNode(Node3D node, bool enable = true)
-	{
-		var node3Ds = GetNode3DsRecursively(node);
-		foreach (var node3D in node3Ds)
-		{
-			HighlightMesh(node3D, enable);
-		}
-	}
-
-	/// <summary>
-	/// 指定したノードのハイライト状態を切り替えます。
-	/// </summary>
-	/// <param name="node">切り替えるノードです。</param>
-	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalseです。</param>
-	private static void HighlightMesh(Node3D node, bool enable = true)
-	{
-		if (enable)
-		{
-			// 選択状態の適用は子孫のMeshInstance3Dすべてにとりあえず適用すればよい
-			var meshInstances = GetMeshInstancesRecursively(node);
-			foreach (var mesh in meshInstances)			{
-				mesh.MaterialOverride = ResourceLoader.Load<StandardMaterial3D>("res://assets/materials/selected.tres");
-			}
-		}
-		else
-		{
-			// 選択状態の解除は、祖先のNode3Dに選択状態のものがいなければ子孫のMeshInstance3Dすべてから選択状態を解除する判定が必要
-			if (!HasSelectedAncestor(node))
-			{
-				var meshInstances = GetMeshInstancesRecursively(node);
-				foreach (var mesh in meshInstances)
-				{
-					mesh.MaterialOverride = null;
-				}
-			}
-		}
-	}
-
-	/// <summary>
-	/// 指定したノードとその子孫から純粋なNode3Dを再帰的に取得します。
-	/// </summary>
-	/// <param name="node">取得対象のノードです。</param>
-	/// <returns>取得したNode3Dのリストです。</returns>
-	private static List<Node3D> GetNode3DsRecursively(Node node)
-	{
-		var node3Ds = new List<Node3D>();
-
-		if (node.GetType() == typeof(Node3D))
-		{
-			node3Ds.Add((Node3D)node);
-		}
-
-		foreach (Node child in node.GetChildren())
-		{
-			node3Ds.AddRange(GetNode3DsRecursively(child));
-		}
-
-		return node3Ds;
-	}
-
-	/// <summary>
-	/// 指定したノードとその子孫からMeshInstance3Dを再帰的に取得します。
-	/// </summary>
-	/// <param name="node">取得対象のノードです。</param>
-	private static List<MeshInstance3D> GetMeshInstancesRecursively(Node node)
-	{
-		var meshInstances = new List<MeshInstance3D>();
-
-		if (node is MeshInstance3D meshInstance)
-		{
-			meshInstances.Add(meshInstance);
-		}
-
-		foreach (Node child in node.GetChildren())
-		{
-			meshInstances.AddRange(GetMeshInstancesRecursively(child));
-		}
-
-		return meshInstances;
-	}
-
-	/// <summary>
-	/// 指定したノードの祖先に選択状態のノードが存在するかどうかを判定します。
-	/// </summary>
-	/// <param name="node3D">判定対象のノードです。</param>
-	private static bool HasSelectedAncestor(Node node3D)
-	{
-		var node = node3D;
-		while (node != null)
-		{
-			if (I._nodes.Contains(node))
-			{
-				return true;
-			}
-			node = node.GetParent() as Node3D;
-		}
-		return false;
 	}
 
 	#endregion

@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://dvoc2r3mse54i"]
 
+[ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://src/features/model/RootModel.cs" id="1_3p2gp"]
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="2_bjd11"]
-[ext_resource type="Script" uid="uid://cb8mh34mjm1hk" path="res://src/features/model/ModelLoader.cs" id="2_mwfav"]
+[ext_resource type="Script" uid="uid://co6erwykahhud" path="res://src/features/model/AnyModel.cs" id="2_cvmbd"]
 [ext_resource type="Script" uid="uid://bv1qjj2yvm6xc" path="res://src/test/SendIpc.cs" id="3_qmy6f"]
 [ext_resource type="Script" uid="uid://b5keyjh3gtsfo" path="res://src/test/ButtonSendHttp.cs" id="4_mwfav"]
 [ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/ui/SceneCommandButton.cs" id="5_qmy6f"]
@@ -46,12 +47,12 @@ environment = SubResource("Environment_2xmat")
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="Environments" unique_id=543980358]
 transform = Transform3D(0.14644663, 0.8535534, -0.5, -0.50000006, 0.50000006, 0.70710677, 0.8535534, 0.14644662, 0.5, 0, 0, 0)
 
-[node name="Models" type="Node3D" parent="." unique_id=2131541972 node_paths=PackedStringArray("TextEditModelPath")]
-script = ExtResource("2_mwfav")
-TextEditModelPath = NodePath("../Canvas/VBoxContainer/TopBar/TextGlbPath")
+[node name="Models" type="Node3D" parent="." unique_id=2131541972]
+script = ExtResource("1_3p2gp")
 
 [node name="Cube" type="Node3D" parent="Models" unique_id=2086981542]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
+script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Cube" unique_id=1111657438]
 material_override = ExtResource("2_bjd11")
@@ -64,6 +65,7 @@ shape = SubResource("BoxShape3D_5x7yu")
 
 [node name="Sphere" type="Node3D" parent="Models" unique_id=1772479710]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.5, 0)
+script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Sphere" unique_id=1374449570]
 mesh = SubResource("SphereMesh_3p2gp")
@@ -75,6 +77,7 @@ shape = SubResource("SphereShape3D_f2lfd")
 
 [node name="Capsule" type="Node3D" parent="Models" unique_id=1748147158]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 0)
+script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Capsule" unique_id=1907078487]
 material_override = ExtResource("2_bjd11")
@@ -249,12 +252,12 @@ script = ExtResource("10_1nqs0")
 
 [node name="WindowViewportInteraction" parent="." unique_id=940691164 instance=ExtResource("15_ft6cd")]
 initial_position = 0
-position = Vector2i(526, 36)
+position = Vector2i(0, 36)
 
 [node name="PanelViewportInteraction" parent="WindowViewportInteraction" unique_id=1128003110 instance=ExtResource("15_cvmbd")]
 
 [node name="WindowMessage" parent="." unique_id=1764545528 instance=ExtResource("15_ft6cd")]
 initial_position = 0
-position = Vector2i(25, 36)
+position = Vector2i(0, 36)
 
 [node name="PanelMessage" parent="WindowMessage" unique_id=115086409 instance=ExtResource("14_3p2gp")]

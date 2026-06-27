@@ -11,6 +11,7 @@ public partial class ViewportEventHub : Node
 	/// <summary>
 	/// シングルトン参照です。
 	/// </summary>
+	/// <returns>シングルトン参照</returns>
 	public static ViewportEventHub I { get; private set; }
 
 	/// <summary>
@@ -18,23 +19,15 @@ public partial class ViewportEventHub : Node
 	/// </summary>
 	public override void _EnterTree()
 	{
-		// AutoLoad をデフォルト参照として維持するため、未設定時のみ I を確立する。
-		if (I == null)
-		{
-			I = this;
-		}
+		I = this;
 	}
 
 	/// <summary>
-	/// シーンツリー離脱時に、現在インスタンスがシングルトン参照なら解放します。
+	/// シーンツリー離脱時に、シングルトン参照を破棄します。
 	/// </summary>
 	public override void _ExitTree()
 	{
-		// 複数インスタンスが存在し得るため、自身が I の場合のみ解放する。
-		if (ReferenceEquals(I, this))
-		{
-			I = null;
-		}
+		I = null;
 	}
 
 	#region --------------------------------------- Request ---------------------------------------

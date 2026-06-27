@@ -1,9 +1,9 @@
 using Godot;
 
 /// <summary>
-/// シーン管理用のシングルトンクラスです。AutoLoadノードとしてシーンツリーに配置します。
+/// UI管理用のシングルトンクラスです。AutoLoadノードとしてシーンツリーに配置します。
 /// </summary>
-public partial class SceneManager : Node
+public partial class UiManager : Node
 {
 	#region Fields
 
@@ -16,7 +16,7 @@ public partial class SceneManager : Node
 	/// <summary>
 	/// シングルトン参照です。
 	/// </summary>
-	public static SceneManager I { get; private set; }
+	public static UiManager I { get; private set; }
 
 	#endregion
 

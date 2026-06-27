@@ -5,7 +5,7 @@ public partial class HierarchyTree : Tree
 {
 
 	// 関連ノードのキャッシュ
-	private Node3D _models = null; // 3Dモデル用ルートノードのキャッシュ
+	private RootModel _rootModel = null; // 3Dモデル用ルートノードのキャッシュ
 	// アイコンのキャッシュ
 	private Texture2D _visibleIcon;
 
@@ -17,12 +17,10 @@ public partial class HierarchyTree : Tree
 
 		// イベントの購読
 		ModelEventHub.I.AddModelRequested += OnAddModelRequested;
-		ModelEventHub.I.SelectModelRequested += OnSelectModelRequested;
-		ModelEventHub.I.DeselectModelRequested += OnDeselectModelRequested;
+		ModelEventHub.I.ModelSelectionStateNotified += OnModelSelectionStateNotified;
 
 		// 関連ノードのキャッシュ
-		_models = GetNode<Node3D>("/root/Main/Models");
-
+		_rootModel = GetNode<RootModel>("/root/Main/Models");
 
 		_visibleIcon = LoadIcon("res://assets/icon/icon.svg", 24);
 
@@ -31,7 +29,7 @@ public partial class HierarchyTree : Tree
 		SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
 
 		// ツリーの初期化
-		AddToTree(_models);
+		AddToTree(_rootModel);
 	}
 
 	public override void _ExitTree()
@@ -42,8 +40,7 @@ public partial class HierarchyTree : Tree
 
 		// イベントの購読解除
 		ModelEventHub.I.AddModelRequested -= OnAddModelRequested;
-		ModelEventHub.I.SelectModelRequested -= OnSelectModelRequested;
-		ModelEventHub.I.DeselectModelRequested -= OnDeselectModelRequested;
+		ModelEventHub.I.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
 	}
 
 	#region Events
@@ -65,13 +62,13 @@ public partial class HierarchyTree : Tree
 
 		if (selected)
 		{
-			// 選択されたアイテムに対応する Node3D を選択状態にする
-			Selection.Add(HierarchyBinder.GetNode(item));
+			// 選択されたアイテムに対応する AnyModel を選択状態にする
+			Selection.Add(ModelBinder.GetModel(item));
 		}
 		else
 		{
-			// 選択が解除されたアイテムに対応する Node3D を選択解除状態にする
-			Selection.Remove(HierarchyBinder.GetNode(item));
+			// 選択が解除されたアイテムに対応する AnyModel を選択解除状態にする
+			Selection.Remove(ModelBinder.GetModel(item));
 		}
 	}
 
@@ -85,11 +82,11 @@ public partial class HierarchyTree : Tree
 		switch (column)
 		{
 			case (int)HierarchyTreeColumn.VisibleButton:
-				Node3D node = HierarchyBinder.GetNode(item);
-				if (node != null)
+				AnyModel model = ModelBinder.GetModel(item);
+				if (model != null)
 				{
-					node.Visible = !node.Visible; // ノードの表示状態を切り替える
-					item.SetIconModulate((int)HierarchyTreeColumn.VisibleButton, node.Visible ? new Color(1, 1, 1) : new Color(1, 1, 1, 0.5f)); // アイコンの見た目も更新する
+					model.Visible = !model.Visible; // ノードの表示状態を切り替える
+					item.SetIconModulate((int)HierarchyTreeColumn.VisibleButton, model.Visible ? new Color(1, 1, 1) : new Color(1, 1, 1, 0.5f)); // アイコンの見た目も更新する
 				}
 				break;
 			default:
@@ -97,71 +94,70 @@ public partial class HierarchyTree : Tree
 		}
 	}
 
-	private void OnAddModelRequested(Node3D node, Node3D parent)
+	/// <summary>
+	/// モデルの追加がリクエストされたときのイベントハンドラ
+	/// </summary>
+	/// <param name="child">追加する子モデル</param>
+	/// <param name="parent">追加先の親モデル</param>
+	private void OnAddModelRequested(AnyModel child, AnyModel parent)
 	{
-		AddToTree(node, parent);
+		AddToTree(child, parent);
 	}
 
-	private void OnSelectModelRequested(Node3D node)
+	private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
 	{
-		TreeItem item = HierarchyBinder.GetItem(node);
+		TreeItem item = ModelBinder.GetItem(model);
 		if (item != null)
 		{
-			item.Select((int)HierarchyTreeColumn.Name);
-		}
-	}
-
-	private void OnDeselectModelRequested(Node3D node)
-	{
-		TreeItem item = HierarchyBinder.GetItem(node);
-		if (item != null)
-		{
-			item.Deselect((int)HierarchyTreeColumn.Name);
+			if (isSelected)
+			{
+				item.Select((int)HierarchyTreeColumn.Name);
+			}
+			else
+			{
+				item.Deselect((int)HierarchyTreeColumn.Name);
+			}
 		}
 	}
 
 	#endregion
 
 	/// <summary>
-	/// Node3D を TreeItem に追加する
+	/// AnyModel を TreeItem に追加する
 	/// </summary>
-	/// <param name="node">追加する Node3D</param>
+	/// <param name="node">追加する AnyModel</param>
 	/// <param name="parentTreeItem">親の TreeItem</param>
-	private void AddToTree(Node3D node, TreeItem parentTreeItem = null)
+	private void AddToTree(AnyModel model, TreeItem parentTreeItem = null)
 	{
 		// ツリーにアイテムを追加。親が null の場合はルートアイテムとして追加される便利仕様
 		TreeItem item = CreateItem(parentTreeItem);
-		item.SetText((int)HierarchyTreeColumn.Name, node.Name);
+		item.SetText((int)HierarchyTreeColumn.Name, model.Name);
 
 		// 非表示切り替えのためのアイコンを設定
 		item.SetCellMode((int)HierarchyTreeColumn.VisibleButton, TreeItem.TreeCellMode.Icon);
 		item.SetIcon((int)HierarchyTreeColumn.VisibleButton, _visibleIcon);
-		item.SetIconModulate((int)HierarchyTreeColumn.VisibleButton, node.Visible ? new Color(1, 1, 1) : new Color(1, 1, 1, 0.5f)); // 非表示なら半透明にする
+		item.SetIconModulate((int)HierarchyTreeColumn.VisibleButton, model.Visible ? new Color(1, 1, 1) : new Color(1, 1, 1, 0.5f)); // 非表示なら半透明にする
 		item.SetEditable((int)HierarchyTreeColumn.VisibleButton, true); // アイコンをクリックして編集可能にする
 
-		// Node3D と TreeItem の対応を登録
-		HierarchyBinder.Bind(node, item);
+		// AnyModel と TreeItem の対応を登録
+		ModelBinder.Bind(model, item);
 
 		// 子ノードを再帰的に追加
-		foreach (Node3D childNode in node.GetChildren())
+		foreach (AnyModel childModel in model.ChildModels)
 		{
-			// 純粋なNode3Dのみをツリーに追加する、Node3Dを継承しているStaticBody3DやMeshInstance3Dなどはツリーに表示しない
-			if (childNode.GetType() == typeof(Node3D))
-			{
-				AddToTree(childNode, item);
-			}
+			// AnyModel のみをツリーに追加する
+			AddToTree(childModel, item);
 		}
 	}
 
-	private void AddToTree(Node3D node , Node3D parentNode)
+	private void AddToTree(AnyModel childModel , AnyModel parentModel)
 	{
-		TreeItem parentTreeItem = HierarchyBinder.GetItem(parentNode);
+		TreeItem parentTreeItem = ModelBinder.GetItem(parentModel);
 		if (parentTreeItem != null)
 		{
-			AddToTree(node, parentTreeItem);
+			AddToTree(childModel, parentTreeItem);
 		}
 	}
-
 
 	private Texture2D LoadIcon(string path, int size = 16)
 	{

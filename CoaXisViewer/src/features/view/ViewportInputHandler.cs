@@ -3,11 +3,8 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// メインの3Dビューの入力を受け取り、EventHub へ中継します。
+/// アタッチされている3Dビューの入力を受け取り、ViewportEventHub へ中継します。
 /// </summary>
-/// <remarks>
-/// クラスに関する備考や注意点をここに記述します。
-/// </remarks>
 public partial class ViewportInputHandler : SubViewport
 {
 	#region Fields
@@ -541,21 +538,11 @@ public partial class ViewportInputHandler : SubViewport
 
 		if (pickResult.HasHit)
 		{
-			if (Selection.IsMultiSelectMode)
-			{
-				Selection.Toggle(pickResult.Node);
-			}
-			else
-			{
-				Selection.Set(pickResult.Node);
-			}
+			ModelEventHub.RequestSelectModel(pickResult.Model);
 		}
 		else
 		{
-			if (!Selection.IsMultiSelectMode)
-			{
-				Selection.Clear();
-			}
+			ModelEventHub.RequestClearSelection();
 		}
 	}
 
@@ -571,21 +558,13 @@ public partial class ViewportInputHandler : SubViewport
 		var camera = GetCamera3D();
 		var pickResults = PickService.PickByShape(camera, frustumShape, true);
 
-		// ヒットしたオブジェクトから Node3D を抜き取る
-		List<Node3D> pickedNodes = new List<Node3D>();
-		foreach (var result in pickResults)
+		// ヒットしたオブジェクトから AnyModel を抜き取る
+		AnyModel[] pickedModels = new AnyModel[pickResults.Count];
+		for (int i = 0; i < pickResults.Count; i++)
 		{
-			pickedNodes.Add(result.Collider.GetParentOrNull<Node3D>());
+			pickedModels[i] = pickResults[i].Model;
 		}
-
-		if (Selection.IsMultiSelectMode)
-		{
-			Selection.Add(pickedNodes);
-		}
-		else
-		{
-			Selection.Set(pickedNodes);
-		}
+		ModelEventHub.RequestSelectModels(pickedModels);
 	}
 
 	/// <summary>

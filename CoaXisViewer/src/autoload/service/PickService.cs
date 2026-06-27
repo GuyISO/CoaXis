@@ -37,7 +37,7 @@ public partial class PickService : Node
 			HasHit = true,
 			Collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
 			Rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-			Node = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<Node3D>() : null,
+			Model = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
 			Position = (Vector3)result["position"],
 			Normal = result.ContainsKey("normal") ? (Vector3)result["normal"] : Vector3.Zero,
 			Distance = origin.DistanceTo((Vector3)result["position"])
@@ -122,7 +122,7 @@ public partial class PickService : Node
 				HasHit = true,
 				Collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
 				Rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-				Node = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<Node3D>() : null,
+				Model = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
 				Position = Vector3.Zero, // IntersectShape は position を返さない
 				Normal = Vector3.Zero,
 				Distance = 0f

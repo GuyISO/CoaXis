@@ -20,9 +20,9 @@ public struct PickResult
 	/// </summary>
 	public Rid Rid;
 	/// <summary>
-	/// 取得したコライダーの親ノードへの参照です。本プロジェクトではコライダーはNode3Dの子ノードとして配置され、実態としてその親ノードを扱うことが多いため、親ノードも取得できるようにしています。
+	/// 取得したコライダーの親ノードへの参照です。本プロジェクトではコライダーはAnyModelの子ノードとして配置され、実態としてそのAnyModelノードを扱うことが多いため取得できるようにしています。
 	/// </summary>
-	public Node3D Node;
+	public AnyModel Model;
 	/// <summary>
 	/// 取得した位置のワールド座標です。レイキャストの場合のみ有効で、範囲選択などでは取得されません。
 	/// </summary>

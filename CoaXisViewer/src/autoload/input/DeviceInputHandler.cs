@@ -13,7 +13,9 @@ public partial class DeviceInputHandler : Node
 	[Export] private float _rotateSpeedDegrees = 90.0f;
 	[Export] private float _rollSpeedDegrees = 120.0f;
 
-	private static DeviceInputHandler I;
+	private bool _isMultiSelectMode = false;
+
+	public static DeviceInputHandler I { get; private set; }
 
 	#endregion
 
@@ -26,12 +28,26 @@ public partial class DeviceInputHandler : Node
 
 	public override void _Process(double delta)
 	{
-		// マルチセレクトモードの状態を毎フレーム更新して通知
-		Selection.IsMultiSelectMode = Input.IsActionPressed("select_multiple");
+		// マルチセレクトモードの状態を更新します。
+		bool wasMultiSelectMode = _isMultiSelectMode;
+		_isMultiSelectMode = Input.IsActionPressed("select_multiple");
+		if (wasMultiSelectMode != _isMultiSelectMode)
+		{
+			ModelEventHub.RequestSetMultiSelectMode(_isMultiSelectMode);
+		}
 
+		// ユーザーの入力に基づいてカメラの平行移動と回転をリクエストします。
 		float dt = (float)delta;
 		HandleTranslationInput(dt);
 		HandleRotationInput(dt);
+	}
+
+    public override async void _UnhandledKeyInput(InputEvent @event)
+    {
+		if (@event.IsActionPressed("load"))
+		{
+			ModelEventHub.RequestLoadModel("res://assets/models/car.glb");
+		}
 	}
 
 	#endregion
