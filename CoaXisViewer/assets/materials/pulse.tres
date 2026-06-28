@@ -1,0 +1,11 @@
+[gd_resource type="ShaderMaterial" format=3 uid="uid://dusavx2ywdb1q"]
+
+[ext_resource type="Shader" uid="uid://r8qdmskwtk7g" path="res://assets/shaders/blink.gdshader" id="1_l1dmc"]
+
+[resource]
+render_priority = 0
+shader = ExtResource("1_l1dmc")
+shader_parameter/highlight = true
+shader_parameter/highlight_color = Vector4(1, 1, 0, 1)
+shader_parameter/pulse_speed = 4.0
+shader_parameter/pulse_strength = 1.0

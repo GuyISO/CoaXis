@@ -1,13 +1,21 @@
 ﻿using Godot;
 using System;
 
+/// <summary>
+/// 階層ツリーの表示と操作を行うUIコンポーネント
+/// </summary>
 public partial class HierarchyTree : Tree
 {
+    #region Fields
 
     // 関連ノードのキャッシュ
     private RootModel _rootModel = null; // 3Dモデル用ルートノードのキャッシュ
-                                         // アイコンのキャッシュ
-    private Texture2D _visibleIcon;
+    private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
+    private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
+
+    #endregion
+
+    #region Lifecycle
 
     public override void _Ready()
     {
@@ -18,18 +26,15 @@ public partial class HierarchyTree : Tree
         // イベントの購読
         ModelEventHub.Instance.AddModelRequested += OnAddModelRequested;
         ModelEventHub.Instance.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+        ModelEventHub.Instance.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        ModelEventHub.Instance.RootModelNotified += OnRootModelNotified;
 
-        // 関連ノードのキャッシュ
-        _rootModel = GetNode<RootModel>("/root/Main/Models");
-
-        _visibleIcon = LoadIcon("res://assets/icon/icon.svg", 24);
+        _visibleIcon = LoadIcon("res://assets/icon/visible.svg", 24);
+        _invisibleIcon = LoadIcon("res://assets/icon/invisible.svg", 24);
 
         // VisibleButton 列を固定幅にする
         SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
         SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
-
-        // ツリーの初期化
-        AddToTree(_rootModel);
     }
 
     public override void _ExitTree()
@@ -41,7 +46,20 @@ public partial class HierarchyTree : Tree
         // イベントの購読解除
         ModelEventHub.Instance.AddModelRequested -= OnAddModelRequested;
         ModelEventHub.Instance.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+        ModelEventHub.Instance.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        ModelEventHub.Instance.RootModelNotified -= OnRootModelNotified;
     }
+
+    public override void _Process(double delta)
+    {
+        // ルートモデルがまだ取得できていない場合は、ModelEventHub に通知をリクエストする、Ready団塊ではノードの読み込み順序の都合などで取得できないことを想定し、毎フレームチェックする
+        if (_rootModel == null)
+        {
+            ModelEventHub.RequestNotifyRootModel();
+        }
+    }
+
+    #endregion
 
     #region Events
 
@@ -79,19 +97,36 @@ public partial class HierarchyTree : Tree
     {
         int column = GetSelectedColumn();
         TreeItem item = GetSelected();
+        if (item == null)
+        {
+            return;
+        }
+
         switch (column)
         {
             case (int)HierarchyTreeColumn.VisibleButton:
-                AnyModel model = ModelBinder.GetModel(item);
-                if (model != null)
-                {
-                    model.Visible = !model.Visible; // ノードの表示状態を切り替える
-                    item.SetIconModulate((int)HierarchyTreeColumn.VisibleButton, model.Visible ? new Color(1, 1, 1) : new Color(1, 1, 1, 0.5f)); // アイコンの見た目も更新する
-                }
+                OnVisibleButtonClicked(item);
                 break;
             default:
                 break;
         }
+    }
+
+    /// <summary>
+    /// VisibleButton がクリックされたときのイベントハンドラ
+    /// </summary>
+    /// <param name="item">クリックされた TreeItem</param>
+    private void OnVisibleButtonClicked(TreeItem item)
+    {
+        AnyModel model = ModelBinder.GetModel(item);
+        if (model == null)
+        {
+            LogHub.Warn("HierarchyTree: clicked item has no associated model.");
+            return;
+        }
+
+        // モデルの表示状態を切り替える
+        ModelEventHub.RequestToggleModelVisibility(model);
     }
 
     /// <summary>
@@ -104,6 +139,11 @@ public partial class HierarchyTree : Tree
         AddToTree(child, parent);
     }
 
+    /// <summary>
+    /// モデルの選択状態が通知されたときのイベントハンドラ
+    /// </summary>
+    /// <param name="model">選択状態が変更されたモデル</param>
+    /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
     private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
     {
         TreeItem item = ModelBinder.GetItem(model);
@@ -117,6 +157,35 @@ public partial class HierarchyTree : Tree
             {
                 item.Deselect((int)HierarchyTreeColumn.Name);
             }
+        }
+    }
+
+    /// <summary>
+    /// モデルの表示状態が通知されたときのイベントハンドラ
+    /// </summary>
+    /// <param name="model">表示状態が変更されたモデル</param>
+    /// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
+    private void OnModelVisibilityStateNotified(AnyModel model, bool isVisible)
+    {
+        LogHub.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
+        TreeItem item = ModelBinder.GetItem(model);
+        if (item != null)
+        {
+            item.SetIcon((int)HierarchyTreeColumn.VisibleButton, isVisible ? _visibleIcon : _invisibleIcon);
+        }
+    }
+
+    /// <summary>
+    /// ルートモデルが通知されたときのイベントハンドラ
+    /// </summary>
+    /// <param name="rootModel">通知されたルートモデル</param>
+    private void OnRootModelNotified(RootModel rootModel)
+    {
+        if (_rootModel == null)
+        {
+            _rootModel = rootModel;
+            AddToTree(_rootModel);
+            LogHub.Info("HierarchyTree: RootModel notified and added to tree.");
         }
     }
 
@@ -135,12 +204,14 @@ public partial class HierarchyTree : Tree
 
         // 非表示切り替えのためのアイコンを設定
         item.SetCellMode((int)HierarchyTreeColumn.VisibleButton, TreeItem.TreeCellMode.Icon);
-        item.SetIcon((int)HierarchyTreeColumn.VisibleButton, _visibleIcon);
-        item.SetIconModulate((int)HierarchyTreeColumn.VisibleButton, model.Visible ? new Color(1, 1, 1) : new Color(1, 1, 1, 0.5f)); // 非表示なら半透明にする
-        item.SetEditable((int)HierarchyTreeColumn.VisibleButton, true); // アイコンをクリックして編集可能にする
+        item.SetIcon((int)HierarchyTreeColumn.VisibleButton, model.Visible ? _visibleIcon : _invisibleIcon);
+        //item.SetEditable((int)HierarchyTreeColumn.VisibleButton, true); // アイコンをクリックして編集可能にする
 
         // AnyModel と TreeItem の対応を登録
-        ModelBinder.Bind(model, item);
+        if (!ModelBinder.Bind(model, item))
+        {
+            LogHub.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
+        }
 
         // 子ノードを再帰的に追加
         foreach (AnyModel childModel in model.ChildModels)
@@ -162,7 +233,19 @@ public partial class HierarchyTree : Tree
     private Texture2D LoadIcon(string path, int size = 16)
     {
         var tex = GD.Load<Texture2D>(path);
+        if (tex == null)
+        {
+            LogHub.Warn($"HierarchyTree: icon load failed. path='{path}'");
+            return null;
+        }
+
         var img = tex.GetImage();
+        if (img == null)
+        {
+            LogHub.Warn($"HierarchyTree: icon image is null. path='{path}'");
+            return tex;
+        }
+
         img.Resize(size, size, Image.Interpolation.Lanczos);
         return ImageTexture.CreateFromImage(img);
     }

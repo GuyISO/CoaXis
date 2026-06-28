@@ -38,6 +38,7 @@ public partial class ViewportInputHandler : SubViewport
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
+        LogHub.Info("ViewportInputHandler initialized.");
     }
 
     public override void _ExitTree()
@@ -47,6 +48,8 @@ public partial class ViewportInputHandler : SubViewport
 
         // イベントの購読解除
         ViewportEventHub.Instance.NotifyStateRequested -= OnNotifyStateRequested;
+
+        LogHub.Info("ViewportInputHandler released.");
     }
 
     public override void _Process(double delta)
@@ -146,6 +149,7 @@ public partial class ViewportInputHandler : SubViewport
             return;
         }
 
+        LogHub.Debug($"ViewportInputHandler: mode changed {_mode} -> {mode}");
         _mode = mode;
         ViewportEventHub.NotifyInputMode(mode);
     }
@@ -317,11 +321,13 @@ public partial class ViewportInputHandler : SubViewport
         if (pickResult.HasHit)
         {
             // ヒットしたら注視点を移動
+            LogHub.Debug($"ViewportInputHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
             ViewportEventHub.RequestMovePositionTo(pickResult.Position, useTween);
             return true;
         }
         else
         {
+            LogHub.Debug("ViewportInputHandler: focus target not found.");
             return false;
         }
     }
@@ -339,11 +345,13 @@ public partial class ViewportInputHandler : SubViewport
 
         if (pickResult.HasHit)
         {
+            LogHub.Debug($"ViewportInputHandler: align-normal target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
             ViewportEventHub.RequestAlignNormalTo(pickResult.Normal, useTween);
             return true;
         }
         else
         {
+            LogHub.Debug("ViewportInputHandler: align-normal target not found.");
             return false;
         }
     }
@@ -539,10 +547,12 @@ public partial class ViewportInputHandler : SubViewport
 
         if (pickResult.HasHit)
         {
+            LogHub.Debug($"ViewportInputHandler: point select hit. model='{pickResult.Model?.Name}'");
             ModelEventHub.RequestSelectModel(pickResult.Model);
         }
         else
         {
+            LogHub.Debug("ViewportInputHandler: point select miss. clear selection requested.");
             ModelEventHub.RequestClearSelection();
         }
     }
@@ -565,6 +575,7 @@ public partial class ViewportInputHandler : SubViewport
         {
             pickedModels[i] = pickResults[i].Model;
         }
+        LogHub.Debug($"ViewportInputHandler: rect select requested. hitCount={pickedModels.Length}");
         ModelEventHub.RequestSelectModels(pickedModels);
     }
 

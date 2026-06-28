@@ -11,18 +11,28 @@ public partial class RootModel : AnyModel
     public override void _Ready()
     {
         // イベントハンドラの登録
+        ModelEventHub.Instance.NotifyRootModelRequested += OnNotifyRootModelRequested;
         ModelEventHub.Instance.LoadModelRequested += OnLoadModelRequested;
     }
 
     public override void _ExitTree()
     {
         // イベントハンドラの登録解除
+        ModelEventHub.Instance.NotifyRootModelRequested -= OnNotifyRootModelRequested;
         ModelEventHub.Instance.LoadModelRequested -= OnLoadModelRequested;
     }
 
     #endregion
 
     #region Events
+
+    /// <summary>
+    /// ルートモデルの通知要求イベントのハンドラで、ModelEventHub に対して自身を通知する
+    /// </summary>
+    private void OnNotifyRootModelRequested()
+    {
+        ModelEventHub.NotifyRootModel(this);
+    }
 
     /// <summary>
     /// モデルロード要求イベントのハンドラで ModelLoader を使用して非同期でモデルをロードし、ロード完了後にシーンへ追加する

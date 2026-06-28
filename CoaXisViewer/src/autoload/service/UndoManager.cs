@@ -27,9 +27,17 @@ public partial class UndoManager : Node
     /// </summary>
     public void Execute(CommandBase command)
     {
+        if (command == null)
+        {
+            LogHub.Warn("UndoManager.Execute was called with null command.");
+            return;
+        }
+
+        LogHub.Debug($"UndoManager Execute: {command.Description}");
         command.Do();
         _undoStack.Push(command);
         _redoStack.Clear();
+        LogHub.Debug($"UndoManager Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
     }
 
     /// <summary>
@@ -38,11 +46,16 @@ public partial class UndoManager : Node
     public void Undo()
     {
         if (_undoStack.Count == 0)
+        {
+            LogHub.Debug("UndoManager Undo skipped: undo stack is empty.");
             return;
+        }
 
         var cmd = _undoStack.Pop();
+        LogHub.Debug($"UndoManager Undo: {cmd.Description}");
         cmd.Undo();
         _redoStack.Push(cmd);
+        LogHub.Debug($"UndoManager Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
     }
 
     /// <summary>
@@ -51,11 +64,16 @@ public partial class UndoManager : Node
     public void Redo()
     {
         if (_redoStack.Count == 0)
+        {
+            LogHub.Debug("UndoManager Redo skipped: redo stack is empty.");
             return;
+        }
 
         var cmd = _redoStack.Pop();
+        LogHub.Debug($"UndoManager Redo: {cmd.Description}");
         cmd.Do();
         _undoStack.Push(cmd);
+        LogHub.Debug($"UndoManager Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
     }
 
     /// <summary>
@@ -63,6 +81,7 @@ public partial class UndoManager : Node
     /// </summary>
     public void Clear()
     {
+        LogHub.Info($"UndoManager Clear: undo={_undoStack.Count}, redo={_redoStack.Count}");
         _undoStack.Clear();
         _redoStack.Clear();
     }

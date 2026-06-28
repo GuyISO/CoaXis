@@ -42,6 +42,13 @@ public partial class DeviceInputHandler : Node
             ModelEventHub.RequestSetMultiSelectMode(_isMultiSelectMode);
         }
 
+        if (Input.IsActionJustPressed("load"))
+        {
+            ModelEventHub.RequestLoadModel("res://assets/models/car.glb");
+        }
+
+        HandleUndoRedoInput();
+
         // ユーザーの入力に基づいてカメラの平行移動と回転をリクエストする
         float dt = (float)delta;
         HandleTranslationInput(dt);
@@ -51,6 +58,37 @@ public partial class DeviceInputHandler : Node
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// Undo/Redo 入力に応じてコマンド履歴を操作する
+    /// </summary>
+    private static void HandleUndoRedoInput()
+    {
+        bool undoPressed = Input.IsActionJustPressed("undo");
+        bool redoPressed = Input.IsActionJustPressed("redo");
+        if (!undoPressed && !redoPressed)
+        {
+            return;
+        }
+
+        if (UndoManager.Instance == null)
+        {
+            LogHub.Warn("DeviceInputHandler: Undo/Redo input received, but UndoManager is not initialized.");
+            return;
+        }
+
+        if (undoPressed)
+        {
+            LogHub.Debug("DeviceInputHandler: Undo requested.");
+            UndoManager.Instance.Undo();
+        }
+
+        if (redoPressed)
+        {
+            LogHub.Debug("DeviceInputHandler: Redo requested.");
+            UndoManager.Instance.Redo();
+        }
+    }
 
     /// <summary>
     /// ユーザーの入力に基づいてカメラの平行移動をリクエストする

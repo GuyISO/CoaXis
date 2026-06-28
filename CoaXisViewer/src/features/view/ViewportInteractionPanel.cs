@@ -1,4 +1,5 @@
 ﻿using Godot;
+using System;
 
 /// <summary>
 /// メインのビューポート状態表示と操作用のパネル
@@ -7,7 +8,7 @@ public partial class ViewportInteractionPanel : PanelContainer
 {
     #region Fields
 
-    [Export] private Node3D _defaultFitTargetNode = null!;
+    [Export] private RootModel _rootModel = null!;
 
     private bool _isInitialized; // 初回状態通知を受けたかだけを保持する
 
@@ -54,6 +55,7 @@ public partial class ViewportInteractionPanel : PanelContainer
         _labelFov = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueFov");
         _sliderFov = GetNode<HSlider>("MarginContainer/VBoxContainer/HSliderFov");
 
+        // UIイベントの購読開始
         _buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
         _buttonFitAllIn.Pressed += OnButtonFitAllInPressed;
         _buttonFitToSelection.Pressed += OnButtonFitToSelectionPressed;
@@ -61,6 +63,8 @@ public partial class ViewportInteractionPanel : PanelContainer
         _buttonRollRight.Pressed += OnButtonRollRightPressed;
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
 
+        // イベントの購読開始
+        ModelEventHub.Instance.RootModelNotified += OnRootModelNotified;
         ViewportEventHub.Instance.InputModeNotified += OnInputModeNotified;
         ViewportEventHub.Instance.PositionNotified += OnPositionNotified;
         ViewportEventHub.Instance.RotationNotified += OnRotationNotified;
@@ -68,12 +72,11 @@ public partial class ViewportInteractionPanel : PanelContainer
         ViewportEventHub.Instance.SizeNotified += OnSizeNotified;
         ViewportEventHub.Instance.FovNotified += OnFovNotified;
         ViewportEventHub.Instance.ProjectionTypeNotified += OnProjectionTypeNotified;
-
-        ViewportEventHub.RequestNotifyState();
     }
 
     public override void _ExitTree()
     {
+        // UIイベントの購読解除
         _buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
         _buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
         _buttonFitToSelection.Pressed -= OnButtonFitToSelectionPressed;
@@ -81,6 +84,7 @@ public partial class ViewportInteractionPanel : PanelContainer
         _buttonRollRight.Pressed -= OnButtonRollRightPressed;
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
+        // イベントの購読解除
         ViewportEventHub.Instance.InputModeNotified -= OnInputModeNotified;
         ViewportEventHub.Instance.PositionNotified -= OnPositionNotified;
         ViewportEventHub.Instance.RotationNotified -= OnRotationNotified;
@@ -88,6 +92,20 @@ public partial class ViewportInteractionPanel : PanelContainer
         ViewportEventHub.Instance.SizeNotified -= OnSizeNotified;
         ViewportEventHub.Instance.FovNotified -= OnFovNotified;
         ViewportEventHub.Instance.ProjectionTypeNotified -= OnProjectionTypeNotified;
+    }
+
+    public override void _Process(double delta)
+    {
+        // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
+        if (_rootModel == null)
+        {
+            ModelEventHub.RequestNotifyRootModel();
+        }
+
+        if (!_isInitialized)
+        {
+            ViewportEventHub.RequestNotifyState();
+        }
     }
 
     #endregion
@@ -99,6 +117,7 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// </summary>
     private void OnButtonToggleProjectionPressed()
     {
+        LogHub.Debug("ViewportInteractionPanel: toggle projection requested.");
         ViewportEventHub.RequestToggleProjectionType();
     }
 
@@ -107,13 +126,15 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// </summary>
     private void OnButtonFitAllInPressed()
     {
-        if (_defaultFitTargetNode == null)
+        if (_rootModel == null)
         {
-            GD.PushWarning("ViewportInteractionPanel: fit target node is missing.");
+            GD.PushWarning("ViewportInteractionPanel: fit target model is missing.");
+            LogHub.Warn("ViewportInteractionPanel: fit-all requested but default target is missing.");
             return;
         }
 
-        ViewportEventHub.RequestFit(new[] { _defaultFitTargetNode }, true);
+        LogHub.Debug($"ViewportInteractionPanel: fit-all requested. target='{_rootModel.Name}'");
+        ViewportEventHub.RequestFit(new[] { _rootModel }, true);
     }
 
     /// <summary>
@@ -121,12 +142,14 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        Node3D[] fitTargets = Selection.GetNodesArray();
+        AnyModel[] fitTargets = Selection.GetNodesArray();
         if (fitTargets.Length == 0)
         {
+            LogHub.Debug("ViewportInteractionPanel: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
+        LogHub.Debug($"ViewportInteractionPanel: fit-to-selection requested. targets={fitTargets.Length}");
         ViewportEventHub.RequestFit(fitTargets, true);
     }
 
@@ -136,6 +159,7 @@ public partial class ViewportInteractionPanel : PanelContainer
     private void OnButtonRollLeftPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
+        LogHub.Debug("ViewportInteractionPanel: roll-left requested.");
         ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
     }
 
@@ -145,7 +169,17 @@ public partial class ViewportInteractionPanel : PanelContainer
     private void OnButtonRollRightPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
+        LogHub.Debug("ViewportInteractionPanel: roll-right requested.");
         ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
+    }
+
+    /// <summary>
+    /// RootModel が通知されたときに呼び出されるイベントハンドラ、キャッシュを更新する
+    /// </summary>
+    /// <param name="rootModel">通知されたルートモデル</param>
+    private void OnRootModelNotified(RootModel rootModel)
+    {
+        _rootModel = rootModel;
     }
 
     /// <summary>
@@ -154,6 +188,7 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// <param name="value">新しい FOV 値</param>
     private void OnSliderFovValueChanged(double value)
     {
+        LogHub.Debug($"ViewportInteractionPanel: set-fov requested. fov={value:F1}");
         ViewportEventHub.RequestSetFov((float)value);
     }
 
@@ -163,7 +198,9 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// <param name="mode">ビューポートの入力モード</param>
     private void OnInputModeNotified(ViewportInputMode mode)
     {
+        // ViewportEventHub.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
         _isInitialized = true;
+
         _labelMode.Text = mode.ToString();
     }
 

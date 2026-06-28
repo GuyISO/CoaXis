@@ -21,13 +21,13 @@ config/icon="res://assets/icon/icon.svg"
 ModelEventHub="*uid://guga46ph5l82"
 ViewportEventHub="*uid://dx5t10ibmi7k1"
 DeviceInputHandler="*uid://vwxli71heajm"
-HighlightService="*uid://c72re42r7nlfn"
-ModelBinder="*uid://dgrwggwf23ysx"
+ModelOperationService="*uid://doqqmjg3lqulp"
+ModelVisualService="*uid://c72re42r7nlfn"
 Selection="*uid://dngenqpeyo83v"
-UiManager="*uid://bdww21xtruf8m"
-IpcService="*uid://cw6vp0knouk1l"
-LogHub="*uid://5o16r7usgjmh"
 SettingsService="*res://src/autoload/service/SettingsService.cs"
+UiManager="*uid://bdww21xtruf8m"
+UndoManager="*uid://dbaec6b5x7oqf"
+LogHub="*uid://5o16r7usgjmh"
 
 [display]
 

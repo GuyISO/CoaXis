@@ -30,7 +30,7 @@ reflected_light_source = 1
 
 [sub_resource type="SphereShape3D" id="SphereShape3D_f2lfd"]
 
-[sub_resource type="CapsuleMesh" id="CapsuleMesh_cvmbd"]
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_qmy6f"]
 
 [sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ft6cd"]
 
@@ -45,45 +45,44 @@ environment = SubResource("Environment_2xmat")
 transform = Transform3D(0.14644663, 0.8535534, -0.5, -0.50000006, 0.50000006, 0.70710677, 0.8535534, 0.14644662, 0.5, 0, 0, 0)
 layers = 1048573
 
-[node name="Models" type="Node3D" parent="." unique_id=2131541972]
+[node name="RootModel" type="Node3D" parent="." unique_id=2131541972]
 script = ExtResource("1_3p2gp")
 
-[node name="Cube" type="Node3D" parent="Models" unique_id=2086981542]
+[node name="Cube" type="Node3D" parent="RootModel" unique_id=2086981542]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 script = ExtResource("2_cvmbd")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Cube" unique_id=1111657438]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Cube" unique_id=1111657438]
 material_override = ExtResource("2_bjd11")
 mesh = SubResource("BoxMesh_cvmbd")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Models/Cube" unique_id=722696110]
+[node name="StaticBody3D" type="StaticBody3D" parent="RootModel/Cube" unique_id=722696110]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Cube/StaticBody3D" unique_id=1783050876]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RootModel/Cube/StaticBody3D" unique_id=1783050876]
 shape = SubResource("BoxShape3D_5x7yu")
 
-[node name="Sphere" type="Node3D" parent="Models" unique_id=1772479710]
+[node name="Sphere" type="Node3D" parent="RootModel" unique_id=1772479710]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.5, 0)
 script = ExtResource("2_cvmbd")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Sphere" unique_id=1374449570]
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Sphere" unique_id=1374449570]
 mesh = SubResource("SphereMesh_3p2gp")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Models/Sphere" unique_id=1514251133]
+[node name="StaticBody3D" type="StaticBody3D" parent="RootModel/Sphere" unique_id=1514251133]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Sphere/StaticBody3D" unique_id=402133486]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RootModel/Sphere/StaticBody3D" unique_id=402133486]
 shape = SubResource("SphereShape3D_f2lfd")
 
-[node name="Capsule" type="Node3D" parent="Models" unique_id=1748147158]
+[node name="Capsule" type="Node3D" parent="RootModel" unique_id=1748147158]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 0)
 script = ExtResource("2_cvmbd")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="Models/Capsule" unique_id=1907078487]
-material_override = ExtResource("2_bjd11")
-mesh = SubResource("CapsuleMesh_cvmbd")
+[node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Capsule" unique_id=1907078487]
+mesh = SubResource("CapsuleMesh_qmy6f")
 
-[node name="StaticBody3D" type="StaticBody3D" parent="Models/Capsule" unique_id=1191354939]
+[node name="StaticBody3D" type="StaticBody3D" parent="RootModel/Capsule" unique_id=1191354939]
 
-[node name="CollisionShape3D" type="CollisionShape3D" parent="Models/Capsule/StaticBody3D" unique_id=1731708693]
+[node name="CollisionShape3D" type="CollisionShape3D" parent="RootModel/Capsule/StaticBody3D" unique_id=1731708693]
 shape = SubResource("CapsuleShape3D_ft6cd")
 
 [node name="Canvas" type="Control" parent="." unique_id=1073936096]

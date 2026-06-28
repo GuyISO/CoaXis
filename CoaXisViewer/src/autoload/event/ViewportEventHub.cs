@@ -27,6 +27,7 @@ public partial class ViewportEventHub : Node
     /// </summary>
     public override void _ExitTree()
     {
+        LogHub.Info("ViewportEventHub released.");
         Instance = null;
     }
 
@@ -39,6 +40,7 @@ public partial class ViewportEventHub : Node
         }
 
         Instance.EmitSignal(signalName, args);
+        LogHub.Debug($"ViewportEventHub emitted signal: {signalName}.");
         return true;
     }
 
@@ -164,16 +166,15 @@ public partial class ViewportEventHub : Node
         TryEmitSignal(SignalName.ToggleProjectionTypeRequested);
     }
 
-    [Signal] public delegate void FitRequestedEventHandler(Node3D[] targetNodes, bool useTween);
+    [Signal] public delegate void FitRequestedEventHandler(AnyModel[] targetModels, bool useTween);
     /// <summary>
-    /// カメラを指定ノード群全体にフィットさせる操作をリクエストする
+    /// カメラを指定モデル群全体にフィットさせる操作をリクエストする
     /// </summary>
-    /// <param name="targetNodes">フィットさせたいターゲットノード群</param>
+    /// <param name="targetModels">フィットさせたいターゲットモデル群</param>
     /// <param name="useTween">フィット操作にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
-    public static void RequestFit(IEnumerable<Node3D> targetNodes, bool useTween = false)
+    public static void RequestFit(AnyModel[] targetModels, bool useTween = false)
     {
-        Node3D[] targets = targetNodes as Node3D[] ?? (targetNodes == null ? Array.Empty<Node3D>() : new List<Node3D>(targetNodes).ToArray());
-        TryEmitSignal(SignalName.FitRequested, targets, useTween);
+        TryEmitSignal(SignalName.FitRequested, targetModels, useTween);
     }
 
     [Signal] public delegate void AlignNormalToRequestedEventHandler(Vector3 normal, bool useTween);
