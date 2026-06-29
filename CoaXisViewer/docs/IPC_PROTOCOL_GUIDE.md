@@ -112,3 +112,18 @@ payload フィールド:
 - 応答メッセージ（成功/失敗と理由）を明示的に返す
 - model識別を name から UUID ベースへ移行
 - 双方向同時接続時の同時実行制御を追加
+
+## 7. 座標系ポリシー
+- 外部境界（IPC payload、DB保存、ユーザー表示）は CATIA 座標系で統一する。
+- Viewer 内部（Node3D の Transform、カメラ操作、物理/描画計算）は Godot 座標系で扱う。
+- 境界を跨ぐ変換は `CoordinateSystemUtility` を使用して行う。
+
+CATIA -> Godot の軸対応:
+- Xg = Yc
+- Yg = Zc
+- Zg = Xc
+
+Godot -> CATIA の軸対応:
+- Xc = Zg
+- Yc = Xg
+- Zc = Yg

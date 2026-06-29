@@ -210,9 +210,10 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// <param name="position">カメラの位置</param>
     private void OnPositionNotified(Vector3 position)
     {
-        _labelPositionX.Text = (position.X * 1000f).ToString("F3");
-        _labelPositionY.Text = (position.Y * 1000f).ToString("F3");
-        _labelPositionZ.Text = (position.Z * 1000f).ToString("F3");
+        Vector3 catiaPosition = CoordinateSystemUtility.GodotToCatia(position);
+        _labelPositionX.Text = (catiaPosition.X * 1000f).ToString("F3");
+        _labelPositionY.Text = (catiaPosition.Y * 1000f).ToString("F3");
+        _labelPositionZ.Text = (catiaPosition.Z * 1000f).ToString("F3");
     }
 
     /// <summary>
@@ -221,7 +222,8 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// <param name="rotation">カメラの回転を表すクォータニオン</param>
     private void OnRotationNotified(Quaternion rotation)
     {
-        Vector3 rotationDegrees = rotation.GetEuler() * (180f / Mathf.Pi);
+        Quaternion catiaRotation = CoordinateSystemUtility.GodotToCatia(rotation);
+        Vector3 rotationDegrees = catiaRotation.GetEuler() * (180f / Mathf.Pi);
         _labelRotationX.Text = rotationDegrees.X.ToString("F3");
         _labelRotationY.Text = rotationDegrees.Y.ToString("F3");
         _labelRotationZ.Text = rotationDegrees.Z.ToString("F3");
