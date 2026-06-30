@@ -48,7 +48,7 @@
 - 問題: 一般規約の region 名統一だけを機械適用すると、EventHub の体裁が壊れ、意図した読みやすさが失われる。
 - 判断: EventHub クラスのみ、装飾付きの `Request` / `Notification` region を例外として許可する。
 - 判断理由: EventHub は「要求発行」と「状態通知」を同居させる集約点であり、2系統を視覚的に分けるメリットが大きい。
-- 採用しなかった代替案: すべてを `Public API` に統合する案は、規約の単純さは高いが、EventHub では探索性が低下するため不採用。
+- 採用しなかった代替案: すべてを `Public Methods` に統合する案は、規約の単純さは高いが、EventHub では探索性が低下するため不採用。
 - 影響範囲: `CoaXisViewer/src/autoload/event/*EventHub.cs` と region 体裁リファクタ手順。
 - 実装/運用手順: EventHub 変更時は `Properties -> Lifecycle -> Request -> Notification` の順序を維持し、非 EventHub クラスには同装飾 region を持ち込まない。
 - 検証方法: `#region` 検索で EventHub 以外に装飾付き `Request` / `Notification` が存在しないことを確認する。
@@ -76,7 +76,7 @@
 
 - 背景: PoC段階でクラス内の記述順・region名が揺れており、探索性とレビュー効率が低下していた。
 - 問題: 開発者ごとに `Event Handlers` / `Input Handling` / `State Management` など命名が分かれ、同種メソッドの所在を予測しづらい。
-- 判断: クラス内順序を `Signals -> Fields -> Properties -> Lifecycle -> Public API -> Internal Helpers` に統一し、region名も同名へ限定する。
+- 判断: クラス内順序を `Signals -> Fields -> Properties -> Lifecycle -> Public Methods -> Internal Helpers` に統一し、region名も同名へ限定する。
 - 判断理由: Godot系/非Godot系を問わず共通運用でき、学習コストとレビューコストを下げられる。
 - 採用しなかった代替案: クラスごと自由命名は柔軟性が高いが、長期保守で認知負荷が上がるため不採用。
 - 影響範囲: `CoaXisViewer/src/**/*.cs` および `tests/**/*.cs` のクラス内構成。
@@ -106,11 +106,11 @@
 
 - 背景: 既存規約ではイベント処理やユーザー操作起点の処理を `Internal Helpers` に集約しており、呼び出し起点の探索に時間がかかっていた。その後 `User Actions` / `Event Handlers` 分離、`Event Handlers` 一本化を経て、最終的に `Events` へ名称統一する段階的見直しを実施した。
 - 問題: region 名と責務の分け方が短期間で変遷し、履歴が分散したことで「現在の正」と「運用手順」が読み取りづらくなっていた。
-- 判断: 外部起点の処理（シグナル/イベント購読コールバック、ユーザー操作起点の直接呼び出し処理）は `Events` region へ統一し、標準順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public API -> Internal Helpers` とする。
-- 判断理由: 名称と責務を一意にしつつ、呼び出し起点の処理を `Public API` より先に配置することで、イベント起点の流れを先に追える構成にできる。
+- 判断: 外部起点の処理（シグナル/イベント購読コールバック、ユーザー操作起点の直接呼び出し処理）は `Events` region へ統一し、標準順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public Methods -> Internal Helpers` とする。
+- 判断理由: 名称と責務を一意にしつつ、呼び出し起点の処理を `Public Methods` より先に配置することで、イベント起点の流れを先に追える構成にできる。
 - 採用しなかった代替案: `User Actions` と `Event Handlers` の分離運用、および `Event Handlers` 名継続は、表現力はあるが配置判断と命名の揺れを生みやすいため不採用。
 - 影響範囲: `CoaXisViewer/src/**/*.cs` および `tests/**/*.cs` のクラス内region構成・命名。
-- 実装/運用手順: クラス更新時は `#region Events` を使用し、`#region User Actions` / `#region Event Handlers` は新規作成しない。順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public API -> Internal Helpers` を適用する。
+- 実装/運用手順: クラス更新時は `#region Events` を使用し、`#region User Actions` / `#region Event Handlers` は新規作成しない。順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public Methods -> Internal Helpers` を適用する。
 - 検証方法: `#region User Actions` と `#region Event Handlers` の残存がないこと、`#region Events` が使用されていること、必要に応じて `dotnet build .\\CoaXis.sln` で整合確認する。
 - 関連ファイル/関連仕様: `docs/rules/implementation-conventions.md`
 - 備考: 同日付の「C#のregion運用へUser ActionsとEvent Handlersを正式追加」「C#のユーザー起点処理をEvent Handlersへ一本化」「C#の外部起点処理region名をEventsへ統一」は本ログへ統合した。

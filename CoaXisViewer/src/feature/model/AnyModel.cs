@@ -35,6 +35,18 @@ public partial class AnyModel : Node3D
     public bool HasCollider => Collider.GetChildCount() > 0;
 
     /// <summary>
+    /// このモデルのエフェクトを保持する Node3D で、動的ロード後はこの中にエフェクトが追加される
+    /// </summary>
+    /// <returns>エフェクトを保持する Node3D</returns>
+    public Node3D Effect { get; private set; }
+
+    /// <summary>
+    /// このモデルがエフェクトを持っているかどうかを示す
+    /// </summary>
+    /// <returns>エフェクトが存在する場合は true、存在しない場合は false を返す</returns>
+    public bool HasEffect => Effect.GetChildCount() > 0;
+
+    /// <summary>
     /// このモデルの親モデルを取得する、親モデルが存在しない場合は null を返す
     /// </summary>
     /// <returns>親モデル、存在しない場合は null</returns>
@@ -58,13 +70,10 @@ public partial class AnyModel : Node3D
         Collider = new StaticBody3D();
         Collider.Name = "Collider";
         AddChild(Collider);
+        Effect = new Node3D();
+        Effect.Name = "Effect";
+        AddChild(Effect);
     }
-
-    #endregion
-
-    #region Internal Helpers
-
-
 
     #endregion
 }

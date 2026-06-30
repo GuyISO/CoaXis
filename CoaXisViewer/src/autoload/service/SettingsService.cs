@@ -3,6 +3,15 @@ using System;
 using System.IO;
 using System.Text.Json;
 
+// TODO: 全然できてないので、後でちゃんと作る
+
+
+
+
+
+
+
+
 /// <summary>
 /// 外部 JSON 設定を読み込んでアプリ全体へ提供する AutoLoad サービス。
 /// </summary>
@@ -17,10 +26,11 @@ using System.Text.Json;
 /// </summary>
 public partial class SettingsService : Node
 {
-    /// <summary>
-    /// AutoLoad ノードのシングルトン参照。
-    /// </summary>
+    #region Properties
+
     public static SettingsService Instance { get; private set; }
+
+    #endregion
 
     /// <summary>
     /// 現在有効な設定値。

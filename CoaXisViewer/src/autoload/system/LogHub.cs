@@ -8,13 +8,23 @@ using System.IO;
 /// </summary>
 public partial class LogHub : Node
 {
-    public static LogHub Instance { get; private set; } // シングルトン参照
+    #region Fields
 
     private StreamWriter _fileWriter;
     private string _logFilePath = string.Empty;
     private bool _enableFileLog = false;
 
     [Signal] public delegate void LoggedEventHandler(string line);
+
+    #endregion
+
+    #region Properties
+
+    public static LogHub Instance { get; private set; }
+
+    #endregion
+
+    #region Lifecycle
 
     public override void _EnterTree()
     {
@@ -34,6 +44,10 @@ public partial class LogHub : Node
         _fileWriter?.Dispose();
         Instance = null;
     }
+
+    #endregion
+
+    #region Public Methods
 
     /// <summary>
     /// ログレベルとメッセージを指定してログを出力する
@@ -88,4 +102,6 @@ public partial class LogHub : Node
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
     public static void Error(string msg) => Log(LogLevel.Error, msg);
+
+    #endregion
 }

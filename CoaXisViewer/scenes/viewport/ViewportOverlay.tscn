@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cf06e5oyn7g2i"]
 
-[ext_resource type="Script" uid="uid://dynirh5eygkkb" path="res://src/features/view/ViewportOverlay.cs" id="1_3a0ha"]
+[ext_resource type="Script" uid="uid://dynirh5eygkkb" path="res://src/feature/view/ViewportOverlay.cs" id="1_3a0ha"]
 
 [node name="ViewportOverlay" type="Control" unique_id=440684067]
 layout_mode = 3

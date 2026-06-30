@@ -1,5 +1,7 @@
 #nullable enable
 
+// TODO: 全然できてないので、後でちゃんと作る
+
 using Godot;
 using System;
 
@@ -10,26 +12,17 @@ public partial class UiManager : Node
 {
     #region Properties
 
-    /// <summary>
-    /// シングルトン参照
-    /// </summary>
     public static UiManager? Instance { get; private set; }
 
     #endregion
 
     #region Lifecycle
 
-    /// <summary>
-    /// シーンツリー参加時にシングルトン参照を確立する
-    /// </summary>
     public override void _EnterTree()
     {
         Instance = this;
     }
 
-    /// <summary>
-    /// シーンツリー離脱時にシングルトン参照を破棄する
-    /// </summary>
     public override void _ExitTree()
     {
         Instance = null;
@@ -37,7 +30,7 @@ public partial class UiManager : Node
 
     #endregion
 
-    #region Public API
+    #region Public Methods
 
     /// <summary>
     /// 指定されたコマンド名に対応する処理を実行する

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ctjbhouwd3kn7"]
 
-[ext_resource type="Script" uid="uid://cqf7jel4l6pjq" path="res://src/features/view/ViewportInteractionPanel.cs" id="1_vtpwr"]
+[ext_resource type="Script" uid="uid://cqf7jel4l6pjq" path="res://src/feature/view/ViewportInteractionPanel.cs" id="1_vtpwr"]
 
 [sub_resource type="Theme" id="Theme_iww46"]
 default_font_size = 0

@@ -57,7 +57,7 @@
 
 1. Lifecycle
 2. Events
-3. Public API
+3. Public Methods
 4. Internal Helpers
 
 ## 5. PRセルフチェック

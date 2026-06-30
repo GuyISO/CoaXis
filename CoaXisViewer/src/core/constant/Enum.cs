@@ -6,9 +6,13 @@ using System;
 /// </summary>
 public enum LogLevel
 {
+    /// <summary>開発中のデバッグ用</summary>
     Debug,
+    /// <summary>ユーザーに通知する必要がある情報</summary>
     Info,
+    /// <summary>警告を表す</summary>
     Warn,
+    /// <summary>エラーを表す</summary>
     Error
 }
 
@@ -17,8 +21,11 @@ public enum LogLevel
 /// </summary>
 public enum SpaceMode
 {
+    /// <summary>ワールド座標系</summary>
     World,
+    /// <summary>注視点基準の座標系</summary>
     FocalPoint,
+    /// <summary>カメラ基準の座標系</summary>
     Camera
 }
 

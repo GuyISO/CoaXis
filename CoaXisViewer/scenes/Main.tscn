@@ -1,16 +1,16 @@
 [gd_scene format=3 uid="uid://dvoc2r3mse54i"]
 
-[ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://src/features/model/RootModel.cs" id="1_3p2gp"]
+[ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://src/feature/model/RootModel.cs" id="1_3p2gp"]
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="2_bjd11"]
-[ext_resource type="Script" uid="uid://co6erwykahhud" path="res://src/features/model/AnyModel.cs" id="2_cvmbd"]
-[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/features/ui/SceneCommandButton.cs" id="5_qmy6f"]
+[ext_resource type="Script" uid="uid://co6erwykahhud" path="res://src/feature/model/AnyModel.cs" id="2_cvmbd"]
+[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/feature/ui/SceneCommandButton.cs" id="5_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewer/AxisNavigator.tscn" id="6_cvmbd"]
-[ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/features/view/CameraRig.cs" id="7_cvmbd"]
+[ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/feature/view/CameraRig.cs" id="7_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/ViewportOverlay.tscn" id="7_ft6cd"]
-[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/features/ui/FpsUi.cs" id="8_bb450"]
-[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/features/ui/HierarchyTree.cs" id="8_qmy6f"]
+[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/feature/ui/FpsUi.cs" id="8_bb450"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/feature/ui/HierarchyTree.cs" id="8_qmy6f"]
 [ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/ui/MessagePanel.tscn" id="14_3p2gp"]
-[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/features/view/ViewportInputHandler.cs" id="14_3t3px"]
+[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/feature/view/ViewportInputHandler.cs" id="14_3t3px"]
 [ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/ViewportInteractionPanel.tscn" id="15_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://djgnpihsaft66" path="res://scenes/ui/UiWindow.tscn" id="15_ft6cd"]
 
@@ -49,7 +49,6 @@ layers = 1048573
 script = ExtResource("1_3p2gp")
 
 [node name="Cube" type="Node3D" parent="RootModel" unique_id=2086981542]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.5, 0)
 script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Cube" unique_id=1111657438]
@@ -62,7 +61,7 @@ mesh = SubResource("BoxMesh_cvmbd")
 shape = SubResource("BoxShape3D_5x7yu")
 
 [node name="Sphere" type="Node3D" parent="RootModel" unique_id=1772479710]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
 script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Sphere" unique_id=1374449570]
@@ -74,7 +73,7 @@ mesh = SubResource("SphereMesh_3p2gp")
 shape = SubResource("SphereShape3D_f2lfd")
 
 [node name="Capsule" type="Node3D" parent="RootModel" unique_id=1748147158]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 1.5, 0)
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
 script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Capsule" unique_id=1907078487]

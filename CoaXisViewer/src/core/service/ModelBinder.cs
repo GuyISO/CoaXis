@@ -3,17 +3,23 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// AnyModel と TreeItem の対応を管理するシングルトンクラスで、Autoload としてシーンに追加して使用する
+/// AnyModel と TreeItem の対応を管理する静的クラス
 /// モデルのヒエラルキーを TreeItem に反映するための登録処理と登録解除処理、対応取得処理を提供する
 /// </summary>
 /// <remarks>
 /// 実際の動的ロード時は ModelManager でメインシーンへ追加し、その後 ModelEventHub の通知で HierarchyTree が更新されて ModelBinder に登録される
 /// </remarks>
-public partial class ModelBinder
+public static class ModelBinder
 {
+    #region Fields
+
     // AnyModel ↔ TreeItem の対応辞書
     private static readonly Dictionary<AnyModel, TreeItem> _modelToItem = new();
     private static readonly Dictionary<TreeItem, AnyModel> _itemToModel = new();
+
+    #endregion
+
+    #region Public Methods
 
     /// <summary>
     /// TreeItem から対応する AnyModel を取得する
@@ -132,4 +138,6 @@ public partial class ModelBinder
 
         item.Free();
     }
+
+    #endregion
 }

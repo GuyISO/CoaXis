@@ -1,12 +1,12 @@
 ---
 applyTo: "**/src/**/*.cs"
-description: "Use when editing C# code. Require XML doc comments for public API and explanatory Japanese comments for intent/reason/constraints."
+description: "Use when editing C# code. Require XML doc comments for Public Methods and explanatory Japanese comments for intent/reason/constraints."
 ---
 # C# コメント必須ルール
 
 このプロジェクトでは、C# の実装時に以下を必須とする。
 
-## 1. 公開 API の XML ドキュメントコメント
+## 1. Public Methods の XML ドキュメントコメント
 
 - public なクラス・interface・record・enum に `/// <summary>` を付ける。
 - public メソッド・プロパティ・コンストラクタに `/// <summary>` を付ける。
@@ -28,7 +28,7 @@ description: "Use when editing C# code. Require XML doc comments for public API 
 
 ## 4. 変更時チェック
 
-- 変更した public API には XML コメントを追加したか確認する。
+- 変更した Public Methods には XML コメントを追加したか確認する。
 - 仕様変更を伴う場合は README または仕様書を同一作業で更新する。
 - ビルド警告にコメント不足が出た場合は、警告を解消してから完了とする。
 

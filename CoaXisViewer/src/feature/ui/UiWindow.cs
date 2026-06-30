@@ -66,7 +66,7 @@ public partial class UiWindow : Window
 
     #endregion
 
-    #region Public API
+    #region Public Methods
 
     /// <summary>
     /// ウィンドウのコンテンツを指定されたコンテナに置き換え、ウィンドウ内の UI を新しいコンテナ内容へ更新する

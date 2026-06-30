@@ -6,6 +6,8 @@ using System.Collections.Generic;
 /// </summary>
 public static class CameraFitUtility
 {
+    #region Public Methods
+
     /// <summary>
     /// 指定ノード群からワールド空間の AABB を合算して取得する
     /// </summary>
@@ -63,7 +65,15 @@ public static class CameraFitUtility
         };
     }
 
-    // フィット対象はモデル配下の MeshInstance3D のみとし、見た目上の境界を安定して算出する
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// AABB の 8 コーナーをワールド座標に変換して返す
+    /// </summary>
+    /// <param name="node">対象ノード</param>
+    /// <param name="aabb">対象 AABB</param>
     private static bool TryGetWorldAabb(Node node, out Aabb aabb)
     {
         aabb = default;
@@ -72,8 +82,19 @@ public static class CameraFitUtility
         return hasMeshAabb;
     }
 
+    /// <summary>
+    /// ノードの階層を再帰的に探索してワールド AABB を取得する
+    /// </summary>
+    /// <param name="node">対象ノード</param>
+    /// <param name="aabb">取得した AABB</param>
+    /// <param name="hasMeshAabb">有効な MeshInstance3D が存在するかどうか</param>
     private static void GetWorldAabbRecursive(Node node, ref Aabb aabb, ref bool hasMeshAabb)
     {
+        if (node is Node3D node3D && !node3D.IsVisibleInTree())
+        {
+            return;
+        }
+
         if (node is MeshInstance3D meshInstance && meshInstance.Mesh != null)
         {
             Aabb meshAabb = BuildWorldAabb(meshInstance, meshInstance.Mesh.GetAabb());
@@ -84,7 +105,7 @@ public static class CameraFitUtility
             }
             else
             {
-                aabb = MergeAabb(aabb, meshAabb);
+                aabb = aabb.Merge(meshAabb);
             }
         }
 
@@ -94,6 +115,12 @@ public static class CameraFitUtility
         }
     }
 
+    /// <summary>
+    /// MeshInstance3D のローカル AABB をワールド AABB に変換する
+    /// </summary>
+    /// <param name="meshInstance">対象の MeshInstance3D</param>
+    /// <param name="localAabb">対象のローカル AABB</param>
+    /// <returns>ワールド AABB</returns>
     private static Aabb BuildWorldAabb(MeshInstance3D meshInstance, Aabb localAabb)
     {
         Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
@@ -109,19 +136,5 @@ public static class CameraFitUtility
         return new Aabb(min, max - min);
     }
 
-    private static Aabb MergeAabb(Aabb a, Aabb b)
-    {
-        Vector3 aMax = a.Position + a.Size;
-        Vector3 bMax = b.Position + b.Size;
-        Vector3 min = new Vector3(
-            Mathf.Min(a.Position.X, b.Position.X),
-            Mathf.Min(a.Position.Y, b.Position.Y),
-            Mathf.Min(a.Position.Z, b.Position.Z));
-        Vector3 max = new Vector3(
-            Mathf.Max(aMax.X, bMax.X),
-            Mathf.Max(aMax.Y, bMax.Y),
-            Mathf.Max(aMax.Z, bMax.Z));
-
-        return new Aabb(min, max - min);
-    }
+    #endregion
 }

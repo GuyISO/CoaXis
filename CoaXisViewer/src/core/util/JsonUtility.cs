@@ -2,8 +2,20 @@ using Godot;
 using System;
 using System.Globalization;
 
+/// <summary>
+/// JSON データの解析を補助するユーティリティ
+/// </summary>
 public static class JsonUtility
 {
+    #region Public Methods
+
+    /// <summary>
+    /// 指定されたキーに対応する Vector3 を取得する
+    /// </summary>
+    /// <param name="dictionary">対象の辞書</param>
+    /// <param name="key">取得するキー</param>
+    /// <param name="value">取得した Vector3</param>
+    /// <returns>取得に成功した場合は true、それ以外は false</returns>
     public static bool TryGetVector3(Godot.Collections.Dictionary dictionary, string key, out Vector3 value)
     {
         value = Vector3.Zero;
@@ -42,6 +54,13 @@ public static class JsonUtility
         return true;
     }
 
+    /// <summary>
+    /// 指定されたキーに対応する float を取得する
+    /// </summary>
+    /// <param name="dictionary">対象の辞書</param>
+    /// <param name="key">取得するキー</param>
+    /// <param name="value">取得した float</param>
+    /// <returns>取得に成功した場合は true、それ以外は false</returns>
     public static bool TryGetFloat(Godot.Collections.Dictionary dictionary, string key, out float value)
     {
         value = 0.0f;
@@ -53,6 +72,13 @@ public static class JsonUtility
         return TryConvertToFloat(dictionary[key], out value);
     }
 
+    /// <summary>
+    /// 指定されたキーに対応する int を取得する
+    /// </summary>
+    /// <param name="dictionary">対象の辞書</param>
+    /// <param name="key">取得するキー</param>
+    /// <param name="value">取得した int</param>
+    /// <returns>取得に成功した場合は true、それ以外は false</returns>
     public static bool TryGetInt(Godot.Collections.Dictionary dictionary, string key, out int value)
     {
         value = 0;
@@ -64,6 +90,12 @@ public static class JsonUtility
         return TryConvertToInt(dictionary[key], out value);
     }
 
+    /// <summary>
+    /// 指定された Variant を float に変換する
+    /// </summary>
+    /// <param name="value">変換する Variant</param>
+    /// <param name="converted">変換後の float</param>
+    /// <returns>変換に成功した場合は true、それ以外は false</returns>
     public static bool TryConvertToFloat(object value, out float converted)
     {
         switch (value)
@@ -108,6 +140,12 @@ public static class JsonUtility
         }
     }
 
+    /// <summary>
+    /// 指定されたオブジェクトを int に変換する
+    /// </summary>
+    /// <param name="value">変換するオブジェクト</param>
+    /// <param name="converted">変換後の int</param>
+    /// <returns>変換に成功した場合は true、それ以外は false</returns>
     public static bool TryConvertToInt(object value, out int converted)
     {
         switch (value)
@@ -152,6 +190,12 @@ public static class JsonUtility
         }
     }
 
+    /// <summary>
+    /// 指定された Variant を float に変換する
+    /// </summary>
+    /// <param name="value">変換する Variant</param>
+    /// <param name="converted">変換後の float</param>
+    /// <returns>変換に成功した場合は true、それ以外は false</returns>
     public static bool TryConvertVariantToFloat(Variant value, out float converted)
     {
         try
@@ -165,6 +209,12 @@ public static class JsonUtility
         }
     }
 
+    /// <summary>
+    /// 指定された Variant を int に変換する
+    /// </summary>
+    /// <param name="value">変換する Variant</param>
+    /// <param name="converted">変換後の int</param>
+    /// <returns>変換に成功した場合は true、それ以外は false</returns>
     public static bool TryConvertVariantToInt(Variant value, out int converted)
     {
         try
@@ -178,4 +228,5 @@ public static class JsonUtility
         }
     }
 
+    #endregion
 }

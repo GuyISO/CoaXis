@@ -5,8 +5,10 @@ using System.Threading.Tasks;
 /// <summary>
 /// glTFモデルの非同期ロードを担当するヘルパー
 /// </summary>
-public static class ModelLoader
+public static class ModelLoadUtility
 {
+    #region Public Methods
+
     /// <summary>
     /// 指定したパスのglTFモデルを非同期でロードし、指定したモデルに追加する
     /// </summary>
@@ -39,4 +41,6 @@ public static class ModelLoader
             return false;
         }
     }
+
+    #endregion
 }

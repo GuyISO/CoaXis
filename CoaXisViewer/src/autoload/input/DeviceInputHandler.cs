@@ -9,12 +9,17 @@ public partial class DeviceInputHandler : Node
 {
     #region Fields
 
+    // TODO: 将来的にユーザーが設定可能な値にする
     [ExportGroup("Settings")]
     [Export] private float _translateSpeed = 8.0f;
     [Export] private float _rotateSpeedDegrees = 90.0f;
     [Export] private float _rollSpeedDegrees = 120.0f;
 
     private bool _isMultiSelectMode = false;
+
+    #endregion
+
+    #region Properties
 
     public static DeviceInputHandler Instance { get; private set; }
 
@@ -71,22 +76,16 @@ public partial class DeviceInputHandler : Node
             return;
         }
 
-        if (UndoManager.Instance == null)
-        {
-            LogHub.Warn("DeviceInputHandler: Undo/Redo input received, but UndoManager is not initialized.");
-            return;
-        }
-
         if (undoPressed)
         {
             LogHub.Debug("DeviceInputHandler: Undo requested.");
-            UndoManager.Instance.Undo();
+            UndoService.Undo();
         }
 
         if (redoPressed)
         {
             LogHub.Debug("DeviceInputHandler: Redo requested.");
-            UndoManager.Instance.Redo();
+            UndoService.Redo();
         }
     }
 

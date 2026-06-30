@@ -8,28 +8,27 @@ using System.Collections.Generic;
 /// </summary>
 public partial class ModelEventHub : Node
 {
-	/// <summary>
-	/// シングルトン参照
-	/// </summary>
-	/// <returns>シングルトン参照</returns>
+	#region Properties
+
 	public static ModelEventHub Instance { get; private set; }
 
-	/// <summary>
-	/// シーンツリー参加時にシングルトン参照を確立する
-	/// </summary>
+	#endregion
+
+	#region Lifecycle
+
 	public override void _EnterTree()
 	{
 		Instance = this;
 	}
 
-	/// <summary>
-	/// シーンツリー離脱時に、シングルトン参照を破棄する
-	/// </summary>
 	public override void _ExitTree()
 	{
-		LogHub.Info("ModelEventHub released.");
 		Instance = null;
 	}
+
+	#endregion
+
+	#region Internal Helper
 
 	private static bool TryEmitSignal(StringName signalName, params Variant[] args)
 	{
@@ -43,6 +42,8 @@ public partial class ModelEventHub : Node
 		LogHub.Debug($"ModelEventHub emitted signal: {signalName}.");
 		return true;
 	}
+
+	#endregion
 
 	#region --------------------------------------- Request ---------------------------------------
 

@@ -26,7 +26,6 @@ ModelVisualService="*uid://c72re42r7nlfn"
 Selection="*uid://dngenqpeyo83v"
 SettingsService="*res://src/autoload/service/SettingsService.cs"
 UiManager="*uid://bdww21xtruf8m"
-UndoManager="*uid://dbaec6b5x7oqf"
 LogHub="*uid://5o16r7usgjmh"
 
 [display]

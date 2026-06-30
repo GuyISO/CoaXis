@@ -60,11 +60,19 @@ public partial class Selection : Node
 
     #region Events
 
+    /// <summary>
+    /// マルチ選択モードの有効化/無効化要求を受け取る
+    /// </summary>
+    /// <param name="enable">有効化する場合はtrue、無効化する場合はfalse</param>
     private void OnSetMultiSelectModeRequested(bool enable)
     {
         _isMultiSelectMode = enable;
     }
 
+    /// <summary>
+    /// 指定したモデルの選択要求を受け取る
+    /// </summary>
+    /// <param name="model">選択するモデル</param>
     private void OnSelectModelRequested(AnyModel model)
     {
         if (_isMultiSelectMode)
@@ -77,6 +85,10 @@ public partial class Selection : Node
         }
     }
 
+    /// <summary>
+    /// 指定したモデル群の選択要求を受け取る
+    /// </summary>
+    /// <param name="models">選択するモデルの配列</param>
     private void OnSelectModelsRequested(AnyModel[] models)
     {
         if (_isMultiSelectMode)
@@ -89,6 +101,9 @@ public partial class Selection : Node
         }
     }
 
+    /// <summary>
+    /// 選択解除要求を受け取る
+    /// </summary>
     private void OnClearSelectionRequested()
     {
         Clear();
@@ -96,12 +111,12 @@ public partial class Selection : Node
 
     #endregion
 
-    #region Public API
+    #region Public Methods
 
     /// <summary>
     /// 現在の選択モデルのコレクションの複製を取得する
     /// </summary>
-    public static IReadOnlyCollection<AnyModel> Models => Instance._models.ToList().AsReadOnly();
+    public static IReadOnlyCollection<AnyModel> GetModels => Instance._models.ToList().AsReadOnly();
 
     /// <summary>
     /// 現在の選択モデルの数を取得する
@@ -116,12 +131,12 @@ public partial class Selection : Node
     public static bool Contains(AnyModel model) => Instance._models.Contains(model);
 
     /// <summary>
-    /// Fit処理に使用可能な選択モデルの配列を取得する
+    /// 選択モデルの配列を取得する
     /// </summary>
     /// <remarks>
     /// 解放済みモデルやツリー外モデルを除外したスナップショットを返す
     /// </remarks>
-    public static AnyModel[] GetNodesArray()
+    public static AnyModel[] GetModelArray()
     {
         return Instance._models
             .Where(model => model != null && GodotObject.IsInstanceValid(model) && model.IsInsideTree())
@@ -129,7 +144,7 @@ public partial class Selection : Node
     }
 
     /// <summary>
-    /// 指定したモデルのみの選択状態にし（既存の選択はすべて解除され）
+    /// 指定したモデルのみの選択状態にする、既存の選択はすべて解除される
     /// </summary>
     /// <param name="model">選択するモデル</param>
     public static void Set(AnyModel model)
@@ -139,7 +154,7 @@ public partial class Selection : Node
     }
 
     /// <summary>
-    /// 指定したモデル群のみの選択状態にし（既存の選択はすべて解除され）
+    /// 指定したモデル群のみの選択状態にする、既存の選択はすべて解除される
     /// </summary>
     /// <param name="models">選択するモデルの配列</param>
     public static void Set(AnyModel[] models)
@@ -152,11 +167,11 @@ public partial class Selection : Node
     }
 
     /// <summary>
-    /// 指定したモデルを選択状態にする
+    /// 指定したモデルを選択対象に追加する
     /// </summary>
     /// <param name="model">選択するモデル</param>
     /// <returns>モデルが新たに選択された場合はtrue、それ以外の場合はfalseを返す</returns>
-    /// <remarks>モデルがすでに選択されている場合は何も起こりません</remarks>
+    /// <remarks>モデルがすでに選択されている場合は何も起こらない</remarks>
     public static bool Add(AnyModel model)
     {
         if (Instance._models.Add(model))
@@ -169,7 +184,7 @@ public partial class Selection : Node
     }
 
     /// <summary>
-    /// 指定したモデル群を選択状態にする
+    /// 指定したモデル群を選択対象に追加する
     /// </summary>
     /// <param name="models">選択するモデルの配列</param>
     public static void Add(AnyModel[] models)
@@ -181,11 +196,11 @@ public partial class Selection : Node
     }
 
     /// <summary>
-    /// 指定したモデルを選択から外す
+    /// 指定したモデルを選択対象から外す
     /// </summary>
     /// <param name="model">選択から外すモデル</param>
     /// <returns>モデルが選択から外された場合はtrue、それ以外の場合はfalseを返す</returns>
-    /// <remarks>モデルが選択されていない場合は何も起こりません</remarks>
+    /// <remarks>モデルが選択されていない場合は何も起こらない</remarks>
     public static bool Remove(AnyModel model)
     {
         if (Instance._models.Remove(model))
@@ -198,9 +213,9 @@ public partial class Selection : Node
     }
 
     /// <summary>
-    /// 指定したモデル群を選択から外す
+    /// 指定したモデル群を選択対象から外す
     /// </summary>
-    /// <param name="models">選択から外すモデルの配列</param>
+    /// <param name="models">選択対象から外すモデルの配列</param>
     public static void Remove(AnyModel[] models)
     {
         foreach (var model in models)

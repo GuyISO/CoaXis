@@ -3,16 +3,20 @@ using Godot.Collections;
 using System;
 using System.Collections.Generic;
 
-
-public partial class PickUtility
+/// <summary>
+/// レイキャストや形状クエリを行うためのユーティリティ
+/// </summary>
+public static class PickUtility
 {
+    #region Public Methods
+
     /// <summary>
     /// 指定したカメラからスクリーン座標に向けてレイキャストを行い、ヒット情報を返す
     /// </summary>
     /// <param name="camera">レイを発射するカメラ</param>
     /// <param name="screenPosition">レイのスクリーン座標</param>
     /// <param name="collisionMask">レイキャストの衝突マスク、デフォルトはカメラのカリングマスク</param>
-    /// <param name="excludeRids">レイキャストから除外すオブジェクトのRIDリスト</param>
+    /// <param name="excludeRids">レイキャストから除外するオブジェクトのRIDリスト</param>
     /// <returns>レイのヒット情報を含む PickResult 構造体</returns>
     public static PickResult PickByRay(Camera3D camera, Vector2 screenPosition, uint? collisionMask = null, List<Rid> excludeRids = null)
     {
@@ -132,9 +136,11 @@ public partial class PickUtility
         // requireFullContainment が true の場合、さらにフィルタリングして完全に内包されているオブジェクトのみを残す
         if (requireFullContainment)
         {
-            // 難しいので、いつか実装したい
+            // TODO: なんか難しいので、いつか実装したい
         }
 
         return pickResults;
     }
+
+    #endregion
 }

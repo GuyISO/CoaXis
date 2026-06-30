@@ -8,9 +8,9 @@ public partial class ViewportInteractionPanel : PanelContainer
 {
     #region Fields
 
-    [Export] private RootModel _rootModel = null!;
+    private RootModel _rootModel = null!;
 
-    private bool _isInitialized; // 初回状態通知を受けたかだけを保持する
+    private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
 
     private Label _labelMode = null!;
     private Label _labelProjection = null!;
@@ -142,7 +142,7 @@ public partial class ViewportInteractionPanel : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        AnyModel[] fitTargets = Selection.GetNodesArray();
+        AnyModel[] fitTargets = Selection.GetModelArray();
         if (fitTargets.Length == 0)
         {
             LogHub.Debug("ViewportInteractionPanel: fit-to-selection skipped (no selected nodes).");

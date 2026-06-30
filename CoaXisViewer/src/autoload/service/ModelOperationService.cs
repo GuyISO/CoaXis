@@ -6,7 +6,7 @@ using System;
 /// </summary>
 public partial class ModelOperationService : Node
 {
-	#region Fields
+	#region Properties
 
 	public static ModelOperationService Instance { get; private set; }
 
@@ -44,7 +44,7 @@ public partial class ModelOperationService : Node
 	private void OnToggleModelVisibilityRequested(AnyModel model)
 	{
 		var command = new SetModelVisibilityCommand([model], !model.Visible);
-		UndoManager.Instance.Execute(command);
+		UndoService.Execute(command);
 	}
 
 	#endregion

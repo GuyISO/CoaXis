@@ -13,6 +13,8 @@ using System;
 /// </remarks>
 public static class CoordinateSystemUtility
 {
+    #region Public Methods
+
     /// <summary>
     /// CATIA のベクトルを Godot のベクトルへ変換する。
     /// </summary>
@@ -112,4 +114,6 @@ public static class CoordinateSystemUtility
             GodotToCatia(godotTransform.Origin)
         );
     }
+
+    #endregion
 }

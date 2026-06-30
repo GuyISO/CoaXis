@@ -9,9 +9,13 @@ public partial class ModelVisualService : Node
 {
 	#region Fields
 
-	public static ModelVisualService Instance { get; private set; }
+	private static Material _selectedMaterial = ResourceLoader.Load<Material>("res://assets/materials/selected.tres");
 
-	private static Material _selectedMaterial = ResourceLoader.Load<Material>("res://assets/materials/pulse.tres");
+	#endregion
+
+	#region Properties
+
+	public static ModelVisualService Instance { get; private set; }
 
 	#endregion
 
@@ -75,9 +79,9 @@ public partial class ModelVisualService : Node
 	{
 		// 指定したモデルとその子孫のモデルすべてにハイライト状態を適用する
 		var models = GetModelsRecursively(model);
-		foreach (AnyModel mod in models)
+		foreach (AnyModel targetModel in models)
 		{
-			HighlightMesh(mod, enable);
+			HighlightMesh(targetModel, enable);
 		}
 	}
 
