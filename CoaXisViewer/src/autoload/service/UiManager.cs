@@ -1,22 +1,24 @@
-#nullable enable
-
-// TODO: 全然できてないので、後でちゃんと作る
-
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
-/// UI管理用のシングルトンクラス、AutoLoadノードとしてシーンツリーに配置する
+/// UI管理用のシングルトンクラス、AutoLoadとしてプロジェクトに登録して使用する
 /// </summary>
 public partial class UiManager : Node
 {
-    #region Properties
+    #region Fields
 
-    public static UiManager? Instance { get; private set; }
+    private static PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/ui/UiWindow.tscn"); // UiWindowのシーンパス
+    private static readonly Dictionary<string, UiWindow> _windowCache = new(); // UIのキャッシュ
 
     #endregion
 
-    #region Lifecycle
+    #region Properties
+
+    public static UiManager Instance { get; private set; }
+
+    #endregion
 
     public override void _EnterTree()
     {
@@ -28,72 +30,117 @@ public partial class UiManager : Node
         Instance = null;
     }
 
-    #endregion
-
     #region Public Methods
 
     /// <summary>
-    /// 指定されたコマンド名に対応する処理を実行する
+    /// 指定されたコンテナを表示する
     /// </summary>
-    /// <param name="commandName">実行するコマンドの名前</param>
-    /// <param name="source">コマンドを発行したノード</param>
-    public void ExecuteCommand(string commandName, Node? source = null)
+    /// <param name="container"></param>
+    /// <remarks>
+    /// コンテナは Container クラスを継承したUIである必要がある
+    /// </remarks>
+    public static void Show(Container container)
     {
-        _ = source;
-
-        switch (commandName)
+        if (container == null)
         {
-            case "ShowViewportInteractionWindow":
-                ShowWindow("WindowViewportInteraction");
-                break;
-            case "ShowMessageWindow":
-                ShowWindow("WindowMessage");
-                break;
-            case "ShowSettingWindow":
-                LogHub.Warn("UiManager: settings window is not implemented yet.");
-                break;
-            case "Load":
-                RequestModelLoadFromMainScene();
-                break;
-            default:
-                LogHub.Warn($"UiManager: unknown command '{commandName}'.");
-                break;
+            LogHub.Warn("UiManager: container is null.");
+            return;
         }
+
+        if (_uiWindow == null)
+        {
+            LogHub.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            container.QueueFree();
+            return;
+        }
+
+        if (Instance == null)
+        {
+            LogHub.Warn("UiManager: instance is null.");
+            container.QueueFree();
+            return;
+        }
+
+        string cacheKey = GetContainerCacheKey(container);
+        if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow))
+        {
+            if (GodotObject.IsInstanceValid(cachedWindow))
+            {
+                cachedWindow.Show();
+                cachedWindow.GrabFocus();
+                container.QueueFree();
+                return;
+            }
+
+            _windowCache.Remove(cacheKey);
+        }
+
+        ShowWindow(container, cacheKey);
     }
 
     #endregion
 
     #region Internal Helpers
 
-    // Main シーン上の既存 Window ノードを表示し、存在しない scene 参照を排除する
-    private void ShowWindow(string windowName)
+    /// <summary>
+    /// 指定されたコンテナを表示する
+    /// </summary>
+    /// <param name="container">表示するコンテナ</param>
+    private static void ShowWindow(Container container, string cacheKey)
     {
-        Window? window = GetTree().Root.GetNodeOrNull<Window>($"Main/{windowName}");
-        if (window == null)
+        if (container == null)
         {
-            LogHub.Warn($"UiManager: window '{windowName}' was not found under Main.");
+            LogHub.Warn("UiManager: container is null.");
             return;
         }
 
+        if (_uiWindow == null)
+        {
+            LogHub.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            container.QueueFree();
+            return;
+        }
+
+        UiWindow window = _uiWindow.Instantiate<UiWindow>();
+        _windowCache[cacheKey] = window;
+        window.TreeExited += () => OnWindowTreeExited(cacheKey, window);
+
+        Instance.AddChild(window);
+        window.SetContainer(container);
         window.Show();
         window.GrabFocus();
+
     }
 
-    // ロード対象パスは Main シーン上の TextEdit から取得し、未設定なら警告して終了する
-    private static void RequestModelLoadFromMainScene()
+    /// <summary>
+    /// ウィンドウがツリーから退出したときにキャッシュから削除するためのイベントハンドラ
+    /// </summary>
+    private static void OnWindowTreeExited(string cacheKey, UiWindow window)
     {
-        TextEdit? pathEditor = Engine.GetMainLoop() is SceneTree sceneTree
-            ? sceneTree.Root.GetNodeOrNull<TextEdit>("Main/Canvas/VBoxContainer/TopBar/TextGlbPath")
-            : null;
-
-        string path = pathEditor?.Text?.Trim() ?? string.Empty;
-        if (string.IsNullOrWhiteSpace(path))
+        if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow) && cachedWindow == window)
         {
-            LogHub.Warn("UiManager: model path is empty.");
-            return;
+            _windowCache.Remove(cacheKey);
+        }
+    }
+
+    /// <summary>
+    /// コンテナのキャッシュキーを取得する
+    /// </summary>
+    /// <param name="container">キャッシュキーを取得するコンテナ</param>
+    private static string GetContainerCacheKey(Container container)
+    {
+        if (!string.IsNullOrWhiteSpace(container.SceneFilePath))
+        {
+            return container.SceneFilePath;
         }
 
-        ModelEventHub.RequestLoadModel(path);
+        Type type = container.GetType();
+        if (type != null && !string.IsNullOrWhiteSpace(type.FullName))
+        {
+            return type.FullName;
+        }
+
+        return container.Name.ToString();
     }
 
     #endregion

@@ -1,20 +1,25 @@
 [gd_scene format=3 uid="uid://ctjbhouwd3kn7"]
 
-[ext_resource type="Script" uid="uid://cqf7jel4l6pjq" path="res://src/feature/view/ViewportInteractionPanel.cs" id="1_vtpwr"]
+[ext_resource type="Script" uid="uid://cqf7jel4l6pjq" path="res://src/feature/container/ViewportInteractionPanelContainer.cs" id="1_vtpwr"]
 
 [sub_resource type="Theme" id="Theme_iww46"]
 default_font_size = 0
 
-[node name="PanelViewportInteraction" type="PanelContainer" unique_id=1128003110]
+[node name="Viewport" type="PanelContainer" unique_id=1128003110]
+custom_minimum_size = Vector2(280, 0)
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 script = ExtResource("1_vtpwr")
 
 [node name="MarginContainer" type="MarginContainer" parent="." unique_id=1489839012]
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
 theme_override_constants/margin_left = 6
 theme_override_constants/margin_top = 6
 theme_override_constants/margin_right = 6

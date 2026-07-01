@@ -8,7 +8,7 @@ public partial class UiWindow : Window
 {
     #region Fields
 
-    private Container _rootContainer = null; // コンテンツを配置するためのルートコンテナ
+    private Container _container = null; // コンテンツを配置するためのルートコンテナ
 
     #endregion
 
@@ -18,22 +18,6 @@ public partial class UiWindow : Window
     {
         // ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラを登録
         CloseRequested += OnCloseRequested;
-
-        // 子ノードが存在しない場合は何もしない
-        if (GetChildCount() == 0)
-        {
-            return;
-        }
-        // すでにContainerクラスを継承した子ノードが1このみ存在する場合はそれをルートコンテナとして使用する
-        else if (GetChildCount() == 1 && GetChild(0) is Container existingContainer)
-        {
-            SetContainer(existingContainer);
-        }
-        // それ以外の場合はエラーを出力する（複数の子ノードが存在するか、子ノードが Container を継承していない）
-        else
-        {
-            LogHub.Error("UiWindow: Invalid child nodes. A UiWindow can only have one child of type Container.");
-        }
     }
 
     public override void _ExitTree()
@@ -79,22 +63,13 @@ public partial class UiWindow : Window
         // 新しいコンテンツを追加
         if (container != null)
         {
-            _rootContainer = container;
-            _rootContainer.Owner = this; // シーンツリー上で正しく管理されるようにオーナーを設定
+            _container = container;
+            AddChild(_container);
+            // 実行時生成ノードは Owner 設定不要。親子関係のみで管理する。
+            _container.MinimumSizeChanged += OnMinimumSizeChanged;
             Resize(); // コンテンツのサイズに合わせてウィンドウのサイズを調整
-                      // UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを登録
-            _rootContainer.MinimumSizeChanged += OnMinimumSizeChanged;
 
-            // コンテナ名がPanelで始まる場合は除去してタイトルにする（必要に応じて変更可能）
-            if (container.Name.ToString().StartsWith("Panel"))
-            {
-                Title = container.Name.ToString().Substring("Panel".Length);
-            }
-            else
-            {
-                Title = container.Name.ToString(); // ウィンドウのタイトルをコンテナの名前に設定（必要に応じて変更可能）
-            }
-
+            Title = container.Name.ToString(); // ウィンドウのタイトルをコンテナの名前に設定（必要に応じて変更可能）
         }
     }
 
@@ -103,12 +78,18 @@ public partial class UiWindow : Window
     /// </summary>
     public void ClearContent()
     {
-        if (_rootContainer != null)
+        if (_container != null)
         {
             // UIの最小サイズが変わったときにウィンドウのサイズも更新するためのイベントハンドラを解除
-            _rootContainer.MinimumSizeChanged -= OnMinimumSizeChanged;
-            _rootContainer.QueueFree();
-            _rootContainer = null;
+            _container.MinimumSizeChanged -= OnMinimumSizeChanged;
+
+            if (_container.GetParent() != null)
+            {
+                _container.GetParent().RemoveChild(_container);
+            }
+
+            _container.QueueFree();
+            _container = null;
         }
     }
 
@@ -122,7 +103,7 @@ public partial class UiWindow : Window
     private void Resize()
     {
         // 子コンテナの最小サイズを取得
-        var min = _rootContainer.GetCombinedMinimumSize();
+        var min = _container.GetCombinedMinimumSize();
 
         // Window のサイズに反映
         Size = new Vector2I((int)min.X, (int)min.Y);

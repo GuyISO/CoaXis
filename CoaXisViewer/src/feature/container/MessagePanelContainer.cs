@@ -3,13 +3,13 @@ using System;
 using System.Text;
 
 /// <summary>
-/// 実行中のコンソール表示の代わりを担う簡易パネル
+/// 実行中にコンソール表示の代わりを担う簡易パネル
 /// </summary>
-public partial class MessagePanel : PanelContainer
+public partial class MessagePanelContainer : PanelContainer
 {
     #region Fields
 
-    [Export] private int _maxLines = 999;
+    [Export] private int _maxLines = 50;
 
     // 関連ノードのキャッシュ
     private RichTextLabel _label;
@@ -24,10 +24,7 @@ public partial class MessagePanel : PanelContainer
     public override void _Ready()
     {
         // 関連ノードのキャッシュ
-        if (_label == null)
-        {
-            _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
-        }
+        _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
 
         // イベント購読の登録
         LogHub.Instance.Logged += OnLogged;

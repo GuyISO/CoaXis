@@ -35,7 +35,7 @@ public partial class RootModel : AnyModel
     }
 
     /// <summary>
-    /// モデルロード要求イベントのハンドラで ModelLoader を使用して非同期でモデルをロードし、ロード完了後にシーンへ追加する
+    /// モデルロード要求イベントのハンドラで ModelLoadUtility を使用して非同期でモデルをロードし、ロード完了後にシーンへ追加する
     /// </summary>
     /// <param name="path">ロードするモデルのパス</param>
     private async void OnLoadModelRequested(string path)
@@ -44,7 +44,7 @@ public partial class RootModel : AnyModel
         model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
         AddChild(model);
 
-        bool loaded = await ModelLoader.LoadModelAsync(model, path);
+        bool loaded = await ModelLoadUtility.LoadModelAsync(model, path);
         if (!loaded)
         {
             model.QueueFree();

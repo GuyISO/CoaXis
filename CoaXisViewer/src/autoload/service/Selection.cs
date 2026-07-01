@@ -11,10 +11,14 @@ public partial class Selection : Node
 {
     #region Fields
 
-    public static Selection Instance { get; private set; }
-
     private static bool _isMultiSelectMode = false;
     private HashSet<AnyModel> _models = new HashSet<AnyModel>();
+
+    #endregion
+
+    #region Properties
+
+    public static Selection Instance { get; private set; }
 
     #endregion
 

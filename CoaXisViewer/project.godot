@@ -32,6 +32,7 @@ LogHub="*uid://5o16r7usgjmh"
 
 window/size/viewport_width=1920
 window/size/viewport_height=1080
+window/subwindows/embed_subwindows=false
 
 [dotnet]
 

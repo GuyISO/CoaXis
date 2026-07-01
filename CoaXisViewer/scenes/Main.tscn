@@ -3,16 +3,15 @@
 [ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://src/feature/model/RootModel.cs" id="1_3p2gp"]
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="2_bjd11"]
 [ext_resource type="Script" uid="uid://co6erwykahhud" path="res://src/feature/model/AnyModel.cs" id="2_cvmbd"]
-[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/feature/ui/SceneCommandButton.cs" id="5_qmy6f"]
+[ext_resource type="PackedScene" uid="uid://b85xs047w8kh8" path="res://scenes/ui/ShowControlButton.tscn" id="4_lhr70"]
+[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/container/MessagePanelContainer.tscn" id="5_bjd11"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewer/AxisNavigator.tscn" id="6_cvmbd"]
+[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/container/ViewportInteractionPanelContainer.tscn" id="6_qmy6f"]
 [ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/feature/view/CameraRig.cs" id="7_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/ViewportOverlay.tscn" id="7_ft6cd"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/feature/ui/FpsUi.cs" id="8_bb450"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/feature/ui/HierarchyTree.cs" id="8_qmy6f"]
-[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/ui/MessagePanel.tscn" id="14_3p2gp"]
 [ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/feature/view/ViewportInputHandler.cs" id="14_3t3px"]
-[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/ViewportInteractionPanel.tscn" id="15_cvmbd"]
-[ext_resource type="PackedScene" uid="uid://djgnpihsaft66" path="res://scenes/ui/UiWindow.tscn" id="15_ft6cd"]
 
 [sub_resource type="Environment" id="Environment_2xmat"]
 background_mode = 1
@@ -105,34 +104,22 @@ grow_vertical = 2
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 
-[node name="ButtonShowViewportInteractionWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1370305409]
+[node name="ButtonShowMessagePanelContainer" parent="Canvas/VBoxContainer/TopBar" unique_id=1859494691 instance=ExtResource("4_lhr70")]
 layout_mode = 2
-tooltip_text = "ビュー操作用のウィンドウを表示します"
-theme_override_font_sizes/font_size = 24
-text = "ViewportInteraction"
-script = ExtResource("5_qmy6f")
+tooltip_text = "システムメッセージパネルを表示します"
+text = "Message"
+_container = ExtResource("5_bjd11")
 
-[node name="ButtonShowMessageWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=1591126494]
+[node name="ButtonShowViewportInteractionPanelContainer" parent="Canvas/VBoxContainer/TopBar" unique_id=1625336390 instance=ExtResource("4_lhr70")]
 layout_mode = 2
-tooltip_text = "メッセージウィンドウを表示します"
-theme_override_font_sizes/font_size = 24
-text = "Message
-"
-script = ExtResource("5_qmy6f")
+tooltip_text = "ビュー情報パネルを表示します"
+text = "Viewport"
+_container = ExtResource("6_qmy6f")
 
-[node name="ButtonShowSettingWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=410961990]
+[node name="ButtonShowMeasurementPanelContainer" parent="Canvas/VBoxContainer/TopBar" unique_id=2040537289 instance=ExtResource("4_lhr70")]
 layout_mode = 2
-tooltip_text = "設定ウィンドウを表示します"
-theme_override_font_sizes/font_size = 24
-text = "Setting"
-script = ExtResource("5_qmy6f")
-
-[node name="ButtonShowMeasurementWindow" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=615800761]
-layout_mode = 2
-tooltip_text = "測定ウィンドウを表示します"
-theme_override_font_sizes/font_size = 24
+tooltip_text = "計測パネルを表示します"
 text = "Measurement"
-script = ExtResource("5_qmy6f")
 
 [node name="Panel" type="Panel" parent="Canvas/VBoxContainer/TopBar" unique_id=1046351606]
 layout_mode = 2
@@ -143,7 +130,6 @@ layout_mode = 2
 tooltip_text = "指定したパスからモデルをロードします"
 theme_override_font_sizes/font_size = 24
 text = "LoadModel"
-script = ExtResource("5_qmy6f")
 
 [node name="TextGlbPath" type="TextEdit" parent="Canvas/VBoxContainer/TopBar" unique_id=1210780805]
 custom_minimum_size = Vector2(600, 0)
@@ -234,15 +220,3 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 24
 vertical_alignment = 2
 script = ExtResource("8_bb450")
-
-[node name="WindowViewportInteraction" parent="." unique_id=940691164 instance=ExtResource("15_ft6cd")]
-initial_position = 0
-position = Vector2i(0, 36)
-
-[node name="PanelViewportInteraction" parent="WindowViewportInteraction" unique_id=1128003110 instance=ExtResource("15_cvmbd")]
-
-[node name="WindowMessage" parent="." unique_id=1764545528 instance=ExtResource("15_ft6cd")]
-initial_position = 0
-position = Vector2i(0, 36)
-
-[node name="PanelMessage" parent="WindowMessage" unique_id=115086409 instance=ExtResource("14_3p2gp")]
