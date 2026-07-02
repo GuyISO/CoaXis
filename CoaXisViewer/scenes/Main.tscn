@@ -4,11 +4,12 @@
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="2_bjd11"]
 [ext_resource type="Script" uid="uid://co6erwykahhud" path="res://src/feature/model/AnyModel.cs" id="2_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://b85xs047w8kh8" path="res://scenes/ui/ShowControlButton.tscn" id="4_lhr70"]
-[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/container/MessagePanelContainer.tscn" id="5_bjd11"]
+[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/container/MessageUi.tscn" id="5_bjd11"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewer/AxisNavigator.tscn" id="6_cvmbd"]
-[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/container/ViewportInteractionPanelContainer.tscn" id="6_qmy6f"]
+[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/container/ViewportUi.tscn" id="6_qmy6f"]
 [ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/feature/view/CameraRig.cs" id="7_cvmbd"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/ViewportOverlay.tscn" id="7_ft6cd"]
+[ext_resource type="PackedScene" uid="uid://cmde2bylb3cu1" path="res://scenes/container/MeasurementUi.tscn" id="7_qmy6f"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/feature/ui/FpsUi.cs" id="8_bb450"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/feature/ui/HierarchyTree.cs" id="8_qmy6f"]
 [ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/feature/view/ViewportInputHandler.cs" id="14_3t3px"]
@@ -104,34 +105,38 @@ grow_vertical = 2
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 
-[node name="ButtonShowMessagePanelContainer" parent="Canvas/VBoxContainer/TopBar" unique_id=1859494691 instance=ExtResource("4_lhr70")]
+[node name="ButtonShowMessageUi" parent="Canvas/VBoxContainer/TopBar" unique_id=1859494691 instance=ExtResource("4_lhr70")]
 layout_mode = 2
 tooltip_text = "システムメッセージパネルを表示します"
 text = "Message"
 _container = ExtResource("5_bjd11")
 
-[node name="ButtonShowViewportInteractionPanelContainer" parent="Canvas/VBoxContainer/TopBar" unique_id=1625336390 instance=ExtResource("4_lhr70")]
+[node name="ButtonShowViewportUi" parent="Canvas/VBoxContainer/TopBar" unique_id=1625336390 instance=ExtResource("4_lhr70")]
 layout_mode = 2
 tooltip_text = "ビュー情報パネルを表示します"
 text = "Viewport"
 _container = ExtResource("6_qmy6f")
 
-[node name="ButtonShowMeasurementPanelContainer" parent="Canvas/VBoxContainer/TopBar" unique_id=2040537289 instance=ExtResource("4_lhr70")]
+[node name="ButtonShowMeasurementUi" parent="Canvas/VBoxContainer/TopBar" unique_id=2040537289 instance=ExtResource("4_lhr70")]
+visible = false
 layout_mode = 2
 tooltip_text = "計測パネルを表示します"
 text = "Measurement"
+_container = ExtResource("7_qmy6f")
 
 [node name="Panel" type="Panel" parent="Canvas/VBoxContainer/TopBar" unique_id=1046351606]
 layout_mode = 2
 size_flags_horizontal = 3
 
 [node name="ButtonLoad" type="Button" parent="Canvas/VBoxContainer/TopBar" unique_id=366187773]
+visible = false
 layout_mode = 2
 tooltip_text = "指定したパスからモデルをロードします"
 theme_override_font_sizes/font_size = 24
 text = "LoadModel"
 
 [node name="TextGlbPath" type="TextEdit" parent="Canvas/VBoxContainer/TopBar" unique_id=1210780805]
+visible = false
 custom_minimum_size = Vector2(600, 0)
 layout_mode = 2
 tooltip_text = "glbファイルのパスを指定してください"

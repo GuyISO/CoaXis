@@ -1,10 +1,10 @@
-using Godot;
+﻿using Godot;
 using System;
 
 /// <summary>
 /// メインのビューポート状態表示と操作用のパネル
 /// </summary>
-public partial class MeasurementPanelContainer : PanelContainer
+public partial class ViewportUi : PanelContainer
 {
     #region Fields
 
@@ -36,24 +36,24 @@ public partial class MeasurementPanelContainer : PanelContainer
 
     public override void _Ready()
     {
-        // シーン構造が固定なので、名前探索ではなく明示パスで関連ノードを解決する
-        _labelMode = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer3/LabelValueMode");
-        _labelProjection = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer/LabelValueProjection");
-        _buttonToggleProjection = GetNode<Button>("MarginContainer/VBoxContainer/ButtonToggleProjection");
-        _buttonFitAllIn = GetNode<Button>("MarginContainer/VBoxContainer/ButtonFitAllIn");
-        _buttonFitToSelection = GetNode<Button>("MarginContainer/VBoxContainer/ButtonFitToSelection");
-        _buttonRollLeft = GetNode<Button>("MarginContainer/VBoxContainer/HBoxContainer/ButtonRollLeft");
-        _buttonRollRight = GetNode<Button>("MarginContainer/VBoxContainer/HBoxContainer/ButtonRollRight");
-        _labelPositionX = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValuePositionX");
-        _labelPositionY = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValuePositionY");
-        _labelPositionZ = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValuePositionZ");
-        _labelRotationX = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueRotationX");
-        _labelRotationY = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueRotationY");
-        _labelRotationZ = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueRotationZ");
-        _labelSize = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueSize");
-        _labelDistance = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueDistance");
-        _labelFov = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueFov");
-        _sliderFov = GetNode<HSlider>("MarginContainer/VBoxContainer/HSliderFov");
+        // シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
+        _labelMode = (Label)FindChild("LabelValueMode");
+        _labelProjection = (Label)FindChild("LabelValueProjection");
+        _buttonToggleProjection = (Button)FindChild("ButtonToggleProjection");
+        _buttonFitAllIn = (Button)FindChild("ButtonFitAllIn");
+        _buttonFitToSelection = (Button)FindChild("ButtonFitToSelection");
+        _buttonRollLeft = (Button)FindChild("ButtonRollLeft");
+        _buttonRollRight = (Button)FindChild("ButtonRollRight");
+        _labelPositionX = (Label)FindChild("LabelValuePositionX");
+        _labelPositionY = (Label)FindChild("LabelValuePositionY");
+        _labelPositionZ = (Label)FindChild("LabelValuePositionZ");
+        _labelRotationX = (Label)FindChild("LabelValueRotationX");
+        _labelRotationY = (Label)FindChild("LabelValueRotationY");
+        _labelRotationZ = (Label)FindChild("LabelValueRotationZ");
+        _labelSize = (Label)FindChild("LabelValueSize");
+        _labelDistance = (Label)FindChild("LabelValueDistance");
+        _labelFov = (Label)FindChild("LabelValueFov");
+        _sliderFov = (HSlider)FindChild("HSliderFov");
 
         // UIイベントの購読開始
         _buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
@@ -117,7 +117,7 @@ public partial class MeasurementPanelContainer : PanelContainer
     /// </summary>
     private void OnButtonToggleProjectionPressed()
     {
-        LogHub.Debug("MeasurementPanel: toggle projection requested.");
+        LogHub.Debug("ViewportUi: toggle projection requested.");
         ViewportEventHub.RequestToggleProjectionType();
     }
 
@@ -128,12 +128,12 @@ public partial class MeasurementPanelContainer : PanelContainer
     {
         if (_rootModel == null)
         {
-            GD.PushWarning("MeasurementPanel: fit target model is missing.");
-            LogHub.Warn("MeasurementPanel: fit-all requested but default target is missing.");
+            GD.PushWarning("ViewportUi: fit target model is missing.");
+            LogHub.Warn("ViewportUi: fit-all requested but default target is missing.");
             return;
         }
 
-        LogHub.Debug($"MeasurementPanel: fit-all requested. target='{_rootModel.Name}'");
+        LogHub.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
         ViewportEventHub.RequestFit(new[] { _rootModel }, true);
     }
 
@@ -145,11 +145,11 @@ public partial class MeasurementPanelContainer : PanelContainer
         AnyModel[] fitTargets = Selection.GetModelArray();
         if (fitTargets.Length == 0)
         {
-            LogHub.Debug("MeasurementPanel: fit-to-selection skipped (no selected nodes).");
+            LogHub.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
-        LogHub.Debug($"MeasurementPanel: fit-to-selection requested. targets={fitTargets.Length}");
+        LogHub.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
         ViewportEventHub.RequestFit(fitTargets, true);
     }
 
@@ -159,7 +159,7 @@ public partial class MeasurementPanelContainer : PanelContainer
     private void OnButtonRollLeftPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-        LogHub.Debug("MeasurementPanel: roll-left requested.");
+        LogHub.Debug("ViewportUi: roll-left requested.");
         ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
     }
 
@@ -169,7 +169,7 @@ public partial class MeasurementPanelContainer : PanelContainer
     private void OnButtonRollRightPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-        LogHub.Debug("MeasurementPanel: roll-right requested.");
+        LogHub.Debug("ViewportUi: roll-right requested.");
         ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
     }
 
@@ -188,7 +188,7 @@ public partial class MeasurementPanelContainer : PanelContainer
     /// <param name="value">新しい FOV 値</param>
     private void OnSliderFovValueChanged(double value)
     {
-        LogHub.Debug($"MeasurementPanel: set-fov requested. fov={value:F1}");
+        LogHub.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
         ViewportEventHub.RequestSetFov((float)value);
     }
 

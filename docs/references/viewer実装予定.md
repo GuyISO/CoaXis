@@ -17,8 +17,6 @@
 ## UI
 オーバーレイのような透過する仕様ツリー
     Godotの仕様上むり？検討する
-Window管理
-    各UIをWindowの入れ子にする
 Dockable Window
     各UIをDock可能なContainerの入れ子にして使えるようにもする
 設定画面

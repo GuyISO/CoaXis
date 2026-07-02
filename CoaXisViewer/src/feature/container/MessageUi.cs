@@ -5,7 +5,7 @@ using System.Text;
 /// <summary>
 /// 実行中にコンソール表示の代わりを担う簡易パネル
 /// </summary>
-public partial class MessagePanelContainer : PanelContainer
+public partial class MessageUi : PanelContainer
 {
     #region Fields
 
