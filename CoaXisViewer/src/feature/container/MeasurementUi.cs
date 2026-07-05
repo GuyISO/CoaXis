@@ -70,7 +70,7 @@ public partial class MeasurementUi : PanelContainer
 
         // イベントの購読開始
         PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        PickEventHub.Instance.PickResultsNotified += OnPickResultsNotified;
+        PickEventHub.Instance.PickResultNotified += OnPickResultNotified;
 
         SetupMeasurementVisuals();
     }
@@ -83,7 +83,7 @@ public partial class MeasurementUi : PanelContainer
 
         // イベントの購読解除
         PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        PickEventHub.Instance.PickResultsNotified -= OnPickResultsNotified;
+        PickEventHub.Instance.PickResultNotified -= OnPickResultNotified;
 
         // 実行時生成した注釈ラベルを破棄
         ClearAnnotationLabels();
@@ -147,7 +147,7 @@ public partial class MeasurementUi : PanelContainer
     /// <summary>
     /// PickEventHub からの PickResultNotified シグナルを受け取るイベントハンドラ、選択結果を保持してUIを更新する
     /// </summary>
-    private void OnPickResultsNotified(PickResult[] pickResults)
+    private void OnPickResultNotified(PickResult pickResult)
     {
         // 測定モードではない場合は無視する
         if (_pickHandlingMode != PickHandlingMode.Measurement)
@@ -161,13 +161,17 @@ public partial class MeasurementUi : PanelContainer
             return;
         }
 
-        _points[_pickingPointIndex - 1] = pickResults[_pickingPointIndex - 1];
-        LogHub.Debug($"MeasurementUi: point {_pickingPointIndex} picked. Position: {_points[_pickingPointIndex - 1].Position}, Normal: {_points[_pickingPointIndex - 1].Normal}, Distance: {_points[_pickingPointIndex - 1].Distance}");
+        // ピック結果が空なら処理できない
+        if (pickResult == null || pickResult.Model == null)
+        {
+            return;
+        }
 
-        UpdateAnnotationLabel(_pickingPointIndex - 1, pickResults[_pickingPointIndex - 1]);
-        _pickingPointIndex = 0;
+        int index = _pickingPointIndex - 1;
+        _points[index] = pickResult;
+        LogHub.Debug($"MeasurementUi: point {_pickingPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
 
-
+        UpdateAnnotationLabel(index, pickResult);
         RefreshMeasurementLabels();
     }
 

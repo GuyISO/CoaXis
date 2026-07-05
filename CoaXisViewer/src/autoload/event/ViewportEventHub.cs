@@ -2,7 +2,6 @@
 
 /// <summary>
 /// ビューポート関連のイベント集約ハブ
-/// Autoloadに登録してシングルトン参照する
 /// </summary>
 public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
 {

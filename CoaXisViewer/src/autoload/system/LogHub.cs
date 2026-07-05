@@ -3,8 +3,7 @@ using System;
 using System.IO;
 
 /// <summary>
-/// ログ関連のイベント集約ハブで AutoLoad ノードとしてシーンツリーに配置し、ログ通知と出力を一元管理する
-/// Autoloadに登録してシングルトン参照することを前提としている
+/// ログ関連のイベント集約ハブで、ログ通知と出力を一元管理する Autoload ノード
 /// </summary>
 public partial class LogHub : AutoloadNodeBase<LogHub>
 {

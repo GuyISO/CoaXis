@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 /// <summary>
-/// プロジェクト内アセットの取得とキャッシュを一元化する AutoLoad シングルトン
+/// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード
 /// </summary>
 public partial class AssetManager : AutoloadNodeBase<AssetManager>
 {

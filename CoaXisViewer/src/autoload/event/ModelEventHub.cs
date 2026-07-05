@@ -2,7 +2,6 @@
 
 /// <summary>
 /// モデル関連のイベント集約ハブ
-/// Autoloadに登録してシングルトン参照する
 /// </summary>
 public partial class ModelEventHub : EventHubBase<ModelEventHub>
 {

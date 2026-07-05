@@ -19,6 +19,9 @@ public partial class CameraRig : Node3D
 
     private Camera3D _camera; // 操作対象のカメラノード
 
+    private PickHandlingMode _currentPickHandlingMode; // 現在の選択操作モード
+    private bool _isInitialized = false; // 初期化済みかどうかのフラグ、初回通知を受け取った時点で true にする
+
     #endregion
 
     #region Lifecycle
@@ -29,6 +32,8 @@ public partial class CameraRig : Node3D
         _camera = GetNode<Camera3D>("Camera3D");
 
         // イベント購読の登録
+        PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultNotified += OnPickResultNotified;
         ViewportEventHub.Instance.NotifyStateRequested += OnNotifyStateRequested;
         ViewportEventHub.Instance.MovePositionToRequested += OnMovePositionToRequested;
         ViewportEventHub.Instance.MoveRotationToRequested += OnMoveRotationToRequested;
@@ -47,6 +52,8 @@ public partial class CameraRig : Node3D
     public override void _ExitTree()
     {
         // イベント購読の解除
+        PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultNotified -= OnPickResultNotified;
         ViewportEventHub.Instance.NotifyStateRequested -= OnNotifyStateRequested;
         ViewportEventHub.Instance.MovePositionToRequested -= OnMovePositionToRequested;
         ViewportEventHub.Instance.MoveRotationToRequested -= OnMoveRotationToRequested;
@@ -65,6 +72,34 @@ public partial class CameraRig : Node3D
     #endregion
 
     #region Events
+
+    /// <summary>
+    /// 選択操作モードの通知を受け取るイベントハンドラ、現在の選択操作モードを更新する
+    /// </summary>
+    /// <param name="mode">通知された選択操作モード</param>
+    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    {
+        // 初回通知を受け取った時点で初期化済みとする
+        _isInitialized = true;
+        _currentPickHandlingMode = mode;
+    }
+
+    /// <summary>
+    /// ピック結果の通知を受け取るイベントハンドラ、選択操作モードに応じて選択状態を更新する
+    /// </summary>
+    /// <param name="pickResult">通知されたピック結果</param>
+    private void OnPickResultNotified(PickResult pickResult)
+    {
+        if (_currentPickHandlingMode == PickHandlingMode.NormalToFace)
+        {
+            // 法線方向の整列モードの場合は、ピック結果の法線方向を取得してカメラを整列させる
+            if (pickResult.HasHit)
+            {
+                MovePositionTo(pickResult.Position, true);
+                AlignNormalTo(pickResult.Normal, true);
+            }
+        }
+    }
 
     /// <summary>
     /// カメラの状態の通知がリクエストされたときに呼び出されるイベントハンドラ、現在のカメラ状態をイベントハブを通じて通知する

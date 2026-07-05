@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデル選択状態に応じてハイライト表示を切り替えるサービス
+/// モデル選択状態に応じてハイライト表示を切り替える Autoload ノード
 /// </summary>
 public partial class ModelVisualService : AutoloadNodeBase<ModelVisualService>
 {

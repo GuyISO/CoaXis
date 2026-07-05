@@ -4,17 +4,15 @@ using System.Linq;
 using System.Collections.Generic;
 
 /// <summary>
-/// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する
-/// Autoloadに登録してシングルトン参照する
+/// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する Autoload ノード
 /// </summary>
 public partial class Selection : AutoloadNodeBase<Selection>
 {
     #region Fields
 
     private static bool _isInitialized = false;
-    private static bool _isPickSelectionMode = false;
     private static bool _isMultiSelectionMode = false;
-    private static PickHandlingMode _currentPickHandlingMode = PickHandlingMode.Selection;
+    private static PickHandlingMode _currentPickHandlingMode;
     private HashSet<AnyModel> _models = new HashSet<AnyModel>();
 
     #endregion
@@ -27,6 +25,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
         ModelEventHub.Instance.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
         ModelEventHub.Instance.ClearSelectionRequested += OnClearSelectionRequested;
         PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultNotified += OnPickResultNotified;
         PickEventHub.Instance.PickResultsNotified += OnPickResultsNotified;
     }
 
@@ -36,9 +35,18 @@ public partial class Selection : AutoloadNodeBase<Selection>
         ModelEventHub.Instance.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
         ModelEventHub.Instance.ClearSelectionRequested -= OnClearSelectionRequested;
         PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultNotified -= OnPickResultNotified;
         PickEventHub.Instance.PickResultsNotified -= OnPickResultsNotified;
 
         base._ExitTree();
+    }
+
+    public override void _Process(double delta)
+    {
+        if (!_isInitialized)
+        {
+            PickEventHub.RequestNotifyPickHandlingMode();
+        }
     }
 
     #endregion
@@ -68,8 +76,37 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// <param name="mode">通知された選択操作モード</param>
     private void OnPickHandlingModeNotified(PickHandlingMode mode)
     {
-        _isPickSelectionMode = mode == PickHandlingMode.Selection;
+        // 初回通知を受け取った時点で初期化済みとする
+        _isInitialized = true;
         _currentPickHandlingMode = mode;
+    }
+
+    /// <summary>
+    /// ピック結果の通知を受け取る
+    /// </summary>
+    /// <param name="pickResult">通知されたピック結果</param>
+    private void OnPickResultNotified(PickResult pickResult)
+    {
+        if (_currentPickHandlingMode != PickHandlingMode.Selection)
+        {
+            return; // 選択操作モードでない場合は無視
+        }
+
+        // ピック結果が空なら選択状態クリア
+        if (pickResult == null || pickResult.Model == null)
+        {
+            Clear();
+            return;
+        }
+
+        if (_isMultiSelectionMode)
+        {
+            Toggle(pickResult.Model);
+        }
+        else
+        {
+            Set(pickResult.Model);
+        }
     }
 
     /// <summary>
@@ -78,39 +115,19 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// <param name="pickResults">ピック結果の配列</param>
     private void OnPickResultsNotified(PickResult[] pickResults)
     {
+        if (_currentPickHandlingMode != PickHandlingMode.Selection)
+        {
+            return; // 選択操作モードでない場合は無視
+        }
+
+        // ピック結果が空なら選択状態クリア
+        if (pickResults == null || pickResults.Length == 0)
+        {
+            Clear();
+            return;
+        }
+
         var models = pickResults.Select(pr => pr.Model).Where(m => m != null).ToArray();
-        if (_isMultiSelectionMode)
-        {
-            Toggle(models);
-        }
-        else
-        {
-            Set(models);
-        }
-    }
-
-    /// <summary>
-    /// 指定したモデルの選択要求を受け取る
-    /// </summary>
-    /// <param name="model">選択するモデル</param>
-    private void OnSelectModelRequested(AnyModel model)
-    {
-        if (_isMultiSelectionMode)
-        {
-            Toggle(model);
-        }
-        else
-        {
-            Set(model);
-        }
-    }
-
-    /// <summary>
-    /// 指定したモデル群の選択要求を受け取る
-    /// </summary>
-    /// <param name="models">選択するモデルの配列</param>
-    private void OnSelectModelsRequested(AnyModel[] models)
-    {
         if (_isMultiSelectionMode)
         {
             Toggle(models);

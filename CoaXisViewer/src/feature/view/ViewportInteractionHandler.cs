@@ -189,12 +189,10 @@ public partial class ViewportInteractionHandler : SubViewport
             SetMode(ViewportInteractionMode.PickRect);
             ViewportEventHub.NotifyPickRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
         }
-        // 右クリックは未定義だが、とりあえず注視点にフォーカスして法線方向にカメラを整列させる処理を行う
+        // 右クリックはメニュー表示
         else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
         {
-            // 右クリックで注視点にフォーカス後、法線方向にカメラを整列させる
-            TryFocusAt(button.Position, true);
-            TryAlignNormalTo(button.Position, true);
+            // TODO: 右クリックの操作は未定義、将来的にメニュー表示予定
         }
     }
 
@@ -339,30 +337,6 @@ public partial class ViewportInteractionHandler : SubViewport
         else
         {
             LogHub.Debug("ViewportInteractionHandler: focus target not found.");
-            return false;
-        }
-    }
-
-    /// <summary>
-    /// 画面上の指定された位置の法線にカメラの向きを合わせる
-    /// </summary>
-    /// <param name="screenPos">スクリーン座標</param>
-    /// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用</param>
-    /// <returns>法線にカメラを合わせられた場合は true、レイキャストがヒットしなかった場合は false を返す</returns>
-    private bool TryAlignNormalTo(Vector2 screenPos, bool useTween = false)
-    {
-        // レイキャストしてヒット情報を取得
-        var pickResult = PickUtility.PickByRay(GetCamera3D(), screenPos);
-
-        if (pickResult.HasHit)
-        {
-            LogHub.Debug($"ViewportInteractionHandler: align-normal target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
-            ViewportEventHub.RequestAlignNormalTo(pickResult.Normal, useTween);
-            return true;
-        }
-        else
-        {
-            LogHub.Debug("ViewportInteractionHandler: align-normal target not found.");
             return false;
         }
     }
@@ -555,7 +529,7 @@ public partial class ViewportInteractionHandler : SubViewport
     private void PickByPoint(Vector2 screenPos)
     {
         var pickResult = PickUtility.PickByRay(GetCamera3D(), screenPos);
-        PickEventHub.NotifyPickResults(new[] { pickResult });
+        PickEventHub.NotifyPickResult(pickResult);
     }
 
     /// <summary>

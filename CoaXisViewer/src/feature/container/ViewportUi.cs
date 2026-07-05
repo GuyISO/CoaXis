@@ -17,6 +17,7 @@ public partial class ViewportUi : PanelContainer
     private Button _buttonToggleProjection = null!;
     private Button _buttonFitAllIn = null!;
     private Button _buttonFitToSelection = null!;
+    private Button _buttonAlignNormal = null!;
     private Button _buttonRollLeft = null!;
     private Button _buttonRollRight = null!;
     private Label _labelPositionX = null!;
@@ -42,6 +43,7 @@ public partial class ViewportUi : PanelContainer
         _buttonToggleProjection = (Button)FindChild("ButtonToggleProjection");
         _buttonFitAllIn = (Button)FindChild("ButtonFitAllIn");
         _buttonFitToSelection = (Button)FindChild("ButtonFitToSelection");
+        _buttonAlignNormal = (Button)FindChild("ButtonAlignNormal");
         _buttonRollLeft = (Button)FindChild("ButtonRollLeft");
         _buttonRollRight = (Button)FindChild("ButtonRollRight");
         _labelPositionX = (Label)FindChild("LabelValuePositionX");
@@ -59,6 +61,7 @@ public partial class ViewportUi : PanelContainer
         _buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
         _buttonFitAllIn.Pressed += OnButtonFitAllInPressed;
         _buttonFitToSelection.Pressed += OnButtonFitToSelectionPressed;
+        _buttonAlignNormal.Pressed += OnButtonAlignNormalPressed;
         _buttonRollLeft.Pressed += OnButtonRollLeftPressed;
         _buttonRollRight.Pressed += OnButtonRollRightPressed;
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
@@ -80,6 +83,7 @@ public partial class ViewportUi : PanelContainer
         _buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
         _buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
         _buttonFitToSelection.Pressed -= OnButtonFitToSelectionPressed;
+        _buttonAlignNormal.Pressed -= OnButtonAlignNormalPressed;
         _buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
         _buttonRollRight.Pressed -= OnButtonRollRightPressed;
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
@@ -152,6 +156,14 @@ public partial class ViewportUi : PanelContainer
 
         LogHub.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
         ViewportEventHub.RequestFit(fitTargets, true);
+    }
+
+    /// <summary>
+    /// Align Normal ボタンのクリックイベントハンドラ、カメラの法線方向合わせ操作をリクエストする
+    /// </summary>
+    private void OnButtonAlignNormalPressed()
+    {
+        PickEventHub.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
     }
 
     /// <summary>

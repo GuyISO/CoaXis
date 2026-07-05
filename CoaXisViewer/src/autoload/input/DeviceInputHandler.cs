@@ -2,8 +2,7 @@
 using System;
 
 /// <summary>
-/// ユーザーのキーボードやコントローラー入力を処理するノード
-/// Autoload に登録され常にシーンツリーに存在し、シングルトン参照される
+/// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
 /// </summary>
 public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
 {
@@ -34,6 +33,12 @@ public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
         if (Input.IsActionJustPressed("load"))
         {
             ModelEventHub.RequestLoadModel("res://assets/models/car.glb");
+        }
+
+        if (Input.IsActionJustPressed("escape"))
+        {
+            PickEventHub.NotifyPickHandlingMode(PickHandlingMode.Selection);
+            ModelEventHub.RequestClearSelection();
         }
 
         HandleUndoRedoInput();

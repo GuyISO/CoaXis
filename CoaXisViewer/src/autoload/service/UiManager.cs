@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// UI管理用のシングルトンクラス、AutoLoadとしてプロジェクトに登録して使用する
+/// UI管理用 Autoload ノード
 /// </summary>
 public partial class UiManager : AutoloadNodeBase<UiManager>
 {

@@ -2,16 +2,24 @@ using Godot;
 using System;
 
 /// <summary>
-/// モデルの操作を行うサービス、Autoload でシングルトン化される
+/// モデルの操作を行う Autoload ノード
 /// </summary>
 public partial class ModelOperationService : AutoloadNodeBase<ModelOperationService>
 {
+	#region Fields
+
+	// 選択操作モードの現在値を保持するフィールド、初期値は選択操作とする
+	private static PickHandlingMode _currentPickHandlingMode = PickHandlingMode.Selection;
+
+	#endregion
+
 	#region Lifecycle
 
 	public override void _Ready()
 	{
 		// イベントの購読開始
 		ModelEventHub.Instance.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+		PickEventHub.Instance.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
 		PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
 
@@ -19,6 +27,7 @@ public partial class ModelOperationService : AutoloadNodeBase<ModelOperationServ
 	{
 		// イベントの購読解除
 		ModelEventHub.Instance.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
+		PickEventHub.Instance.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
 		PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 
 		base._ExitTree();
@@ -39,12 +48,20 @@ public partial class ModelOperationService : AutoloadNodeBase<ModelOperationServ
 	}
 
 	/// <summary>
+	/// 選択操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
+	/// </summary>
+	private void OnNotifyPickHandlingModeRequested()
+	{
+		PickEventHub.NotifyPickHandlingMode(_currentPickHandlingMode);
+	}
+
+	/// <summary>
 	/// 選択操作モードが通知されたときに呼び出されるイベントハンドラ
 	/// </summary>
 	/// <param name="mode">通知された選択操作モード</param>
 	private void OnPickHandlingModeNotified(PickHandlingMode mode)
 	{
-		// モードに応じた処理をここに追加
+		_currentPickHandlingMode = mode;
 	}
 
 	#endregion

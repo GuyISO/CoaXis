@@ -13,7 +13,7 @@ using System.Text.Json;
 
 
 /// <summary>
-/// 外部 JSON 設定を読み込んでアプリ全体へ提供する AutoLoad サービス。
+/// 外部 JSON 設定を読み込んでアプリ全体へ提供する Autoload ノード
 /// </summary>
 /// <remarks>
 /// 読み込み優先順位は次の通り。
