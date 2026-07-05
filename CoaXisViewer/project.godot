@@ -19,6 +19,7 @@ config/icon="res://assets/icon/icon.svg"
 [autoload]
 
 ModelEventHub="*uid://guga46ph5l82"
+PickEventHub="*uid://8uvapfqphubs"
 ViewportEventHub="*uid://dx5t10ibmi7k1"
 DeviceInputHandler="*uid://vwxli71heajm"
 ModelOperationService="*uid://doqqmjg3lqulp"
@@ -27,6 +28,7 @@ Selection="*uid://dngenqpeyo83v"
 SettingsService="*res://src/autoload/service/SettingsService.cs"
 UiManager="*uid://bdww21xtruf8m"
 LogHub="*uid://5o16r7usgjmh"
+AssetManager="*res://src/autoload/system/AssetManager.cs"
 
 [display]
 

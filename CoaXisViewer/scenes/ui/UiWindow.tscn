@@ -7,4 +7,6 @@ oversampling_override = 1.0
 initial_position = 2
 always_on_top = true
 unfocusable = true
+minimize_disabled = true
+maximize_disabled = true
 script = ExtResource("1_2ly6m")

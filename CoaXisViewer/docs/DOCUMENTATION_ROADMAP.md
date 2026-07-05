@@ -7,6 +7,11 @@
 - 依存方向の原則
 - シーン階層の概要
 
+### 1.1.1 AUTOLOAD_GUIDE.md
+- AutoLoad 共通基底クラスの使い分け
+- Instance 確立と解放の共通化ルール
+- EventHubBase と AutoloadNodeBase の責務境界
+
 ### 1.2 EVENTS_GUIDE.md
 - ModelEventHub と ViewportEventHub のRequest/Notify一覧
 - 初期状態通知のタイミング
@@ -21,8 +26,8 @@
 ## 2. 優先度B（次に作る）
 
 ### 2.1 CAMERA_INPUT_SYSTEM.md
-- ViewportInputMode の状態遷移
-- Pan/Orbit/Roll/Zoom/SelectionRect 操作仕様
+- ViewportInteractionMode の状態遷移
+- Pan/Orbit/Roll/Zoom/PickRect 操作仕様
 - Arcball計算の要点
 
 ### 2.2 IPC_PROTOCOL_GUIDE.md

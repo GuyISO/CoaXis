@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://cmde2bylb3cu1" path="res://scenes/container/MeasurementUi.tscn" id="7_qmy6f"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/feature/ui/FpsUi.cs" id="8_bb450"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/feature/ui/HierarchyTree.cs" id="8_qmy6f"]
-[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/feature/view/ViewportInputHandler.cs" id="14_3t3px"]
+[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/feature/view/ViewportInteractionHandler.cs" id="14_3t3px"]
 
 [sub_resource type="Environment" id="Environment_2xmat"]
 background_mode = 1
@@ -53,6 +53,7 @@ script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Cube" unique_id=1111657438]
 material_override = ExtResource("2_bjd11")
+transparency = 0.5
 mesh = SubResource("BoxMesh_cvmbd")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="RootModel/Cube" unique_id=722696110]
@@ -65,6 +66,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
 script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Sphere" unique_id=1374449570]
+transparency = 0.5
 mesh = SubResource("SphereMesh_3p2gp")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="RootModel/Sphere" unique_id=1514251133]
@@ -77,6 +79,7 @@ transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
 script = ExtResource("2_cvmbd")
 
 [node name="MeshInstance3D" type="MeshInstance3D" parent="RootModel/Capsule" unique_id=1907078487]
+transparency = 0.5
 mesh = SubResource("CapsuleMesh_qmy6f")
 
 [node name="StaticBody3D" type="StaticBody3D" parent="RootModel/Capsule" unique_id=1191354939]
@@ -118,7 +121,6 @@ text = "Viewport"
 _container = ExtResource("6_qmy6f")
 
 [node name="ButtonShowMeasurementUi" parent="Canvas/VBoxContainer/TopBar" unique_id=2040537289 instance=ExtResource("4_lhr70")]
-visible = false
 layout_mode = 2
 tooltip_text = "計測パネルを表示します"
 text = "Measurement"

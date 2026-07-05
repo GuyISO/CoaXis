@@ -34,18 +34,17 @@ public static class PickUtility
         var result = space.IntersectRay(query);
 
         if (result.Count == 0)
-            return new PickResult { HasHit = false };
+            return new PickResult();
 
-        return new PickResult
-        {
-            HasHit = true,
-            Collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
-            Rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-            Model = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
-            Position = (Vector3)result["position"],
-            Normal = result.ContainsKey("normal") ? (Vector3)result["normal"] : Vector3.Zero,
-            Distance = origin.DistanceTo((Vector3)result["position"])
-        };
+        return new PickResult(
+            hasHit: true,
+            collider: result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
+            rid: result.ContainsKey("rid") ? (Rid)result["rid"] : default,
+            model: result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
+            position: (Vector3)result["position"],
+            normal: result.ContainsKey("normal") ? (Vector3)result["normal"] : Vector3.Zero,
+            distance: origin.DistanceTo((Vector3)result["position"])
+        );
     }
 
     /// <summary>
@@ -55,9 +54,9 @@ public static class PickUtility
     /// <param name="screenPosition">レイのスクリーン座標</param>
     /// <param name="collisionMask">レイキャストの衝突マスク、デフォルトはカメラのカリングマスク</param>
     /// <param name="excludeRids">レイキャストから除外するオブジェクトのRIDリスト</param>
-    /// <returns>レイのヒット情報を含む PickResult のリスト</returns>
+    /// <returns>レイのヒット情報を含む PickResult の配列</returns>
     /// <remarks>Godotには貫通レイキャストがないため単体レイキャストを繰り返し呼び出し、すべてのヒットを収集することで実装している</remarks>
-    public static List<PickResult> PickAllByRay(Camera3D camera, Vector2 screenPosition, uint? collisionMask = null, List<Rid> excludeRids = null)
+    public static PickResult[] PickAllByRay(Camera3D camera, Vector2 screenPosition, uint? collisionMask = null, List<Rid> excludeRids = null)
     {
         // 引数で受け取った除外リストに、レイキャスト情報を取得するたびに除外品目を追加していくため複製して使用
         var exclude = excludeRids != null
@@ -87,7 +86,7 @@ public static class PickUtility
         // 距離順で取得されているはずだが、念のためヒット距離でソート
         results.Sort((a, b) => a.Distance.CompareTo(b.Distance));
 
-        return results;
+        return results.ToArray();
     }
 
     /// <summary>
@@ -98,8 +97,8 @@ public static class PickUtility
     /// <param name="requireFullContainment">形状に完全内包されたオブジェクトのみを取得するかどうか、true の場合は完全内包のみをヒットとみなし false の場合は形状と交差していればヒットとみなす</param>
     /// <param name="collisionMask">クエリの衝突マスク、デフォルトはカメラのカリングマスク</param>
     /// <param name="excludeRids">クエリから除外するオブジェクトのRIDリスト</param>
-    /// <returns>クエリのヒット情報を含む PickResult のリスト</returns>
-    public static List<PickResult> PickByShape(Camera3D camera, Shape3D shape, bool requireFullContainment, uint? collisionMask = null, List<Rid> excludeRids = null)
+    /// <returns>クエリのヒット情報を含む PickResult の配列</returns>
+    public static PickResult[] PickByShape(Camera3D camera, Shape3D shape, bool requireFullContainment, uint? collisionMask = null, List<Rid> excludeRids = null)
     {
         var space = camera.GetWorld3D().DirectSpaceState;
 
@@ -121,16 +120,17 @@ public static class PickUtility
         var pickResults = new List<PickResult>();
         foreach (var result in results)
         {
-            pickResults.Add(new PickResult
-            {
-                HasHit = true,
-                Collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
-                Rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-                Model = result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
-                Position = Vector3.Zero, // IntersectShape は position を返さない
-                Normal = Vector3.Zero,
-                Distance = 0f
-            });
+            pickResults.Add(
+                new PickResult(
+                    hasHit: true,
+                    collider: result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
+                    rid: result.ContainsKey("rid") ? (Rid)result["rid"] : default,
+                    model: result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
+                    position: Vector3.Zero, // IntersectShape は position を返さない
+                    normal: Vector3.Zero,
+                    distance: 0f
+                )
+            );
         }
 
         // requireFullContainment が true の場合、さらにフィルタリングして完全に内包されているオブジェクトのみを残す
@@ -139,7 +139,7 @@ public static class PickUtility
             // TODO: なんか難しいので、いつか実装したい
         }
 
-        return pickResults;
+        return pickResults.ToArray();
     }
 
     #endregion

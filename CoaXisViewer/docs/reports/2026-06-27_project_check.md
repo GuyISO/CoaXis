@@ -8,7 +8,7 @@
 ## 実装修正（今回反映済み）
 - LogHub: 終了時のリソース解放と未初期化時ガード
 - Selection: EventHub未初期化時の防御とXMLコメント整形
-- ViewportInputHandler: 曖昧コメント修正とXMLコメント整形
+- ViewportInteractionHandler: 曖昧コメント修正とXMLコメント整形
 - UiWindow: コメント文言の明確化
 - ModelLoader + RootModel: ロード成功可否連携と失敗時クリーンアップ
 - ModelColliderBuilder: nullメッシュ安全化と空データ保護

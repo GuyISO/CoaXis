@@ -29,8 +29,8 @@ public partial class HierarchyTree : Tree
         ModelEventHub.Instance.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
         ModelEventHub.Instance.RootModelNotified += OnRootModelNotified;
 
-        _visibleIcon = LoadIcon("res://assets/icon/visible.svg", 24);
-        _invisibleIcon = LoadIcon("res://assets/icon/invisible.svg", 24);
+        _visibleIcon = AssetManager.GetVisibilityIcon(true, 24);
+        _invisibleIcon = AssetManager.GetVisibilityIcon(false, 24);
 
         // VisibleButton 列を固定幅にする
         SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
@@ -230,23 +230,4 @@ public partial class HierarchyTree : Tree
         }
     }
 
-    private Texture2D LoadIcon(string path, int size = 16)
-    {
-        var tex = GD.Load<Texture2D>(path);
-        if (tex == null)
-        {
-            LogHub.Warn($"HierarchyTree: icon load failed. path='{path}'");
-            return null;
-        }
-
-        var img = tex.GetImage();
-        if (img == null)
-        {
-            LogHub.Warn($"HierarchyTree: icon image is null. path='{path}'");
-            return tex;
-        }
-
-        img.Resize(size, size, Image.Interpolation.Lanczos);
-        return ImageTexture.CreateFromImage(img);
-    }
 }

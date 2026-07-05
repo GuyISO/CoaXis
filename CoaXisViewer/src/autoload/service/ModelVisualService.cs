@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデル選択状態に応じてハイライト表示を切り替えるサービス
 /// </summary>
-public partial class ModelVisualService : Node
+public partial class ModelVisualService : AutoloadNodeBase<ModelVisualService>
 {
 	#region Fields
 
@@ -13,18 +13,7 @@ public partial class ModelVisualService : Node
 
 	#endregion
 
-	#region Properties
-
-	public static ModelVisualService Instance { get; private set; }
-
-	#endregion
-
 	#region Lifecycle
-
-	public override void _EnterTree()
-	{
-		Instance = this;
-	}
 
 	public override void _Ready()
 	{
@@ -39,7 +28,7 @@ public partial class ModelVisualService : Node
 		ModelEventHub.Instance.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
 		ModelEventHub.Instance.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 
-		Instance = null;
+		base._ExitTree();
 	}
 
 	#endregion

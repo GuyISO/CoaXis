@@ -58,7 +58,7 @@ public partial class ViewportOverlay : Control
         _arcballCrossLineX = _arcballCross.GetNode<Line2D>("LineX");
         _arcballCrossLineY = _arcballCross.GetNode<Line2D>("LineY");
         _arcballOutline = GetNode<Control>("ArcballOutline");
-        _selectionRect = GetNode<Control>("SelectionRect");
+        _selectionRect = GetNode<Control>("PickRect");
         _selectionRectLineHorizontal1 = _selectionRect.GetNode<Line2D>("LineHorizontal1");
         _selectionRectLineHorizontal2 = _selectionRect.GetNode<Line2D>("LineHorizontal2");
         _selectionRectLineVertical1 = _selectionRect.GetNode<Line2D>("LineVertical1");
@@ -67,10 +67,10 @@ public partial class ViewportOverlay : Control
         // イベントの購読登録
         ViewportEventHub.Instance.RotateRequested += OnRotateRequested;
         ViewportEventHub.Instance.RotationNotified += OnRotationNotified;
-        ViewportEventHub.Instance.InputModeNotified += OnInputModeNotified;
+        ViewportEventHub.Instance.InteractionModeNotified += OnInteractionModeNotified;
         ViewportEventHub.Instance.ArcballRadiusNotified += OnArcballRadiusNotified;
         ViewportEventHub.Instance.ArcballHandleNotified += OnArcballHandleNotified;
-        ViewportEventHub.Instance.SelectionRectNotified += OnSelectionRectNotified;
+        ViewportEventHub.Instance.PickRectNotified += OnPickRectNotified;
     }
 
     public override void _ExitTree()
@@ -78,10 +78,10 @@ public partial class ViewportOverlay : Control
         // イベントの購読解除
         ViewportEventHub.Instance.RotateRequested -= OnRotateRequested;
         ViewportEventHub.Instance.RotationNotified -= OnRotationNotified;
-        ViewportEventHub.Instance.InputModeNotified -= OnInputModeNotified;
+        ViewportEventHub.Instance.InteractionModeNotified -= OnInteractionModeNotified;
         ViewportEventHub.Instance.ArcballRadiusNotified -= OnArcballRadiusNotified;
         ViewportEventHub.Instance.ArcballHandleNotified -= OnArcballHandleNotified;
-        ViewportEventHub.Instance.SelectionRectNotified -= OnSelectionRectNotified;
+        ViewportEventHub.Instance.PickRectNotified -= OnPickRectNotified;
     }
 
     public override void _Process(double delta)
@@ -128,12 +128,12 @@ public partial class ViewportOverlay : Control
     /// カメラの入力モードが通知されたときに呼び出されるイベントハンドラ、中心軸とアークボール補助表示の表示を切り替える
     /// </summary>
     /// <param name="mode">通知されたカメラの入力モード</param>
-    private void OnInputModeNotified(ViewportInputMode mode)
+    private void OnInteractionModeNotified(ViewportInteractionMode mode)
     {
         _arcballOutline.Visible = IsArcballMode(mode);
         _centerAxis.Visible = IsCenterAxisMode(mode);
         _arcballCross.Visible = IsArcballMode(mode);
-        _selectionRect.Visible = IsSelectionRectMode(mode);
+        _selectionRect.Visible = IsPickRectMode(mode);
     }
 
     /// <summary>
@@ -161,9 +161,9 @@ public partial class ViewportOverlay : Control
     /// </summary>
     /// <param name="startPosition">通知された矩形選択の開始位置</param>
     /// <param name="endPosition">通知された矩形選択の終了位置</param>
-    private void OnSelectionRectNotified(Vector2 startPosition, Vector2 endPosition)
+    private void OnPickRectNotified(Vector2 startPosition, Vector2 endPosition)
     {
-        DrawSelectionRect(startPosition, endPosition);
+        DrawPickRect(startPosition, endPosition);
     }
 
     #endregion
@@ -426,7 +426,7 @@ public partial class ViewportOverlay : Control
     /// </summary>
     /// <param name="startPosition">矩形選択の開始位置</param>
     /// <param name="endPosition">矩形選択の終了位置</param>
-    private void DrawSelectionRect(Vector2 startPosition, Vector2 endPosition)
+    private void DrawPickRect(Vector2 startPosition, Vector2 endPosition)
     {
         SetLinePoints(_selectionRectLineHorizontal1, new Vector2(startPosition.X, startPosition.Y), new Vector2(endPosition.X, startPosition.Y));
         SetLinePoints(_selectionRectLineHorizontal2, new Vector2(startPosition.X, endPosition.Y), new Vector2(endPosition.X, endPosition.Y));
@@ -435,33 +435,33 @@ public partial class ViewportOverlay : Control
     }
 
     /// <summary>
-    /// ViewportInputMode がアークボール操作モード（Orbit または Roll）かどうかを判定する
+    /// ViewportInteractionMode がアークボール操作モード（Orbit または Roll）かどうかを判定する
     /// </summary>
-    /// <param name="mode">判定する ViewportInputMode </param>
+    /// <param name="mode">判定する ViewportInteractionMode </param>
     /// <returns>アークボール操作モードであれば true を返す</returns>
-    private bool IsArcballMode(ViewportInputMode mode)
+    private bool IsArcballMode(ViewportInteractionMode mode)
     {
-        return mode == ViewportInputMode.CameraOrbit || mode == ViewportInputMode.CameraRoll;
+        return mode == ViewportInteractionMode.CameraOrbit || mode == ViewportInteractionMode.CameraRoll;
     }
 
     /// <summary>
-    /// ViewportInputMode が中心軸表示モード（Orbit/Pan/Zoom/Roll）かどうかを判定する
+    /// ViewportInteractionMode が中心軸表示モード（Orbit/Pan/Zoom/Roll）かどうかを判定する
     /// </summary>
-    /// <param name="mode">判定する ViewportInputMode </param>
+    /// <param name="mode">判定する ViewportInteractionMode </param>
     /// <returns>中心軸表示モードであれば true を返す</returns>
-    private bool IsCenterAxisMode(ViewportInputMode mode)
+    private bool IsCenterAxisMode(ViewportInteractionMode mode)
     {
-        return mode == ViewportInputMode.CameraOrbit || mode == ViewportInputMode.CameraPan || mode == ViewportInputMode.CameraZoom || mode == ViewportInputMode.CameraRoll;
+        return mode == ViewportInteractionMode.CameraOrbit || mode == ViewportInteractionMode.CameraPan || mode == ViewportInteractionMode.CameraZoom || mode == ViewportInteractionMode.CameraRoll;
     }
 
     /// <summary>
-    /// ViewportInputMode が選択矩形表示モード（Select）かどうかを判定する
+    /// ViewportInteractionMode が選択矩形表示モード（Select）かどうかを判定する
     /// </summary>
-    /// <param name="mode">判定する ViewportInputMode </param>
+    /// <param name="mode">判定する ViewportInteractionMode </param>
     /// <returns>選択矩形表示モードであれば true を返す</returns>
-    private bool IsSelectionRectMode(ViewportInputMode mode)
+    private bool IsPickRectMode(ViewportInteractionMode mode)
     {
-        return mode == ViewportInputMode.SelectionRect;
+        return mode == ViewportInteractionMode.PickRect;
     }
 
     #endregion

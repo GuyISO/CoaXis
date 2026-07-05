@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// アタッチされている3Dビューの入力を受け取り、ViewportEventHub へ中継する
 /// </summary>
-public partial class ViewportInputHandler : SubViewport
+public partial class ViewportInteractionHandler : SubViewport
 {
     #region Fields
 
@@ -17,7 +17,7 @@ public partial class ViewportInputHandler : SubViewport
     [Export] private Material _defaultMaterial; // 通常表示用のマテリアル（将来の拡張で使用予定）
     [Export] private Material _selectedMaterial; // 選択ハイライト用のマテリアル（将来の拡張で使用予定）
 
-    private ViewportInputMode _mode = ViewportInputMode.None; // 現在の操作モード
+    private ViewportInteractionMode _mode = ViewportInteractionMode.None; // 現在の操作モード
     private Vector2 _lastPosition = Vector2.Zero; // 移動量算出のために前フレームの操作座標を保持
     private Vector2 _startPosition = Vector2.Zero; // 操作開始点の座標を保持
     private bool _hasMoved = false; // ボタンを押してから移動操作したかのフラグ、マウスのクリックと移動の区別に使用
@@ -35,10 +35,11 @@ public partial class ViewportInputHandler : SubViewport
 
         // イベントの購読
         ViewportEventHub.Instance.NotifyStateRequested += OnNotifyStateRequested;
+        ViewportEventHub.Instance.InteractionModeNotified += OnInteractionModeNotified;
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
-        LogHub.Info("ViewportInputHandler initialized.");
+        LogHub.Info("ViewportInteractionHandler initialized.");
     }
 
     public override void _ExitTree()
@@ -48,14 +49,15 @@ public partial class ViewportInputHandler : SubViewport
 
         // イベントの購読解除
         ViewportEventHub.Instance.NotifyStateRequested -= OnNotifyStateRequested;
+        ViewportEventHub.Instance.InteractionModeNotified -= OnInteractionModeNotified;
 
-        LogHub.Info("ViewportInputHandler released.");
+        LogHub.Info("ViewportInteractionHandler released.");
     }
 
     public override void _Process(double delta)
     {
         // 入力モードが None のときはマウス移動の検知やカメラ操作の適用を行わず、リソース節約のためここで早期リターンする
-        if (_mode == ViewportInputMode.None)
+        if (_mode == ViewportInteractionMode.None)
         {
             return;
         }
@@ -105,9 +107,17 @@ public partial class ViewportInputHandler : SubViewport
     /// </summary>
     private void OnNotifyStateRequested()
     {
-        ViewportEventHub.NotifyInputMode(_mode);
+        ViewportEventHub.NotifyInteractionMode(_mode);
         ViewportEventHub.NotifyArcballRadius(_arcballRadius);
         ViewportEventHub.NotifyArcballHandle(new Vector3(0, 0, 1)); // アークボールハンドルは初期状態では画面正面方向にしておく
+    }
+
+    /// <summary>
+    /// ViewportEventHub からの InteractionModeNotified シグナルを受け取るイベントハンドラ、操作モードを切り替える
+    /// </summary>
+    private void OnInteractionModeNotified(ViewportInteractionMode mode)
+    {
+        SetMode(mode);
     }
 
     /// <summary>
@@ -117,15 +127,15 @@ public partial class ViewportInputHandler : SubViewport
     private void OnMouseButtonClicked(InputEventMouseButton button)
     {
         // 入力モードに応じて、マウス入力の処理を分岐する
-        if (_mode == ViewportInputMode.None)
+        if (_mode == ViewportInteractionMode.None)
         {
             // None モードのときは、カメラ操作開始のトリガーを検知するための処理を行う
             HandleIdleModeInput(button);
         }
-        else if (_mode == ViewportInputMode.SelectionRect)
+        else if (_mode == ViewportInteractionMode.PickRect)
         {
-            // SelectionRectモードのときは矩形選択操作の開始・終了を検知するための処理を行う
-            HandleSelectionModeInput(button);
+            // PickRectモードのときは矩形選択操作の開始・終了を検知するための処理を行う
+            HandlePickModeInput(button);
         }
         else
         {
@@ -142,16 +152,16 @@ public partial class ViewportInputHandler : SubViewport
     /// 操作モードを切り替え、EventHub を通じて変更を通知する
     /// </summary>
     /// <param name="mode">新しい操作モード</param>
-    private void SetMode(ViewportInputMode mode)
+    private void SetMode(ViewportInteractionMode mode)
     {
         if (_mode == mode)
         {
             return;
         }
 
-        LogHub.Debug($"ViewportInputHandler: mode changed {_mode} -> {mode}");
+        LogHub.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
         _mode = mode;
-        ViewportEventHub.NotifyInputMode(mode);
+        ViewportEventHub.NotifyInteractionMode(mode);
     }
 
     /// <summary>
@@ -166,7 +176,7 @@ public partial class ViewportInputHandler : SubViewport
             // カメラ操作しているかどうかは、移動量が閾値を超えたかで判定するためここでは移動フラグをリセットして現在位置も更新しておく
             _hasMoved = false;
             _lastPosition = button.Position;
-            SetMode(ViewportInputMode.CameraPan);
+            SetMode(ViewportInteractionMode.CameraPan);
         }
         // 左ボタンのクリック開始を検知したら矩形選択操作を行う
         else if (button.Pressed && button.ButtonIndex == MouseButton.Left)
@@ -176,9 +186,10 @@ public partial class ViewportInputHandler : SubViewport
             _lastPosition = button.Position;
             // 矩形選択の開始点を保存
             _startPosition = button.Position;
-            SetMode(ViewportInputMode.SelectionRect);
-            ViewportEventHub.NotifySelectionRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
+            SetMode(ViewportInteractionMode.PickRect);
+            ViewportEventHub.NotifyPickRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
         }
+        // 右クリックは未定義だが、とりあえず注視点にフォーカスして法線方向にカメラを整列させる処理を行う
         else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
         {
             // 右クリックで注視点にフォーカス後、法線方向にカメラを整列させる
@@ -188,16 +199,16 @@ public partial class ViewportInputHandler : SubViewport
     }
 
     /// <summary>
-    /// 入力モードがSelectionのときのマウス入力を処理する
+    /// 入力モードがPickのときのマウス入力を処理する
     /// </summary>
     /// <param name="button">マウスボタン入力イベント</param>
-    private void HandleSelectionModeInput(InputEventMouseButton button)
+    private void HandlePickModeInput(InputEventMouseButton button)
     {
         // ウィンドウフォーカス喪失などのキャンセル時は即時終了
         if (button.Canceled)
         {
             // 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する
-            SetMode(ViewportInputMode.None);
+            SetMode(ViewportInteractionMode.None);
             return;
         }
 
@@ -207,15 +218,15 @@ public partial class ViewportInputHandler : SubViewport
             if (_hasMoved)
             {
                 // ドラッグしていた場合は矩形選択を行う
-                SelectByRect(_startPosition, button.Position);
+                PickByRect(_startPosition, button.Position);
             }
             else
             {
                 // ドラッグしていない場合は、クリックとみなして単一選択を行う
-                SelectByPoint(button.Position);
+                PickByPoint(button.Position);
             }
 
-            SetMode(ViewportInputMode.None);
+            SetMode(ViewportInteractionMode.None);
         }
     }
 
@@ -229,7 +240,7 @@ public partial class ViewportInputHandler : SubViewport
         if (button.Canceled)
         {
             // 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する
-            SetMode(ViewportInputMode.None);
+            SetMode(ViewportInteractionMode.None);
             return;
         }
 
@@ -243,7 +254,7 @@ public partial class ViewportInputHandler : SubViewport
                     PanCamera(button.Position, _screenCenter); // フォーカスできなかったら、クリック位置にパン扱いとする
                 }
             }
-            SetMode(ViewportInputMode.None);
+            SetMode(ViewportInteractionMode.None);
             return;
         }
 
@@ -257,14 +268,14 @@ public partial class ViewportInputHandler : SubViewport
         if (button.Pressed)
         {
             _hasMoved = true; // クリック操作したら注視点移動しないようににするため、移動フラグを立てる
-            SetMode(IsOnArcball(button.Position) ? ViewportInputMode.CameraOrbit : ViewportInputMode.CameraRoll);
+            SetMode(IsOnArcball(button.Position) ? ViewportInteractionMode.CameraOrbit : ViewportInteractionMode.CameraRoll);
             Vector3 positionOnArcball = GetPositionOnArcballSphere(button.Position);
             ViewportEventHub.NotifyArcballHandle(positionOnArcball);
             return;
         }
 
         // 中ボタンを押したまま右or左クリック終了を検知したら、Zoomモードに切り替え
-        SetMode(ViewportInputMode.CameraZoom);
+        SetMode(ViewportInteractionMode.CameraZoom);
     }
 
     /// <summary>
@@ -280,17 +291,17 @@ public partial class ViewportInputHandler : SubViewport
     {
         switch (_mode)
         {
-            case ViewportInputMode.CameraPan:
+            case ViewportInteractionMode.CameraPan:
                 PanCamera(previousPos, currentPos);
                 break;
-            case ViewportInputMode.CameraOrbit:
+            case ViewportInteractionMode.CameraOrbit:
                 OrbitCamera(previousPos, currentPos);
                 break;
-            case ViewportInputMode.CameraRoll:
+            case ViewportInteractionMode.CameraRoll:
                 if (IsOnArcball(currentPos))
                 {
                     // 画面中央寄りに入ったらOrbitに変更、外周寄りはRollのままにする
-                    SetMode(ViewportInputMode.CameraOrbit);
+                    SetMode(ViewportInteractionMode.CameraOrbit);
                     OrbitCamera(previousPos, currentPos);
                 }
                 else
@@ -298,11 +309,11 @@ public partial class ViewportInputHandler : SubViewport
                     RollCamera(previousPos, currentPos);
                 }
                 break;
-            case ViewportInputMode.CameraZoom:
+            case ViewportInteractionMode.CameraZoom:
                 ZoomCamera(previousPos, currentPos);
                 break;
-            case ViewportInputMode.SelectionRect:
-                ViewportEventHub.NotifySelectionRect(_startPosition, currentPos);
+            case ViewportInteractionMode.PickRect:
+                ViewportEventHub.NotifyPickRect(_startPosition, currentPos);
                 break;
         }
     }
@@ -321,13 +332,13 @@ public partial class ViewportInputHandler : SubViewport
         if (pickResult.HasHit)
         {
             // ヒットしたら注視点を移動
-            LogHub.Debug($"ViewportInputHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
+            LogHub.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
             ViewportEventHub.RequestMovePositionTo(pickResult.Position, useTween);
             return true;
         }
         else
         {
-            LogHub.Debug("ViewportInputHandler: focus target not found.");
+            LogHub.Debug("ViewportInteractionHandler: focus target not found.");
             return false;
         }
     }
@@ -345,13 +356,13 @@ public partial class ViewportInputHandler : SubViewport
 
         if (pickResult.HasHit)
         {
-            LogHub.Debug($"ViewportInputHandler: align-normal target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
+            LogHub.Debug($"ViewportInteractionHandler: align-normal target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
             ViewportEventHub.RequestAlignNormalTo(pickResult.Normal, useTween);
             return true;
         }
         else
         {
-            LogHub.Debug("ViewportInputHandler: align-normal target not found.");
+            LogHub.Debug("ViewportInteractionHandler: align-normal target not found.");
             return false;
         }
     }
@@ -538,23 +549,13 @@ public partial class ViewportInputHandler : SubViewport
     }
 
     /// <summary>
-    /// 画面上の指定された位置をクリックして、そこにあるオブジェクトを選択する
+    /// 画面上の指定された位置をクリックして、そこからレイキャストしてヒットしたオブジェクトを選択する
     /// </summary>
     /// <param name="screenPos">スクリーン座標</param>
-    private void SelectByPoint(Vector2 screenPos)
+    private void PickByPoint(Vector2 screenPos)
     {
         var pickResult = PickUtility.PickByRay(GetCamera3D(), screenPos);
-
-        if (pickResult.HasHit)
-        {
-            LogHub.Debug($"ViewportInputHandler: point select hit. model='{pickResult.Model?.Name}'");
-            ModelEventHub.RequestSelectModel(pickResult.Model);
-        }
-        else
-        {
-            LogHub.Debug("ViewportInputHandler: point select miss. clear selection requested.");
-            ModelEventHub.RequestClearSelection();
-        }
+        PickEventHub.NotifyPickResults(new[] { pickResult });
     }
 
     /// <summary>
@@ -562,21 +563,13 @@ public partial class ViewportInputHandler : SubViewport
     /// </summary>
     /// <param name="topLeft">矩形の左上座標</param>
     /// <param name="bottomRight">矩形の右下座標</param>
-    private void SelectByRect(Vector2 topLeft, Vector2 bottomRight)
+    private void PickByRect(Vector2 topLeft, Vector2 bottomRight)
     {
         // 画面上の矩形領域をカメラの視錐台として、そこに含まれるオブジェクトを選択する
         var frustumShape = CreateFrustumShape(topLeft, bottomRight);
         var camera = GetCamera3D();
         var pickResults = PickUtility.PickByShape(camera, frustumShape, true);
-
-        // ヒットしたオブジェクトから AnyModel を抜き取る
-        AnyModel[] pickedModels = new AnyModel[pickResults.Count];
-        for (int i = 0; i < pickResults.Count; i++)
-        {
-            pickedModels[i] = pickResults[i].Model;
-        }
-        LogHub.Debug($"ViewportInputHandler: rect select requested. hitCount={pickedModels.Length}");
-        ModelEventHub.RequestSelectModels(pickedModels);
+        PickEventHub.NotifyPickResults(pickResults);
     }
 
     /// <summary>

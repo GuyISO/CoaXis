@@ -1,50 +1,11 @@
 ﻿using Godot;
-using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// ビューポート関連のイベント集約ハブ
 /// Autoloadに登録してシングルトン参照する
 /// </summary>
-public partial class ViewportEventHub : Node
+public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
 {
-    #region Properties
-
-    public static ViewportEventHub Instance { get; private set; }
-
-    #endregion
-
-    #region Lifecycle
-
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
-
-    public override void _ExitTree()
-    {
-        Instance = null;
-    }
-
-    #endregion
-
-    #region Internal Helper 
-
-    private static bool TryEmitSignal(StringName signalName, params Variant[] args)
-    {
-        if (Instance == null)
-        {
-            LogHub.Warn($"ViewportEventHub is not initialized. Skipped signal: {signalName}.");
-            return false;
-        }
-
-        Instance.EmitSignal(signalName, args);
-        LogHub.Debug($"ViewportEventHub emitted signal: {signalName}.");
-        return true;
-    }
-
-    #endregion
-
     #region --------------------------------------- Request ---------------------------------------
 
     [Signal] public delegate void NotifyStateRequestedEventHandler();
@@ -189,29 +150,29 @@ public partial class ViewportEventHub : Node
         TryEmitSignal(SignalName.AlignNormalToRequested, normal, useTween);
     }
 
-    [Signal] public delegate void DecideSelectionRectRequestedEventHandler(Vector2 startPosition, Vector2 endPosition);
+    [Signal] public delegate void DecidePickRectRequestedEventHandler(Vector2 startPosition, Vector2 endPosition);
     /// <summary>
     /// 矩形選択の確定を通知するシグナル
     /// </summary>
     /// <param name="startPosition">矩形選択の開始位置</param>
     /// <param name="endPosition">矩形選択の終了位置</param>
-    public static void RequestDecideSelectionRect(Vector2 startPosition, Vector2 endPosition)
+    public static void RequestDecidePickRect(Vector2 startPosition, Vector2 endPosition)
     {
-        TryEmitSignal(SignalName.DecideSelectionRectRequested, startPosition, endPosition);
+        TryEmitSignal(SignalName.DecidePickRectRequested, startPosition, endPosition);
     }
 
     #endregion
 
     #region --------------------------------------- Notification ---------------------------------------
 
-    [Signal] public delegate void InputModeNotifiedEventHandler(ViewportInputMode mode);
+    [Signal] public delegate void InteractionModeNotifiedEventHandler(ViewportInteractionMode mode);
     /// <summary>
     /// 操作モードを通知するシグナル
     /// </summary>
     /// <param name="mode">操作モード</param>
-    public static void NotifyInputMode(ViewportInputMode mode)
+    public static void NotifyInteractionMode(ViewportInteractionMode mode)
     {
-        TryEmitSignal(SignalName.InputModeNotified, (int)mode);
+        TryEmitSignal(SignalName.InteractionModeNotified, (int)mode);
     }
 
     [Signal] public delegate void PositionNotifiedEventHandler(Vector3 position);
@@ -294,15 +255,25 @@ public partial class ViewportEventHub : Node
         TryEmitSignal(SignalName.ArcballHandleNotified, position);
     }
 
-    [Signal] public delegate void SelectionRectNotifiedEventHandler(Vector2 startPosition, Vector2 endPosition);
+    [Signal] public delegate void PickRectNotifiedEventHandler(Vector2 startPosition, Vector2 endPosition);
     /// <summary>
     /// 矩形選択の範囲を通知するシグナル
     /// </summary>
     /// <param name="startPosition">矩形選択の開始位置</param>
     /// <param name="endPosition">矩形選択の終了位置</param>
-    public static void NotifySelectionRect(Vector2 startPosition, Vector2 endPosition)
+    public static void NotifyPickRect(Vector2 startPosition, Vector2 endPosition)
     {
-        TryEmitSignal(SignalName.SelectionRectNotified, startPosition, endPosition);
+        TryEmitSignal(SignalName.PickRectNotified, startPosition, endPosition);
+    }
+
+    [Signal] public delegate void PickResultNotifiedEventHandler(PickResult pickResult);
+    /// <summary>
+    /// 測定用の点選択結果を通知するシグナル
+    /// </summary>
+    /// <param name="pickResult">選択結果の情報を含むオブジェクト</param>
+    public static void NotifyPickResult(PickResult pickResult)
+    {
+        TryEmitSignal(SignalName.PickResultNotified, pickResult);
     }
 
     #endregion

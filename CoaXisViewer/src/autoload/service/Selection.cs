@@ -7,57 +7,38 @@ using System.Collections.Generic;
 /// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する
 /// Autoloadに登録してシングルトン参照する
 /// </summary>
-public partial class Selection : Node
+public partial class Selection : AutoloadNodeBase<Selection>
 {
     #region Fields
 
-    private static bool _isMultiSelectMode = false;
+    private static bool _isInitialized = false;
+    private static bool _isPickSelectionMode = false;
+    private static bool _isMultiSelectionMode = false;
+    private static PickHandlingMode _currentPickHandlingMode = PickHandlingMode.Selection;
     private HashSet<AnyModel> _models = new HashSet<AnyModel>();
-
-    #endregion
-
-    #region Properties
-
-    public static Selection Instance { get; private set; }
 
     #endregion
 
     #region Lifecycle
 
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
-
     public override void _Ready()
     {
-        if (ModelEventHub.Instance == null)
-        {
-            LogHub.Warn("Selection: ModelEventHub is not initialized.");
-            return;
-        }
-
         // イベントの購読開始
-        ModelEventHub.Instance.SetMultiSelectModeRequested += OnSetMultiSelectModeRequested;
-        ModelEventHub.Instance.SelectModelRequested += OnSelectModelRequested;
-        ModelEventHub.Instance.SelectModelsRequested += OnSelectModelsRequested;
+        ModelEventHub.Instance.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
         ModelEventHub.Instance.ClearSelectionRequested += OnClearSelectionRequested;
+        PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultsNotified += OnPickResultsNotified;
     }
 
     public override void _ExitTree()
     {
-        if (ModelEventHub.Instance == null)
-        {
-            return;
-        }
-
         // イベントの購読解除
-        ModelEventHub.Instance.SetMultiSelectModeRequested -= OnSetMultiSelectModeRequested;
-        ModelEventHub.Instance.SelectModelRequested -= OnSelectModelRequested;
-        ModelEventHub.Instance.SelectModelsRequested -= OnSelectModelsRequested;
+        ModelEventHub.Instance.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
         ModelEventHub.Instance.ClearSelectionRequested -= OnClearSelectionRequested;
+        PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultsNotified -= OnPickResultsNotified;
 
-        Instance = null;
+        base._ExitTree();
     }
 
     #endregion
@@ -68,9 +49,44 @@ public partial class Selection : Node
     /// マルチ選択モードの有効化/無効化要求を受け取る
     /// </summary>
     /// <param name="enable">有効化する場合はtrue、無効化する場合はfalse</param>
-    private void OnSetMultiSelectModeRequested(bool enable)
+    private void OnSetMultiSelectionModeRequested(bool enable)
     {
-        _isMultiSelectMode = enable;
+        _isMultiSelectionMode = enable;
+    }
+
+    /// <summary>
+    /// 選択解除要求を受け取る
+    /// </summary>
+    private void OnClearSelectionRequested()
+    {
+        Clear();
+    }
+
+    /// <summary>
+    /// 選択操作モードの通知を受け取る
+    /// </summary>
+    /// <param name="mode">通知された選択操作モード</param>
+    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    {
+        _isPickSelectionMode = mode == PickHandlingMode.Selection;
+        _currentPickHandlingMode = mode;
+    }
+
+    /// <summary>
+    /// ピック結果の通知を受け取る
+    /// </summary>
+    /// <param name="pickResults">ピック結果の配列</param>
+    private void OnPickResultsNotified(PickResult[] pickResults)
+    {
+        var models = pickResults.Select(pr => pr.Model).Where(m => m != null).ToArray();
+        if (_isMultiSelectionMode)
+        {
+            Toggle(models);
+        }
+        else
+        {
+            Set(models);
+        }
     }
 
     /// <summary>
@@ -79,7 +95,7 @@ public partial class Selection : Node
     /// <param name="model">選択するモデル</param>
     private void OnSelectModelRequested(AnyModel model)
     {
-        if (_isMultiSelectMode)
+        if (_isMultiSelectionMode)
         {
             Toggle(model);
         }
@@ -95,7 +111,7 @@ public partial class Selection : Node
     /// <param name="models">選択するモデルの配列</param>
     private void OnSelectModelsRequested(AnyModel[] models)
     {
-        if (_isMultiSelectMode)
+        if (_isMultiSelectionMode)
         {
             Toggle(models);
         }
@@ -103,14 +119,6 @@ public partial class Selection : Node
         {
             Set(models);
         }
-    }
-
-    /// <summary>
-    /// 選択解除要求を受け取る
-    /// </summary>
-    private void OnClearSelectionRequested()
-    {
-        Clear();
     }
 
     #endregion

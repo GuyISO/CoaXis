@@ -1,50 +1,11 @@
 ﻿using Godot;
-using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// モデル関連のイベント集約ハブ
 /// Autoloadに登録してシングルトン参照する
 /// </summary>
-public partial class ModelEventHub : Node
+public partial class ModelEventHub : EventHubBase<ModelEventHub>
 {
-	#region Properties
-
-	public static ModelEventHub Instance { get; private set; }
-
-	#endregion
-
-	#region Lifecycle
-
-	public override void _EnterTree()
-	{
-		Instance = this;
-	}
-
-	public override void _ExitTree()
-	{
-		Instance = null;
-	}
-
-	#endregion
-
-	#region Internal Helper
-
-	private static bool TryEmitSignal(StringName signalName, params Variant[] args)
-	{
-		if (Instance == null)
-		{
-			LogHub.Warn($"ModelEventHub is not initialized. Skipped signal: {signalName}.");
-			return false;
-		}
-
-		Instance.EmitSignal(signalName, args);
-		LogHub.Debug($"ModelEventHub emitted signal: {signalName}.");
-		return true;
-	}
-
-	#endregion
-
 	#region --------------------------------------- Request ---------------------------------------
 
 	[Signal] public delegate void NotifyRootModelRequestedEventHandler();
@@ -56,34 +17,14 @@ public partial class ModelEventHub : Node
 		TryEmitSignal(SignalName.NotifyRootModelRequested);
 	}
 
-	[Signal] public delegate void SetMultiSelectModeRequestedEventHandler(bool enable);
+	[Signal] public delegate void SetMultiSelectionModeRequestedEventHandler(bool enable);
 	/// <summary>
 	/// 複数選択モードの設定をリクエストする
 	/// </summary>
 	/// <param name="enable">複数選択モードを有効にする場合はtrue、無効にする場合はfalse</param>
-	public static void RequestSetMultiSelectMode(bool enable)
+	public static void RequestSetMultiSelectionMode(bool enable)
 	{
-		TryEmitSignal(SignalName.SetMultiSelectModeRequested, enable);
-	}
-
-	[Signal] public delegate void SelectModelRequestedEventHandler(AnyModel model);
-	/// <summary>
-	/// モデルの選択をリクエストする
-	/// </summary>
-	/// <param name="model">選択するモデル</param>
-	public static void RequestSelectModel(AnyModel model)
-	{
-		TryEmitSignal(SignalName.SelectModelRequested, model);
-	}
-
-	[Signal] public delegate void SelectModelsRequestedEventHandler(AnyModel[] models);
-	/// <summary>
-	/// 複数モデルの選択をリクエストする
-	/// </summary>
-	/// <param name="models">選択するモデルの配列</param>
-	public static void RequestSelectModels(AnyModel[] models)
-	{
-		TryEmitSignal(SignalName.SelectModelsRequested, models);
+		TryEmitSignal(SignalName.SetMultiSelectionModeRequested, enable);
 	}
 
 	[Signal] public delegate void ClearSelectionRequestedEventHandler();

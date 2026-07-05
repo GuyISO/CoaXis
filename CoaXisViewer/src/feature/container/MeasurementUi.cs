@@ -2,33 +2,42 @@ using Godot;
 using System;
 
 /// <summary>
-/// メインのビューポート状態表示と操作用のパネル
+/// 測定ポイントの取得結果と派生値を表示するパネル
 /// </summary>
 public partial class MeasurementUi : PanelContainer
 {
     #region Fields
 
-    private RootModel _rootModel = null!;
+    private bool _isInitialized = false;
 
-    private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
+    private PickHandlingMode _pickHandlingMode;
+    private int _pickingPointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
 
-    private Label _labelMode = null!;
-    private Label _labelProjection = null!;
-    private Button _buttonToggleProjection = null!;
-    private Button _buttonFitAllIn = null!;
-    private Button _buttonFitToSelection = null!;
-    private Button _buttonRollLeft = null!;
-    private Button _buttonRollRight = null!;
-    private Label _labelPositionX = null!;
-    private Label _labelPositionY = null!;
-    private Label _labelPositionZ = null!;
-    private Label _labelRotationX = null!;
-    private Label _labelRotationY = null!;
-    private Label _labelRotationZ = null!;
-    private Label _labelSize = null!;
+    // 測定位置のラベルを表示するための PackedScene
+    private PackedScene _annotationLabel = ResourceLoader.Load<PackedScene>("res://scenes/AnnotationLabel.tscn")!;
+    private readonly Node3D[] _annotationInstances = new Node3D[2];
+    private readonly ImmediateMesh _measurementLineMesh = new ImmediateMesh();
+
+    // ピック結果の保持
+    private PickResult[] _points = new PickResult[2] { new PickResult(), new PickResult() };
+
+    // 関連ノードの参照
+    private Node3D _measurementVisualRoot = null!;
+    private MeshInstance3D _measurementLine = null!;
+
+    private readonly Label[] _labelPositionXs = new Label[2];
+    private readonly Label[] _labelPositionYs = new Label[2];
+    private readonly Label[] _labelPositionZs = new Label[2];
+    private readonly Label[] _labelNormalXs = new Label[2];
+    private readonly Label[] _labelNormalYs = new Label[2];
+    private readonly Label[] _labelNormalZs = new Label[2];
+    private readonly Button[] _buttonPicks = new Button[2];
+
     private Label _labelDistance = null!;
-    private Label _labelFov = null!;
-    private HSlider _sliderFov = null!;
+    private Label _labelAngle = null!;
+    private Label _labelDeltaX = null!;
+    private Label _labelDeltaY = null!;
+    private Label _labelDeltaZ = null!;
 
     #endregion
 
@@ -36,75 +45,62 @@ public partial class MeasurementUi : PanelContainer
 
     public override void _Ready()
     {
-        // シーン構造が固定なので、名前探索ではなく明示パスで関連ノードを解決する
-        _labelMode = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer3/LabelValueMode");
-        _labelProjection = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer/LabelValueProjection");
-        _buttonToggleProjection = GetNode<Button>("MarginContainer/VBoxContainer/ButtonToggleProjection");
-        _buttonFitAllIn = GetNode<Button>("MarginContainer/VBoxContainer/ButtonFitAllIn");
-        _buttonFitToSelection = GetNode<Button>("MarginContainer/VBoxContainer/ButtonFitToSelection");
-        _buttonRollLeft = GetNode<Button>("MarginContainer/VBoxContainer/HBoxContainer/ButtonRollLeft");
-        _buttonRollRight = GetNode<Button>("MarginContainer/VBoxContainer/HBoxContainer/ButtonRollRight");
-        _labelPositionX = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValuePositionX");
-        _labelPositionY = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValuePositionY");
-        _labelPositionZ = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValuePositionZ");
-        _labelRotationX = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueRotationX");
-        _labelRotationY = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueRotationY");
-        _labelRotationZ = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueRotationZ");
-        _labelSize = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueSize");
-        _labelDistance = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueDistance");
-        _labelFov = GetNode<Label>("MarginContainer/VBoxContainer/GridContainer2/LabelValueFov");
-        _sliderFov = GetNode<HSlider>("MarginContainer/VBoxContainer/HSliderFov");
+        // シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
+        Container[] container = new Container[2];
+        for (int i = 0; i < 2; i++)
+        {
+            container[i] = (Container)FindChild($"VBoxContainerPickResult{i + 1}");
+            _labelPositionXs[i] = (Label)container[i].FindChild($"LabelValuePositionX");
+            _labelPositionYs[i] = (Label)container[i].FindChild($"LabelValuePositionY");
+            _labelPositionZs[i] = (Label)container[i].FindChild($"LabelValuePositionZ");
+            _labelNormalXs[i] = (Label)container[i].FindChild($"LabelValueNormalX");
+            _labelNormalYs[i] = (Label)container[i].FindChild($"LabelValueNormalY");
+            _labelNormalZs[i] = (Label)container[i].FindChild($"LabelValueNormalZ");
+            _buttonPicks[i] = (Button)container[i].FindChild($"ButtonPick");
+        }
+        _labelDistance = (Label)FindChild("LabelValueDistance");
+        _labelAngle = (Label)FindChild("LabelValueAngle");
+        _labelDeltaX = (Label)FindChild("LabelValueDeltaX");
+        _labelDeltaY = (Label)FindChild("LabelValueDeltaY");
+        _labelDeltaZ = (Label)FindChild("LabelValueDeltaZ");
 
         // UIイベントの購読開始
-        _buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
-        _buttonFitAllIn.Pressed += OnButtonFitAllInPressed;
-        _buttonFitToSelection.Pressed += OnButtonFitToSelectionPressed;
-        _buttonRollLeft.Pressed += OnButtonRollLeftPressed;
-        _buttonRollRight.Pressed += OnButtonRollRightPressed;
-        _sliderFov.ValueChanged += OnSliderFovValueChanged;
+        _buttonPicks[0].Pressed += OnButtonPick1Pressed;
+        _buttonPicks[1].Pressed += OnButtonPick2Pressed;
 
         // イベントの購読開始
-        ModelEventHub.Instance.RootModelNotified += OnRootModelNotified;
-        ViewportEventHub.Instance.InputModeNotified += OnInputModeNotified;
-        ViewportEventHub.Instance.PositionNotified += OnPositionNotified;
-        ViewportEventHub.Instance.RotationNotified += OnRotationNotified;
-        ViewportEventHub.Instance.DistanceNotified += OnDistanceNotified;
-        ViewportEventHub.Instance.SizeNotified += OnSizeNotified;
-        ViewportEventHub.Instance.FovNotified += OnFovNotified;
-        ViewportEventHub.Instance.ProjectionTypeNotified += OnProjectionTypeNotified;
+        PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultsNotified += OnPickResultsNotified;
+
+        SetupMeasurementVisuals();
     }
 
     public override void _ExitTree()
     {
         // UIイベントの購読解除
-        _buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
-        _buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
-        _buttonFitToSelection.Pressed -= OnButtonFitToSelectionPressed;
-        _buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
-        _buttonRollRight.Pressed -= OnButtonRollRightPressed;
-        _sliderFov.ValueChanged -= OnSliderFovValueChanged;
+        _buttonPicks[0].Pressed -= OnButtonPick1Pressed;
+        _buttonPicks[1].Pressed -= OnButtonPick2Pressed;
 
         // イベントの購読解除
-        ViewportEventHub.Instance.InputModeNotified -= OnInputModeNotified;
-        ViewportEventHub.Instance.PositionNotified -= OnPositionNotified;
-        ViewportEventHub.Instance.RotationNotified -= OnRotationNotified;
-        ViewportEventHub.Instance.DistanceNotified -= OnDistanceNotified;
-        ViewportEventHub.Instance.SizeNotified -= OnSizeNotified;
-        ViewportEventHub.Instance.FovNotified -= OnFovNotified;
-        ViewportEventHub.Instance.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        PickEventHub.Instance.PickResultsNotified -= OnPickResultsNotified;
+
+        // 実行時生成した注釈ラベルを破棄
+        ClearAnnotationLabels();
+
+        if (_measurementVisualRoot != null && GodotObject.IsInstanceValid(_measurementVisualRoot))
+        {
+            _measurementVisualRoot.QueueFree();
+            _measurementVisualRoot = null;
+            _measurementLine = null;
+        }
     }
 
     public override void _Process(double delta)
     {
-        // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
-        if (_rootModel == null)
-        {
-            ModelEventHub.RequestNotifyRootModel();
-        }
-
         if (!_isInitialized)
         {
-            ViewportEventHub.RequestNotifyState();
+            PickEventHub.RequestNotifyPickHandlingMode();
         }
     }
 
@@ -113,157 +109,291 @@ public partial class MeasurementUi : PanelContainer
     #region Events
 
     /// <summary>
-    /// 投影切替ボタンのクリックイベントハンドラ、カメラの投影タイプ切替をリクエストする
+    /// ピックボタン1のクリックイベントハンドラ、ポイント1の選択をリクエストする
     /// </summary>
-    private void OnButtonToggleProjectionPressed()
+    private void OnButtonPick1Pressed()
     {
-        LogHub.Debug("MeasurementUi: toggle projection requested.");
-        ViewportEventHub.RequestToggleProjectionType();
+        LogHub.Debug("MeasurementUi: pick point 1 requested.");
+        PickEventHub.NotifyPickHandlingMode(PickHandlingMode.Measurement);
+        _pickingPointIndex = 1;
     }
 
     /// <summary>
-    /// Fit All In ボタンのクリックイベントハンドラ、カメラのフィット操作をリクエストする
+    /// ピックボタン2のクリックイベントハンドラ、ポイント2の選択をリクエストする
     /// </summary>
-    private void OnButtonFitAllInPressed()
+    private void OnButtonPick2Pressed()
     {
-        if (_rootModel == null)
-        {
-            GD.PushWarning("MeasurementUi: fit target model is missing.");
-            LogHub.Warn("MeasurementUi: fit-all requested but default target is missing.");
-            return;
-        }
-
-        LogHub.Debug($"MeasurementUi: fit-all requested. target='{_rootModel.Name}'");
-        ViewportEventHub.RequestFit(new[] { _rootModel }, true);
+        LogHub.Debug("MeasurementUi: pick point 2 requested.");
+        PickEventHub.NotifyPickHandlingMode(PickHandlingMode.Measurement);
+        _pickingPointIndex = 2;
     }
 
     /// <summary>
-    /// Fit To Selection ボタンのクリックイベントハンドラ、選択中ノードへのFitをリクエストする
+    /// 選択操作モードの通知を受け取るイベントハンドラ、測定モードの状態を更新する
     /// </summary>
-    private void OnButtonFitToSelectionPressed()
+    /// <param name="mode">通知された選択操作モード</param>
+    private void OnPickHandlingModeNotified(PickHandlingMode mode)
     {
-        AnyModel[] fitTargets = Selection.GetModelArray();
-        if (fitTargets.Length == 0)
-        {
-            LogHub.Debug("MeasurementUi: fit-to-selection skipped (no selected nodes).");
-            return;
-        }
-
-        LogHub.Debug($"MeasurementUi: fit-to-selection requested. targets={fitTargets.Length}");
-        ViewportEventHub.RequestFit(fitTargets, true);
-    }
-
-    /// <summary>
-    /// Roll Left ボタンのクリックイベントハンドラ、カメラの左ロール操作をリクエストする
-    /// </summary>
-    private void OnButtonRollLeftPressed()
-    {
-        Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-        LogHub.Debug("MeasurementUi: roll-left requested.");
-        ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
-    }
-
-    /// <summary>
-    /// Roll Right ボタンのクリックイベントハンドラ、カメラの右ロール操作をリクエストする
-    /// </summary>
-    private void OnButtonRollRightPressed()
-    {
-        Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-        LogHub.Debug("MeasurementUi: roll-right requested.");
-        ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
-    }
-
-    /// <summary>
-    /// RootModel が通知されたときに呼び出されるイベントハンドラ、キャッシュを更新する
-    /// </summary>
-    /// <param name="rootModel">通知されたルートモデル</param>
-    private void OnRootModelNotified(RootModel rootModel)
-    {
-        _rootModel = rootModel;
-    }
-
-    /// <summary>
-    /// FOVスライダーの値変更イベントハンドラ、カメラのFOV設定をリクエストする
-    /// </summary>
-    /// <param name="value">新しい FOV 値</param>
-    private void OnSliderFovValueChanged(double value)
-    {
-        LogHub.Debug($"MeasurementUi: set-fov requested. fov={value:F1}");
-        ViewportEventHub.RequestSetFov((float)value);
-    }
-
-    /// <summary>
-    /// ビューポートへの入力モードが通知されたときに呼び出されるイベントハンドラ
-    /// </summary>
-    /// <param name="mode">ビューポートの入力モード</param>
-    private void OnInputModeNotified(ViewportInputMode mode)
-    {
-        // ViewportEventHub.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
         _isInitialized = true;
+        _pickHandlingMode = mode;
 
-        _labelMode.Text = mode.ToString();
+        if (mode != PickHandlingMode.Measurement)
+        {
+            // 測定モード以外の通知が来た場合はピックインデックスをリセットする
+            _pickingPointIndex = 0;
+        }
     }
 
     /// <summary>
-    /// カメラの位置が通知されたときに呼び出されるイベントハンドラ
+    /// PickEventHub からの PickResultNotified シグナルを受け取るイベントハンドラ、選択結果を保持してUIを更新する
     /// </summary>
-    /// <param name="position">カメラの位置</param>
-    private void OnPositionNotified(Vector3 position)
+    private void OnPickResultsNotified(PickResult[] pickResults)
     {
-        Vector3 catiaPosition = CoordinateSystemUtility.GodotToCatia(position);
-        _labelPositionX.Text = (catiaPosition.X * 1000f).ToString("F3");
-        _labelPositionY.Text = (catiaPosition.Y * 1000f).ToString("F3");
-        _labelPositionZ.Text = (catiaPosition.Z * 1000f).ToString("F3");
+        // 測定モードではない場合は無視する
+        if (_pickHandlingMode != PickHandlingMode.Measurement)
+        {
+            return;
+        }
+
+        // 測定対象のポイントが明示されていない場合は無視する
+        if (_pickingPointIndex == 0)
+        {
+            return;
+        }
+
+        _points[_pickingPointIndex - 1] = pickResults[_pickingPointIndex - 1];
+        LogHub.Debug($"MeasurementUi: point {_pickingPointIndex} picked. Position: {_points[_pickingPointIndex - 1].Position}, Normal: {_points[_pickingPointIndex - 1].Normal}, Distance: {_points[_pickingPointIndex - 1].Distance}");
+
+        UpdateAnnotationLabel(_pickingPointIndex - 1, pickResults[_pickingPointIndex - 1]);
+        _pickingPointIndex = 0;
+
+
+        RefreshMeasurementLabels();
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// 測定ポイントのラベルと測定線を更新する
+    /// </summary>
+    private void RefreshMeasurementLabels()
+    {
+        for (int i = 0; i < _points.Length; i++)
+        {
+            UpdatePointLabels(i, _points[i]);
+        }
+
+        UpdateMeasurementLine();
+
+        if (_points[0].HasHit && _points[1].HasHit)
+        {
+            Vector3 point1 = CoordinateSystemUtility.GodotToCatia(_points[0].Position) * 1000.0f; // Convert meters to millimeters
+            Vector3 point2 = CoordinateSystemUtility.GodotToCatia(_points[1].Position) * 1000.0f; // Convert meters to millimeters
+            Vector3 delta = point2 - point1;
+
+            _labelDeltaX.Text = delta.X.ToString("F3");
+            _labelDeltaY.Text = delta.Y.ToString("F3");
+            _labelDeltaZ.Text = delta.Z.ToString("F3");
+            _labelDistance.Text = point1.DistanceTo(point2).ToString("F3");
+            float angle = ComputeNormalAngleDegrees(_points[0].Normal, _points[1].Normal);
+            _labelAngle.Text = float.IsNaN(angle) ? "-" : angle.ToString("F1");
+            return;
+        }
+
+        _labelDeltaX.Text = "-";
+        _labelDeltaY.Text = "-";
+        _labelDeltaZ.Text = "-";
+        _labelDistance.Text = "-";
+        _labelAngle.Text = "-";
+    }
+
+    private void UpdatePointLabels(int index, PickResult pickResult)
+    {
+        if (!pickResult.HasHit)
+        {
+            _labelPositionXs[index].Text = "-";
+            _labelPositionYs[index].Text = "-";
+            _labelPositionZs[index].Text = "-";
+            _labelNormalXs[index].Text = "-";
+            _labelNormalYs[index].Text = "-";
+            _labelNormalZs[index].Text = "-";
+            return;
+        }
+
+        Vector3 position = CoordinateSystemUtility.GodotToCatia(pickResult.Position) * 1000.0f; // Convert meters to millimeters
+        Vector3 normal = CoordinateSystemUtility.GodotToCatia(pickResult.Normal);
+
+        _labelPositionXs[index].Text = position.X.ToString("F3");
+        _labelPositionYs[index].Text = position.Y.ToString("F3");
+        _labelPositionZs[index].Text = position.Z.ToString("F3");
+        _labelNormalXs[index].Text = normal.X.ToString("F3");
+        _labelNormalYs[index].Text = normal.Y.ToString("F3");
+        _labelNormalZs[index].Text = normal.Z.ToString("F3");
     }
 
     /// <summary>
-    /// カメラの回転が通知されたときに呼び出されるイベントハンドラ
+    /// 2つの法線ベクトルのなす角度を計算する
     /// </summary>
-    /// <param name="rotation">カメラの回転を表すクォータニオン</param>
-    private void OnRotationNotified(Quaternion rotation)
+    /// <param name="normal1">1つ目の法線ベクトル</param>
+    /// <param name="normal2">2つ目の法線ベクトル</param>
+    /// <returns>2つの法線ベクトルのなす角度（度単位）</returns>
+    private float ComputeNormalAngleDegrees(Vector3 normal1, Vector3 normal2)
     {
-        Quaternion catiaRotation = CoordinateSystemUtility.GodotToCatia(rotation);
-        Vector3 rotationDegrees = catiaRotation.GetEuler() * (180f / Mathf.Pi);
-        _labelRotationX.Text = rotationDegrees.X.ToString("F3");
-        _labelRotationY.Text = rotationDegrees.Y.ToString("F3");
-        _labelRotationZ.Text = rotationDegrees.Z.ToString("F3");
+        if (normal1.LengthSquared() <= Mathf.Epsilon || normal2.LengthSquared() <= Mathf.Epsilon)
+        {
+            return float.NaN;
+        }
+
+        float dot = Mathf.Clamp(normal1.Normalized().Dot(normal2.Normalized()), -1.0f, 1.0f);
+        return Mathf.RadToDeg(Mathf.Acos(dot));
     }
 
     /// <summary>
-    /// カメラの距離が通知されたときに呼び出されるイベントハンドラ
+    /// 指定したインデックスの測定ポイントに注釈ラベルを配置する
     /// </summary>
-    /// <param name="distance">カメラの距離</param>
-    private void OnDistanceNotified(float distance)
+    /// <param name="index">測定ポイントのインデックス</param>
+    /// <param name="pickResult">ピック結果</param>
+    private void UpdateAnnotationLabel(int index, PickResult pickResult)
     {
-        _labelDistance.Text = (distance * 1000f).ToString("F3");
+        RemoveAnnotationLabel(index);
+
+        if (!pickResult.HasHit)
+        {
+            return;
+        }
+
+        if (_annotationLabel == null)
+        {
+            LogHub.Warn("MeasurementUi: annotation label scene is not loaded.");
+            return;
+        }
+
+        if (pickResult.Collider == null || !GodotObject.IsInstanceValid(pickResult.Collider))
+        {
+            LogHub.Warn("MeasurementUi: collider is invalid, skip annotation label placement.");
+            return;
+        }
+
+        Node3D annotation = _annotationLabel.Instantiate<Node3D>();
+        annotation.Name = $"MeasurementPoint{index + 1}";
+        pickResult.Collider.AddChild(annotation);
+
+        annotation.GlobalPosition = pickResult.Position;
+        if (pickResult.Normal.LengthSquared() > Mathf.Epsilon)
+        {
+            // AnnotationLabel は +Z を前方として作成されているため useModelFront=true で法線方向へ向ける
+            annotation.LookAt(annotation.GlobalPosition + pickResult.Normal.Normalized(), Vector3.Up, true);
+        }
+
+        SetAnnotationText(annotation, $"P{index + 1}");
+        _annotationInstances[index] = annotation;
     }
 
     /// <summary>
-    /// カメラのサイズが通知されたときに呼び出されるイベントハンドラ
+    /// 指定した注釈ラベルにテキストを設定する
     /// </summary>
-    /// <param name="size">カメラのサイズ</param>
-    private void OnSizeNotified(float size)
+    /// <param name="annotation">注釈ラベルのノード</param>
+    /// <param name="text">設定するテキスト</param>
+    private static void SetAnnotationText(Node3D annotation, string text)
     {
-        _labelSize.Text = (size * 1000f).ToString("F3");
+        if (annotation.FindChild("Label3DLeft", true, false) is Label3D left)
+        {
+            left.Text = text;
+        }
+
+        if (annotation.FindChild("Label3DRight", true, false) is Label3D right)
+        {
+            right.Text = text;
+        }
     }
 
     /// <summary>
-    /// カメラのFOVが通知されたときに呼び出されるイベントハンドラ
+    /// 指定したインデックスの注釈ラベルを破棄する
     /// </summary>
-    /// <param name="fov">カメラのFOV</param>
-    private void OnFovNotified(float fov)
+    /// <param name="index">破棄する注釈ラベルのインデックス</param>
+    private void RemoveAnnotationLabel(int index)
     {
-        _labelFov.Text = fov.ToString("F1");
-        _sliderFov.Value = fov;
+        Node3D annotation = _annotationInstances[index];
+        if (annotation != null && GodotObject.IsInstanceValid(annotation))
+        {
+            annotation.QueueFree();
+        }
+
+        _annotationInstances[index] = null;
     }
 
     /// <summary>
-    /// カメラの投影タイプが通知されたときに呼び出されるイベントハンドラ
+    /// すべての注釈ラベルを破棄する
     /// </summary>
-    /// <param name="type">カメラの投影タイプ</param>
-    private void OnProjectionTypeNotified(Camera3D.ProjectionType type)
+    private void ClearAnnotationLabels()
     {
-        _labelProjection.Text = type.ToString();
+        for (int i = 0; i < _annotationInstances.Length; i++)
+        {
+            RemoveAnnotationLabel(i);
+        }
+    }
+
+    /// <summary>
+    /// 測定ビジュアルをセットアップする
+    /// </summary>
+    private void SetupMeasurementVisuals()
+    {
+        Node sceneRoot = GetTree()?.CurrentScene;
+        if (sceneRoot == null)
+        {
+            LogHub.Warn("MeasurementUi: current scene is null, skip measurement visual setup.");
+            return;
+        }
+
+        _measurementVisualRoot = new Node3D
+        {
+            Name = "MeasurementVisualRoot"
+        };
+        sceneRoot.AddChild(_measurementVisualRoot);
+
+        _measurementLine = new MeshInstance3D
+        {
+            Name = "MeasurementLine",
+            Mesh = _measurementLineMesh,
+            CastShadow = GeometryInstance3D.ShadowCastingSetting.Off
+        };
+
+        _measurementLine.MaterialOverride = new StandardMaterial3D
+        {
+            ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            AlbedoColor = new Color(0.98f, 0.82f, 0.12f, 1.0f)
+        };
+
+        _measurementVisualRoot.AddChild(_measurementLine);
+        _measurementLine.Visible = false;
+    }
+
+    /// <summary>
+    /// 測定線を更新する
+    /// </summary>
+    private void UpdateMeasurementLine()
+    {
+        if (_measurementLine == null || !GodotObject.IsInstanceValid(_measurementLine))
+        {
+            return;
+        }
+
+        _measurementLineMesh.ClearSurfaces();
+
+        if (!(_points[0].HasHit && _points[1].HasHit))
+        {
+            _measurementLine.Visible = false;
+            return;
+        }
+
+        _measurementLineMesh.SurfaceBegin(Mesh.PrimitiveType.Lines);
+        _measurementLineMesh.SurfaceAddVertex(_points[0].Position);
+        _measurementLineMesh.SurfaceAddVertex(_points[1].Position);
+        _measurementLineMesh.SurfaceEnd();
+
+        _measurementLine.Visible = true;
     }
 
     #endregion

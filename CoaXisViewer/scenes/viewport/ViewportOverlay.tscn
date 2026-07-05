@@ -82,24 +82,24 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="SelectionRect" type="Control" parent="." unique_id=1573564257]
+[node name="PickRect" type="Control" parent="." unique_id=1573564257]
 visible = false
 layout_mode = 1
 anchors_preset = 0
 mouse_filter = 2
 
-[node name="LineHorizontal1" type="Line2D" parent="SelectionRect" unique_id=2102222506]
+[node name="LineHorizontal1" type="Line2D" parent="PickRect" unique_id=2102222506]
 width = 1.0
 default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
 
-[node name="LineHorizontal2" type="Line2D" parent="SelectionRect" unique_id=1090205538]
+[node name="LineHorizontal2" type="Line2D" parent="PickRect" unique_id=1090205538]
 width = 1.0
 default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
 
-[node name="LineVertical1" type="Line2D" parent="SelectionRect" unique_id=1237095732]
+[node name="LineVertical1" type="Line2D" parent="PickRect" unique_id=1237095732]
 width = 1.0
 default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)
 
-[node name="LineVertical2" type="Line2D" parent="SelectionRect" unique_id=617276273]
+[node name="LineVertical2" type="Line2D" parent="PickRect" unique_id=617276273]
 width = 1.0
 default_color = Color(0.90588236, 0.69411767, 0.9647059, 1)

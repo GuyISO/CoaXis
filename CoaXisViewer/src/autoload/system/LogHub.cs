@@ -6,7 +6,7 @@ using System.IO;
 /// ログ関連のイベント集約ハブで AutoLoad ノードとしてシーンツリーに配置し、ログ通知と出力を一元管理する
 /// Autoloadに登録してシングルトン参照することを前提としている
 /// </summary>
-public partial class LogHub : Node
+public partial class LogHub : AutoloadNodeBase<LogHub>
 {
     #region Fields
 
@@ -18,18 +18,7 @@ public partial class LogHub : Node
 
     #endregion
 
-    #region Properties
-
-    public static LogHub Instance { get; private set; }
-
-    #endregion
-
     #region Lifecycle
-
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
 
     public override void _Ready()
     {
@@ -42,7 +31,8 @@ public partial class LogHub : Node
     {
         _enableFileLog = false;
         _fileWriter?.Dispose();
-        Instance = null;
+
+        base._ExitTree();
     }
 
     #endregion

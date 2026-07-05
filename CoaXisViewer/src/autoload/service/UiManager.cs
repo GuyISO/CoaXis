@@ -5,30 +5,15 @@ using System.Collections.Generic;
 /// <summary>
 /// UI管理用のシングルトンクラス、AutoLoadとしてプロジェクトに登録して使用する
 /// </summary>
-public partial class UiManager : Node
+public partial class UiManager : AutoloadNodeBase<UiManager>
 {
     #region Fields
 
+    // TODO: UiWindowのシーンパスをうまく管理する
     private static PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/ui/UiWindow.tscn"); // UiWindowのシーンパス
     private static readonly Dictionary<string, UiWindow> _windowCache = new(); // UIのキャッシュ
 
     #endregion
-
-    #region Properties
-
-    public static UiManager Instance { get; private set; }
-
-    #endregion
-
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
-
-    public override void _ExitTree()
-    {
-        Instance = null;
-    }
 
     #region Public Methods
 

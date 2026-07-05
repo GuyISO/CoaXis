@@ -24,13 +24,8 @@ using System.Text.Json;
 /// 実行ファイル近傍に設定ファイルを置くことで、ビルド後の配布物でも
 /// 再ビルド不要で設定変更できる運用を想定している。
 /// </summary>
-public partial class SettingsService : Node
+public partial class SettingsService : AutoloadNodeBase<SettingsService>
 {
-    #region Properties
-
-    public static SettingsService Instance { get; private set; }
-
-    #endregion
 
     /// <summary>
     /// 現在有効な設定値。
@@ -60,27 +55,11 @@ public partial class SettingsService : Node
     };
 
     /// <summary>
-    /// シーンツリー参加時にシングルトン参照を確立する。
-    /// </summary>
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
-
-    /// <summary>
     /// AutoLoad 初期化時に設定を読み込む。
     /// </summary>
     public override void _Ready()
     {
         Reload();
-    }
-
-    /// <summary>
-    /// シーンツリー離脱時にシングルトン参照を解放する。
-    /// </summary>
-    public override void _ExitTree()
-    {
-        Instance = null;
     }
 
     /// <summary>

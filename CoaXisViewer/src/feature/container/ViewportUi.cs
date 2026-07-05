@@ -65,7 +65,7 @@ public partial class ViewportUi : PanelContainer
 
         // イベントの購読開始
         ModelEventHub.Instance.RootModelNotified += OnRootModelNotified;
-        ViewportEventHub.Instance.InputModeNotified += OnInputModeNotified;
+        ViewportEventHub.Instance.InteractionModeNotified += OnInteractionModeNotified;
         ViewportEventHub.Instance.PositionNotified += OnPositionNotified;
         ViewportEventHub.Instance.RotationNotified += OnRotationNotified;
         ViewportEventHub.Instance.DistanceNotified += OnDistanceNotified;
@@ -85,7 +85,8 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
         // イベントの購読解除
-        ViewportEventHub.Instance.InputModeNotified -= OnInputModeNotified;
+        ModelEventHub.Instance.RootModelNotified -= OnRootModelNotified;
+        ViewportEventHub.Instance.InteractionModeNotified -= OnInteractionModeNotified;
         ViewportEventHub.Instance.PositionNotified -= OnPositionNotified;
         ViewportEventHub.Instance.RotationNotified -= OnRotationNotified;
         ViewportEventHub.Instance.DistanceNotified -= OnDistanceNotified;
@@ -193,10 +194,10 @@ public partial class ViewportUi : PanelContainer
     }
 
     /// <summary>
-    /// ビューポートへの入力モードが通知されたときに呼び出されるイベントハンドラ
+    /// ビューポートの操作モードが通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="mode">ビューポートの入力モード</param>
-    private void OnInputModeNotified(ViewportInputMode mode)
+    /// <param name="mode">ビューポートの操作モード</param>
+    private void OnInteractionModeNotified(ViewportInteractionMode mode)
     {
         // ViewportEventHub.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
         _isInitialized = true;

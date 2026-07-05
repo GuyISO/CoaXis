@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 
 /// <summary>
@@ -13,7 +13,7 @@ public enum LogLevel
     /// <summary>警告を表す</summary>
     Warn,
     /// <summary>エラーを表す</summary>
-    Error
+    Error,
 }
 
 /// <summary>
@@ -26,7 +26,7 @@ public enum SpaceMode
     /// <summary>注視点基準の座標系</summary>
     FocalPoint,
     /// <summary>カメラ基準の座標系</summary>
-    Camera
+    Camera,
 }
 
 /// <summary>
@@ -51,7 +51,7 @@ public enum ViewportLayer
 /// <summary>
 /// Viewportの操作モードを表す列挙型
 /// </summary>
-public enum ViewportInputMode
+public enum ViewportInteractionMode
 {
     /// <summary>操作待機状態</summary>
     None,
@@ -64,5 +64,18 @@ public enum ViewportInputMode
     /// <summary>カメラのズーム操作</summary>
     CameraZoom,
     /// <summary>選択矩形操作</summary>
-    SelectionRect
+    PickRect,
+}
+
+/// <summary>
+/// 選択されたモデルの操作モードを表す列挙型
+/// </summary>
+public enum PickHandlingMode
+{
+    /// <summary>選択操作モード</summary>
+    Selection,
+    /// <summary>測定操作モード</summary>
+    Measurement,
+    /// <summary>面に垂直操作モード</summary>
+    NormalToFace,
 }

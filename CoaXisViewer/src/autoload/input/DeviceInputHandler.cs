@@ -5,7 +5,7 @@ using System;
 /// ユーザーのキーボードやコントローラー入力を処理するノード
 /// Autoload に登録され常にシーンツリーに存在し、シングルトン参照される
 /// </summary>
-public partial class DeviceInputHandler : Node
+public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
 {
     #region Fields
 
@@ -19,23 +19,7 @@ public partial class DeviceInputHandler : Node
 
     #endregion
 
-    #region Properties
-
-    public static DeviceInputHandler Instance { get; private set; }
-
-    #endregion
-
     #region Lifecycle
-
-    public override void _EnterTree()
-    {
-        Instance = this;
-    }
-
-    public override void _ExitTree()
-    {
-        Instance = null;
-    }
 
     public override void _Process(double delta)
     {
@@ -44,7 +28,7 @@ public partial class DeviceInputHandler : Node
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            ModelEventHub.RequestSetMultiSelectMode(_isMultiSelectMode);
+            ModelEventHub.RequestSetMultiSelectionMode(_isMultiSelectMode);
         }
 
         if (Input.IsActionJustPressed("load"))

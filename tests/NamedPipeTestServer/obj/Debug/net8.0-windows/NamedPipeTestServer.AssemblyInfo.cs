@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("NamedPipeTestServer")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+136c7630bb996a5e12c658f631390a5935ab0d4c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+2b84a16cb97f219ee60459117c6a5e8864df91d2")]
 [assembly: System.Reflection.AssemblyProductAttribute("NamedPipeTestServer")]
 [assembly: System.Reflection.AssemblyTitleAttribute("NamedPipeTestServer")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
