@@ -1,0 +1,123 @@
+[gd_scene format=3 uid="uid://dkq5ovq6ymdm"]
+
+[ext_resource type="PackedScene" uid="uid://b85xs047w8kh8" path="res://scenes/Ui/Button/ShowContainerButton.tscn" id="1_0wdie"]
+[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/Ui/Container/MessageUi.tscn" id="2_y2duu"]
+[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/Ui/Container/ViewportUi.tscn" id="3_6a6xr"]
+[ext_resource type="PackedScene" uid="uid://cmde2bylb3cu1" path="res://scenes/Ui/Container/MeasurementUi.tscn" id="4_g4gva"]
+[ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/Viewport/ViewportContainer.tscn" id="5_y2duu"]
+[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://scenes/Ui/FpsUi.cs" id="6_5i13y"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/Ui/HierarchyTree.cs" id="6_6a6xr"]
+
+[node name="Canvas" type="Control" unique_id=1312684224]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=568549716]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopBar" type="HBoxContainer" parent="VBoxContainer" unique_id=338852457]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="ButtonShowMessageUi" parent="VBoxContainer/TopBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "システムメッセージパネルを表示します"
+text = "Message"
+_container = ExtResource("2_y2duu")
+
+[node name="ButtonShowViewportUi" parent="VBoxContainer/TopBar" unique_id=176539602 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "ビュー情報パネルを表示します"
+text = "Viewport"
+_container = ExtResource("3_6a6xr")
+
+[node name="ButtonShowMeasurementUi" parent="VBoxContainer/TopBar" unique_id=2090190786 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "計測パネルを表示します"
+text = "Measurement"
+_container = ExtResource("4_g4gva")
+
+[node name="Panel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ButtonLoad" type="Button" parent="VBoxContainer/TopBar" unique_id=860568986]
+visible = false
+layout_mode = 2
+tooltip_text = "指定したパスからモデルをロードします"
+theme_override_font_sizes/font_size = 24
+text = "LoadModel"
+
+[node name="TextGlbPath" type="TextEdit" parent="VBoxContainer/TopBar" unique_id=1295229687]
+visible = false
+custom_minimum_size = Vector2(600, 0)
+layout_mode = 2
+tooltip_text = "glbファイルのパスを指定してください"
+theme_override_font_sizes/font_size = 24
+text = "res://assets/models/car.glb"
+
+[node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=536581596]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=1440387980]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/LeftBar" unique_id=1507152929]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Screen" type="Control" parent="VBoxContainer/HBoxContainer" unique_id=1110778621]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="ViewportContainer" parent="VBoxContainer/HBoxContainer/Screen" unique_id=999195544 instance=ExtResource("5_y2duu")]
+layout_mode = 1
+
+[node name="HierarchyTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen" unique_id=119731503]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 500.0
+grow_vertical = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+columns = 2
+select_mode = 2
+script = ExtResource("6_6a6xr")
+
+[node name="RightBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=617452991]
+custom_minimum_size = Vector2(48, 0)
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1245432863]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
+custom_minimum_size = Vector2(0, 48)
+layout_mode = 2
+
+[node name="Panel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="LabelFps" type="Label" parent="VBoxContainer/BottomBar" unique_id=886535964]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 2
+script = ExtResource("6_5i13y")

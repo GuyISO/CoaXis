@@ -1,0 +1,35 @@
+[gd_scene format=3 uid="uid://crt7sb6bahnhp"]
+
+[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://scenes/Viewport/ViewportInteractionHandler.cs" id="1_a2s2r"]
+[ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://scenes/Viewport/CameraRig.cs" id="2_woemn"]
+[ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/Viewport/Overlay/ViewportOverlay.tscn" id="3_uud5i"]
+[ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/Viewport/AxisNavigator/AxisNavigator.tscn" id="4_o0c0q"]
+
+[node name="ViewportContainer" type="SubViewportContainer" unique_id=999195544]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+stretch = true
+
+[node name="Viewport" type="SubViewport" parent="." unique_id=1297826918]
+handle_input_locally = false
+size = Vector2i(1920, 1080)
+render_target_update_mode = 4
+script = ExtResource("1_a2s2r")
+
+[node name="FocalPoint" type="Node3D" parent="Viewport" unique_id=1474385631]
+script = ExtResource("2_woemn")
+
+[node name="Camera3D" type="Camera3D" parent="Viewport/FocalPoint" unique_id=833457769]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
+cull_mask = 1048573
+current = true
+fov = 35.0
+near = 0.001
+
+[node name="ViewportOverlay" parent="Viewport" unique_id=440684067 instance=ExtResource("3_uud5i")]
+
+[node name="AxisNavigator" parent="Viewport" unique_id=1990463361 instance=ExtResource("4_o0c0q")]

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cfpvvau2incc4"]
 
-[ext_resource type="Script" uid="uid://stjlfvm4o4dh" path="res://src/feature/container/MessageUi.cs" id="1_ox1gj"]
+[ext_resource type="Script" uid="uid://stjlfvm4o4dh" path="res://scenes/Ui/Container/MessageUi.cs" id="1_ox1gj"]
 
 [node name="Message" type="PanelContainer" unique_id=115086409]
 anchors_preset = 15

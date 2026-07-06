@@ -1,29 +1,28 @@
 [gd_scene format=3 uid="uid://dik7rronncw1v"]
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_j7vvt"]
-albedo_color = Color(0.34200642, 0.6036752, 0, 1)
-emission_enabled = true
-emission = Color(0.37716255, 0.37716258, 0.37716255, 1)
+[ext_resource type="Script" uid="uid://b7t5ab3b62avf" path="res://scenes/Part/PointerLabel.cs" id="1_3ds83"]
 
 [sub_resource type="PrismMesh" id="PrismMesh_chofk"]
-material = SubResource("StandardMaterial3D_j7vvt")
 
-[node name="AnnotationLabel" type="Node3D" unique_id=328699343]
+[node name="PointerLabel" type="Node3D" unique_id=328699343]
+script = ExtResource("1_3ds83")
 
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=1341280247]
+[node name="Components" type="Node3D" parent="." unique_id=249597650]
+
+[node name="Pointer" type="MeshInstance3D" parent="Components" unique_id=1341280247]
 transform = Transform3D(1.9106854e-16, 4.371139e-09, -0.01, 0.1, -4.371139e-09, 0, -4.371139e-09, -0.1, -4.3711387e-10, 0, 0, 0.05)
 mesh = SubResource("PrismMesh_chofk")
 
-[node name="Labels" type="Node3D" parent="." unique_id=429373956]
+[node name="Labels" type="Node3D" parent="Components" unique_id=429373956]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.15)
 
-[node name="Label3DLeft" type="Label3D" parent="Labels" unique_id=2117762440]
+[node name="LabelLeft" type="Label3D" parent="Components/Labels" unique_id=2117762440]
 transform = Transform3D(4.371139e-08, -3.821371e-15, 1, -8.742278e-08, -1, 0, 1, -8.742278e-08, -4.371139e-08, 0, 0, 0)
 double_sided = false
 text = "Text"
 horizontal_alignment = 0
 
-[node name="Label3DRight" type="Label3D" parent="Labels" unique_id=2112316871]
+[node name="LabelRight" type="Label3D" parent="Components/Labels" unique_id=2112316871]
 transform = Transform3D(-4.371139e-08, 0, -1, 0, 1, 0, 1, 0, -4.371139e-08, 0, 0, 0)
 double_sided = false
 text = "Text"

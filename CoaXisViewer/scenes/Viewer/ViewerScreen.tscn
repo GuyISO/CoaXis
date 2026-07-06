@@ -1,0 +1,30 @@
+[gd_scene format=3 uid="uid://uo4vh7cwjcs8"]
+
+[ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/Viewport/ViewportContainer.tscn" id="1_f1a0t"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/Ui/HierarchyTree.cs" id="2_hlj6n"]
+
+[node name="ViewerScreen" type="Control" unique_id=1110778621]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
+[node name="SubViewportContainer" parent="." unique_id=999195544 instance=ExtResource("1_f1a0t")]
+layout_mode = 1
+
+[node name="HierarchyTree" type="Tree" parent="." unique_id=119731503]
+custom_minimum_size = Vector2(500, 0)
+layout_mode = 1
+anchors_preset = 9
+anchor_bottom = 1.0
+offset_right = 500.0
+grow_vertical = 2
+size_flags_horizontal = 2
+size_flags_vertical = 3
+columns = 2
+select_mode = 2
+script = ExtResource("2_hlj6n")

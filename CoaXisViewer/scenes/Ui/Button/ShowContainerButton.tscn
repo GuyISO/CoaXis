@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://b85xs047w8kh8"]
 
-[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/feature/ui/ShowContainerButton.cs" id="1_nujh8"]
+[ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://scenes/Ui/Button/ShowContainerButton.cs" id="1_nujh8"]
 
 [node name="ButtonShowControl" type="Button" unique_id=1859494691]
 tooltip_text = "ToolTip"

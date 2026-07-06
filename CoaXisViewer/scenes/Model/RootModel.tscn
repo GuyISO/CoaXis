@@ -1,0 +1,59 @@
+[gd_scene format=3 uid="uid://n15owgw2vkc3"]
+
+[ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://scenes/Model/RootModel.cs" id="1_1011c"]
+[ext_resource type="Script" uid="uid://co6erwykahhud" path="res://scenes/Model/AnyModel.cs" id="2_xumao"]
+[ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="3_s773y"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_cvmbd"]
+
+[sub_resource type="BoxShape3D" id="BoxShape3D_5x7yu"]
+
+[sub_resource type="SphereMesh" id="SphereMesh_3p2gp"]
+
+[sub_resource type="SphereShape3D" id="SphereShape3D_f2lfd"]
+
+[sub_resource type="CapsuleMesh" id="CapsuleMesh_qmy6f"]
+
+[sub_resource type="CapsuleShape3D" id="CapsuleShape3D_ft6cd"]
+
+[node name="RootModel" type="Node3D" unique_id=128872870]
+script = ExtResource("1_1011c")
+
+[node name="Cube" type="Node3D" parent="." unique_id=1695975072]
+script = ExtResource("2_xumao")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Cube" unique_id=1445737658]
+material_override = ExtResource("3_s773y")
+transparency = 0.5
+mesh = SubResource("BoxMesh_cvmbd")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Cube" unique_id=1154494415]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Cube/StaticBody3D" unique_id=1097236262]
+shape = SubResource("BoxShape3D_5x7yu")
+
+[node name="Sphere" type="Node3D" parent="." unique_id=1529986332]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.5, 0, 0)
+script = ExtResource("2_xumao")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Sphere" unique_id=1648040863]
+transparency = 0.5
+mesh = SubResource("SphereMesh_3p2gp")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Sphere" unique_id=1907131239]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Sphere/StaticBody3D" unique_id=1122654125]
+shape = SubResource("SphereShape3D_f2lfd")
+
+[node name="Capsule" type="Node3D" parent="." unique_id=1485411686]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 1.5, 0, 0)
+script = ExtResource("2_xumao")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Capsule" unique_id=961629406]
+transparency = 0.5
+mesh = SubResource("CapsuleMesh_qmy6f")
+
+[node name="StaticBody3D" type="StaticBody3D" parent="Capsule" unique_id=446858677]
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Capsule/StaticBody3D" unique_id=1606085061]
+shape = SubResource("CapsuleShape3D_ft6cd")

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cmde2bylb3cu1"]
 
-[ext_resource type="Script" uid="uid://b3fjt6iecg5gv" path="res://src/feature/container/MeasurementUi.cs" id="1_1r4nc"]
+[ext_resource type="Script" uid="uid://b3fjt6iecg5gv" path="res://scenes/Ui/Container/MeasurementUi.cs" id="1_1r4nc"]
 
 [node name="Measurement" type="PanelContainer" unique_id=1128003110]
 custom_minimum_size = Vector2(280, 0)

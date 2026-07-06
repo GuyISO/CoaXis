@@ -10,7 +10,7 @@ public partial class UiManager : AutoloadNodeBase<UiManager>
     #region Fields
 
     // TODO: UiWindowのシーンパスをうまく管理する
-    private static PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/ui/UiWindow.tscn"); // UiWindowのシーンパス
+    private static PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/Ui/Window/UiWindow.tscn"); // UiWindowのシーンパス
     private static readonly Dictionary<string, UiWindow> _windowCache = new(); // UIのキャッシュ
 
     #endregion

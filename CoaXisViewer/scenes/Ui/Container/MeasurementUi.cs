@@ -14,8 +14,8 @@ public partial class MeasurementUi : PanelContainer
     private int _pickingPointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
 
     // 測定位置のラベルを表示するための PackedScene
-    private PackedScene _annotationLabel = ResourceLoader.Load<PackedScene>("res://scenes/AnnotationLabel.tscn")!;
-    private readonly Node3D[] _annotationInstances = new Node3D[2];
+    private PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/Part/PointerLabel.tscn")!;
+    private readonly PointerLabel[] _pointerLabelInstances = new PointerLabel[2];
     private readonly ImmediateMesh _measurementLineMesh = new ImmediateMesh();
 
     // ピック結果の保持
@@ -85,8 +85,8 @@ public partial class MeasurementUi : PanelContainer
         PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
         PickEventHub.Instance.PickResultNotified -= OnPickResultNotified;
 
-        // 実行時生成した注釈ラベルを破棄
-        ClearAnnotationLabels();
+        // 実行時生成したポインタラベルを破棄
+        ClearPointerLabels();
 
         if (_measurementVisualRoot != null && GodotObject.IsInstanceValid(_measurementVisualRoot))
         {
@@ -171,7 +171,7 @@ public partial class MeasurementUi : PanelContainer
         _points[index] = pickResult;
         LogHub.Debug($"MeasurementUi: point {_pickingPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
 
-        UpdateAnnotationLabel(index, pickResult);
+        UpdatePointerLabel(index, pickResult);
         RefreshMeasurementLabels();
     }
 
@@ -259,40 +259,40 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     /// <param name="index">測定ポイントのインデックス</param>
     /// <param name="pickResult">ピック結果</param>
-    private void UpdateAnnotationLabel(int index, PickResult pickResult)
+    private void UpdatePointerLabel(int index, PickResult pickResult)
     {
-        RemoveAnnotationLabel(index);
+        RemovePointerLabel(index);
 
         if (!pickResult.HasHit)
         {
             return;
         }
 
-        if (_annotationLabel == null)
+        if (_pointerLabel == null)
         {
-            LogHub.Warn("MeasurementUi: annotation label scene is not loaded.");
+            LogHub.Warn("MeasurementUi: pointer label scene is not loaded.");
             return;
         }
 
         if (pickResult.Collider == null || !GodotObject.IsInstanceValid(pickResult.Collider))
         {
-            LogHub.Warn("MeasurementUi: collider is invalid, skip annotation label placement.");
+            LogHub.Warn("MeasurementUi: collider is invalid, skip pointer label placement.");
             return;
         }
 
-        Node3D annotation = _annotationLabel.Instantiate<Node3D>();
-        annotation.Name = $"MeasurementPoint{index + 1}";
-        pickResult.Collider.AddChild(annotation);
+        PointerLabel pointerLabel = _pointerLabel.Instantiate<PointerLabel>();
+        pointerLabel.Name = $"MeasurementPoint{index + 1}";
+        pickResult.Collider.AddChild(pointerLabel);
 
-        annotation.GlobalPosition = pickResult.Position;
+        pointerLabel.GlobalPosition = pickResult.Position;
         if (pickResult.Normal.LengthSquared() > Mathf.Epsilon)
         {
-            // AnnotationLabel は +Z を前方として作成されているため useModelFront=true で法線方向へ向ける
-            annotation.LookAt(annotation.GlobalPosition + pickResult.Normal.Normalized(), Vector3.Up, true);
+            // PointerLabel は +Z を前方として作成されているため useModelFront=true で法線方向へ向ける
+            pointerLabel.LookAt(pointerLabel.GlobalPosition + pickResult.Normal.Normalized(), Vector3.Up, true);
         }
 
-        SetAnnotationText(annotation, $"P{index + 1}");
-        _annotationInstances[index] = annotation;
+        pointerLabel.SetText($"Point{index + 1}");
+        _pointerLabelInstances[index] = pointerLabel;
     }
 
     /// <summary>
@@ -314,28 +314,28 @@ public partial class MeasurementUi : PanelContainer
     }
 
     /// <summary>
-    /// 指定したインデックスの注釈ラベルを破棄する
+    /// 指定したインデックスのポインタラベルを破棄する
     /// </summary>
-    /// <param name="index">破棄する注釈ラベルのインデックス</param>
-    private void RemoveAnnotationLabel(int index)
+    /// <param name="index">破棄するポインタラベルのインデックス</param>
+    private void RemovePointerLabel(int index)
     {
-        Node3D annotation = _annotationInstances[index];
-        if (annotation != null && GodotObject.IsInstanceValid(annotation))
+        PointerLabel pointerLabel = _pointerLabelInstances[index];
+        if (pointerLabel != null && GodotObject.IsInstanceValid(pointerLabel))
         {
-            annotation.QueueFree();
+            pointerLabel.QueueFree();
         }
 
-        _annotationInstances[index] = null;
+        _pointerLabelInstances[index] = null;
     }
 
     /// <summary>
-    /// すべての注釈ラベルを破棄する
+    /// すべてのポインタラベルを破棄する
     /// </summary>
-    private void ClearAnnotationLabels()
+    private void ClearPointerLabels()
     {
-        for (int i = 0; i < _annotationInstances.Length; i++)
+        for (int i = 0; i < _pointerLabelInstances.Length; i++)
         {
-            RemoveAnnotationLabel(i);
+            RemovePointerLabel(i);
         }
     }
 
