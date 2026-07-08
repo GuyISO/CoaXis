@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 using System.Linq;
 using System.Collections.Generic;
@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する Autoload ノード
 /// </summary>
-public partial class Selection : AutoloadNodeBase<Selection>
+public partial class Selection : SingletonNodeBase<Selection>
 {
     #region Fields
 
@@ -22,21 +22,21 @@ public partial class Selection : AutoloadNodeBase<Selection>
     public override void _Ready()
     {
         // イベントの購読開始
-        ModelEventHub.Instance.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
-        ModelEventHub.Instance.ClearSelectionRequested += OnClearSelectionRequested;
-        PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        PickEventHub.Instance.PickResultNotified += OnPickResultNotified;
-        PickEventHub.Instance.PickResultsNotified += OnPickResultsNotified;
+        Application.Instance.Events.Model.Hub.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
+        Application.Instance.Events.Model.Hub.ClearSelectionRequested += OnClearSelectionRequested;
+        Application.Instance.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Instance.Events.Pick.Hub.PickResultNotified += OnPickResultNotified;
+        Application.Instance.Events.Pick.Hub.PickResultsNotified += OnPickResultsNotified;
     }
 
     public override void _ExitTree()
     {
         // イベントの購読解除
-        ModelEventHub.Instance.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
-        ModelEventHub.Instance.ClearSelectionRequested -= OnClearSelectionRequested;
-        PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        PickEventHub.Instance.PickResultNotified -= OnPickResultNotified;
-        PickEventHub.Instance.PickResultsNotified -= OnPickResultsNotified;
+        Application.Instance.Events.Model.Hub.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
+        Application.Instance.Events.Model.Hub.ClearSelectionRequested -= OnClearSelectionRequested;
+        Application.Instance.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Instance.Events.Pick.Hub.PickResultNotified -= OnPickResultNotified;
+        Application.Instance.Events.Pick.Hub.PickResultsNotified -= OnPickResultsNotified;
 
         base._ExitTree();
     }
@@ -45,7 +45,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     {
         if (!_isInitialized)
         {
-            PickEventHub.RequestNotifyPickHandlingMode();
+            Application.Instance.Events.Pick.RequestNotifyPickHandlingMode();
         }
     }
 
@@ -145,19 +145,19 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// <summary>
     /// 現在の選択モデルのコレクションの複製を取得する
     /// </summary>
-    public static IReadOnlyCollection<AnyModel> GetModels => Instance._models.ToList().AsReadOnly();
+    internal static IReadOnlyCollection<AnyModel> GetModels => Instance._models.ToList().AsReadOnly();
 
     /// <summary>
     /// 現在の選択モデルの数を取得する
     /// </summary>
-    public static int Count => Instance._models.Count;
+    internal static int Count => Instance._models.Count;
 
     /// <summary>
     /// 指定したモデルが選択されているかどうかを確認する
     /// </summary>
     /// <param name="model">確認するモデル</param>
     /// <returns>モデルが選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
-    public static bool Contains(AnyModel model) => Instance._models.Contains(model);
+    internal static bool Contains(AnyModel model) => Instance._models.Contains(model);
 
     /// <summary>
     /// 選択モデルの配列を取得する
@@ -165,7 +165,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// <remarks>
     /// 解放済みモデルやツリー外モデルを除外したスナップショットを返す
     /// </remarks>
-    public static AnyModel[] GetModelArray()
+    internal static AnyModel[] GetModelArray()
     {
         return Instance._models
             .Where(model => model != null && GodotObject.IsInstanceValid(model) && model.IsInsideTree())
@@ -176,7 +176,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// 指定したモデルのみの選択状態にする、既存の選択はすべて解除される
     /// </summary>
     /// <param name="model">選択するモデル</param>
-    public static void Set(AnyModel model)
+    internal static void Set(AnyModel model)
     {
         Clear();
         Add(model);
@@ -186,7 +186,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// 指定したモデル群のみの選択状態にする、既存の選択はすべて解除される
     /// </summary>
     /// <param name="models">選択するモデルの配列</param>
-    public static void Set(AnyModel[] models)
+    internal static void Set(AnyModel[] models)
     {
         Clear();
         foreach (var model in models)
@@ -201,12 +201,12 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// <param name="model">選択するモデル</param>
     /// <returns>モデルが新たに選択された場合はtrue、それ以外の場合はfalseを返す</returns>
     /// <remarks>モデルがすでに選択されている場合は何も起こらない</remarks>
-    public static bool Add(AnyModel model)
+    internal static bool Add(AnyModel model)
     {
         if (Instance._models.Add(model))
         {
-            ModelEventHub.NotifyModelSelectionState(model, true);
-            LogHub.Info($"Selected: {model.Name}");
+            Application.Instance.Events.Model.NotifyModelSelectionState(model, true);
+            Application.Instance.System.Log.Info($"Selected: {model.Name}");
             return true;
         }
         return false;
@@ -216,7 +216,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// 指定したモデル群を選択対象に追加する
     /// </summary>
     /// <param name="models">選択するモデルの配列</param>
-    public static void Add(AnyModel[] models)
+    internal static void Add(AnyModel[] models)
     {
         foreach (var model in models)
         {
@@ -230,12 +230,12 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// <param name="model">選択から外すモデル</param>
     /// <returns>モデルが選択から外された場合はtrue、それ以外の場合はfalseを返す</returns>
     /// <remarks>モデルが選択されていない場合は何も起こらない</remarks>
-    public static bool Remove(AnyModel model)
+    internal static bool Remove(AnyModel model)
     {
         if (Instance._models.Remove(model))
         {
-            ModelEventHub.NotifyModelSelectionState(model, false);
-            LogHub.Info($"Deselected: {model.Name}");
+            Application.Instance.Events.Model.NotifyModelSelectionState(model, false);
+            Application.Instance.System.Log.Info($"Deselected: {model.Name}");
             return true;
         }
         return false;
@@ -245,7 +245,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// 指定したモデル群を選択対象から外す
     /// </summary>
     /// <param name="models">選択対象から外すモデルの配列</param>
-    public static void Remove(AnyModel[] models)
+    internal static void Remove(AnyModel[] models)
     {
         foreach (var model in models)
         {
@@ -257,7 +257,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// 指定したモデルの選択状態を切り替える
     /// </summary>
     /// <param name="model">切り替えるモデル</param>
-    public static void Toggle(AnyModel model)
+    internal static void Toggle(AnyModel model)
     {
         if (Instance._models.Contains(model))
         {
@@ -273,7 +273,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// 指定したモデル群の選択状態を切り替える
     /// </summary>
     /// <param name="models">切り替えるモデルの列挙体</param>
-    public static void Toggle(AnyModel[] models)
+    internal static void Toggle(AnyModel[] models)
     {
         // 切り替えるモデルがない場合は何もしない
         if (models == null || models.Length == 0)
@@ -291,7 +291,7 @@ public partial class Selection : AutoloadNodeBase<Selection>
     /// すべての選択を解除する
     /// </summary>
     /// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返す</returns>
-    public static bool Clear()
+    internal static bool Clear()
     {
         if (Instance._models.Count == 0)
         {
@@ -306,8 +306,8 @@ public partial class Selection : AutoloadNodeBase<Selection>
         // モデルの選択解除シグナルとハイライト解除は個々に行う
         foreach (var model in modelsToDeselect)
         {
-            ModelEventHub.NotifyModelSelectionState(model, false);
-            LogHub.Info($"Deselected: {model.Name}");
+            Application.Instance.Events.Model.NotifyModelSelectionState(model, false);
+            Application.Instance.System.Log.Info($"Deselected: {model.Name}");
         }
         return true;
     }

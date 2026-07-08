@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// UI管理用 Autoload ノード
 /// </summary>
-public partial class UiManager : AutoloadNodeBase<UiManager>
+public partial class UiManager : SingletonNodeBase<UiManager>
 {
     #region Fields
 
@@ -24,24 +24,24 @@ public partial class UiManager : AutoloadNodeBase<UiManager>
     /// <remarks>
     /// コンテナは Container クラスを継承したUIである必要がある
     /// </remarks>
-    public static void Show(Container container)
+    internal static void Show(Container container)
     {
         if (container == null)
         {
-            LogHub.Warn("UiManager: container is null.");
+            Application.Instance.System.Log.Warn("UiManager: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            LogHub.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Instance.System.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
 
         if (Instance == null)
         {
-            LogHub.Warn("UiManager: instance is null.");
+            Application.Instance.System.Log.Warn("UiManager: instance is null.");
             container.QueueFree();
             return;
         }
@@ -75,13 +75,13 @@ public partial class UiManager : AutoloadNodeBase<UiManager>
     {
         if (container == null)
         {
-            LogHub.Warn("UiManager: container is null.");
+            Application.Instance.System.Log.Warn("UiManager: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            LogHub.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Instance.System.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }

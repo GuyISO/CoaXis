@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード
 /// </summary>
-public partial class AssetManager : AutoloadNodeBase<AssetManager>
+public partial class AssetManager : SingletonNodeBase<AssetManager>
 {
     #region Fields
 
@@ -33,7 +33,7 @@ public partial class AssetManager : AutoloadNodeBase<AssetManager>
     /// <param name="isVisible">表示状態なら true、非表示状態なら false</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    public static Texture2D GetVisibilityIcon(bool isVisible, int size = 24)
+    internal static Texture2D GetVisibilityIcon(bool isVisible, int size = 24)
     {
         string path = isVisible ? VisibleIconPath : InvisibleIconPath;
         return GetIcon(path, size);
@@ -45,11 +45,11 @@ public partial class AssetManager : AutoloadNodeBase<AssetManager>
     /// <param name="path">アセットパス</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    public static Texture2D GetIcon(string path, int size = 16)
+    internal static Texture2D GetIcon(string path, int size = 16)
     {
         if (Instance == null)
         {
-            LogHub.Warn($"AssetManager is not initialized. path='{path}', size={size}");
+            Warn($"AssetManager is not initialized. path='{path}', size={size}");
             return null;
         }
 
@@ -71,14 +71,14 @@ public partial class AssetManager : AutoloadNodeBase<AssetManager>
         Texture2D source = GD.Load<Texture2D>(path);
         if (source == null)
         {
-            LogHub.Warn($"AssetManager: icon load failed. path='{path}'");
+            Warn($"AssetManager: icon load failed. path='{path}'");
             return null;
         }
 
         Image image = source.GetImage();
         if (image == null)
         {
-            LogHub.Warn($"AssetManager: icon image is null. path='{path}'");
+            Warn($"AssetManager: icon image is null. path='{path}'");
             _iconCache[key] = source;
             return source;
         }
@@ -87,6 +87,17 @@ public partial class AssetManager : AutoloadNodeBase<AssetManager>
         Texture2D resized = ImageTexture.CreateFromImage(image);
         _iconCache[key] = resized;
         return resized;
+    }
+
+    private static void Warn(string message)
+    {
+        if (Application.Instance?.System?.Log != null)
+        {
+            Application.Instance.System.Log.Warn(message);
+            return;
+        }
+
+        GD.PrintErr(message);
     }
 
     #endregion

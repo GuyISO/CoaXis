@@ -1,10 +1,10 @@
-﻿using Godot;
+using Godot;
 using System;
 
 /// <summary>
 /// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
 /// </summary>
-public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
+public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
 {
     #region Fields
 
@@ -27,18 +27,18 @@ public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            ModelEventHub.RequestSetMultiSelectionMode(_isMultiSelectMode);
+            Application.Instance.Events.Model.RequestSetMultiSelectionMode(_isMultiSelectMode);
         }
 
         if (Input.IsActionJustPressed("load"))
         {
-            ModelEventHub.RequestLoadModel("res://assets/models/car.glb");
+            Application.Instance.Events.Model.RequestLoadModel("res://assets/models/car.glb");
         }
 
         if (Input.IsActionJustPressed("escape"))
         {
-            PickEventHub.NotifyPickHandlingMode(PickHandlingMode.Selection);
-            ModelEventHub.RequestClearSelection();
+            Application.Instance.Events.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
+            Application.Instance.Events.Model.RequestClearSelection();
         }
 
         HandleUndoRedoInput();
@@ -67,13 +67,13 @@ public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
 
         if (undoPressed)
         {
-            LogHub.Debug("DeviceInputHandler: Undo requested.");
+            Application.Instance.System.Log.Debug("DeviceInputHandler: Undo requested.");
             UndoService.Undo();
         }
 
         if (redoPressed)
         {
-            LogHub.Debug("DeviceInputHandler: Redo requested.");
+            Application.Instance.System.Log.Debug("DeviceInputHandler: Redo requested.");
             UndoService.Redo();
         }
     }
@@ -100,7 +100,7 @@ public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
         }
 
         Vector3 translation = translationDirection * (Instance._translateSpeed * delta);
-        ViewportEventHub.RequestTranslate(translation, SpaceMode.Camera);
+        Application.Instance.Events.Viewport.RequestTranslate(translation, SpaceMode.Camera);
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public partial class DeviceInputHandler : AutoloadNodeBase<DeviceInputHandler>
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
         Quaternion rotation = yaw * pitch * roll;
 
-        ViewportEventHub.RequestRotate(rotation, SpaceMode.Camera);
+        Application.Instance.Events.Viewport.RequestRotate(rotation, SpaceMode.Camera);
     }
 
     /// <summary>

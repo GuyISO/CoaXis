@@ -64,7 +64,7 @@ public sealed class SetModelVisibilityCommand : CommandBase
             }
 
             LogDo($"model='{_models[i].Name}', visible={_nextVisible}");
-            ModelEventHub.NotifyModelVisibilityState(_models[i], _nextVisible);
+            Application.Instance.Events.Model.NotifyModelVisibilityState(_models[i], _nextVisible);
         }
     }
 
@@ -82,7 +82,7 @@ public sealed class SetModelVisibilityCommand : CommandBase
             }
 
             LogUndo($"model='{_models[i].Name}', visible={_previousVisibles[i]}");
-            ModelEventHub.NotifyModelVisibilityState(_models[i], _previousVisibles[i]);
+            Application.Instance.Events.Model.NotifyModelVisibilityState(_models[i], _previousVisibles[i]);
         }
     }
 

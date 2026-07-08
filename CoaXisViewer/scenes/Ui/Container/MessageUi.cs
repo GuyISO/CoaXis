@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 using System.Text;
 
@@ -27,13 +27,13 @@ public partial class MessageUi : PanelContainer
         _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
 
         // イベント購読の登録
-        LogHub.Instance.Logged += OnLogged;
+        Application.Instance.System.Log.Hub.Logged += OnLogged;
     }
 
     public override void _ExitTree()
     {
         // イベント購読の解除
-        LogHub.Instance.Logged -= OnLogged;
+        Application.Instance.System.Log.Hub.Logged -= OnLogged;
     }
 
     #endregion

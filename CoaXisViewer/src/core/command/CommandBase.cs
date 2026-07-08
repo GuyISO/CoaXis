@@ -53,7 +53,7 @@ public abstract class CommandBase
     protected void LogSkip(string operation, string reason)
     {
         string message = $"{GetType().Name}.{operation} skipped: {reason}";
-        LogHub.Warn(message);
+        Application.Instance.System.Log.Warn(message);
     }
 
     /// <summary>
@@ -66,7 +66,7 @@ public abstract class CommandBase
         string message = string.IsNullOrWhiteSpace(detail)
             ? $"{GetType().Name}.{operation}: {Description}"
             : $"{GetType().Name}.{operation}: {Description}, {detail}";
-        LogHub.Debug(message);
+        Application.Instance.System.Log.Debug(message);
     }
 
     #endregion

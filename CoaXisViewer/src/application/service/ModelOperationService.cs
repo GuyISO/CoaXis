@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// モデルの操作を行う Autoload ノード
 /// </summary>
-public partial class ModelOperationService : AutoloadNodeBase<ModelOperationService>
+public partial class ModelOperationService : SingletonNodeBase<ModelOperationService>
 {
 	#region Fields
 
@@ -18,17 +18,17 @@ public partial class ModelOperationService : AutoloadNodeBase<ModelOperationServ
 	public override void _Ready()
 	{
 		// イベントの購読開始
-		ModelEventHub.Instance.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		PickEventHub.Instance.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
-		PickEventHub.Instance.PickHandlingModeNotified += OnPickHandlingModeNotified;
+		Application.Instance.Events.Model.Hub.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+		Application.Instance.Events.Pick.Hub.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
+		Application.Instance.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		ModelEventHub.Instance.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		PickEventHub.Instance.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
-		PickEventHub.Instance.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+		Application.Instance.Events.Model.Hub.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
+		Application.Instance.Events.Pick.Hub.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
+		Application.Instance.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 
 		base._ExitTree();
 	}
@@ -52,7 +52,7 @@ public partial class ModelOperationService : AutoloadNodeBase<ModelOperationServ
 	/// </summary>
 	private void OnNotifyPickHandlingModeRequested()
 	{
-		PickEventHub.NotifyPickHandlingMode(_currentPickHandlingMode);
+		Application.Instance.Events.Pick.NotifyPickHandlingMode(_currentPickHandlingMode);
 	}
 
 	/// <summary>

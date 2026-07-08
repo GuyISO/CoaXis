@@ -5,7 +5,7 @@ using System.IO;
 /// <summary>
 /// ログ関連のイベント集約ハブで、ログ通知と出力を一元管理する Autoload ノード
 /// </summary>
-public partial class LogHub : AutoloadNodeBase<LogHub>
+public partial class LogHub : SingletonNodeBase<LogHub>
 {
     #region Fields
 
@@ -43,7 +43,7 @@ public partial class LogHub : AutoloadNodeBase<LogHub>
     /// </summary>
     /// <param name="level">ログレベル</param>
     /// <param name="message">ログメッセージ</param> 
-    public static void Log(LogLevel level, string message)
+    internal static void Log(LogLevel level, string message)
     {
         string line = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} [{level}] {message}";
 
@@ -72,25 +72,25 @@ public partial class LogHub : AutoloadNodeBase<LogHub>
     /// デバッグレベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    public static void Debug(string msg) => Log(LogLevel.Debug, msg);
+    internal static void Debug(string msg) => Log(LogLevel.Debug, msg);
 
     /// <summary>
     /// 情報レベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    public static void Info(string msg) => Log(LogLevel.Info, msg);
+    internal static void Info(string msg) => Log(LogLevel.Info, msg);
 
     /// <summary>
     /// 警告レベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    public static void Warn(string msg) => Log(LogLevel.Warn, msg);
+    internal static void Warn(string msg) => Log(LogLevel.Warn, msg);
 
     /// <summary>
     /// エラーレベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    public static void Error(string msg) => Log(LogLevel.Error, msg);
+    internal static void Error(string msg) => Log(LogLevel.Error, msg);
 
     #endregion
 }

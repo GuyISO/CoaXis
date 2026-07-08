@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 
 /// <summary>
@@ -67,14 +67,14 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
 
         // イベントの購読開始
-        ModelEventHub.Instance.RootModelNotified += OnRootModelNotified;
-        ViewportEventHub.Instance.InteractionModeNotified += OnInteractionModeNotified;
-        ViewportEventHub.Instance.PositionNotified += OnPositionNotified;
-        ViewportEventHub.Instance.RotationNotified += OnRotationNotified;
-        ViewportEventHub.Instance.DistanceNotified += OnDistanceNotified;
-        ViewportEventHub.Instance.SizeNotified += OnSizeNotified;
-        ViewportEventHub.Instance.FovNotified += OnFovNotified;
-        ViewportEventHub.Instance.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Instance.Events.Model.Hub.RootModelNotified += OnRootModelNotified;
+        Application.Instance.Events.Viewport.Hub.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Instance.Events.Viewport.Hub.PositionNotified += OnPositionNotified;
+        Application.Instance.Events.Viewport.Hub.RotationNotified += OnRotationNotified;
+        Application.Instance.Events.Viewport.Hub.DistanceNotified += OnDistanceNotified;
+        Application.Instance.Events.Viewport.Hub.SizeNotified += OnSizeNotified;
+        Application.Instance.Events.Viewport.Hub.FovNotified += OnFovNotified;
+        Application.Instance.Events.Viewport.Hub.ProjectionTypeNotified += OnProjectionTypeNotified;
     }
 
     public override void _ExitTree()
@@ -89,14 +89,14 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
         // イベントの購読解除
-        ModelEventHub.Instance.RootModelNotified -= OnRootModelNotified;
-        ViewportEventHub.Instance.InteractionModeNotified -= OnInteractionModeNotified;
-        ViewportEventHub.Instance.PositionNotified -= OnPositionNotified;
-        ViewportEventHub.Instance.RotationNotified -= OnRotationNotified;
-        ViewportEventHub.Instance.DistanceNotified -= OnDistanceNotified;
-        ViewportEventHub.Instance.SizeNotified -= OnSizeNotified;
-        ViewportEventHub.Instance.FovNotified -= OnFovNotified;
-        ViewportEventHub.Instance.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Instance.Events.Model.Hub.RootModelNotified -= OnRootModelNotified;
+        Application.Instance.Events.Viewport.Hub.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Instance.Events.Viewport.Hub.PositionNotified -= OnPositionNotified;
+        Application.Instance.Events.Viewport.Hub.RotationNotified -= OnRotationNotified;
+        Application.Instance.Events.Viewport.Hub.DistanceNotified -= OnDistanceNotified;
+        Application.Instance.Events.Viewport.Hub.SizeNotified -= OnSizeNotified;
+        Application.Instance.Events.Viewport.Hub.FovNotified -= OnFovNotified;
+        Application.Instance.Events.Viewport.Hub.ProjectionTypeNotified -= OnProjectionTypeNotified;
     }
 
     public override void _Process(double delta)
@@ -104,12 +104,12 @@ public partial class ViewportUi : PanelContainer
         // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
         if (_rootModel == null)
         {
-            ModelEventHub.RequestNotifyRootModel();
+            Application.Instance.Events.Model.RequestNotifyRootModel();
         }
 
         if (!_isInitialized)
         {
-            ViewportEventHub.RequestNotifyState();
+            Application.Instance.Events.Viewport.RequestNotifyState();
         }
     }
 
@@ -122,8 +122,8 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonToggleProjectionPressed()
     {
-        LogHub.Debug("ViewportUi: toggle projection requested.");
-        ViewportEventHub.RequestToggleProjectionType();
+        Application.Instance.System.Log.Debug("ViewportUi: toggle projection requested.");
+        Application.Instance.Events.Viewport.RequestToggleProjectionType();
     }
 
     /// <summary>
@@ -134,12 +134,12 @@ public partial class ViewportUi : PanelContainer
         if (_rootModel == null)
         {
             GD.PushWarning("ViewportUi: fit target model is missing.");
-            LogHub.Warn("ViewportUi: fit-all requested but default target is missing.");
+            Application.Instance.System.Log.Warn("ViewportUi: fit-all requested but default target is missing.");
             return;
         }
 
-        LogHub.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
-        ViewportEventHub.RequestFit(new[] { _rootModel }, true);
+        Application.Instance.System.Log.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
+        Application.Instance.Events.Viewport.RequestFit(new[] { _rootModel }, true);
     }
 
     /// <summary>
@@ -147,15 +147,15 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        AnyModel[] fitTargets = Selection.GetModelArray();
+        AnyModel[] fitTargets = Application.Instance.Services.Selection.GetModelArray();
         if (fitTargets.Length == 0)
         {
-            LogHub.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
+            Application.Instance.System.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
-        LogHub.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
-        ViewportEventHub.RequestFit(fitTargets, true);
+        Application.Instance.System.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
+        Application.Instance.Events.Viewport.RequestFit(fitTargets, true);
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonAlignNormalPressed()
     {
-        PickEventHub.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
+        Application.Instance.Events.Pick.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
     }
 
     /// <summary>
@@ -172,8 +172,8 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollLeftPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-        LogHub.Debug("ViewportUi: roll-left requested.");
-        ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Instance.System.Log.Debug("ViewportUi: roll-left requested.");
+        Application.Instance.Events.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -182,8 +182,8 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollRightPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-        LogHub.Debug("ViewportUi: roll-right requested.");
-        ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Instance.System.Log.Debug("ViewportUi: roll-right requested.");
+        Application.Instance.Events.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -201,8 +201,8 @@ public partial class ViewportUi : PanelContainer
     /// <param name="value">新しい FOV 値</param>
     private void OnSliderFovValueChanged(double value)
     {
-        LogHub.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
-        ViewportEventHub.RequestSetFov((float)value);
+        Application.Instance.System.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
+        Application.Instance.Events.Viewport.RequestSetFov((float)value);
     }
 
     /// <summary>
@@ -211,7 +211,7 @@ public partial class ViewportUi : PanelContainer
     /// <param name="mode">ビューポートの操作モード</param>
     private void OnInteractionModeNotified(ViewportInteractionMode mode)
     {
-        // ViewportEventHub.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
+        // Application.Instance.Events.Viewport.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
         _isInitialized = true;
 
         _labelMode.Text = mode.ToString();

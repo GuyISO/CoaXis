@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// AutoLoad 登録ノードの共通シングルトン基底クラス
 /// </summary>
-public abstract partial class AutoloadNodeBase<TNode> : Node where TNode : AutoloadNodeBase<TNode>
+public abstract partial class SingletonNodeBase<TNode> : Node where TNode : SingletonNodeBase<TNode>
 {
 	public static TNode Instance { get; private set; }
 

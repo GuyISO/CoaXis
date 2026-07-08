@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 
 /// <summary>
@@ -37,12 +37,12 @@ public partial class ShowContainerButton : Button
     {
         if (_container == null)
         {
-            LogHub.Warn("ShowContainerButton: Container is not assigned.");
+            Application.Instance.System.Log.Warn("ShowContainerButton: Container is not assigned.");
             return;
         }
 
         // UiManager に対してコンテナの表示を要求する
-        UiManager.Show(_container.Instantiate<Container>());
+        Application.Instance.Services.Ui.Show(_container.Instantiate<Container>());
     }
 
     #endregion

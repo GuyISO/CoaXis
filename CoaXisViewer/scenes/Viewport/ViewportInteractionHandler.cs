@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 using System.Collections.Generic;
 
@@ -34,12 +34,12 @@ public partial class ViewportInteractionHandler : SubViewport
         SizeChanged += OnSizeChanged;
 
         // イベントの購読
-        ViewportEventHub.Instance.NotifyStateRequested += OnNotifyStateRequested;
-        ViewportEventHub.Instance.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Instance.Events.Viewport.Hub.NotifyStateRequested += OnNotifyStateRequested;
+        Application.Instance.Events.Viewport.Hub.InteractionModeNotified += OnInteractionModeNotified;
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
-        LogHub.Info("ViewportInteractionHandler initialized.");
+        Application.Instance.System.Log.Info("ViewportInteractionHandler initialized.");
     }
 
     public override void _ExitTree()
@@ -48,10 +48,10 @@ public partial class ViewportInteractionHandler : SubViewport
         SizeChanged -= OnSizeChanged;
 
         // イベントの購読解除
-        ViewportEventHub.Instance.NotifyStateRequested -= OnNotifyStateRequested;
-        ViewportEventHub.Instance.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Instance.Events.Viewport.Hub.NotifyStateRequested -= OnNotifyStateRequested;
+        Application.Instance.Events.Viewport.Hub.InteractionModeNotified -= OnInteractionModeNotified;
 
-        LogHub.Info("ViewportInteractionHandler released.");
+        Application.Instance.System.Log.Info("ViewportInteractionHandler released.");
     }
 
     public override void _Process(double delta)
@@ -107,9 +107,9 @@ public partial class ViewportInteractionHandler : SubViewport
     /// </summary>
     private void OnNotifyStateRequested()
     {
-        ViewportEventHub.NotifyInteractionMode(_mode);
-        ViewportEventHub.NotifyArcballRadius(_arcballRadius);
-        ViewportEventHub.NotifyArcballHandle(new Vector3(0, 0, 1)); // アークボールハンドルは初期状態では画面正面方向にしておく
+        Application.Instance.Events.Viewport.NotifyInteractionMode(_mode);
+        Application.Instance.Events.Viewport.NotifyArcballRadius(_arcballRadius);
+        Application.Instance.Events.Viewport.NotifyArcballHandle(new Vector3(0, 0, 1)); // アークボールハンドルは初期状態では画面正面方向にしておく
     }
 
     /// <summary>
@@ -159,9 +159,9 @@ public partial class ViewportInteractionHandler : SubViewport
             return;
         }
 
-        LogHub.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
+        Application.Instance.System.Log.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
         _mode = mode;
-        ViewportEventHub.NotifyInteractionMode(mode);
+        Application.Instance.Events.Viewport.NotifyInteractionMode(mode);
     }
 
     /// <summary>
@@ -187,7 +187,7 @@ public partial class ViewportInteractionHandler : SubViewport
             // 矩形選択の開始点を保存
             _startPosition = button.Position;
             SetMode(ViewportInteractionMode.PickRect);
-            ViewportEventHub.NotifyPickRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
+            Application.Instance.Events.Viewport.NotifyPickRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
         }
         // 右クリックはメニュー表示
         else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
@@ -268,7 +268,7 @@ public partial class ViewportInteractionHandler : SubViewport
             _hasMoved = true; // クリック操作したら注視点移動しないようににするため、移動フラグを立てる
             SetMode(IsOnArcball(button.Position) ? ViewportInteractionMode.CameraOrbit : ViewportInteractionMode.CameraRoll);
             Vector3 positionOnArcball = GetPositionOnArcballSphere(button.Position);
-            ViewportEventHub.NotifyArcballHandle(positionOnArcball);
+            Application.Instance.Events.Viewport.NotifyArcballHandle(positionOnArcball);
             return;
         }
 
@@ -311,7 +311,7 @@ public partial class ViewportInteractionHandler : SubViewport
                 ZoomCamera(previousPos, currentPos);
                 break;
             case ViewportInteractionMode.PickRect:
-                ViewportEventHub.NotifyPickRect(_startPosition, currentPos);
+                Application.Instance.Events.Viewport.NotifyPickRect(_startPosition, currentPos);
                 break;
         }
     }
@@ -330,13 +330,13 @@ public partial class ViewportInteractionHandler : SubViewport
         if (pickResult.HasHit)
         {
             // ヒットしたら注視点を移動
-            LogHub.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
-            ViewportEventHub.RequestMovePositionTo(pickResult.Position, useTween);
+            Application.Instance.System.Log.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
+            Application.Instance.Events.Viewport.RequestMovePositionTo(pickResult.Position, useTween);
             return true;
         }
         else
         {
-            LogHub.Debug("ViewportInteractionHandler: focus target not found.");
+            Application.Instance.System.Log.Debug("ViewportInteractionHandler: focus target not found.");
             return false;
         }
     }
@@ -357,7 +357,7 @@ public partial class ViewportInteractionHandler : SubViewport
         // ドラッグ方向に見た目が追従するよう、差分を逆向きで適用する
         Vector3 move = fromWorld - toWorld;
 
-        ViewportEventHub.RequestTranslate(move, SpaceMode.World);
+        Application.Instance.Events.Viewport.RequestTranslate(move, SpaceMode.World);
     }
 
     /// <summary>
@@ -375,7 +375,7 @@ public partial class ViewportInteractionHandler : SubViewport
         Vector3 p1 = GetPositionOnArcballSphere(previousPos);
         Quaternion rotation = ComputeArcballRotation(p0, p1);
 
-        ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint);
+        Application.Instance.Events.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint);
     }
 
     /// <summary>
@@ -392,7 +392,7 @@ public partial class ViewportInteractionHandler : SubViewport
         Vector3 p1 = GetPositionOnArcballEquator(previousPos);
         Quaternion rotation = ComputeArcballRotation(p0, p1);
 
-        ViewportEventHub.RequestRotate(rotation, SpaceMode.FocalPoint);
+        Application.Instance.Events.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint);
     }
 
     /// <summary>
@@ -405,7 +405,7 @@ public partial class ViewportInteractionHandler : SubViewport
         float deltaY = (currentPos.Y - previousPos.Y);
         float exponent = deltaY * _zoomFactor;
 
-        ViewportEventHub.RequestZoom(exponent);
+        Application.Instance.Events.Viewport.RequestZoom(exponent);
     }
 
     /// <summary>
@@ -417,7 +417,7 @@ public partial class ViewportInteractionHandler : SubViewport
         _screenCenter = rect.Position + rect.Size * 0.5f;
         _arcballRadius = rect.Size.Y * _arcballRegionRatio;
 
-        ViewportEventHub.NotifyArcballRadius(_arcballRadius);
+        Application.Instance.Events.Viewport.NotifyArcballRadius(_arcballRadius);
     }
 
     /// <summary>
@@ -529,7 +529,7 @@ public partial class ViewportInteractionHandler : SubViewport
     private void PickByPoint(Vector2 screenPos)
     {
         var pickResult = PickUtility.PickByRay(GetCamera3D(), screenPos);
-        PickEventHub.NotifyPickResult(pickResult);
+        Application.Instance.Events.Pick.NotifyPickResult(pickResult);
     }
 
     /// <summary>
@@ -543,7 +543,7 @@ public partial class ViewportInteractionHandler : SubViewport
         var frustumShape = CreateFrustumShape(topLeft, bottomRight);
         var camera = GetCamera3D();
         var pickResults = PickUtility.PickByShape(camera, frustumShape, true);
-        PickEventHub.NotifyPickResults(pickResults);
+        Application.Instance.Events.Pick.NotifyPickResults(pickResults);
     }
 
     /// <summary>

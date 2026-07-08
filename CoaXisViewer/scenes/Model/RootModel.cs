@@ -1,4 +1,4 @@
-﻿using Godot;
+using Godot;
 using System;
 
 /// <summary>
@@ -11,15 +11,15 @@ public partial class RootModel : AnyModel
     public override void _Ready()
     {
         // イベントハンドラの登録
-        ModelEventHub.Instance.NotifyRootModelRequested += OnNotifyRootModelRequested;
-        ModelEventHub.Instance.LoadModelRequested += OnLoadModelRequested;
+        Application.Instance.Events.Model.Hub.NotifyRootModelRequested += OnNotifyRootModelRequested;
+        Application.Instance.Events.Model.Hub.LoadModelRequested += OnLoadModelRequested;
     }
 
     public override void _ExitTree()
     {
         // イベントハンドラの登録解除
-        ModelEventHub.Instance.NotifyRootModelRequested -= OnNotifyRootModelRequested;
-        ModelEventHub.Instance.LoadModelRequested -= OnLoadModelRequested;
+        Application.Instance.Events.Model.Hub.NotifyRootModelRequested -= OnNotifyRootModelRequested;
+        Application.Instance.Events.Model.Hub.LoadModelRequested -= OnLoadModelRequested;
     }
 
     #endregion
@@ -31,7 +31,7 @@ public partial class RootModel : AnyModel
     /// </summary>
     private void OnNotifyRootModelRequested()
     {
-        ModelEventHub.NotifyRootModel(this);
+        Application.Instance.Events.Model.NotifyRootModel(this);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public partial class RootModel : AnyModel
 
         ModelColliderBuilder.AddCollider(model);
 
-        ModelEventHub.RequestAddModel(model, this);
+        Application.Instance.Events.Model.RequestAddModel(model, this);
 
     }
 

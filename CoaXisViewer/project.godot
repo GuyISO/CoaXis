@@ -18,19 +18,7 @@ config/icon="res://assets/icon/icon.svg"
 
 [autoload]
 
-ModelEventHub="*uid://guga46ph5l82"
-PickEventHub="*uid://8uvapfqphubs"
-ViewportEventHub="*uid://dx5t10ibmi7k1"
-MeasurementEventHub="*res://src/autoload/event/MeasurementEventHub.cs"
-DeviceInputHandler="*uid://vwxli71heajm"
-ModelOperationService="*uid://doqqmjg3lqulp"
-ModelVisualService="*uid://c72re42r7nlfn"
-MeasurementService="*res://src/core/service/MeasurementService.cs"
-Selection="*uid://dngenqpeyo83v"
-SettingsService="*res://src/autoload/service/SettingsService.cs"
-UiManager="*uid://bdww21xtruf8m"
-LogHub="*uid://5o16r7usgjmh"
-AssetManager="*res://src/autoload/system/AssetManager.cs"
+Application="*res://src/application/Application.cs"
 
 [display]
 

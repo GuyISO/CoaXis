@@ -1,11 +1,11 @@
-﻿using Godot;
+using Godot;
 using System;
 using System.Collections.Generic;
 
 /// <summary>
 /// モデル選択状態に応じてハイライト表示を切り替える Autoload ノード
 /// </summary>
-public partial class ModelVisualService : AutoloadNodeBase<ModelVisualService>
+public partial class ModelVisualService : SingletonNodeBase<ModelVisualService>
 {
 	#region Fields
 
@@ -18,15 +18,15 @@ public partial class ModelVisualService : AutoloadNodeBase<ModelVisualService>
 	public override void _Ready()
 	{
 		// イベントの購読開始
-		ModelEventHub.Instance.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-		ModelEventHub.Instance.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+		Application.Instance.Events.Model.Hub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+		Application.Instance.Events.Model.Hub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		ModelEventHub.Instance.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-		ModelEventHub.Instance.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+		Application.Instance.Events.Model.Hub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+		Application.Instance.Events.Model.Hub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 
 		base._ExitTree();
 	}
@@ -159,11 +159,11 @@ public partial class ModelVisualService : AutoloadNodeBase<ModelVisualService>
 		{
 			if (!visited.Add(model))
 			{
-				LogHub.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
+				Application.Instance.System.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
 				return false;
 			}
 
-			if (Selection.Contains(model))
+			if (Application.Instance.Services.Selection.Contains(model))
 			{
 				return true;
 			}
