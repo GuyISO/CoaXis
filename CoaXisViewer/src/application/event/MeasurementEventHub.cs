@@ -11,7 +11,7 @@ public partial class MeasurementEventHub : EventHubBase<MeasurementEventHub>
     /// <summary>
     /// 最新の測定結果通知をリクエストする
     /// </summary>
-    internal static void RequestNotifyMeasurementResult()
+    internal void RequestNotifyMeasurementResult()
     {
         TryEmitSignal(SignalName.NotifyMeasurementResultRequested);
     }
@@ -21,7 +21,7 @@ public partial class MeasurementEventHub : EventHubBase<MeasurementEventHub>
     /// 測定ポイントのピック開始をリクエストする
     /// </summary>
     /// <param name="pointIndex">1 または 2</param>
-    internal static void RequestPickPoint(int pointIndex)
+    internal void RequestPickPoint(int pointIndex)
     {
         TryEmitSignal(SignalName.PickPointRequested, pointIndex);
     }
@@ -35,7 +35,7 @@ public partial class MeasurementEventHub : EventHubBase<MeasurementEventHub>
     /// 測定結果を通知する
     /// </summary>
     /// <param name="result">通知する測定結果</param>
-    internal static void NotifyMeasurementResult(MeasurementResult result)
+    internal void NotifyMeasurementResult(MeasurementResult result)
     {
         TryEmitSignal(SignalName.MeasurementResultNotified, result);
     }

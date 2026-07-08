@@ -27,13 +27,13 @@ public partial class MessageUi : PanelContainer
         _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
 
         // イベント購読の登録
-        Application.Instance.System.Log.Hub.Logged += OnLogged;
+        Application.System.Log.Hub.Logged += OnLogged;
     }
 
     public override void _ExitTree()
     {
         // イベント購読の解除
-        Application.Instance.System.Log.Hub.Logged -= OnLogged;
+        Application.System.Log.Hub.Logged -= OnLogged;
     }
 
     #endregion

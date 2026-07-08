@@ -32,41 +32,41 @@ public partial class CameraRig : Node3D
         _camera = GetNode<Camera3D>("Camera3D");
 
         // イベント購読の登録
-        Application.Instance.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Instance.Events.Pick.Hub.PickResultNotified += OnPickResultNotified;
-        Application.Instance.Events.Viewport.Hub.NotifyStateRequested += OnNotifyStateRequested;
-        Application.Instance.Events.Viewport.Hub.MovePositionToRequested += OnMovePositionToRequested;
-        Application.Instance.Events.Viewport.Hub.MoveRotationToRequested += OnMoveRotationToRequested;
-        Application.Instance.Events.Viewport.Hub.SetSizeRequested += OnSetSizeRequested;
-        Application.Instance.Events.Viewport.Hub.SetDistanceRequested += OnSetDistanceRequested;
-        Application.Instance.Events.Viewport.Hub.SetFovRequested += OnSetFovRequested;
-        Application.Instance.Events.Viewport.Hub.SetProjectionTypeRequested += OnSetProjectionTypeRequested;
-        Application.Instance.Events.Viewport.Hub.TranslateRequested += OnTranslateRequested;
-        Application.Instance.Events.Viewport.Hub.RotateRequested += OnRotateRequested;
-        Application.Instance.Events.Viewport.Hub.ZoomRequested += OnZoomRequested;
-        Application.Instance.Events.Viewport.Hub.ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
-        Application.Instance.Events.Viewport.Hub.FitRequested += OnFitRequested;
-        Application.Instance.Events.Viewport.Hub.AlignNormalToRequested += OnAlignNormalToRequested;
+        Application.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Events.Pick.Hub.PickResultNotified += OnPickResultNotified;
+        Application.Events.Viewport.Hub.NotifyStateRequested += OnNotifyStateRequested;
+        Application.Events.Viewport.Hub.MovePositionToRequested += OnMovePositionToRequested;
+        Application.Events.Viewport.Hub.MoveRotationToRequested += OnMoveRotationToRequested;
+        Application.Events.Viewport.Hub.SetSizeRequested += OnSetSizeRequested;
+        Application.Events.Viewport.Hub.SetDistanceRequested += OnSetDistanceRequested;
+        Application.Events.Viewport.Hub.SetFovRequested += OnSetFovRequested;
+        Application.Events.Viewport.Hub.SetProjectionTypeRequested += OnSetProjectionTypeRequested;
+        Application.Events.Viewport.Hub.TranslateRequested += OnTranslateRequested;
+        Application.Events.Viewport.Hub.RotateRequested += OnRotateRequested;
+        Application.Events.Viewport.Hub.ZoomRequested += OnZoomRequested;
+        Application.Events.Viewport.Hub.ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
+        Application.Events.Viewport.Hub.FitRequested += OnFitRequested;
+        Application.Events.Viewport.Hub.AlignNormalToRequested += OnAlignNormalToRequested;
     }
 
     public override void _ExitTree()
     {
         // イベント購読の解除
-        Application.Instance.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Instance.Events.Pick.Hub.PickResultNotified -= OnPickResultNotified;
-        Application.Instance.Events.Viewport.Hub.NotifyStateRequested -= OnNotifyStateRequested;
-        Application.Instance.Events.Viewport.Hub.MovePositionToRequested -= OnMovePositionToRequested;
-        Application.Instance.Events.Viewport.Hub.MoveRotationToRequested -= OnMoveRotationToRequested;
-        Application.Instance.Events.Viewport.Hub.SetSizeRequested -= OnSetSizeRequested;
-        Application.Instance.Events.Viewport.Hub.SetDistanceRequested -= OnSetDistanceRequested;
-        Application.Instance.Events.Viewport.Hub.SetFovRequested -= OnSetFovRequested;
-        Application.Instance.Events.Viewport.Hub.SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
-        Application.Instance.Events.Viewport.Hub.TranslateRequested -= OnTranslateRequested;
-        Application.Instance.Events.Viewport.Hub.RotateRequested -= OnRotateRequested;
-        Application.Instance.Events.Viewport.Hub.ZoomRequested -= OnZoomRequested;
-        Application.Instance.Events.Viewport.Hub.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
-        Application.Instance.Events.Viewport.Hub.FitRequested -= OnFitRequested;
-        Application.Instance.Events.Viewport.Hub.AlignNormalToRequested -= OnAlignNormalToRequested;
+        Application.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Events.Pick.Hub.PickResultNotified -= OnPickResultNotified;
+        Application.Events.Viewport.Hub.NotifyStateRequested -= OnNotifyStateRequested;
+        Application.Events.Viewport.Hub.MovePositionToRequested -= OnMovePositionToRequested;
+        Application.Events.Viewport.Hub.MoveRotationToRequested -= OnMoveRotationToRequested;
+        Application.Events.Viewport.Hub.SetSizeRequested -= OnSetSizeRequested;
+        Application.Events.Viewport.Hub.SetDistanceRequested -= OnSetDistanceRequested;
+        Application.Events.Viewport.Hub.SetFovRequested -= OnSetFovRequested;
+        Application.Events.Viewport.Hub.SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
+        Application.Events.Viewport.Hub.TranslateRequested -= OnTranslateRequested;
+        Application.Events.Viewport.Hub.RotateRequested -= OnRotateRequested;
+        Application.Events.Viewport.Hub.ZoomRequested -= OnZoomRequested;
+        Application.Events.Viewport.Hub.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
+        Application.Events.Viewport.Hub.FitRequested -= OnFitRequested;
+        Application.Events.Viewport.Hub.AlignNormalToRequested -= OnAlignNormalToRequested;
     }
 
     #endregion
@@ -106,12 +106,12 @@ public partial class CameraRig : Node3D
     /// </summary>
     private void OnNotifyStateRequested()
     {
-        Application.Instance.Events.Viewport.NotifyPosition(Position);
-        Application.Instance.Events.Viewport.NotifyRotation(Transform.Basis.GetRotationQuaternion());
-        Application.Instance.Events.Viewport.NotifySize(_camera.Size);
-        Application.Instance.Events.Viewport.NotifyDistance(_camera.Position.Z);
-        Application.Instance.Events.Viewport.NotifyFov(_camera.Fov);
-        Application.Instance.Events.Viewport.NotifyProjectionType(_camera.Projection);
+        Application.Events.Viewport.NotifyPosition(Position);
+        Application.Events.Viewport.NotifyRotation(Transform.Basis.GetRotationQuaternion());
+        Application.Events.Viewport.NotifySize(_camera.Size);
+        Application.Events.Viewport.NotifyDistance(_camera.Position.Z);
+        Application.Events.Viewport.NotifyFov(_camera.Fov);
+        Application.Events.Viewport.NotifyProjectionType(_camera.Projection);
     }
 
     /// <summary>
@@ -251,7 +251,7 @@ public partial class CameraRig : Node3D
         else
         {
             Transform = new Transform3D(Transform.Basis, position);
-            Application.Instance.Events.Viewport.NotifyPosition(Position);
+            Application.Events.Viewport.NotifyPosition(Position);
         }
     }
 
@@ -269,7 +269,7 @@ public partial class CameraRig : Node3D
         else
         {
             Transform = new Transform3D(new Basis(rotation), Transform.Origin);
-            Application.Instance.Events.Viewport.NotifyRotation(Transform.Basis.GetRotationQuaternion());
+            Application.Events.Viewport.NotifyRotation(Transform.Basis.GetRotationQuaternion());
         }
     }
 
@@ -287,7 +287,7 @@ public partial class CameraRig : Node3D
         else
         {
             _camera.Position = new Vector3(0, 0, distance);
-            Application.Instance.Events.Viewport.NotifyDistance(_camera.Position.Z);
+            Application.Events.Viewport.NotifyDistance(_camera.Position.Z);
         }
     }
 
@@ -305,7 +305,7 @@ public partial class CameraRig : Node3D
         else
         {
             _camera.Size = size;
-            Application.Instance.Events.Viewport.NotifySize(_camera.Size);
+            Application.Events.Viewport.NotifySize(_camera.Size);
         }
     }
 
@@ -323,7 +323,7 @@ public partial class CameraRig : Node3D
         else
         {
             _camera.Fov = fov;
-            Application.Instance.Events.Viewport.NotifyFov(fov);
+            Application.Events.Viewport.NotifyFov(fov);
         }
     }
 
@@ -354,7 +354,7 @@ public partial class CameraRig : Node3D
         }
 
         _camera.Projection = projectionType;
-        Application.Instance.Events.Viewport.NotifyProjectionType(projectionType);
+        Application.Events.Viewport.NotifyProjectionType(projectionType);
     }
 
     /// <summary>
@@ -471,7 +471,7 @@ public partial class CameraRig : Node3D
         tween.TweenMethod(Callable.From<float>(t =>
         {
             Position = startPos.Lerp(position, t);
-            Application.Instance.Events.Viewport.NotifyPosition(Position);
+            Application.Events.Viewport.NotifyPosition(Position);
         }), 0f, 1f, _tweenDuration);
     }
 
@@ -489,7 +489,7 @@ public partial class CameraRig : Node3D
                 new Basis(startRot.Slerp(rotation, t)),
                 Transform.Origin
             );
-            Application.Instance.Events.Viewport.NotifyRotation(Transform.Basis.GetRotationQuaternion());
+            Application.Events.Viewport.NotifyRotation(Transform.Basis.GetRotationQuaternion());
         }), 0f, 1f, _tweenDuration);
     }
 
@@ -504,7 +504,7 @@ public partial class CameraRig : Node3D
         tween.TweenMethod(Callable.From<float>(distance =>
         {
             _camera.Position = new Vector3(0, 0, distance);
-            Application.Instance.Events.Viewport.NotifyDistance(distance);
+            Application.Events.Viewport.NotifyDistance(distance);
         }), startDistance, distance, _tweenDuration);
     }
 
@@ -519,7 +519,7 @@ public partial class CameraRig : Node3D
         tween.TweenMethod(Callable.From<float>(size =>
         {
             _camera.Size = size;
-            Application.Instance.Events.Viewport.NotifySize(size);
+            Application.Events.Viewport.NotifySize(size);
         }), startSize, size, _tweenDuration);
     }
 
@@ -534,7 +534,7 @@ public partial class CameraRig : Node3D
         tween.TweenMethod(Callable.From<float>(fov =>
         {
             _camera.Fov = fov;
-            Application.Instance.Events.Viewport.NotifyFov(fov);
+            Application.Events.Viewport.NotifyFov(fov);
         }), startFov, fov, _tweenDuration);
     }
 

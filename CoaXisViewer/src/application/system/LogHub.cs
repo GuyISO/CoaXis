@@ -5,7 +5,7 @@ using System.IO;
 /// <summary>
 /// ログ関連のイベント集約ハブで、ログ通知と出力を一元管理する Autoload ノード
 /// </summary>
-public partial class LogHub : SingletonNodeBase<LogHub>
+public partial class LogHub : Node
 {
     #region Fields
 
@@ -43,11 +43,11 @@ public partial class LogHub : SingletonNodeBase<LogHub>
     /// </summary>
     /// <param name="level">ログレベル</param>
     /// <param name="message">ログメッセージ</param> 
-    internal static void Log(LogLevel level, string message)
+    internal void Log(LogLevel level, string message)
     {
         string line = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} [{level}] {message}";
 
-        if (Instance == null)
+        if (!IsInsideTree())
         {
             GD.PrintErr("LogHub is not initialized.");
             GD.Print(line);
@@ -58,39 +58,39 @@ public partial class LogHub : SingletonNodeBase<LogHub>
         GD.Print(line);
 
         // ファイルへの出力
-        if (Instance._enableFileLog)
+        if (_enableFileLog)
         {
-            Instance._fileWriter.WriteLine(line);
-            Instance._fileWriter.Flush();
+            _fileWriter.WriteLine(line);
+            _fileWriter.Flush();
         }
 
         // イベントの発行
-        Instance.EmitSignal(SignalName.Logged, line);
+        EmitSignal(SignalName.Logged, line);
     }
 
     /// <summary>
     /// デバッグレベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal static void Debug(string msg) => Log(LogLevel.Debug, msg);
+    internal void Debug(string msg) => Log(LogLevel.Debug, msg);
 
     /// <summary>
     /// 情報レベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal static void Info(string msg) => Log(LogLevel.Info, msg);
+    internal void Info(string msg) => Log(LogLevel.Info, msg);
 
     /// <summary>
     /// 警告レベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal static void Warn(string msg) => Log(LogLevel.Warn, msg);
+    internal void Warn(string msg) => Log(LogLevel.Warn, msg);
 
     /// <summary>
     /// エラーレベルのログを出力する
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal static void Error(string msg) => Log(LogLevel.Error, msg);
+    internal void Error(string msg) => Log(LogLevel.Error, msg);
 
     #endregion
 }

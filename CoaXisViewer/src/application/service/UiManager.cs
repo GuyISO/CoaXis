@@ -5,13 +5,13 @@ using System.Collections.Generic;
 /// <summary>
 /// UI管理用 Autoload ノード
 /// </summary>
-public partial class UiManager : SingletonNodeBase<UiManager>
+public partial class UiManager : Node
 {
     #region Fields
 
     // TODO: UiWindowのシーンパスをうまく管理する
-    private static PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/Ui/Window/UiWindow.tscn"); // UiWindowのシーンパス
-    private static readonly Dictionary<string, UiWindow> _windowCache = new(); // UIのキャッシュ
+    private PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/Ui/Window/UiWindow.tscn"); // UiWindowのシーンパス
+    private readonly Dictionary<string, UiWindow> _windowCache = new(); // UIのキャッシュ
 
     #endregion
 
@@ -24,24 +24,17 @@ public partial class UiManager : SingletonNodeBase<UiManager>
     /// <remarks>
     /// コンテナは Container クラスを継承したUIである必要がある
     /// </remarks>
-    internal static void Show(Container container)
+    internal void Show(Container container)
     {
         if (container == null)
         {
-            Application.Instance.System.Log.Warn("UiManager: container is null.");
+            Application.System.Log.Warn("UiManager: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Instance.System.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
-            container.QueueFree();
-            return;
-        }
-
-        if (Instance == null)
-        {
-            Application.Instance.System.Log.Warn("UiManager: instance is null.");
+            Application.System.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
@@ -71,17 +64,17 @@ public partial class UiManager : SingletonNodeBase<UiManager>
     /// 指定されたコンテナを表示する
     /// </summary>
     /// <param name="container">表示するコンテナ</param>
-    private static void ShowWindow(Container container, string cacheKey)
+    private void ShowWindow(Container container, string cacheKey)
     {
         if (container == null)
         {
-            Application.Instance.System.Log.Warn("UiManager: container is null.");
+            Application.System.Log.Warn("UiManager: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Instance.System.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.System.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
@@ -90,7 +83,7 @@ public partial class UiManager : SingletonNodeBase<UiManager>
         _windowCache[cacheKey] = window;
         window.TreeExited += () => OnWindowTreeExited(cacheKey, window);
 
-        Instance.AddChild(window);
+        AddChild(window);
         window.SetContainer(container);
         window.Show();
         window.GrabFocus();
@@ -100,7 +93,7 @@ public partial class UiManager : SingletonNodeBase<UiManager>
     /// <summary>
     /// ウィンドウがツリーから退出したときにキャッシュから削除するためのイベントハンドラ
     /// </summary>
-    private static void OnWindowTreeExited(string cacheKey, UiWindow window)
+    private void OnWindowTreeExited(string cacheKey, UiWindow window)
     {
         if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow) && cachedWindow == window)
         {
@@ -112,7 +105,7 @@ public partial class UiManager : SingletonNodeBase<UiManager>
     /// コンテナのキャッシュキーを取得する
     /// </summary>
     /// <param name="container">キャッシュキーを取得するコンテナ</param>
-    private static string GetContainerCacheKey(Container container)
+    private string GetContainerCacheKey(Container container)
     {
         if (!string.IsNullOrWhiteSpace(container.SceneFilePath))
         {

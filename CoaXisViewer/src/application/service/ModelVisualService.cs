@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデル選択状態に応じてハイライト表示を切り替える Autoload ノード
 /// </summary>
-public partial class ModelVisualService : SingletonNodeBase<ModelVisualService>
+public partial class ModelVisualService : Node
 {
 	#region Fields
 
@@ -18,15 +18,15 @@ public partial class ModelVisualService : SingletonNodeBase<ModelVisualService>
 	public override void _Ready()
 	{
 		// イベントの購読開始
-		Application.Instance.Events.Model.Hub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-		Application.Instance.Events.Model.Hub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+		Application.Events.Model.Hub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+		Application.Events.Model.Hub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		Application.Instance.Events.Model.Hub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-		Application.Instance.Events.Model.Hub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+		Application.Events.Model.Hub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+		Application.Events.Model.Hub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 
 		base._ExitTree();
 	}
@@ -159,11 +159,11 @@ public partial class ModelVisualService : SingletonNodeBase<ModelVisualService>
 		{
 			if (!visited.Add(model))
 			{
-				Application.Instance.System.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
+				Application.System.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
 				return false;
 			}
 
-			if (Application.Instance.Services.Selection.Contains(model))
+			if (Application.Services.Selection.Contains(model))
 			{
 				return true;
 			}

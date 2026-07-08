@@ -24,14 +24,14 @@ using System.Text.Json;
 /// 実行ファイル近傍に設定ファイルを置くことで、ビルド後の配布物でも
 /// 再ビルド不要で設定変更できる運用を想定している。
 /// </summary>
-public partial class SettingsService : SingletonNodeBase<SettingsService>
+public partial class SettingsService : Node
 {
 
     /// <summary>
     /// 現在有効な設定値。
     /// 起動時に読み込んだ内容を保持し、他サービスはこの値を参照する。
     /// </summary>
-    internal static ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
+    internal ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
 
     /// <summary>
     /// 外部設定ファイル名。配置先ディレクトリは実行環境に応じて決定する。
@@ -69,7 +69,7 @@ public partial class SettingsService : SingletonNodeBase<SettingsService>
     /// 外部ファイルから正常に読めた場合は true。
     /// デフォルト値へフォールバックした場合は false。
     /// </returns>
-    internal static bool Reload()
+    internal bool Reload()
     {
         // 候補を優先順位順に列挙する。
         string[] candidates = BuildExternalCandidates();
@@ -84,7 +84,7 @@ public partial class SettingsService : SingletonNodeBase<SettingsService>
             if (TryRead(path, out ViewerSettings loaded))
             {
                 Current = loaded;
-                Application.Instance.System.Log.Info($"Settings: loaded from '{path}'.");
+                Application.System.Log.Info($"Settings: loaded from '{path}'.");
                 return true;
             }
         }
@@ -97,11 +97,11 @@ public partial class SettingsService : SingletonNodeBase<SettingsService>
             TryWriteDefault(candidates[1], Current, out writtenPath) ||
             TryWriteDefault(GetUserSettingsPath(), Current, out writtenPath))
         {
-            Application.Instance.System.Log.Info($"Settings: default file created at '{writtenPath}'.");
+            Application.System.Log.Info($"Settings: default file created at '{writtenPath}'.");
         }
         else
         {
-            Application.Instance.System.Log.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
+            Application.System.Log.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
         }
 
         return false;
@@ -124,7 +124,7 @@ public partial class SettingsService : SingletonNodeBase<SettingsService>
 
             if (loaded == null)
             {
-                Application.Instance.System.Log.Warn($"Settings: '{path}' is empty. Falling back to default values.");
+                Application.System.Log.Warn($"Settings: '{path}' is empty. Falling back to default values.");
                 return false;
             }
 
@@ -134,7 +134,7 @@ public partial class SettingsService : SingletonNodeBase<SettingsService>
         }
         catch (Exception ex)
         {
-            Application.Instance.System.Log.Warn($"Settings: failed to read '{path}'. {ex.Message}");
+            Application.System.Log.Warn($"Settings: failed to read '{path}'. {ex.Message}");
             return false;
         }
     }
@@ -166,7 +166,7 @@ public partial class SettingsService : SingletonNodeBase<SettingsService>
         }
         catch (Exception ex)
         {
-            Application.Instance.System.Log.Warn($"Settings: failed to write default file '{path}'. {ex.Message}");
+            Application.System.Log.Warn($"Settings: failed to write default file '{path}'. {ex.Message}");
             return false;
         }
     }

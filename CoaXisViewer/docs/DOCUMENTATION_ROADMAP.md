@@ -10,7 +10,7 @@
 ### 1.1.1 AUTOLOAD_GUIDE.md
 - AutoLoad 共通基底クラスの使い分け
 - Instance 確立と解放の共通化ルール
-- EventHubBase と SingletonNodeBase の責務境界
+- EventHubBase と Application Facade の責務境界
 
 ### 1.2 EVENTS_GUIDE.md
 - ModelEventHub と ViewportEventHub のRequest/Notify一覧

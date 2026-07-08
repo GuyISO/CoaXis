@@ -24,13 +24,13 @@ public partial class HierarchyTree : Tree
         CellSelected += OnCellSelected;
 
         // イベントの購読
-        Application.Instance.Events.Model.Hub.AddModelRequested += OnAddModelRequested;
-        Application.Instance.Events.Model.Hub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-        Application.Instance.Events.Model.Hub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
-        Application.Instance.Events.Model.Hub.RootModelNotified += OnRootModelNotified;
+        Application.Events.Model.Hub.AddModelRequested += OnAddModelRequested;
+        Application.Events.Model.Hub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+        Application.Events.Model.Hub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        Application.Events.Model.Hub.RootModelNotified += OnRootModelNotified;
 
-        _visibleIcon = Application.Instance.System.Assets.GetVisibilityIcon(true, 24);
-        _invisibleIcon = Application.Instance.System.Assets.GetVisibilityIcon(false, 24);
+        _visibleIcon = Application.System.Assets.GetVisibilityIcon(true, 24);
+        _invisibleIcon = Application.System.Assets.GetVisibilityIcon(false, 24);
 
         // VisibleButton 列を固定幅にする
         SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
@@ -44,10 +44,10 @@ public partial class HierarchyTree : Tree
         CellSelected -= OnCellSelected;
 
         // イベントの購読解除
-        Application.Instance.Events.Model.Hub.AddModelRequested -= OnAddModelRequested;
-        Application.Instance.Events.Model.Hub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-        Application.Instance.Events.Model.Hub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
-        Application.Instance.Events.Model.Hub.RootModelNotified -= OnRootModelNotified;
+        Application.Events.Model.Hub.AddModelRequested -= OnAddModelRequested;
+        Application.Events.Model.Hub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+        Application.Events.Model.Hub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        Application.Events.Model.Hub.RootModelNotified -= OnRootModelNotified;
     }
 
     public override void _Process(double delta)
@@ -55,7 +55,7 @@ public partial class HierarchyTree : Tree
         // ルートモデルがまだ取得できていない場合は、ModelEventHub に通知をリクエストする、Ready団塊ではノードの読み込み順序の都合などで取得できないことを想定し、毎フレームチェックする
         if (_rootModel == null)
         {
-            Application.Instance.Events.Model.RequestNotifyRootModel();
+            Application.Events.Model.RequestNotifyRootModel();
         }
     }
 
@@ -81,12 +81,12 @@ public partial class HierarchyTree : Tree
         if (selected)
         {
             // 選択されたアイテムに対応する AnyModel を選択状態にする
-            Application.Instance.Services.Selection.Add(ModelBinder.GetModel(item));
+            Application.Services.Selection.Add(ModelBinder.GetModel(item));
         }
         else
         {
             // 選択が解除されたアイテムに対応する AnyModel を選択解除状態にする
-            Application.Instance.Services.Selection.Remove(ModelBinder.GetModel(item));
+            Application.Services.Selection.Remove(ModelBinder.GetModel(item));
         }
     }
 
@@ -121,12 +121,12 @@ public partial class HierarchyTree : Tree
         AnyModel model = ModelBinder.GetModel(item);
         if (model == null)
         {
-            Application.Instance.System.Log.Warn("HierarchyTree: clicked item has no associated model.");
+            Application.System.Log.Warn("HierarchyTree: clicked item has no associated model.");
             return;
         }
 
         // モデルの表示状態を切り替える
-        Application.Instance.Events.Model.RequestToggleModelVisibility(model);
+        Application.Events.Model.RequestToggleModelVisibility(model);
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public partial class HierarchyTree : Tree
     /// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
     private void OnModelVisibilityStateNotified(AnyModel model, bool isVisible)
     {
-        Application.Instance.System.Log.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
+        Application.System.Log.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
         TreeItem item = ModelBinder.GetItem(model);
         if (item != null)
         {
@@ -185,7 +185,7 @@ public partial class HierarchyTree : Tree
         {
             _rootModel = rootModel;
             AddToTree(_rootModel);
-            Application.Instance.System.Log.Info("HierarchyTree: RootModel notified and added to tree.");
+            Application.System.Log.Info("HierarchyTree: RootModel notified and added to tree.");
         }
     }
 
@@ -210,7 +210,7 @@ public partial class HierarchyTree : Tree
         // AnyModel と TreeItem の対応を登録
         if (!ModelBinder.Bind(model, item))
         {
-            Application.Instance.System.Log.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
+            Application.System.Log.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
         }
 
         // 子ノードを再帰的に追加

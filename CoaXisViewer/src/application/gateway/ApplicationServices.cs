@@ -22,53 +22,53 @@ public sealed class ApplicationSelectionService
 {
     private readonly Application _app;
 
-    public Selection Hub => _app.Selection;
+    public Selection Hub => _app.SelectionNode;
 
     public ApplicationSelectionService(Application app)
     {
         _app = app;
     }
 
-    public IReadOnlyCollection<AnyModel> GetModels => Selection.GetModels;
-    public int Count => Selection.Count;
+    public IReadOnlyCollection<AnyModel> GetModels => Hub.GetModels;
+    public int Count => Hub.Count;
 
-    public bool Contains(AnyModel model) => Selection.Contains(model);
-    public AnyModel[] GetModelArray() => Selection.GetModelArray();
-    public void Set(AnyModel model) => Selection.Set(model);
-    public void Set(AnyModel[] models) => Selection.Set(models);
-    public bool Add(AnyModel model) => Selection.Add(model);
-    public void Add(AnyModel[] models) => Selection.Add(models);
-    public bool Remove(AnyModel model) => Selection.Remove(model);
-    public void Remove(AnyModel[] models) => Selection.Remove(models);
-    public void Toggle(AnyModel model) => Selection.Toggle(model);
-    public void Toggle(AnyModel[] models) => Selection.Toggle(models);
-    public bool Clear() => Selection.Clear();
+    public bool Contains(AnyModel model) => Hub.Contains(model);
+    public AnyModel[] GetModelArray() => Hub.GetModelArray();
+    public void Set(AnyModel model) => Hub.Set(model);
+    public void Set(AnyModel[] models) => Hub.Set(models);
+    public bool Add(AnyModel model) => Hub.Add(model);
+    public void Add(AnyModel[] models) => Hub.Add(models);
+    public bool Remove(AnyModel model) => Hub.Remove(model);
+    public void Remove(AnyModel[] models) => Hub.Remove(models);
+    public void Toggle(AnyModel model) => Hub.Toggle(model);
+    public void Toggle(AnyModel[] models) => Hub.Toggle(models);
+    public bool Clear() => Hub.Clear();
 }
 
 public sealed class ApplicationUiService
 {
     private readonly Application _app;
 
-    public UiManager Hub => _app.UiManager;
+    public UiManager Hub => _app.UiManagerNode;
 
     public ApplicationUiService(Application app)
     {
         _app = app;
     }
 
-    public void Show(Container container) => UiManager.Show(container);
+    public void Show(Container container) => Hub.Show(container);
 }
 
 public sealed class ApplicationSettingsService
 {
     private readonly Application _app;
 
-    public SettingsService Hub => _app.SettingsService;
+    public SettingsService Hub => _app.SettingsServiceNode;
 
     public ApplicationSettingsService(Application app)
     {
         _app = app;
     }
 
-    public ViewerSettings Current => SettingsService.Current;
+    public ViewerSettings Current => Hub.Current;
 }

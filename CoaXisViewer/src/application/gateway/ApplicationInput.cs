@@ -5,7 +5,7 @@ public sealed class ApplicationInput
 {
     private readonly Application _app;
 
-    public DeviceInputHandler Device => _app.DeviceInputHandler;
+    public DeviceInputHandler Device => _app.DeviceInputHandlerNode;
 
     public ApplicationInput(Application app)
     {

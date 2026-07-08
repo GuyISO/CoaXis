@@ -65,23 +65,23 @@ public partial class ViewportOverlay : Control
         _selectionRectLineVertical2 = _selectionRect.GetNode<Line2D>("LineVertical2");
 
         // イベントの購読登録
-        Application.Instance.Events.Viewport.Hub.RotateRequested += OnRotateRequested;
-        Application.Instance.Events.Viewport.Hub.RotationNotified += OnRotationNotified;
-        Application.Instance.Events.Viewport.Hub.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Instance.Events.Viewport.Hub.ArcballRadiusNotified += OnArcballRadiusNotified;
-        Application.Instance.Events.Viewport.Hub.ArcballHandleNotified += OnArcballHandleNotified;
-        Application.Instance.Events.Viewport.Hub.PickRectNotified += OnPickRectNotified;
+        Application.Events.Viewport.Hub.RotateRequested += OnRotateRequested;
+        Application.Events.Viewport.Hub.RotationNotified += OnRotationNotified;
+        Application.Events.Viewport.Hub.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Events.Viewport.Hub.ArcballRadiusNotified += OnArcballRadiusNotified;
+        Application.Events.Viewport.Hub.ArcballHandleNotified += OnArcballHandleNotified;
+        Application.Events.Viewport.Hub.PickRectNotified += OnPickRectNotified;
     }
 
     public override void _ExitTree()
     {
         // イベントの購読解除
-        Application.Instance.Events.Viewport.Hub.RotateRequested -= OnRotateRequested;
-        Application.Instance.Events.Viewport.Hub.RotationNotified -= OnRotationNotified;
-        Application.Instance.Events.Viewport.Hub.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Instance.Events.Viewport.Hub.ArcballRadiusNotified -= OnArcballRadiusNotified;
-        Application.Instance.Events.Viewport.Hub.ArcballHandleNotified -= OnArcballHandleNotified;
-        Application.Instance.Events.Viewport.Hub.PickRectNotified -= OnPickRectNotified;
+        Application.Events.Viewport.Hub.RotateRequested -= OnRotateRequested;
+        Application.Events.Viewport.Hub.RotationNotified -= OnRotationNotified;
+        Application.Events.Viewport.Hub.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Events.Viewport.Hub.ArcballRadiusNotified -= OnArcballRadiusNotified;
+        Application.Events.Viewport.Hub.ArcballHandleNotified -= OnArcballHandleNotified;
+        Application.Events.Viewport.Hub.PickRectNotified -= OnPickRectNotified;
     }
 
     public override void _Process(double delta)
@@ -89,7 +89,7 @@ public partial class ViewportOverlay : Control
         if (!_isInitialized)
         {
             // カメラの初期状態を取得してUIに反映する
-            Application.Instance.Events.Viewport.RequestNotifyState();
+            Application.Events.Viewport.RequestNotifyState();
         }
     }
 

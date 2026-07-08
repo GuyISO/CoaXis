@@ -19,31 +19,31 @@ public sealed class ApplicationLog
 {
     private readonly Application _app;
 
-    public LogHub Hub => _app.LogHub;
+    public LogHub Hub => _app.LogHubNode;
 
     public ApplicationLog(Application app)
     {
         _app = app;
     }
 
-    public void Log(LogLevel level, string message) => LogHub.Log(level, message);
-    public void Debug(string msg) => LogHub.Debug(msg);
-    public void Info(string msg) => LogHub.Info(msg);
-    public void Warn(string msg) => LogHub.Warn(msg);
-    public void Error(string msg) => LogHub.Error(msg);
+    public void Log(LogLevel level, string message) => Hub.Log(level, message);
+    public void Debug(string msg) => Hub.Debug(msg);
+    public void Info(string msg) => Hub.Info(msg);
+    public void Warn(string msg) => Hub.Warn(msg);
+    public void Error(string msg) => Hub.Error(msg);
 }
 
 public sealed class ApplicationAssets
 {
     private readonly Application _app;
 
-    public AssetManager Hub => _app.AssetManager;
+    public AssetManager Hub => _app.AssetManagerNode;
 
     public ApplicationAssets(Application app)
     {
         _app = app;
     }
 
-    public Texture2D GetVisibilityIcon(bool isVisible, int size = 24) => AssetManager.GetVisibilityIcon(isVisible, size);
-    public Texture2D GetIcon(string path, int size = 16) => AssetManager.GetIcon(path, size);
+    public Texture2D GetVisibilityIcon(bool isVisible, int size = 24) => Hub.GetVisibilityIcon(isVisible, size);
+    public Texture2D GetIcon(string path, int size = 16) => Hub.GetIcon(path, size);
 }

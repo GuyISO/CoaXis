@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード
 /// </summary>
-public partial class AssetManager : SingletonNodeBase<AssetManager>
+public partial class AssetManager : Node
 {
     #region Fields
 
@@ -33,7 +33,7 @@ public partial class AssetManager : SingletonNodeBase<AssetManager>
     /// <param name="isVisible">表示状態なら true、非表示状態なら false</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    internal static Texture2D GetVisibilityIcon(bool isVisible, int size = 24)
+    internal Texture2D GetVisibilityIcon(bool isVisible, int size = 24)
     {
         string path = isVisible ? VisibleIconPath : InvisibleIconPath;
         return GetIcon(path, size);
@@ -45,15 +45,15 @@ public partial class AssetManager : SingletonNodeBase<AssetManager>
     /// <param name="path">アセットパス</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    internal static Texture2D GetIcon(string path, int size = 16)
+    internal Texture2D GetIcon(string path, int size = 16)
     {
-        if (Instance == null)
+        if (!IsInsideTree())
         {
             Warn($"AssetManager is not initialized. path='{path}', size={size}");
             return null;
         }
 
-        return Instance.GetOrCreateIcon(path, size);
+        return GetOrCreateIcon(path, size);
     }
 
     #endregion
@@ -89,15 +89,9 @@ public partial class AssetManager : SingletonNodeBase<AssetManager>
         return resized;
     }
 
-    private static void Warn(string message)
+    private void Warn(string message)
     {
-        if (Application.Instance?.System?.Log != null)
-        {
-            Application.Instance.System.Log.Warn(message);
-            return;
-        }
-
-        GD.PrintErr(message);
+        Application.System.Log.Warn(message);
     }
 
     #endregion

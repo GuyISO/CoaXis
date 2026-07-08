@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
 /// </summary>
-public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
+public partial class DeviceInputHandler : Node
 {
     #region Fields
 
@@ -27,18 +27,18 @@ public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            Application.Instance.Events.Model.RequestSetMultiSelectionMode(_isMultiSelectMode);
+            Application.Events.Model.RequestSetMultiSelectionMode(_isMultiSelectMode);
         }
 
         if (Input.IsActionJustPressed("load"))
         {
-            Application.Instance.Events.Model.RequestLoadModel("res://assets/models/car.glb");
+            Application.Events.Model.RequestLoadModel("res://assets/models/car.glb");
         }
 
         if (Input.IsActionJustPressed("escape"))
         {
-            Application.Instance.Events.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
-            Application.Instance.Events.Model.RequestClearSelection();
+            Application.Events.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
+            Application.Events.Model.RequestClearSelection();
         }
 
         HandleUndoRedoInput();
@@ -56,7 +56,7 @@ public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
     /// <summary>
     /// Undo/Redo 入力に応じてコマンド履歴を操作する
     /// </summary>
-    private static void HandleUndoRedoInput()
+    private void HandleUndoRedoInput()
     {
         bool undoPressed = Input.IsActionJustPressed("undo");
         bool redoPressed = Input.IsActionJustPressed("redo");
@@ -67,13 +67,13 @@ public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
 
         if (undoPressed)
         {
-            Application.Instance.System.Log.Debug("DeviceInputHandler: Undo requested.");
+            Application.System.Log.Debug("DeviceInputHandler: Undo requested.");
             UndoService.Undo();
         }
 
         if (redoPressed)
         {
-            Application.Instance.System.Log.Debug("DeviceInputHandler: Redo requested.");
+            Application.System.Log.Debug("DeviceInputHandler: Redo requested.");
             UndoService.Redo();
         }
     }
@@ -82,7 +82,7 @@ public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
     /// ユーザーの入力に基づいてカメラの平行移動をリクエストする
     /// </summary>
     /// <param name="delta">前のフレームからの経過時間（秒）</param>
-    private static void HandleTranslationInput(float delta)
+    private void HandleTranslationInput(float delta)
     {
         float x = GetAxis("translate_camera_left", "translate_camera_right");
         float y = GetAxis("translate_camera_down", "translate_camera_up");
@@ -99,15 +99,15 @@ public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
             translationDirection = translationDirection.Normalized();
         }
 
-        Vector3 translation = translationDirection * (Instance._translateSpeed * delta);
-        Application.Instance.Events.Viewport.RequestTranslate(translation, SpaceMode.Camera);
+        Vector3 translation = translationDirection * (_translateSpeed * delta);
+        Application.Events.Viewport.RequestTranslate(translation, SpaceMode.Camera);
     }
 
     /// <summary>
     /// ユーザーの入力に基づいてカメラの回転をリクエストする
     /// </summary>
     /// <param name="delta">前のフレームからの経過時間（秒）</param>
-    private static void HandleRotationInput(float delta)
+    private void HandleRotationInput(float delta)
     {
         float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
         float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
@@ -118,15 +118,15 @@ public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
             return;
         }
 
-        float yawAngle = Mathf.DegToRad(yawInput * Instance._rotateSpeedDegrees * delta);
-        float pitchAngle = Mathf.DegToRad(pitchInput * Instance._rotateSpeedDegrees * delta);
-        float rollAngle = Mathf.DegToRad(rollInput * Instance._rollSpeedDegrees * delta);
+        float yawAngle = Mathf.DegToRad(yawInput * _rotateSpeedDegrees * delta);
+        float pitchAngle = Mathf.DegToRad(pitchInput * _rotateSpeedDegrees * delta);
+        float rollAngle = Mathf.DegToRad(rollInput * _rollSpeedDegrees * delta);
         Quaternion yaw = new Quaternion(Vector3.Up, yawAngle);
         Quaternion pitch = new Quaternion(Vector3.Right, pitchAngle);
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
         Quaternion rotation = yaw * pitch * roll;
 
-        Application.Instance.Events.Viewport.RequestRotate(rotation, SpaceMode.Camera);
+        Application.Events.Viewport.RequestRotate(rotation, SpaceMode.Camera);
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ public partial class DeviceInputHandler : SingletonNodeBase<DeviceInputHandler>
     /// <param name="negativeAction">負の方向のアクション名</param>
     /// <param name="positiveAction">正の方向のアクション名</param>
     /// <returns>軸の値（-1.0から1.0の範囲）</returns>
-    private static float GetAxis(string negativeAction, string positiveAction)
+    private float GetAxis(string negativeAction, string positiveAction)
     {
         return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);
     }

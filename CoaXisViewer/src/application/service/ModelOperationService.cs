@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// モデルの操作を行う Autoload ノード
 /// </summary>
-public partial class ModelOperationService : SingletonNodeBase<ModelOperationService>
+public partial class ModelOperationService : Node
 {
 	#region Fields
 
@@ -18,17 +18,17 @@ public partial class ModelOperationService : SingletonNodeBase<ModelOperationSer
 	public override void _Ready()
 	{
 		// イベントの購読開始
-		Application.Instance.Events.Model.Hub.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		Application.Instance.Events.Pick.Hub.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
-		Application.Instance.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
+		Application.Events.Model.Hub.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+		Application.Events.Pick.Hub.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
+		Application.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		Application.Instance.Events.Model.Hub.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		Application.Instance.Events.Pick.Hub.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
-		Application.Instance.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+		Application.Events.Model.Hub.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
+		Application.Events.Pick.Hub.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
+		Application.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 
 		base._ExitTree();
 	}
@@ -52,7 +52,7 @@ public partial class ModelOperationService : SingletonNodeBase<ModelOperationSer
 	/// </summary>
 	private void OnNotifyPickHandlingModeRequested()
 	{
-		Application.Instance.Events.Pick.NotifyPickHandlingMode(_currentPickHandlingMode);
+		Application.Events.Pick.NotifyPickHandlingMode(_currentPickHandlingMode);
 	}
 
 	/// <summary>
