@@ -11,17 +11,19 @@ public partial class Application : Node
     public static Application Instance { get; private set; }
 
     // gateways
-    private ApplicationEvents _applicationEvents;
-    private ApplicationInput _applicationInput;
-    private ApplicationServices _applicationServices;
     private ApplicationSystem _applicationSystem;
+    private ApplicationEvents _applicationEvents;
+    private ApplicationServices _applicationServices;
+    private ApplicationInput _applicationInput;
 
     // singleton nodes
+    private LogHub _logHub;
+
     private MeasurementEventHub _measurementEventHub;
     private ModelEventHub _modelEventHub;
     private PickEventHub _pickEventHub;
     private ViewportEventHub _viewportEventHub;
-    private DeviceInputHandler _deviceInputHandler;
+
     private MeasurementService _measurementService;
     private ModelOperationService _modelOperationService;
     private ModelVisualService _modelVisualService;
@@ -29,25 +31,29 @@ public partial class Application : Node
     private SettingsService _settingsService;
     private UiManager _uiManager;
     private AssetManager _assetManager;
-    private LogHub _logHub;
 
-    // modules
-    // Nodeインスタンス不要論がわいたらこっちにうつす
+    private DeviceInputHandler _deviceInputHandler;
 
     #endregion
 
     #region Properties
 
+    internal LogHub LogHubNode => _logHub;
+
+    internal MeasurementEventHub MeasurementEventHubNode => _measurementEventHub;
     internal ModelEventHub ModelEventHubNode => _modelEventHub;
     internal PickEventHub PickEventHubNode => _pickEventHub;
     internal ViewportEventHub ViewportEventHubNode => _viewportEventHub;
-    internal MeasurementEventHub MeasurementEventHubNode => _measurementEventHub;
+
+    internal MeasurementService MeasurementServiceNode => _measurementService;
+    internal ModelOperationService ModelOperationServiceNode => _modelOperationService;
+    internal ModelVisualService ModelVisualServiceNode => _modelVisualService;
+    internal AssetManager AssetManagerNode => _assetManager;
     internal Selection SelectionNode => _selection;
     internal SettingsService SettingsServiceNode => _settingsService;
     internal UiManager UiManagerNode => _uiManager;
-    internal AssetManager AssetManagerNode => _assetManager;
+
     internal DeviceInputHandler DeviceInputHandlerNode => _deviceInputHandler;
-    internal LogHub LogHubNode => _logHub;
 
     #endregion
 
@@ -58,9 +64,9 @@ public partial class Application : Node
         Instance = this;
         EnsureModules();
 
+        _applicationSystem = new ApplicationSystem(this);
         _applicationEvents = new ApplicationEvents(this);
         _applicationServices = new ApplicationServices(this);
-        _applicationSystem = new ApplicationSystem(this);
         _applicationInput = new ApplicationInput(this);
     }
 
@@ -77,46 +83,53 @@ public partial class Application : Node
     #region Public Methods
 
     // gateways (static facade)
-    public static ApplicationEvents Events => Instance._applicationEvents;
-    public static ApplicationInput Input => Instance._applicationInput;
-    public static ApplicationServices Services => Instance._applicationServices;
     public static ApplicationSystem System => Instance._applicationSystem;
+    public static ApplicationEvents Events => Instance._applicationEvents;
+    public static ApplicationServices Services => Instance._applicationServices;
+    public static ApplicationInput Input => Instance._applicationInput;
 
     // modules
-    public static MeasurementService MeasurementService => Instance._measurementService;
+    public static LogHub LogHub => Instance._logHub;
+
+    public static MeasurementEventHub MeasurementEventHub => Instance._measurementEventHub;
     public static ModelEventHub ModelEventHub => Instance._modelEventHub;
     public static PickEventHub PickEventHub => Instance._pickEventHub;
     public static ViewportEventHub ViewportEventHub => Instance._viewportEventHub;
-    public static Selection Selection => Instance._selection;
+
+    public static AssetManager AssetManager => Instance._assetManager;
+    public static MeasurementService MeasurementService => Instance._measurementService;
     public static ModelOperationService ModelOperationService => Instance._modelOperationService;
     public static ModelVisualService ModelVisualService => Instance._modelVisualService;
+    public static Selection Selection => Instance._selection;
     public static SettingsService SettingsService => Instance._settingsService;
     public static UiManager UiManager => Instance._uiManager;
-    public static AssetManager AssetManager => Instance._assetManager;
+
     public static DeviceInputHandler DeviceInputHandler => Instance._deviceInputHandler;
-    public static LogHub LogHub => Instance._logHub;
 
     #endregion
 
     #region Private Methods
 
+    /// <summary>
+    /// 依存関係を考慮してモジュールを初期化する。
+    /// </summary>
     private void EnsureModules()
     {
-        // 依存関係を考慮して初期化順を固定する。
         _logHub = AddModule<LogHub>("LogHub");
 
+        _measurementEventHub = AddModule<MeasurementEventHub>("MeasurementEventHub");
         _modelEventHub = AddModule<ModelEventHub>("ModelEventHub");
         _pickEventHub = AddModule<PickEventHub>("PickEventHub");
         _viewportEventHub = AddModule<ViewportEventHub>("ViewportEventHub");
-        _measurementEventHub = AddModule<MeasurementEventHub>("MeasurementEventHub");
 
-        _selection = AddModule<Selection>("Selection");
+        _assetManager = AddModule<AssetManager>("AssetManager");
         _measurementService = AddModule<MeasurementService>("MeasurementService");
         _modelOperationService = AddModule<ModelOperationService>("ModelOperationService");
         _modelVisualService = AddModule<ModelVisualService>("ModelVisualService");
+        _selection = AddModule<Selection>("Selection");
         _settingsService = AddModule<SettingsService>("SettingsService");
         _uiManager = AddModule<UiManager>("UiManager");
-        _assetManager = AddModule<AssetManager>("AssetManager");
+
         _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");
     }
 
