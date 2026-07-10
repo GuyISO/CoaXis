@@ -51,8 +51,8 @@ public partial class MeasurementUi : PanelContainer
         _buttonPicks[0].Pressed += OnButtonPick1Pressed;
         _buttonPicks[1].Pressed += OnButtonPick2Pressed;
 
-        Application.Events.Measurement.Hub.MeasurementResultNotified += OnMeasurementUpdated;
-        Application.Events.Measurement.RequestNotifyMeasurementResult();
+        Application.Measurement.EventHub.MeasurementResultNotified += OnMeasurementUpdated;
+        Application.Measurement.RequestNotifyMeasurementResult();
     }
 
     public override void _ExitTree()
@@ -61,7 +61,7 @@ public partial class MeasurementUi : PanelContainer
         _buttonPicks[0].Pressed -= OnButtonPick1Pressed;
         _buttonPicks[1].Pressed -= OnButtonPick2Pressed;
 
-        Application.Events.Measurement.Hub.MeasurementResultNotified -= OnMeasurementUpdated;
+        Application.Measurement.EventHub.MeasurementResultNotified -= OnMeasurementUpdated;
     }
 
     #endregion
@@ -73,8 +73,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonPick1Pressed()
     {
-        Application.System.Log.Debug("MeasurementUi: pick point 1 requested.");
-        Application.Events.Measurement.RequestPickPoint(1);
+        Application.Logger.Debug("MeasurementUi: pick point 1 requested.");
+        Application.Measurement.RequestPickPoint(1);
     }
 
     /// <summary>
@@ -82,8 +82,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonPick2Pressed()
     {
-        Application.System.Log.Debug("MeasurementUi: pick point 2 requested.");
-        Application.Events.Measurement.RequestPickPoint(2);
+        Application.Logger.Debug("MeasurementUi: pick point 2 requested.");
+        Application.Measurement.RequestPickPoint(2);
     }
 
     /// <summary>

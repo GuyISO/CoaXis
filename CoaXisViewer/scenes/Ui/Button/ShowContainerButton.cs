@@ -37,12 +37,12 @@ public partial class ShowContainerButton : Button
     {
         if (_container == null)
         {
-            Application.System.Log.Warn("ShowContainerButton: Container is not assigned.");
+            Application.Logger.Warn("ShowContainerButton: Container is not assigned.");
             return;
         }
 
         // UiManager に対してコンテナの表示を要求する
-        Application.Services.Ui.Show(_container.Instantiate<Container>());
+        Application.Service.Ui.Show(_container.Instantiate<Container>());
     }
 
     #endregion

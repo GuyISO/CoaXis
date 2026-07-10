@@ -27,18 +27,18 @@ public partial class DeviceInputHandler : Node
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            Application.Events.Model.RequestSetMultiSelectionMode(_isMultiSelectMode);
+            Application.Model.RequestSetMultiSelectionMode(_isMultiSelectMode);
         }
 
         if (Input.IsActionJustPressed("load"))
         {
-            Application.Events.Model.RequestLoadModel("res://assets/models/car.glb");
+            Application.Model.RequestLoadModel("res://assets/models/car.glb");
         }
 
         if (Input.IsActionJustPressed("escape"))
         {
-            Application.Events.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
-            Application.Events.Model.RequestClearSelection();
+            Application.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
+            Application.Model.RequestClearSelection();
         }
 
         HandleUndoRedoInput();
@@ -67,13 +67,13 @@ public partial class DeviceInputHandler : Node
 
         if (undoPressed)
         {
-            Application.System.Log.Debug("DeviceInputHandler: Undo requested.");
+            Application.Logger.Debug("DeviceInputHandler: Undo requested.");
             UndoService.Undo();
         }
 
         if (redoPressed)
         {
-            Application.System.Log.Debug("DeviceInputHandler: Redo requested.");
+            Application.Logger.Debug("DeviceInputHandler: Redo requested.");
             UndoService.Redo();
         }
     }
@@ -100,7 +100,7 @@ public partial class DeviceInputHandler : Node
         }
 
         Vector3 translation = translationDirection * (_translateSpeed * delta);
-        Application.Events.Viewport.RequestTranslate(translation, SpaceMode.Camera);
+        Application.Viewport.RequestTranslate(translation, SpaceMode.Camera);
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public partial class DeviceInputHandler : Node
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
         Quaternion rotation = yaw * pitch * roll;
 
-        Application.Events.Viewport.RequestRotate(rotation, SpaceMode.Camera);
+        Application.Viewport.RequestRotate(rotation, SpaceMode.Camera);
     }
 
     /// <summary>

@@ -17,12 +17,12 @@ public abstract partial class EventHubBase<THub> : Node where THub : EventHubBas
     {
         if (!IsInsideTree())
         {
-            Application.System.Log.Warn($"{typeof(THub).Name} is not initialized. Skipped signal: {signalName}.");
+            Application.Logger.Warn($"{typeof(THub).Name} is not initialized. Skipped signal: {signalName}.");
             return false;
         }
 
         EmitSignal(signalName, args);
-        Application.System.Log.Debug($"{typeof(THub).Name} emitted signal: {signalName}.");
+        Application.Logger.Debug($"{typeof(THub).Name} emitted signal: {signalName}.");
         return true;
     }
 

@@ -3,14 +3,11 @@
     "tasks": [
         {
             "label": "build",
-            "command": "<insert-godot-executable-path-here>",
+            "command": "dotnet",
             "type": "process",
             "args": [
-                "--build-solutions",
-                "--path",
-                "${workspaceRoot}",
-                "--no-window",
-                "-q"
+                "build",
+                ".\\CoaXisViewer.sln"
             ],
             "problemMatcher": "$msCompile"
         }

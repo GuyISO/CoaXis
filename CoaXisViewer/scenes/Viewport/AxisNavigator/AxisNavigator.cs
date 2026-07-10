@@ -32,13 +32,13 @@ public partial class AxisNavigator : Control
         _camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
 
         // イベント購読の登録
-        Application.Events.Viewport.Hub.RotationNotified += OnRotationNotified;
+        Application.Viewport.EventHub.RotationNotified += OnRotationNotified;
     }
 
     public override void _ExitTree()
     {
         // イベント購読の解除
-        Application.Events.Viewport.Hub.RotationNotified -= OnRotationNotified;
+        Application.Viewport.EventHub.RotationNotified -= OnRotationNotified;
     }
 
     public override void _Process(double delta)
@@ -46,7 +46,7 @@ public partial class AxisNavigator : Control
         if (!_isInitialized)
         {
             // カメラの初期回転を取得して軸ナビゲータに反映する
-            Application.Events.Viewport.RequestNotifyState();
+            Application.Viewport.RequestNotifyState();
         }
     }
 
@@ -101,7 +101,7 @@ public partial class AxisNavigator : Control
             // _cameraController.MoveFocalPoint(null, quaternion, true);
 
             // カメラ回転要求イベントを発行
-            Application.Events.Viewport.RequestMoveRotationTo(quaternion, true);
+            Application.Viewport.RequestMoveRotationTo(quaternion, true);
         }
     }
 

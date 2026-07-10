@@ -8,29 +8,25 @@ public partial class Application : Node
 {
     #region Fields
 
-    public static Application Instance { get; private set; }
-
     // gateways
-    private ApplicationSystem _applicationSystem;
-    private ApplicationEvents _applicationEvents;
+    private ApplicationLogHub _applicationLogHub;
+    private ApplicationAssetManager _applicationAssetManager;
+    
+    private ApplicationMeasurementEventHub _applicationMeasurementEventHub;
+    private ApplicationModelEventHub _applicationModelEventHub;
+    private ApplicationPickEventHub _applicationPickEventHub;
+    private ApplicationViewportEventHub _applicationViewportEventHub;
+
     private ApplicationServices _applicationServices;
     private ApplicationInput _applicationInput;
 
     // singleton nodes
-    private LogHub _logHub;
-
-    private MeasurementEventHub _measurementEventHub;
-    private ModelEventHub _modelEventHub;
-    private PickEventHub _pickEventHub;
-    private ViewportEventHub _viewportEventHub;
-
     private MeasurementService _measurementService;
     private ModelOperationService _modelOperationService;
     private ModelVisualService _modelVisualService;
     private Selection _selection;
     private SettingsService _settingsService;
     private UiManager _uiManager;
-    private AssetManager _assetManager;
 
     private DeviceInputHandler _deviceInputHandler;
 
@@ -38,21 +34,39 @@ public partial class Application : Node
 
     #region Properties
 
-    internal LogHub LogHubNode => _logHub;
+    public static Application Instance { get; private set; }
 
-    internal MeasurementEventHub MeasurementEventHubNode => _measurementEventHub;
-    internal ModelEventHub ModelEventHubNode => _modelEventHub;
-    internal PickEventHub PickEventHubNode => _pickEventHub;
-    internal ViewportEventHub ViewportEventHubNode => _viewportEventHub;
+    // static facade gateways
+    public static ApplicationLogHub Logger => Instance._applicationLogHub;
+    public static ApplicationAssetManager Asset => Instance._applicationAssetManager;
+    
+    public static ApplicationMeasurementEventHub Measurement => Instance._applicationMeasurementEventHub;
+    public static ApplicationModelEventHub Model => Instance._applicationModelEventHub;
+    public static ApplicationPickEventHub Pick => Instance._applicationPickEventHub;
+    public static ApplicationViewportEventHub Viewport => Instance._applicationViewportEventHub;
 
+    public static ApplicationServices Service => Instance._applicationServices;
+    public static ApplicationInput Input => Instance._applicationInput;
+
+    // System
+    internal LogHub LogHub { get; private set; }
+    internal AssetManager AssetManager { get; private set; }
+
+    // Event
+    internal MeasurementEventHub MeasurementEventHub { get; private set; }
+    internal ModelEventHub ModelEventHub { get; private set; }
+    internal PickEventHub PickEventHub { get; private set; }
+    internal ViewportEventHub ViewportEventHub { get; private set; }
+
+    // Service
     internal MeasurementService MeasurementServiceNode => _measurementService;
     internal ModelOperationService ModelOperationServiceNode => _modelOperationService;
     internal ModelVisualService ModelVisualServiceNode => _modelVisualService;
-    internal AssetManager AssetManagerNode => _assetManager;
     internal Selection SelectionNode => _selection;
     internal SettingsService SettingsServiceNode => _settingsService;
     internal UiManager UiManagerNode => _uiManager;
 
+    // Input
     internal DeviceInputHandler DeviceInputHandlerNode => _deviceInputHandler;
 
     #endregion
@@ -64,8 +78,14 @@ public partial class Application : Node
         Instance = this;
         EnsureModules();
 
-        _applicationSystem = new ApplicationSystem(this);
-        _applicationEvents = new ApplicationEvents(this);
+        _applicationLogHub = new ApplicationLogHub();
+        _applicationAssetManager = new ApplicationAssetManager();
+        
+        _applicationMeasurementEventHub = new ApplicationMeasurementEventHub();
+        _applicationModelEventHub = new ApplicationModelEventHub();
+        _applicationPickEventHub = new ApplicationPickEventHub();
+        _applicationViewportEventHub = new ApplicationViewportEventHub();
+
         _applicationServices = new ApplicationServices(this);
         _applicationInput = new ApplicationInput(this);
     }
@@ -80,34 +100,6 @@ public partial class Application : Node
 
     #endregion
 
-    #region Public Methods
-
-    // gateways (static facade)
-    public static ApplicationSystem System => Instance._applicationSystem;
-    public static ApplicationEvents Events => Instance._applicationEvents;
-    public static ApplicationServices Services => Instance._applicationServices;
-    public static ApplicationInput Input => Instance._applicationInput;
-
-    // modules
-    public static LogHub LogHub => Instance._logHub;
-
-    public static MeasurementEventHub MeasurementEventHub => Instance._measurementEventHub;
-    public static ModelEventHub ModelEventHub => Instance._modelEventHub;
-    public static PickEventHub PickEventHub => Instance._pickEventHub;
-    public static ViewportEventHub ViewportEventHub => Instance._viewportEventHub;
-
-    public static AssetManager AssetManager => Instance._assetManager;
-    public static MeasurementService MeasurementService => Instance._measurementService;
-    public static ModelOperationService ModelOperationService => Instance._modelOperationService;
-    public static ModelVisualService ModelVisualService => Instance._modelVisualService;
-    public static Selection Selection => Instance._selection;
-    public static SettingsService SettingsService => Instance._settingsService;
-    public static UiManager UiManager => Instance._uiManager;
-
-    public static DeviceInputHandler DeviceInputHandler => Instance._deviceInputHandler;
-
-    #endregion
-
     #region Private Methods
 
     /// <summary>
@@ -115,14 +107,17 @@ public partial class Application : Node
     /// </summary>
     private void EnsureModules()
     {
-        _logHub = AddModule<LogHub>("LogHub");
+        // System
+        LogHub = AddModule<LogHub>("LogHub");
+        AssetManager = AddModule<AssetManager>("AssetManager");
 
-        _measurementEventHub = AddModule<MeasurementEventHub>("MeasurementEventHub");
-        _modelEventHub = AddModule<ModelEventHub>("ModelEventHub");
-        _pickEventHub = AddModule<PickEventHub>("PickEventHub");
-        _viewportEventHub = AddModule<ViewportEventHub>("ViewportEventHub");
+        // Event
+        MeasurementEventHub = AddModule<MeasurementEventHub>("MeasurementEventHub");
+        ModelEventHub = AddModule<ModelEventHub>("ModelEventHub");
+        PickEventHub = AddModule<PickEventHub>("PickEventHub");
+        ViewportEventHub = AddModule<ViewportEventHub>("ViewportEventHub");
 
-        _assetManager = AddModule<AssetManager>("AssetManager");
+        // Service
         _measurementService = AddModule<MeasurementService>("MeasurementService");
         _modelOperationService = AddModule<ModelOperationService>("ModelOperationService");
         _modelVisualService = AddModule<ModelVisualService>("ModelVisualService");
@@ -130,6 +125,7 @@ public partial class Application : Node
         _settingsService = AddModule<SettingsService>("SettingsService");
         _uiManager = AddModule<UiManager>("UiManager");
 
+        // Input
         _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");
     }
 

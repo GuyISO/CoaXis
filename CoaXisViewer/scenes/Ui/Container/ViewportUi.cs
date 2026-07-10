@@ -67,14 +67,14 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
 
         // イベントの購読開始
-        Application.Events.Model.Hub.RootModelNotified += OnRootModelNotified;
-        Application.Events.Viewport.Hub.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Events.Viewport.Hub.PositionNotified += OnPositionNotified;
-        Application.Events.Viewport.Hub.RotationNotified += OnRotationNotified;
-        Application.Events.Viewport.Hub.DistanceNotified += OnDistanceNotified;
-        Application.Events.Viewport.Hub.SizeNotified += OnSizeNotified;
-        Application.Events.Viewport.Hub.FovNotified += OnFovNotified;
-        Application.Events.Viewport.Hub.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Model.EventHub.RootModelNotified += OnRootModelNotified;
+        Application.Viewport.EventHub.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.EventHub.PositionNotified += OnPositionNotified;
+        Application.Viewport.EventHub.RotationNotified += OnRotationNotified;
+        Application.Viewport.EventHub.DistanceNotified += OnDistanceNotified;
+        Application.Viewport.EventHub.SizeNotified += OnSizeNotified;
+        Application.Viewport.EventHub.FovNotified += OnFovNotified;
+        Application.Viewport.EventHub.ProjectionTypeNotified += OnProjectionTypeNotified;
     }
 
     public override void _ExitTree()
@@ -89,14 +89,14 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
         // イベントの購読解除
-        Application.Events.Model.Hub.RootModelNotified -= OnRootModelNotified;
-        Application.Events.Viewport.Hub.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Events.Viewport.Hub.PositionNotified -= OnPositionNotified;
-        Application.Events.Viewport.Hub.RotationNotified -= OnRotationNotified;
-        Application.Events.Viewport.Hub.DistanceNotified -= OnDistanceNotified;
-        Application.Events.Viewport.Hub.SizeNotified -= OnSizeNotified;
-        Application.Events.Viewport.Hub.FovNotified -= OnFovNotified;
-        Application.Events.Viewport.Hub.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Model.EventHub.RootModelNotified -= OnRootModelNotified;
+        Application.Viewport.EventHub.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.EventHub.PositionNotified -= OnPositionNotified;
+        Application.Viewport.EventHub.RotationNotified -= OnRotationNotified;
+        Application.Viewport.EventHub.DistanceNotified -= OnDistanceNotified;
+        Application.Viewport.EventHub.SizeNotified -= OnSizeNotified;
+        Application.Viewport.EventHub.FovNotified -= OnFovNotified;
+        Application.Viewport.EventHub.ProjectionTypeNotified -= OnProjectionTypeNotified;
     }
 
     public override void _Process(double delta)
@@ -104,12 +104,12 @@ public partial class ViewportUi : PanelContainer
         // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
         if (_rootModel == null)
         {
-            Application.Events.Model.RequestNotifyRootModel();
+            Application.Model.RequestNotifyRootModel();
         }
 
         if (!_isInitialized)
         {
-            Application.Events.Viewport.RequestNotifyState();
+            Application.Viewport.RequestNotifyState();
         }
     }
 
@@ -122,8 +122,8 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonToggleProjectionPressed()
     {
-        Application.System.Log.Debug("ViewportUi: toggle projection requested.");
-        Application.Events.Viewport.RequestToggleProjectionType();
+        Application.Logger.Debug("ViewportUi: toggle projection requested.");
+        Application.Viewport.RequestToggleProjectionType();
     }
 
     /// <summary>
@@ -134,12 +134,12 @@ public partial class ViewportUi : PanelContainer
         if (_rootModel == null)
         {
             GD.PushWarning("ViewportUi: fit target model is missing.");
-            Application.System.Log.Warn("ViewportUi: fit-all requested but default target is missing.");
+            Application.Logger.Warn("ViewportUi: fit-all requested but default target is missing.");
             return;
         }
 
-        Application.System.Log.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
-        Application.Events.Viewport.RequestFit(new[] { _rootModel }, true);
+        Application.Logger.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
+        Application.Viewport.RequestFit(new[] { _rootModel }, true);
     }
 
     /// <summary>
@@ -147,15 +147,15 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        AnyModel[] fitTargets = Application.Services.Selection.GetModelArray();
+        AnyModel[] fitTargets = Application.Service.Selection.GetModelArray();
         if (fitTargets.Length == 0)
         {
-            Application.System.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
+            Application.Logger.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
-        Application.System.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
-        Application.Events.Viewport.RequestFit(fitTargets, true);
+        Application.Logger.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
+        Application.Viewport.RequestFit(fitTargets, true);
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonAlignNormalPressed()
     {
-        Application.Events.Pick.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
+        Application.Pick.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
     }
 
     /// <summary>
@@ -172,8 +172,8 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollLeftPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-        Application.System.Log.Debug("ViewportUi: roll-left requested.");
-        Application.Events.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Logger.Debug("ViewportUi: roll-left requested.");
+        Application.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -182,8 +182,8 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollRightPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-        Application.System.Log.Debug("ViewportUi: roll-right requested.");
-        Application.Events.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Logger.Debug("ViewportUi: roll-right requested.");
+        Application.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -201,8 +201,8 @@ public partial class ViewportUi : PanelContainer
     /// <param name="value">新しい FOV 値</param>
     private void OnSliderFovValueChanged(double value)
     {
-        Application.System.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
-        Application.Events.Viewport.RequestSetFov((float)value);
+        Application.Logger.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
+        Application.Viewport.RequestSetFov((float)value);
     }
 
     /// <summary>
@@ -211,7 +211,7 @@ public partial class ViewportUi : PanelContainer
     /// <param name="mode">ビューポートの操作モード</param>
     private void OnInteractionModeNotified(ViewportInteractionMode mode)
     {
-        // Application.Events.Viewport.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
+        // Application.Viewport.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
         _isInitialized = true;
 
         _labelMode.Text = mode.ToString();

@@ -54,7 +54,7 @@ public partial class MeasurementService : Node
     {
         if (!_isInitialized)
         {
-            Application.Events.Pick.RequestNotifyPickHandlingMode();
+            Application.Pick.RequestNotifyPickHandlingMode();
         }
 
         EnsureMeasurementVisuals();
@@ -70,36 +70,36 @@ public partial class MeasurementService : Node
 
     private void SubscribeEvents()
     {
-        Application.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Events.Pick.Hub.PickResultNotified += OnPickResultNotified;
+        Application.Pick.EventHub.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.EventHub.PickResultNotified += OnPickResultNotified;
 
-        Application.Events.Measurement.Hub.NotifyMeasurementResultRequested += OnNotifyMeasurementResultRequested;
-        Application.Events.Measurement.Hub.PickPointRequested += OnPickPointRequested;
+        Application.Measurement.EventHub.NotifyMeasurementResultRequested += OnNotifyMeasurementResultRequested;
+        Application.Measurement.EventHub.PickPointRequested += OnPickPointRequested;
     }
 
     private void UnsubscribeEvents()
     {
-        Application.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Events.Pick.Hub.PickResultNotified -= OnPickResultNotified;
+        Application.Pick.EventHub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.EventHub.PickResultNotified -= OnPickResultNotified;
 
-        Application.Events.Measurement.Hub.NotifyMeasurementResultRequested -= OnNotifyMeasurementResultRequested;
-        Application.Events.Measurement.Hub.PickPointRequested -= OnPickPointRequested;
+        Application.Measurement.EventHub.NotifyMeasurementResultRequested -= OnNotifyMeasurementResultRequested;
+        Application.Measurement.EventHub.PickPointRequested -= OnPickPointRequested;
     }
 
     private void OnNotifyMeasurementResultRequested()
     {
-        Application.Events.Measurement.NotifyMeasurementResult(ComputeMeasurementResult());
+        Application.Measurement.NotifyMeasurementResult(ComputeMeasurementResult());
     }
 
     private void OnPickPointRequested(int pointIndex)
     {
         if (pointIndex is < 1 or > 2)
         {
-            Application.System.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
+            Application.Logger.Warn($"MeasurementService: invalid point index {pointIndex}.");
             return;
         }
 
-        Application.Events.Pick.NotifyPickHandlingMode(PickHandlingMode.Measurement);
+        Application.Pick.NotifyPickHandlingMode(PickHandlingMode.Measurement);
         _pickingPointIndex = pointIndex;
     }
 
@@ -133,12 +133,12 @@ public partial class MeasurementService : Node
 
         int index = _pickingPointIndex - 1;
         _points[index] = pickResult;
-        Application.System.Log.Debug($"MeasurementService: point {_pickingPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
+        Application.Logger.Debug($"MeasurementService: point {_pickingPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
 
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
         UpdateMeasurementLine();
-        Application.Events.Measurement.NotifyMeasurementResult(ComputeMeasurementResult());
+        Application.Measurement.NotifyMeasurementResult(ComputeMeasurementResult());
     }
 
     private MeasurementResult ComputeMeasurementResult()
@@ -204,13 +204,13 @@ public partial class MeasurementService : Node
 
         if (_pointerLabel == null)
         {
-            Application.System.Log.Warn("MeasurementService: pointer label scene is not loaded.");
+            Application.Logger.Warn("MeasurementService: pointer label scene is not loaded.");
             return;
         }
 
         if (pickResult.Collider == null || !GodotObject.IsInstanceValid(pickResult.Collider))
         {
-            Application.System.Log.Warn("MeasurementService: collider is invalid, skip pointer label placement.");
+            Application.Logger.Warn("MeasurementService: collider is invalid, skip pointer label placement.");
             return;
         }
 

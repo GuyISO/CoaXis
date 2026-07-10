@@ -22,21 +22,21 @@ public partial class Selection : Node
     public override void _Ready()
     {
         // イベントの購読開始
-        Application.Events.Model.Hub.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
-        Application.Events.Model.Hub.ClearSelectionRequested += OnClearSelectionRequested;
-        Application.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Events.Pick.Hub.PickResultNotified += OnPickResultNotified;
-        Application.Events.Pick.Hub.PickResultsNotified += OnPickResultsNotified;
+        Application.Model.EventHub.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
+        Application.Model.EventHub.ClearSelectionRequested += OnClearSelectionRequested;
+        Application.Pick.EventHub.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.EventHub.PickResultNotified += OnPickResultNotified;
+        Application.Pick.EventHub.PickResultsNotified += OnPickResultsNotified;
     }
 
     public override void _ExitTree()
     {
         // イベントの購読解除
-        Application.Events.Model.Hub.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
-        Application.Events.Model.Hub.ClearSelectionRequested -= OnClearSelectionRequested;
-        Application.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Events.Pick.Hub.PickResultNotified -= OnPickResultNotified;
-        Application.Events.Pick.Hub.PickResultsNotified -= OnPickResultsNotified;
+        Application.Model.EventHub.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
+        Application.Model.EventHub.ClearSelectionRequested -= OnClearSelectionRequested;
+        Application.Pick.EventHub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.EventHub.PickResultNotified -= OnPickResultNotified;
+        Application.Pick.EventHub.PickResultsNotified -= OnPickResultsNotified;
 
         base._ExitTree();
     }
@@ -45,7 +45,7 @@ public partial class Selection : Node
     {
         if (!_isInitialized)
         {
-            Application.Events.Pick.RequestNotifyPickHandlingMode();
+            Application.Pick.RequestNotifyPickHandlingMode();
         }
     }
 
@@ -205,8 +205,8 @@ public partial class Selection : Node
     {
         if (_models.Add(model))
         {
-            Application.Events.Model.NotifyModelSelectionState(model, true);
-            Application.System.Log.Info($"Selected: {model.Name}");
+            Application.Model.NotifyModelSelectionState(model, true);
+            Application.Logger.Info($"Selected: {model.Name}");
             return true;
         }
         return false;
@@ -234,8 +234,8 @@ public partial class Selection : Node
     {
         if (_models.Remove(model))
         {
-            Application.Events.Model.NotifyModelSelectionState(model, false);
-            Application.System.Log.Info($"Deselected: {model.Name}");
+            Application.Model.NotifyModelSelectionState(model, false);
+            Application.Logger.Info($"Deselected: {model.Name}");
             return true;
         }
         return false;
@@ -306,8 +306,8 @@ public partial class Selection : Node
         // モデルの選択解除シグナルとハイライト解除は個々に行う
         foreach (var model in modelsToDeselect)
         {
-            Application.Events.Model.NotifyModelSelectionState(model, false);
-            Application.System.Log.Info($"Deselected: {model.Name}");
+            Application.Model.NotifyModelSelectionState(model, false);
+            Application.Logger.Info($"Deselected: {model.Name}");
         }
         return true;
     }

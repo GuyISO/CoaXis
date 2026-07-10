@@ -18,15 +18,15 @@ public partial class ModelVisualService : Node
 	public override void _Ready()
 	{
 		// イベントの購読開始
-		Application.Events.Model.Hub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-		Application.Events.Model.Hub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+		Application.Model.EventHub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+		Application.Model.EventHub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		Application.Events.Model.Hub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-		Application.Events.Model.Hub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+		Application.Model.EventHub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+		Application.Model.EventHub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 
 		base._ExitTree();
 	}
@@ -159,11 +159,11 @@ public partial class ModelVisualService : Node
 		{
 			if (!visited.Add(model))
 			{
-				Application.System.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
+				Application.Logger.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
 				return false;
 			}
 
-			if (Application.Services.Selection.Contains(model))
+			if (Application.Service.Selection.Contains(model))
 			{
 				return true;
 			}

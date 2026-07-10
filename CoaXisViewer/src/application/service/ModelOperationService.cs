@@ -18,17 +18,17 @@ public partial class ModelOperationService : Node
 	public override void _Ready()
 	{
 		// イベントの購読開始
-		Application.Events.Model.Hub.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		Application.Events.Pick.Hub.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
-		Application.Events.Pick.Hub.PickHandlingModeNotified += OnPickHandlingModeNotified;
+		Application.Model.EventHub.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+		Application.Pick.EventHub.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
+		Application.Pick.EventHub.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		Application.Events.Model.Hub.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		Application.Events.Pick.Hub.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
-		Application.Events.Pick.Hub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+		Application.Model.EventHub.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
+		Application.Pick.EventHub.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
+		Application.Pick.EventHub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 
 		base._ExitTree();
 	}
@@ -52,7 +52,7 @@ public partial class ModelOperationService : Node
 	/// </summary>
 	private void OnNotifyPickHandlingModeRequested()
 	{
-		Application.Events.Pick.NotifyPickHandlingMode(_currentPickHandlingMode);
+		Application.Pick.NotifyPickHandlingMode(_currentPickHandlingMode);
 	}
 
 	/// <summary>
