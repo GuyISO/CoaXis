@@ -24,8 +24,8 @@ public partial class Application : Node
     private MeasurementService _measurementService;
     private ModelOperationService _modelOperationService;
     private ModelVisualService _modelVisualService;
-    private Selection _selection;
-    private SettingsService _settingsService;
+    private SelectionService _selectionService;
+    private SettingService _settingService;
     private UiManager _uiManager;
 
     private DeviceInputHandler _deviceInputHandler;
@@ -56,8 +56,8 @@ public partial class Application : Node
     internal MeasurementService MeasurementServiceNode => _measurementService;
     internal ModelOperationService ModelOperationServiceNode => _modelOperationService;
     internal ModelVisualService ModelVisualServiceNode => _modelVisualService;
-    internal Selection SelectionNode => _selection;
-    internal SettingsService SettingsServiceNode => _settingsService;
+    internal SelectionService SelectionServiceNode => _selectionService;
+    internal SettingService SettingServiceNode => _settingService;
     internal UiManager UiManagerNode => _uiManager;
 
     // Input
@@ -115,8 +115,8 @@ public partial class Application : Node
         _measurementService = AddModule<MeasurementService>("MeasurementService");
         _modelOperationService = AddModule<ModelOperationService>("ModelOperationService");
         _modelVisualService = AddModule<ModelVisualService>("ModelVisualService");
-        _selection = AddModule<Selection>("Selection");
-        _settingsService = AddModule<SettingsService>("SettingsService");
+        _selectionService = AddModule<SelectionService>("SelectionService");
+        _settingService = AddModule<SettingService>("SettingService");
         _uiManager = AddModule<UiManager>("UiManager");
 
         // Input

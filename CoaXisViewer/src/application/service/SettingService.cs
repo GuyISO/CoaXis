@@ -24,7 +24,7 @@ using System.Text.Json;
 /// 実行ファイル近傍に設定ファイルを置くことで、ビルド後の配布物でも
 /// 再ビルド不要で設定変更できる運用を想定している。
 /// </summary>
-public partial class SettingsService : Node
+public partial class SettingService : Node
 {
 
     /// <summary>

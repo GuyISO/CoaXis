@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <summary>
 /// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する Autoload ノード
 /// </summary>
-public partial class Selection : Node
+public partial class SelectionService : Node
 {
     #region Fields
 
