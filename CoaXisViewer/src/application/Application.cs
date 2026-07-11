@@ -8,17 +8,12 @@ public partial class Application : Node
 {
     #region Fields
 
-    // gateways
-    private ApplicationLogHub _applicationLogHub;
-    private ApplicationAssetManager _applicationAssetManager;
-    
-    private MeasurementEventHub _measurementEventHub;
+    private MeasurementEvent _measurementEvent;
     private ModelEventHub _modelEventHub;
     private PickEventHub _pickEventHub;
     private ViewportEventHub _viewportEventHub;
 
-    private ApplicationServices _applicationServices;
-    private ApplicationInput _applicationInput;
+    private MeasurementFacade _measurementFacade;
 
     // singleton nodes
     private MeasurementService _measurementService;
@@ -35,24 +30,25 @@ public partial class Application : Node
     #region Properties
 
     public static Application Instance { get; private set; }
-
-    // static facade gateways
-    public static ApplicationLogHub Logger => Instance._applicationLogHub;
-    public static ApplicationAssetManager Asset => Instance._applicationAssetManager;
     
-    public static MeasurementEventHub Measurement => Instance._measurementEventHub;
+    public static LogHub Logger => Instance.LogHub;
+
+    public static MeasurementFacade Measurement => Instance._measurementFacade;
+
     public static ModelEventHub Model => Instance._modelEventHub;
     public static PickEventHub Pick => Instance._pickEventHub;
     public static ViewportEventHub Viewport => Instance._viewportEventHub;
 
-    public static ApplicationServices Service => Instance._applicationServices;
-    public static ApplicationInput Input => Instance._applicationInput;
+    public static SelectionService Selection => Instance._selectionService;
+    public static AssetManager Asset => Instance.AssetManager;
+    public static UiManager Ui => Instance._uiManager;
 
     // System
     internal LogHub LogHub { get; private set; }
     internal AssetManager AssetManager { get; private set; }
 
     // Service
+    internal MeasurementEvent MeasurementEventNode => _measurementEvent;
     internal MeasurementService MeasurementServiceNode => _measurementService;
     internal ModelOperationService ModelOperationServiceNode => _modelOperationService;
     internal ModelVisualService ModelVisualServiceNode => _modelVisualService;
@@ -70,26 +66,19 @@ public partial class Application : Node
     public override void _EnterTree()
     {
         Instance = this;
+
         EnsureModules();
 
-        _applicationLogHub = new ApplicationLogHub();
-        _applicationAssetManager = new ApplicationAssetManager();
-        
-        _measurementEventHub = new MeasurementEventHub();
+        _measurementFacade = new MeasurementFacade();
         _modelEventHub = new ModelEventHub();
         _pickEventHub = new PickEventHub();
         _viewportEventHub = new ViewportEventHub();
 
-        _applicationServices = new ApplicationServices(this);
-        _applicationInput = new ApplicationInput(this);
     }
 
     public override void _ExitTree()
     {
-        if (ReferenceEquals(Instance, this))
-        {
-            Instance = null;
-        }
+        Instance = null;
     }
 
     #endregion
@@ -106,7 +95,7 @@ public partial class Application : Node
         AssetManager = AddModule<AssetManager>("AssetManager");
 
         // Event
-        _measurementEventHub = AddModule<MeasurementEventHub>("MeasurementEventHub");
+        _measurementEvent = AddModule<MeasurementEvent>("MeasurementEvent");
         _modelEventHub = AddModule<ModelEventHub>("ModelEventHub");
         _pickEventHub = AddModule<PickEventHub>("PickEventHub");
         _viewportEventHub = AddModule<ViewportEventHub>("ViewportEventHub");

@@ -69,8 +69,8 @@ public partial class MeasurementService : Node
         Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified += OnPickResultNotified;
 
-        Application.Measurement.AskMeasurementResultRequested += OnAskMeasurementResultRequested;
-        Application.Measurement.SetPickPointRequested += OnPickPointRequested;
+        Application.Measurement.Event.AskMeasurementResultRequested += OnAskMeasurementResultRequested;
+        Application.Measurement.Event.SetPickPointRequested += OnPickPointRequested;
     }
 
     private void UnsubscribeEvents()
@@ -78,13 +78,13 @@ public partial class MeasurementService : Node
         Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified -= OnPickResultNotified;
 
-        Application.Measurement.AskMeasurementResultRequested -= OnAskMeasurementResultRequested;
-        Application.Measurement.SetPickPointRequested -= OnPickPointRequested;
+        Application.Measurement.Event.AskMeasurementResultRequested -= OnAskMeasurementResultRequested;
+        Application.Measurement.Event.SetPickPointRequested -= OnPickPointRequested;
     }
 
     private void OnAskMeasurementResultRequested()
     {
-        Application.Measurement.NotifyMeasurementResult(ComputeMeasurementResult());
+        Application.Measurement.NotifyMeasurementResult(GetCurrentResult());
     }
 
     private void OnPickPointRequested(int pointIndex)
@@ -134,7 +134,12 @@ public partial class MeasurementService : Node
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
         UpdateMeasurementLine();
-        Application.Measurement.NotifyMeasurementResult(ComputeMeasurementResult());
+        Application.Measurement.NotifyMeasurementResult(GetCurrentResult());
+    }
+
+    internal MeasurementResult GetCurrentResult()
+    {
+        return ComputeMeasurementResult();
     }
 
     private MeasurementResult ComputeMeasurementResult()

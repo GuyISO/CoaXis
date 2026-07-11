@@ -51,7 +51,7 @@ public partial class MeasurementUi : PanelContainer
         _buttonPicks[0].Pressed += OnButtonPick1Pressed;
         _buttonPicks[1].Pressed += OnButtonPick2Pressed;
 
-        Application.Measurement.MeasurementResultNotified += OnMeasurementUpdated;
+        Application.Measurement.Event.MeasurementResultNotified += OnMeasurementUpdated;
         Application.Measurement.AskMeasurementResult();
     }
 
@@ -61,7 +61,7 @@ public partial class MeasurementUi : PanelContainer
         _buttonPicks[0].Pressed -= OnButtonPick1Pressed;
         _buttonPicks[1].Pressed -= OnButtonPick2Pressed;
 
-        Application.Measurement.MeasurementResultNotified -= OnMeasurementUpdated;
+        Application.Measurement.Event.MeasurementResultNotified -= OnMeasurementUpdated;
     }
 
     #endregion

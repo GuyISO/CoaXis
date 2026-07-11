@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// 測定機能のイベント集約ハブ
 /// </summary>
-public partial class MeasurementEventHub : EventHubBase<MeasurementEventHub>
+public partial class MeasurementEvent : EventHubBase<MeasurementEvent>
 {
     #region --------------------------------------- Action ---------------------------------------
 

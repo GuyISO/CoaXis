@@ -42,7 +42,7 @@ public partial class ShowContainerButton : Button
         }
 
         // UiManager に対してコンテナの表示を要求する
-        Application.Service.Ui.Show(_container.Instantiate<Container>());
+        Application.Ui.Show(_container.Instantiate<Container>());
     }
 
     #endregion

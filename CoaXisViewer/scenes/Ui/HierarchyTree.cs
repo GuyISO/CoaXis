@@ -81,12 +81,12 @@ public partial class HierarchyTree : Tree
         if (selected)
         {
             // 選択されたアイテムに対応する AnyModel を選択状態にする
-            Application.Service.Selection.Add(ModelBinder.GetModel(item));
+            Application.Selection.Add(ModelBinder.GetModel(item));
         }
         else
         {
             // 選択が解除されたアイテムに対応する AnyModel を選択解除状態にする
-            Application.Service.Selection.Remove(ModelBinder.GetModel(item));
+            Application.Selection.Remove(ModelBinder.GetModel(item));
         }
     }
 

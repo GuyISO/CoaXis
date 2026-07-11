@@ -163,7 +163,7 @@ public partial class ModelVisualService : Node
 				return false;
 			}
 
-			if (Application.Service.Selection.Contains(model))
+			if (Application.Selection.Contains(model))
 			{
 				return true;
 			}
