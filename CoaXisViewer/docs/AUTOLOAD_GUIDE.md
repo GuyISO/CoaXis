@@ -13,7 +13,10 @@
 ### 2.2 EventHub 系
 - EventHub 系は src/application/event/EventHubBase.cs を継承する。
 - EventHubBase<T> は Emit を共通化し、未初期化時の警告と発火ログを集約する。
-- 各 Hub は Signal 定義と Request / Notify API を持ち、呼び出しは Application.Events から行う。
+- 各 Hub は Signal 定義と Action / Notify API を持ち、呼び出しは Application から行う。
+- Request 系の公開メソッド名は使わず、AskRootModel, SetMultiSelectionMode, ClearSelection のように動作名だけで統一する。
+- Notify 系は通知専用としてそのまま維持する。
+- Signal 名の Requested / Notified は内部イベント表現として残してよい。
 
 ### 2.3 _ExitTree の扱い
 - _ExitTree で独自の購読解除やリソース解放が必要な場合は、その処理を先に行ってから base._ExitTree() を呼ぶ。

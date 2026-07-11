@@ -54,15 +54,11 @@ public partial class MeasurementService : Node
     {
         if (!_isInitialized)
         {
-            Application.Pick.RequestNotifyPickHandlingMode();
+            Application.Pick.AskPickHandlingMode();
         }
 
         EnsureMeasurementVisuals();
     }
-
-    #endregion
-
-    #region Public API
 
     #endregion
 
@@ -73,7 +69,7 @@ public partial class MeasurementService : Node
         Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified += OnPickResultNotified;
 
-        Application.Measurement.NotifyMeasurementResultRequested += OnNotifyMeasurementResultRequested;
+        Application.Measurement.AskMeasurementResultRequested += OnAskMeasurementResultRequested;
         Application.Measurement.SetPickPointRequested += OnPickPointRequested;
     }
 
@@ -82,11 +78,11 @@ public partial class MeasurementService : Node
         Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified -= OnPickResultNotified;
 
-        Application.Measurement.NotifyMeasurementResultRequested -= OnNotifyMeasurementResultRequested;
+        Application.Measurement.AskMeasurementResultRequested -= OnAskMeasurementResultRequested;
         Application.Measurement.SetPickPointRequested -= OnPickPointRequested;
     }
 
-    private void OnNotifyMeasurementResultRequested()
+    private void OnAskMeasurementResultRequested()
     {
         Application.Measurement.NotifyMeasurementResult(ComputeMeasurementResult());
     }

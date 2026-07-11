@@ -55,7 +55,7 @@ public partial class HierarchyTree : Tree
         // ルートモデルがまだ取得できていない場合は、ModelEventHub に通知をリクエストする、Ready団塊ではノードの読み込み順序の都合などで取得できないことを想定し、毎フレームチェックする
         if (_rootModel == null)
         {
-            Application.Model.RequestNotifyRootModel();
+            Application.Model.AskRootModel();
         }
     }
 
@@ -126,7 +126,7 @@ public partial class HierarchyTree : Tree
         }
 
         // モデルの表示状態を切り替える
-        Application.Model.RequestToggleModelVisibility(model);
+        Application.Model.ToggleModelVisibility(model);
     }
 
     /// <summary>

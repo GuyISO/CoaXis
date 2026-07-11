@@ -13,7 +13,7 @@
 - EventHubBase と Application Facade の責務境界
 
 ### 1.2 EVENTS_GUIDE.md
-- ModelEventHub と ViewportEventHub のRequest/Notify一覧
+- ModelEventHub と ViewportEventHub のAction/Notify一覧
 - 初期状態通知のタイミング
 - 購読解除パターン
 - 二重購読・未解除の典型バグ

@@ -5,15 +5,15 @@
 /// </summary>
 public partial class PickEventHub : EventHubBase<PickEventHub>
 {
-    #region --------------------------------------- Request ---------------------------------------
+    #region --------------------------------------- Action ---------------------------------------
 
-    [Signal] public delegate void NotifyPickHandlingModeRequestedEventHandler();
+    [Signal] public delegate void AskPickHandlingModeRequestedEventHandler();
     /// <summary>
     /// 選択操作モードの通知をリクエストする
     /// </summary>
-    internal void RequestNotifyPickHandlingMode()
+    internal void AskPickHandlingMode()
     {
-        Emit(SignalName.NotifyPickHandlingModeRequested);
+        Emit(SignalName.AskPickHandlingModeRequested);
     }
 
     #endregion

@@ -34,7 +34,7 @@ public partial class CameraRig : Node3D
         // イベント購読の登録
         Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified += OnPickResultNotified;
-        Application.Viewport.NotifyStateRequested += OnNotifyStateRequested;
+        Application.Viewport.AskStateRequested += OnAskStateRequested;
         Application.Viewport.MovePositionToRequested += OnMovePositionToRequested;
         Application.Viewport.MoveRotationToRequested += OnMoveRotationToRequested;
         Application.Viewport.SetSizeRequested += OnSetSizeRequested;
@@ -54,7 +54,7 @@ public partial class CameraRig : Node3D
         // イベント購読の解除
         Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified -= OnPickResultNotified;
-        Application.Viewport.NotifyStateRequested -= OnNotifyStateRequested;
+        Application.Viewport.AskStateRequested -= OnAskStateRequested;
         Application.Viewport.MovePositionToRequested -= OnMovePositionToRequested;
         Application.Viewport.MoveRotationToRequested -= OnMoveRotationToRequested;
         Application.Viewport.SetSizeRequested -= OnSetSizeRequested;
@@ -104,7 +104,7 @@ public partial class CameraRig : Node3D
     /// <summary>
     /// カメラの状態の通知がリクエストされたときに呼び出されるイベントハンドラ、現在のカメラ状態をイベントハブを通じて通知する
     /// </summary>
-    private void OnNotifyStateRequested()
+    private void OnAskStateRequested()
     {
         Application.Viewport.NotifyPosition(Position);
         Application.Viewport.NotifyRotation(Transform.Basis.GetRotationQuaternion());

@@ -19,7 +19,7 @@ public partial class ModelOperationService : Node
 	{
 		// イベントの購読開始
 		Application.Model.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		Application.Pick.NotifyPickHandlingModeRequested += OnNotifyPickHandlingModeRequested;
+		Application.Pick.AskPickHandlingModeRequested += OnAskPickHandlingModeRequested;
 		Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
 
@@ -27,7 +27,7 @@ public partial class ModelOperationService : Node
 	{
 		// イベントの購読解除
 		Application.Model.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		Application.Pick.NotifyPickHandlingModeRequested -= OnNotifyPickHandlingModeRequested;
+		Application.Pick.AskPickHandlingModeRequested -= OnAskPickHandlingModeRequested;
 		Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 
 		base._ExitTree();
@@ -50,7 +50,7 @@ public partial class ModelOperationService : Node
 	/// <summary>
 	/// 選択操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
 	/// </summary>
-	private void OnNotifyPickHandlingModeRequested()
+	private void OnAskPickHandlingModeRequested()
 	{
 		Application.Pick.NotifyPickHandlingMode(_currentPickHandlingMode);
 	}

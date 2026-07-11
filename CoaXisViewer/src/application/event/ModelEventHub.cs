@@ -5,15 +5,15 @@
 /// </summary>
 public partial class ModelEventHub : EventHubBase<ModelEventHub>
 {
-	#region --------------------------------------- Request ---------------------------------------
+	#region --------------------------------------- Action ---------------------------------------
 
-	[Signal] public delegate void NotifyRootModelRequestedEventHandler();
+	[Signal] public delegate void AskRootModelRequestedEventHandler();
 	/// <summary>
 	/// ルートモデルに対して通知をリクエストする
 	/// </summary>
-	internal void RequestNotifyRootModel()
+	internal void AskRootModel()
 	{
-		Emit(SignalName.NotifyRootModelRequested);
+		Emit(SignalName.AskRootModelRequested);
 	}
 
 	[Signal] public delegate void SetMultiSelectionModeRequestedEventHandler(bool enable);
@@ -21,7 +21,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// 複数選択モードの設定をリクエストする
 	/// </summary>
 	/// <param name="enable">複数選択モードを有効にする場合はtrue、無効にする場合はfalse</param>
-	internal void RequestSetMultiSelectionMode(bool enable)
+	internal void SetMultiSelectionMode(bool enable)
 	{
 		Emit(SignalName.SetMultiSelectionModeRequested, enable);
 	}
@@ -30,7 +30,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <summary>
 	/// 選択のクリアをリクエストする
 	/// </summary>
-	internal void RequestClearSelection()
+	internal void ClearSelection()
 	{
 		Emit(SignalName.ClearSelectionRequested);
 	}
@@ -40,7 +40,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// モデルの表示/非表示切替をリクエストする
 	/// </summary>
 	/// <param name="model">切替対象のモデル</param>
-	internal void RequestToggleModelVisibility(AnyModel model)
+	internal void ToggleModelVisibility(AnyModel model)
 	{
 		Emit(SignalName.ToggleModelVisibilityRequested, model);
 	}
@@ -51,7 +51,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// </summary>
 	/// <param name="childModel">追加するモデル</param>
 	/// <param name="parentModel">追加先の親モデル、nullの場合はルートに追加される</param>
-	internal void RequestAddModel(AnyModel childModel, AnyModel parentModel = null)
+	internal void AddModel(AnyModel childModel, AnyModel parentModel = null)
 	{
 		Emit(SignalName.AddModelRequested, childModel, parentModel);
 	}
@@ -61,7 +61,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// モデルのロードをリクエストする
 	/// </summary>
 	/// <param name="path">ロードするモデルのパス</param>
-	internal void RequestLoadModel(string path)
+	internal void LoadModel(string path)
 	{
 		Emit(SignalName.LoadModelRequested, path);
 	}

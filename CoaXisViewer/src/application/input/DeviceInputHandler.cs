@@ -27,18 +27,18 @@ public partial class DeviceInputHandler : Node
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            Application.Model.RequestSetMultiSelectionMode(_isMultiSelectMode);
+            Application.Model.SetMultiSelectionMode(_isMultiSelectMode);
         }
 
         if (Input.IsActionJustPressed("load"))
         {
-            Application.Model.RequestLoadModel("res://assets/models/car.glb");
+            Application.Model.LoadModel("res://assets/models/car.glb");
         }
 
         if (Input.IsActionJustPressed("escape"))
         {
             Application.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
-            Application.Model.RequestClearSelection();
+            Application.Model.ClearSelection();
         }
 
         HandleUndoRedoInput();
@@ -100,7 +100,7 @@ public partial class DeviceInputHandler : Node
         }
 
         Vector3 translation = translationDirection * (_translateSpeed * delta);
-        Application.Viewport.RequestTranslate(translation, SpaceMode.Camera);
+        Application.Viewport.Translate(translation, SpaceMode.Camera);
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public partial class DeviceInputHandler : Node
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
         Quaternion rotation = yaw * pitch * roll;
 
-        Application.Viewport.RequestRotate(rotation, SpaceMode.Camera);
+        Application.Viewport.Rotate(rotation, SpaceMode.Camera);
     }
 
     /// <summary>

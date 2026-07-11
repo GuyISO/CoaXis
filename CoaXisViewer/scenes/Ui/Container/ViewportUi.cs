@@ -104,12 +104,12 @@ public partial class ViewportUi : PanelContainer
         // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
         if (_rootModel == null)
         {
-            Application.Model.RequestNotifyRootModel();
+            Application.Model.AskRootModel();
         }
 
         if (!_isInitialized)
         {
-            Application.Viewport.RequestNotifyState();
+            Application.Viewport.AskState();
         }
     }
 
@@ -123,7 +123,7 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonToggleProjectionPressed()
     {
         Application.Logger.Debug("ViewportUi: toggle projection requested.");
-        Application.Viewport.RequestToggleProjectionType();
+        Application.Viewport.ToggleProjectionType();
     }
 
     /// <summary>
@@ -139,7 +139,7 @@ public partial class ViewportUi : PanelContainer
         }
 
         Application.Logger.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
-        Application.Viewport.RequestFit(new[] { _rootModel }, true);
+        Application.Viewport.Fit(new[] { _rootModel }, true);
     }
 
     /// <summary>
@@ -155,7 +155,7 @@ public partial class ViewportUi : PanelContainer
         }
 
         Application.Logger.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
-        Application.Viewport.RequestFit(fitTargets, true);
+        Application.Viewport.Fit(fitTargets, true);
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public partial class ViewportUi : PanelContainer
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
         Application.Logger.Debug("ViewportUi: roll-left requested.");
-        Application.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -183,7 +183,7 @@ public partial class ViewportUi : PanelContainer
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
         Application.Logger.Debug("ViewportUi: roll-right requested.");
-        Application.Viewport.RequestRotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -202,7 +202,7 @@ public partial class ViewportUi : PanelContainer
     private void OnSliderFovValueChanged(double value)
     {
         Application.Logger.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
-        Application.Viewport.RequestSetFov((float)value);
+        Application.Viewport.SetFov((float)value);
     }
 
     /// <summary>
@@ -211,7 +211,7 @@ public partial class ViewportUi : PanelContainer
     /// <param name="mode">ビューポートの操作モード</param>
     private void OnInteractionModeNotified(ViewportInteractionMode mode)
     {
-        // Application.Viewport.RequestNotifyState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
+        // Application.Viewport.AskState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
         _isInitialized = true;
 
         _labelMode.Text = mode.ToString();

@@ -46,7 +46,7 @@ public partial class AxisNavigator : Control
         if (!_isInitialized)
         {
             // カメラの初期回転を取得して軸ナビゲータに反映する
-            Application.Viewport.RequestNotifyState();
+            Application.Viewport.AskState();
         }
     }
 
@@ -101,7 +101,7 @@ public partial class AxisNavigator : Control
             // _cameraController.MoveFocalPoint(null, quaternion, true);
 
             // カメラ回転要求イベントを発行
-            Application.Viewport.RequestMoveRotationTo(quaternion, true);
+            Application.Viewport.MoveRotationTo(quaternion, true);
         }
     }
 

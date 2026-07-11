@@ -24,7 +24,7 @@ payload:
 - path: string
 
 動作:
-- ModelEventHub.RequestLoadModel(path) を呼ぶ
+- ModelEventHub.LoadModel(path) を呼ぶ
 
 ### 3.2 Select / Highlight
 payload:
@@ -36,7 +36,7 @@ payload:
 
 ### 3.3 ClearHighlight
 動作:
-- ModelEventHub.RequestClearSelection() を呼ぶ
+- ModelEventHub.ClearSelection() を呼ぶ
 
 ### 3.4 Hide / Show
 payload:

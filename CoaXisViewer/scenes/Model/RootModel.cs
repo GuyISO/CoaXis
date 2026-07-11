@@ -11,14 +11,14 @@ public partial class RootModel : AnyModel
     public override void _Ready()
     {
         // イベントハンドラの登録
-        Application.Model.NotifyRootModelRequested += OnNotifyRootModelRequested;
+        Application.Model.AskRootModelRequested += OnAskRootModelRequested;
         Application.Model.LoadModelRequested += OnLoadModelRequested;
     }
 
     public override void _ExitTree()
     {
         // イベントハンドラの登録解除
-        Application.Model.NotifyRootModelRequested -= OnNotifyRootModelRequested;
+        Application.Model.AskRootModelRequested -= OnAskRootModelRequested;
         Application.Model.LoadModelRequested -= OnLoadModelRequested;
     }
 
@@ -29,7 +29,7 @@ public partial class RootModel : AnyModel
     /// <summary>
     /// ルートモデルの通知要求イベントのハンドラで、ModelEventHub に対して自身を通知する
     /// </summary>
-    private void OnNotifyRootModelRequested()
+    private void OnAskRootModelRequested()
     {
         Application.Model.NotifyRootModel(this);
     }
@@ -56,7 +56,7 @@ public partial class RootModel : AnyModel
 
         ModelColliderBuilder.AddCollider(model);
 
-        Application.Model.RequestAddModel(model, this);
+        Application.Model.AddModel(model, this);
 
     }
 

@@ -45,7 +45,7 @@ public partial class Selection : Node
     {
         if (!_isInitialized)
         {
-            Application.Pick.RequestNotifyPickHandlingMode();
+            Application.Pick.AskPickHandlingMode();
         }
     }
 

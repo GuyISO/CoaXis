@@ -89,7 +89,7 @@ public partial class ViewportOverlay : Control
         if (!_isInitialized)
         {
             // カメラの初期状態を取得してUIに反映する
-            Application.Viewport.RequestNotifyState();
+            Application.Viewport.AskState();
         }
     }
 

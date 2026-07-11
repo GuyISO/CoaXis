@@ -5,15 +5,15 @@ using Godot;
 /// </summary>
 public partial class MeasurementEventHub : EventHubBase<MeasurementEventHub>
 {
-    #region --------------------------------------- Request ---------------------------------------
+    #region --------------------------------------- Action ---------------------------------------
 
-    [Signal] public delegate void NotifyMeasurementResultRequestedEventHandler();
+    [Signal] public delegate void AskMeasurementResultRequestedEventHandler();
     /// <summary>
     /// 最新の測定結果通知をリクエストする
     /// </summary>
-    internal void RequestNotifyMeasurementResult()
+    internal void AskMeasurementResult()
     {
-        Emit(SignalName.NotifyMeasurementResultRequested);
+        Emit(SignalName.AskMeasurementResultRequested);
     }
 
     [Signal] public delegate void SetPickPointRequestedEventHandler(int pointIndex);
@@ -21,7 +21,7 @@ public partial class MeasurementEventHub : EventHubBase<MeasurementEventHub>
     /// 測定ポイントのピック開始をリクエストする
     /// </summary>
     /// <param name="pointIndex">1 または 2</param>
-    internal void RequestSetPickPoint(int pointIndex)
+    internal void SetPickPoint(int pointIndex)
     {
         Emit(SignalName.SetPickPointRequested, pointIndex);
     }
