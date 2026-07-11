@@ -13,7 +13,7 @@ public partial class PickEventHub : EventHubBase<PickEventHub>
     /// </summary>
     internal void RequestNotifyPickHandlingMode()
     {
-        TryEmitSignal(SignalName.NotifyPickHandlingModeRequested);
+        Emit(SignalName.NotifyPickHandlingModeRequested);
     }
 
     #endregion
@@ -27,7 +27,7 @@ public partial class PickEventHub : EventHubBase<PickEventHub>
     /// <param name="mode">通知する選択操作モード</param>
     internal void NotifyPickHandlingMode(PickHandlingMode mode)
     {
-        TryEmitSignal(SignalName.PickHandlingModeNotified, (int)mode);
+        Emit(SignalName.PickHandlingModeNotified, (int)mode);
     }
 
     [Signal] public delegate void PickResultNotifiedEventHandler(PickResult pickResult);
@@ -37,7 +37,7 @@ public partial class PickEventHub : EventHubBase<PickEventHub>
     /// <param name="pickResult">ピック結果</param>
     internal void NotifyPickResult(PickResult pickResult)
     {
-        TryEmitSignal(SignalName.PickResultNotified, pickResult);
+        Emit(SignalName.PickResultNotified, pickResult);
     }
 
     [Signal] public delegate void PickResultsNotifiedEventHandler(PickResult[] pickResults);
@@ -48,7 +48,7 @@ public partial class PickEventHub : EventHubBase<PickEventHub>
     /// <remarks>複数のピック結果を一括で通知する場合はレイキャストによる取得ではないので座標値などを持たない</remarks>
     internal void NotifyPickResults(PickResult[] pickResults)
     {
-        TryEmitSignal(SignalName.PickResultsNotified, pickResults);
+        Emit(SignalName.PickResultsNotified, pickResults);
     }
 
     #endregion

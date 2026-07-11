@@ -12,7 +12,7 @@
 
 ### 2.2 EventHub 系
 - EventHub 系は src/application/event/EventHubBase.cs を継承する。
-- EventHubBase<T> は TryEmitSignal を共通化し、未初期化時の警告と発火ログを集約する。
+- EventHubBase<T> は Emit を共通化し、未初期化時の警告と発火ログを集約する。
 - 各 Hub は Signal 定義と Request / Notify API を持ち、呼び出しは Application.Events から行う。
 
 ### 2.3 _ExitTree の扱い

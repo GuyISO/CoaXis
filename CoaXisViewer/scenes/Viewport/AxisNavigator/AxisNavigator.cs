@@ -32,13 +32,13 @@ public partial class AxisNavigator : Control
         _camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
 
         // イベント購読の登録
-        Application.Viewport.EventHub.RotationNotified += OnRotationNotified;
+        Application.Viewport.RotationNotified += OnRotationNotified;
     }
 
     public override void _ExitTree()
     {
         // イベント購読の解除
-        Application.Viewport.EventHub.RotationNotified -= OnRotationNotified;
+        Application.Viewport.RotationNotified -= OnRotationNotified;
     }
 
     public override void _Process(double delta)

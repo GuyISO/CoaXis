@@ -13,7 +13,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// </summary>
     internal void RequestNotifyState()
     {
-        TryEmitSignal(SignalName.NotifyStateRequested);
+        Emit(SignalName.NotifyStateRequested);
     }
 
     [Signal] public delegate void MovePositionToRequestedEventHandler(Vector3 position, bool useTween);
@@ -25,7 +25,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <remarks>SetPositionという名前にしたいところが、Node3Dの標準メソッドと区別するためにRequestMovePositionToという名前にしている</remarks>
     internal void RequestMovePositionTo(Vector3 position, bool useTween = false)
     {
-        TryEmitSignal(SignalName.MovePositionToRequested, position, useTween);
+        Emit(SignalName.MovePositionToRequested, position, useTween);
     }
 
     [Signal] public delegate void MoveRotationToRequestedEventHandler(Quaternion rotation, bool useTween);
@@ -37,7 +37,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <remarks>SetRotationという名前にしたいところが、Node3Dの標準メソッドと区別するためにRequestMoveRotationToという名前にしている</remarks>
     internal void RequestMoveRotationTo(Quaternion rotation, bool useTween = false)
     {
-        TryEmitSignal(SignalName.MoveRotationToRequested, rotation, useTween);
+        Emit(SignalName.MoveRotationToRequested, rotation, useTween);
     }
 
     [Signal] public delegate void SetDistanceRequestedEventHandler(float distance, bool useTween);
@@ -48,7 +48,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">移動にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestSetDistance(float distance, bool useTween = false)
     {
-        TryEmitSignal(SignalName.SetDistanceRequested, distance, useTween);
+        Emit(SignalName.SetDistanceRequested, distance, useTween);
     }
 
     [Signal] public delegate void SetSizeRequestedEventHandler(float size, bool useTween);
@@ -59,7 +59,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">サイズ変更にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestSetSizeTo(float size, bool useTween = false)
     {
-        TryEmitSignal(SignalName.SetSizeRequested, size, useTween);
+        Emit(SignalName.SetSizeRequested, size, useTween);
     }
 
     [Signal] public delegate void SetFovRequestedEventHandler(float fov, bool useTween);
@@ -70,7 +70,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">FOV変更にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestSetFov(float fov, bool useTween = false)
     {
-        TryEmitSignal(SignalName.SetFovRequested, fov, useTween);
+        Emit(SignalName.SetFovRequested, fov, useTween);
     }
 
     [Signal] public delegate void TranslateRequestedEventHandler(Vector3 translation, SpaceMode spaceMode, bool useTween);
@@ -82,7 +82,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">移動にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestTranslate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
     {
-        TryEmitSignal(SignalName.TranslateRequested, translation, (int)spaceMode, useTween);
+        Emit(SignalName.TranslateRequested, translation, (int)spaceMode, useTween);
     }
 
     [Signal] public delegate void RotateRequestedEventHandler(Quaternion rotation, SpaceMode spaceMode, bool useTween);
@@ -94,7 +94,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">回転にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestRotate(Quaternion rotation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
     {
-        TryEmitSignal(SignalName.RotateRequested, rotation, (int)spaceMode, useTween);
+        Emit(SignalName.RotateRequested, rotation, (int)spaceMode, useTween);
     }
 
     [Signal] public delegate void ZoomRequestedEventHandler(float exponent, bool useTween);
@@ -105,7 +105,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">ズームにトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestZoom(float exponent, bool useTween = false)
     {
-        TryEmitSignal(SignalName.ZoomRequested, exponent, useTween);
+        Emit(SignalName.ZoomRequested, exponent, useTween);
     }
 
     [Signal] public delegate void SetProjectionTypeRequestedEventHandler(Camera3D.ProjectionType type);
@@ -115,7 +115,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="type">設定する投影タイプ</param>
     internal void RequestSetProjectionType(Camera3D.ProjectionType type)
     {
-        TryEmitSignal(SignalName.SetProjectionTypeRequested, (int)type);
+        Emit(SignalName.SetProjectionTypeRequested, (int)type);
     }
 
     [Signal] public delegate void ToggleProjectionTypeRequestedEventHandler();
@@ -124,7 +124,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// </summary>
     internal void RequestToggleProjectionType()
     {
-        TryEmitSignal(SignalName.ToggleProjectionTypeRequested);
+        Emit(SignalName.ToggleProjectionTypeRequested);
     }
 
     [Signal] public delegate void FitRequestedEventHandler(AnyModel[] targetModels, bool useTween);
@@ -135,7 +135,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">フィット操作にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestFit(AnyModel[] targetModels, bool useTween = false)
     {
-        TryEmitSignal(SignalName.FitRequested, targetModels, useTween);
+        Emit(SignalName.FitRequested, targetModels, useTween);
     }
 
     [Signal] public delegate void AlignNormalToRequestedEventHandler(Vector3 normal, bool useTween);
@@ -146,7 +146,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="useTween">回転にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
     internal void RequestAlignNormalTo(Vector3 normal, bool useTween = false)
     {
-        TryEmitSignal(SignalName.AlignNormalToRequested, normal, useTween);
+        Emit(SignalName.AlignNormalToRequested, normal, useTween);
     }
 
     [Signal] public delegate void DecidePickRectRequestedEventHandler(Vector2 startPosition, Vector2 endPosition);
@@ -157,7 +157,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="endPosition">矩形選択の終了位置</param>
     internal void RequestDecidePickRect(Vector2 startPosition, Vector2 endPosition)
     {
-        TryEmitSignal(SignalName.DecidePickRectRequested, startPosition, endPosition);
+        Emit(SignalName.DecidePickRectRequested, startPosition, endPosition);
     }
 
     #endregion
@@ -171,7 +171,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="mode">操作モード</param>
     internal void NotifyInteractionMode(ViewportInteractionMode mode)
     {
-        TryEmitSignal(SignalName.InteractionModeNotified, (int)mode);
+        Emit(SignalName.InteractionModeNotified, (int)mode);
     }
 
     [Signal] public delegate void PositionNotifiedEventHandler(Vector3 position);
@@ -181,7 +181,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="position">注視点の位置</param>
     internal void NotifyPosition(Vector3 position)
     {
-        TryEmitSignal(SignalName.PositionNotified, position);
+        Emit(SignalName.PositionNotified, position);
     }
 
     [Signal] public delegate void RotationNotifiedEventHandler(Quaternion rotation);
@@ -191,7 +191,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="rotation">注視点の回転</param>
     internal void NotifyRotation(Quaternion rotation)
     {
-        TryEmitSignal(SignalName.RotationNotified, rotation);
+        Emit(SignalName.RotationNotified, rotation);
     }
 
     [Signal] public delegate void DistanceNotifiedEventHandler(float distance);
@@ -201,7 +201,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="distance">カメラの距離、透視投影の場合のみ有効</param>
     internal void NotifyDistance(float distance)
     {
-        TryEmitSignal(SignalName.DistanceNotified, distance);
+        Emit(SignalName.DistanceNotified, distance);
     }
 
     [Signal] public delegate void SizeNotifiedEventHandler(float size);
@@ -211,7 +211,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="size">カメラのサイズ（ズームレベル）、平行投影の場合のみ有効</param>
     internal void NotifySize(float size)
     {
-        TryEmitSignal(SignalName.SizeNotified, size);
+        Emit(SignalName.SizeNotified, size);
     }
 
     [Signal] public delegate void FovNotifiedEventHandler(float fov);
@@ -221,7 +221,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="fov">FOV の値</param>
     internal void NotifyFov(float fov)
     {
-        TryEmitSignal(SignalName.FovNotified, fov);
+        Emit(SignalName.FovNotified, fov);
     }
 
     [Signal] public delegate void ProjectionTypeNotifiedEventHandler(Camera3D.ProjectionType type);
@@ -231,7 +231,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="type">投影タイプ</param>
     internal void NotifyProjectionType(Camera3D.ProjectionType type)
     {
-        TryEmitSignal(SignalName.ProjectionTypeNotified, (int)type);
+        Emit(SignalName.ProjectionTypeNotified, (int)type);
     }
 
     [Signal] public delegate void ArcballRadiusNotifiedEventHandler(float radius);
@@ -241,7 +241,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="radius">アークボールの半径</param>
     internal void NotifyArcballRadius(float radius)
     {
-        TryEmitSignal(SignalName.ArcballRadiusNotified, radius);
+        Emit(SignalName.ArcballRadiusNotified, radius);
     }
 
     [Signal] public delegate void ArcballHandleNotifiedEventHandler(Vector3 position);
@@ -251,7 +251,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="position">アークボールの操作点の位置</param>
     internal void NotifyArcballHandle(Vector3 position)
     {
-        TryEmitSignal(SignalName.ArcballHandleNotified, position);
+        Emit(SignalName.ArcballHandleNotified, position);
     }
 
     [Signal] public delegate void PickRectNotifiedEventHandler(Vector2 startPosition, Vector2 endPosition);
@@ -262,7 +262,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="endPosition">矩形選択の終了位置</param>
     internal void NotifyPickRect(Vector2 startPosition, Vector2 endPosition)
     {
-        TryEmitSignal(SignalName.PickRectNotified, startPosition, endPosition);
+        Emit(SignalName.PickRectNotified, startPosition, endPosition);
     }
 
     [Signal] public delegate void PickResultNotifiedEventHandler(PickResult pickResult);
@@ -272,7 +272,7 @@ public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
     /// <param name="pickResult">選択結果の情報を含むオブジェクト</param>
     internal void NotifyPickResult(PickResult pickResult)
     {
-        TryEmitSignal(SignalName.PickResultNotified, pickResult);
+        Emit(SignalName.PickResultNotified, pickResult);
     }
 
     #endregion

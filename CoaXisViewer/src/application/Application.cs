@@ -12,10 +12,10 @@ public partial class Application : Node
     private ApplicationLogHub _applicationLogHub;
     private ApplicationAssetManager _applicationAssetManager;
     
-    private ApplicationMeasurementEventHub _applicationMeasurementEventHub;
-    private ApplicationModelEventHub _applicationModelEventHub;
-    private ApplicationPickEventHub _applicationPickEventHub;
-    private ApplicationViewportEventHub _applicationViewportEventHub;
+    private MeasurementEventHub _measurementEventHub;
+    private ModelEventHub _modelEventHub;
+    private PickEventHub _pickEventHub;
+    private ViewportEventHub _viewportEventHub;
 
     private ApplicationServices _applicationServices;
     private ApplicationInput _applicationInput;
@@ -40,10 +40,10 @@ public partial class Application : Node
     public static ApplicationLogHub Logger => Instance._applicationLogHub;
     public static ApplicationAssetManager Asset => Instance._applicationAssetManager;
     
-    public static ApplicationMeasurementEventHub Measurement => Instance._applicationMeasurementEventHub;
-    public static ApplicationModelEventHub Model => Instance._applicationModelEventHub;
-    public static ApplicationPickEventHub Pick => Instance._applicationPickEventHub;
-    public static ApplicationViewportEventHub Viewport => Instance._applicationViewportEventHub;
+    public static MeasurementEventHub Measurement => Instance._measurementEventHub;
+    public static ModelEventHub Model => Instance._modelEventHub;
+    public static PickEventHub Pick => Instance._pickEventHub;
+    public static ViewportEventHub Viewport => Instance._viewportEventHub;
 
     public static ApplicationServices Service => Instance._applicationServices;
     public static ApplicationInput Input => Instance._applicationInput;
@@ -51,12 +51,6 @@ public partial class Application : Node
     // System
     internal LogHub LogHub { get; private set; }
     internal AssetManager AssetManager { get; private set; }
-
-    // Event
-    internal MeasurementEventHub MeasurementEventHub { get; private set; }
-    internal ModelEventHub ModelEventHub { get; private set; }
-    internal PickEventHub PickEventHub { get; private set; }
-    internal ViewportEventHub ViewportEventHub { get; private set; }
 
     // Service
     internal MeasurementService MeasurementServiceNode => _measurementService;
@@ -81,10 +75,10 @@ public partial class Application : Node
         _applicationLogHub = new ApplicationLogHub();
         _applicationAssetManager = new ApplicationAssetManager();
         
-        _applicationMeasurementEventHub = new ApplicationMeasurementEventHub();
-        _applicationModelEventHub = new ApplicationModelEventHub();
-        _applicationPickEventHub = new ApplicationPickEventHub();
-        _applicationViewportEventHub = new ApplicationViewportEventHub();
+        _measurementEventHub = new MeasurementEventHub();
+        _modelEventHub = new ModelEventHub();
+        _pickEventHub = new PickEventHub();
+        _viewportEventHub = new ViewportEventHub();
 
         _applicationServices = new ApplicationServices(this);
         _applicationInput = new ApplicationInput(this);
@@ -112,10 +106,10 @@ public partial class Application : Node
         AssetManager = AddModule<AssetManager>("AssetManager");
 
         // Event
-        MeasurementEventHub = AddModule<MeasurementEventHub>("MeasurementEventHub");
-        ModelEventHub = AddModule<ModelEventHub>("ModelEventHub");
-        PickEventHub = AddModule<PickEventHub>("PickEventHub");
-        ViewportEventHub = AddModule<ViewportEventHub>("ViewportEventHub");
+        _measurementEventHub = AddModule<MeasurementEventHub>("MeasurementEventHub");
+        _modelEventHub = AddModule<ModelEventHub>("ModelEventHub");
+        _pickEventHub = AddModule<PickEventHub>("PickEventHub");
+        _viewportEventHub = AddModule<ViewportEventHub>("ViewportEventHub");
 
         // Service
         _measurementService = AddModule<MeasurementService>("MeasurementService");

@@ -70,20 +70,20 @@ public partial class MeasurementService : Node
 
     private void SubscribeEvents()
     {
-        Application.Pick.EventHub.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.EventHub.PickResultNotified += OnPickResultNotified;
+        Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.PickResultNotified += OnPickResultNotified;
 
-        Application.Measurement.EventHub.NotifyMeasurementResultRequested += OnNotifyMeasurementResultRequested;
-        Application.Measurement.EventHub.PickPointRequested += OnPickPointRequested;
+        Application.Measurement.NotifyMeasurementResultRequested += OnNotifyMeasurementResultRequested;
+        Application.Measurement.SetPickPointRequested += OnPickPointRequested;
     }
 
     private void UnsubscribeEvents()
     {
-        Application.Pick.EventHub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.EventHub.PickResultNotified -= OnPickResultNotified;
+        Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.PickResultNotified -= OnPickResultNotified;
 
-        Application.Measurement.EventHub.NotifyMeasurementResultRequested -= OnNotifyMeasurementResultRequested;
-        Application.Measurement.EventHub.PickPointRequested -= OnPickPointRequested;
+        Application.Measurement.NotifyMeasurementResultRequested -= OnNotifyMeasurementResultRequested;
+        Application.Measurement.SetPickPointRequested -= OnPickPointRequested;
     }
 
     private void OnNotifyMeasurementResultRequested()

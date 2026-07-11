@@ -13,7 +13,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// </summary>
 	internal void RequestNotifyRootModel()
 	{
-		TryEmitSignal(SignalName.NotifyRootModelRequested);
+		Emit(SignalName.NotifyRootModelRequested);
 	}
 
 	[Signal] public delegate void SetMultiSelectionModeRequestedEventHandler(bool enable);
@@ -23,7 +23,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <param name="enable">複数選択モードを有効にする場合はtrue、無効にする場合はfalse</param>
 	internal void RequestSetMultiSelectionMode(bool enable)
 	{
-		TryEmitSignal(SignalName.SetMultiSelectionModeRequested, enable);
+		Emit(SignalName.SetMultiSelectionModeRequested, enable);
 	}
 
 	[Signal] public delegate void ClearSelectionRequestedEventHandler();
@@ -32,7 +32,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// </summary>
 	internal void RequestClearSelection()
 	{
-		TryEmitSignal(SignalName.ClearSelectionRequested);
+		Emit(SignalName.ClearSelectionRequested);
 	}
 
 	[Signal] public delegate void ToggleModelVisibilityRequestedEventHandler(AnyModel model);
@@ -42,7 +42,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <param name="model">切替対象のモデル</param>
 	internal void RequestToggleModelVisibility(AnyModel model)
 	{
-		TryEmitSignal(SignalName.ToggleModelVisibilityRequested, model);
+		Emit(SignalName.ToggleModelVisibilityRequested, model);
 	}
 
 	[Signal] public delegate void AddModelRequestedEventHandler(AnyModel childModel, AnyModel parentModel);
@@ -53,7 +53,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <param name="parentModel">追加先の親モデル、nullの場合はルートに追加される</param>
 	internal void RequestAddModel(AnyModel childModel, AnyModel parentModel = null)
 	{
-		TryEmitSignal(SignalName.AddModelRequested, childModel, parentModel);
+		Emit(SignalName.AddModelRequested, childModel, parentModel);
 	}
 
 	[Signal] public delegate void LoadModelRequestedEventHandler(string path);
@@ -63,7 +63,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <param name="path">ロードするモデルのパス</param>
 	internal void RequestLoadModel(string path)
 	{
-		TryEmitSignal(SignalName.LoadModelRequested, path);
+		Emit(SignalName.LoadModelRequested, path);
 	}
 
 	#endregion
@@ -77,7 +77,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <param name="rootModel">通知するルートモデル</param>
 	internal void NotifyRootModel(RootModel rootModel)
 	{
-		TryEmitSignal(SignalName.RootModelNotified, rootModel);
+		Emit(SignalName.RootModelNotified, rootModel);
 	}
 
 	[Signal] public delegate void ModelSelectionStateNotifiedEventHandler(AnyModel model, bool isSelected);
@@ -88,7 +88,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
 	internal void NotifyModelSelectionState(AnyModel model, bool isSelected)
 	{
-		TryEmitSignal(SignalName.ModelSelectionStateNotified, model, isSelected);
+		Emit(SignalName.ModelSelectionStateNotified, model, isSelected);
 	}
 
 	[Signal] public delegate void ModelVisibilityStateNotifiedEventHandler(AnyModel model, bool isVisible);
@@ -99,7 +99,7 @@ public partial class ModelEventHub : EventHubBase<ModelEventHub>
 	/// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
 	internal void NotifyModelVisibilityState(AnyModel model, bool isVisible)
 	{
-		TryEmitSignal(SignalName.ModelVisibilityStateNotified, model, isVisible);
+		Emit(SignalName.ModelVisibilityStateNotified, model, isVisible);
 	}
 
 	#endregion

@@ -65,23 +65,23 @@ public partial class ViewportOverlay : Control
         _selectionRectLineVertical2 = _selectionRect.GetNode<Line2D>("LineVertical2");
 
         // イベントの購読登録
-        Application.Viewport.EventHub.RotateRequested += OnRotateRequested;
-        Application.Viewport.EventHub.RotationNotified += OnRotationNotified;
-        Application.Viewport.EventHub.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.EventHub.ArcballRadiusNotified += OnArcballRadiusNotified;
-        Application.Viewport.EventHub.ArcballHandleNotified += OnArcballHandleNotified;
-        Application.Viewport.EventHub.PickRectNotified += OnPickRectNotified;
+        Application.Viewport.RotateRequested += OnRotateRequested;
+        Application.Viewport.RotationNotified += OnRotationNotified;
+        Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.ArcballRadiusNotified += OnArcballRadiusNotified;
+        Application.Viewport.ArcballHandleNotified += OnArcballHandleNotified;
+        Application.Viewport.PickRectNotified += OnPickRectNotified;
     }
 
     public override void _ExitTree()
     {
         // イベントの購読解除
-        Application.Viewport.EventHub.RotateRequested -= OnRotateRequested;
-        Application.Viewport.EventHub.RotationNotified -= OnRotationNotified;
-        Application.Viewport.EventHub.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.EventHub.ArcballRadiusNotified -= OnArcballRadiusNotified;
-        Application.Viewport.EventHub.ArcballHandleNotified -= OnArcballHandleNotified;
-        Application.Viewport.EventHub.PickRectNotified -= OnPickRectNotified;
+        Application.Viewport.RotateRequested -= OnRotateRequested;
+        Application.Viewport.RotationNotified -= OnRotationNotified;
+        Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.ArcballRadiusNotified -= OnArcballRadiusNotified;
+        Application.Viewport.ArcballHandleNotified -= OnArcballHandleNotified;
+        Application.Viewport.PickRectNotified -= OnPickRectNotified;
     }
 
     public override void _Process(double delta)

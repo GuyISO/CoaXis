@@ -22,21 +22,21 @@ public partial class Selection : Node
     public override void _Ready()
     {
         // イベントの購読開始
-        Application.Model.EventHub.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
-        Application.Model.EventHub.ClearSelectionRequested += OnClearSelectionRequested;
-        Application.Pick.EventHub.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.EventHub.PickResultNotified += OnPickResultNotified;
-        Application.Pick.EventHub.PickResultsNotified += OnPickResultsNotified;
+        Application.Model.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
+        Application.Model.ClearSelectionRequested += OnClearSelectionRequested;
+        Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.PickResultNotified += OnPickResultNotified;
+        Application.Pick.PickResultsNotified += OnPickResultsNotified;
     }
 
     public override void _ExitTree()
     {
         // イベントの購読解除
-        Application.Model.EventHub.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
-        Application.Model.EventHub.ClearSelectionRequested -= OnClearSelectionRequested;
-        Application.Pick.EventHub.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.EventHub.PickResultNotified -= OnPickResultNotified;
-        Application.Pick.EventHub.PickResultsNotified -= OnPickResultsNotified;
+        Application.Model.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
+        Application.Model.ClearSelectionRequested -= OnClearSelectionRequested;
+        Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.PickResultNotified -= OnPickResultNotified;
+        Application.Pick.PickResultsNotified -= OnPickResultsNotified;
 
         base._ExitTree();
     }

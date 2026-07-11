@@ -67,14 +67,14 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
 
         // イベントの購読開始
-        Application.Model.EventHub.RootModelNotified += OnRootModelNotified;
-        Application.Viewport.EventHub.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.EventHub.PositionNotified += OnPositionNotified;
-        Application.Viewport.EventHub.RotationNotified += OnRotationNotified;
-        Application.Viewport.EventHub.DistanceNotified += OnDistanceNotified;
-        Application.Viewport.EventHub.SizeNotified += OnSizeNotified;
-        Application.Viewport.EventHub.FovNotified += OnFovNotified;
-        Application.Viewport.EventHub.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Model.RootModelNotified += OnRootModelNotified;
+        Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.PositionNotified += OnPositionNotified;
+        Application.Viewport.RotationNotified += OnRotationNotified;
+        Application.Viewport.DistanceNotified += OnDistanceNotified;
+        Application.Viewport.SizeNotified += OnSizeNotified;
+        Application.Viewport.FovNotified += OnFovNotified;
+        Application.Viewport.ProjectionTypeNotified += OnProjectionTypeNotified;
     }
 
     public override void _ExitTree()
@@ -89,14 +89,14 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
         // イベントの購読解除
-        Application.Model.EventHub.RootModelNotified -= OnRootModelNotified;
-        Application.Viewport.EventHub.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.EventHub.PositionNotified -= OnPositionNotified;
-        Application.Viewport.EventHub.RotationNotified -= OnRotationNotified;
-        Application.Viewport.EventHub.DistanceNotified -= OnDistanceNotified;
-        Application.Viewport.EventHub.SizeNotified -= OnSizeNotified;
-        Application.Viewport.EventHub.FovNotified -= OnFovNotified;
-        Application.Viewport.EventHub.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Model.RootModelNotified -= OnRootModelNotified;
+        Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.PositionNotified -= OnPositionNotified;
+        Application.Viewport.RotationNotified -= OnRotationNotified;
+        Application.Viewport.DistanceNotified -= OnDistanceNotified;
+        Application.Viewport.SizeNotified -= OnSizeNotified;
+        Application.Viewport.FovNotified -= OnFovNotified;
+        Application.Viewport.ProjectionTypeNotified -= OnProjectionTypeNotified;
     }
 
     public override void _Process(double delta)

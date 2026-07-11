@@ -34,8 +34,8 @@ public partial class ViewportInteractionHandler : SubViewport
         SizeChanged += OnSizeChanged;
 
         // イベントの購読
-        Application.Viewport.EventHub.NotifyStateRequested += OnNotifyStateRequested;
-        Application.Viewport.EventHub.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.NotifyStateRequested += OnNotifyStateRequested;
+        Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
@@ -48,8 +48,8 @@ public partial class ViewportInteractionHandler : SubViewport
         SizeChanged -= OnSizeChanged;
 
         // イベントの購読解除
-        Application.Viewport.EventHub.NotifyStateRequested -= OnNotifyStateRequested;
-        Application.Viewport.EventHub.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.NotifyStateRequested -= OnNotifyStateRequested;
+        Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
 
         Application.Logger.Info("ViewportInteractionHandler released.");
     }

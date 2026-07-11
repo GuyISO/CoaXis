@@ -24,10 +24,10 @@ public partial class HierarchyTree : Tree
         CellSelected += OnCellSelected;
 
         // イベントの購読
-        Application.Model.EventHub.AddModelRequested += OnAddModelRequested;
-        Application.Model.EventHub.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-        Application.Model.EventHub.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
-        Application.Model.EventHub.RootModelNotified += OnRootModelNotified;
+        Application.Model.AddModelRequested += OnAddModelRequested;
+        Application.Model.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+        Application.Model.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        Application.Model.RootModelNotified += OnRootModelNotified;
 
         _visibleIcon = Application.Asset.GetVisibilityIcon(true, 24);
         _invisibleIcon = Application.Asset.GetVisibilityIcon(false, 24);
@@ -44,10 +44,10 @@ public partial class HierarchyTree : Tree
         CellSelected -= OnCellSelected;
 
         // イベントの購読解除
-        Application.Model.EventHub.AddModelRequested -= OnAddModelRequested;
-        Application.Model.EventHub.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-        Application.Model.EventHub.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
-        Application.Model.EventHub.RootModelNotified -= OnRootModelNotified;
+        Application.Model.AddModelRequested -= OnAddModelRequested;
+        Application.Model.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+        Application.Model.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        Application.Model.RootModelNotified -= OnRootModelNotified;
     }
 
     public override void _Process(double delta)
