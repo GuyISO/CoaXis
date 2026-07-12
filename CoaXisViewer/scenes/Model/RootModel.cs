@@ -11,15 +11,15 @@ public partial class RootModel : AnyModel
     public override void _Ready()
     {
         // イベントハンドラの登録
-        Application.Model.AskRootModelRequested += OnAskRootModelRequested;
-        Application.Model.LoadModelRequested += OnLoadModelRequested;
+        Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
+        Application.Model.Event.LoadModelRequested += OnLoadModelRequested;
     }
 
     public override void _ExitTree()
     {
         // イベントハンドラの登録解除
-        Application.Model.AskRootModelRequested -= OnAskRootModelRequested;
-        Application.Model.LoadModelRequested -= OnLoadModelRequested;
+        Application.Model.Event.AskRootModelRequested -= OnAskRootModelRequested;
+        Application.Model.Event.LoadModelRequested -= OnLoadModelRequested;
     }
 
     #endregion
@@ -31,7 +31,7 @@ public partial class RootModel : AnyModel
     /// </summary>
     private void OnAskRootModelRequested()
     {
-        Application.Model.NotifyRootModel(this);
+        Application.Model.Event.NotifyRootModel(this);
     }
 
     /// <summary>
@@ -56,7 +56,7 @@ public partial class RootModel : AnyModel
 
         ModelColliderBuilder.AddCollider(model);
 
-        Application.Model.AddModel(model, this);
+        Application.Model.Event.AddModel(model, this);
 
     }
 

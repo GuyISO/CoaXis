@@ -5,26 +5,15 @@ using Godot;
 /// </summary>
 public partial class MeasurementFacade : Node
 {
-    // Domain instances
-	public MeasurementEvent Event { get; }
+    public MeasurementEvent Event { get; }
 	public MeasurementService Service { get; }
 
     public MeasurementFacade()
     {
-        Event = new MeasurementEvent();
-        Event.Name = "MeasurementEvent";
-        AddChild(Event);
+        Event = new MeasurementEvent() { Name = "MeasurementEvent" };
+        Service = new MeasurementService() { Name = "MeasurementService" };
 
-        Service = new MeasurementService();
-        Service.Name = "MeasurementService";
+        AddChild(Event);
         AddChild(Service);
     }
-
-    // Event gateways
-    public void AskMeasurementResult() => Event.AskMeasurementResult();
-    public void SetPickPoint(int pointIndex) => Event.SetPickPoint(pointIndex);
-    public void NotifyMeasurementResult(MeasurementResult result) => Event.NotifyMeasurementResult(result);
-
-    // Service gateways
-
 }

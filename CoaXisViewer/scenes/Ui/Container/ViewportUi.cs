@@ -67,7 +67,7 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
 
         // イベントの購読開始
-        Application.Model.RootModelNotified += OnRootModelNotified;
+        Application.Model.Event.RootModelNotified += OnRootModelNotified;
         Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
         Application.Viewport.PositionNotified += OnPositionNotified;
         Application.Viewport.RotationNotified += OnRotationNotified;
@@ -89,7 +89,7 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
         // イベントの購読解除
-        Application.Model.RootModelNotified -= OnRootModelNotified;
+        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
         Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
         Application.Viewport.PositionNotified -= OnPositionNotified;
         Application.Viewport.RotationNotified -= OnRotationNotified;
@@ -104,7 +104,7 @@ public partial class ViewportUi : PanelContainer
         // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
         if (_rootModel == null)
         {
-            Application.Model.AskRootModel();
+            Application.Model.Event.AskRootModel();
         }
 
         if (!_isInitialized)

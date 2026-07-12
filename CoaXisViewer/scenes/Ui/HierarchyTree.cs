@@ -24,10 +24,10 @@ public partial class HierarchyTree : Tree
         CellSelected += OnCellSelected;
 
         // イベントの購読
-        Application.Model.AddModelRequested += OnAddModelRequested;
-        Application.Model.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-        Application.Model.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
-        Application.Model.RootModelNotified += OnRootModelNotified;
+        Application.Model.Event.AddModelRequested += OnAddModelRequested;
+        Application.Model.Event.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+        Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        Application.Model.Event.RootModelNotified += OnRootModelNotified;
 
         _visibleIcon = Application.Asset.GetVisibilityIcon(true, 24);
         _invisibleIcon = Application.Asset.GetVisibilityIcon(false, 24);
@@ -44,10 +44,10 @@ public partial class HierarchyTree : Tree
         CellSelected -= OnCellSelected;
 
         // イベントの購読解除
-        Application.Model.AddModelRequested -= OnAddModelRequested;
-        Application.Model.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-        Application.Model.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
-        Application.Model.RootModelNotified -= OnRootModelNotified;
+        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
+        Application.Model.Event.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+        Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
     }
 
     public override void _Process(double delta)
@@ -55,7 +55,7 @@ public partial class HierarchyTree : Tree
         // ルートモデルがまだ取得できていない場合は、ModelEvent に通知をリクエストする、Ready団塊ではノードの読み込み順序の都合などで取得できないことを想定し、毎フレームチェックする
         if (_rootModel == null)
         {
-            Application.Model.AskRootModel();
+            Application.Model.Event.AskRootModel();
         }
     }
 
@@ -126,7 +126,7 @@ public partial class HierarchyTree : Tree
         }
 
         // モデルの表示状態を切り替える
-        Application.Model.ToggleModelVisibility(model);
+        Application.Model.Event.ToggleModelVisibility(model);
     }
 
     /// <summary>
@@ -229,5 +229,4 @@ public partial class HierarchyTree : Tree
             AddToTree(childModel, parentTreeItem);
         }
     }
-
 }

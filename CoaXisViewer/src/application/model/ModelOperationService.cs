@@ -18,7 +18,7 @@ public partial class ModelOperationService : Node
 	public override void _Ready()
 	{
 		// イベントの購読開始
-		Application.Model.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
 		Application.Pick.AskPickHandlingModeRequested += OnAskPickHandlingModeRequested;
 		Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
@@ -26,7 +26,7 @@ public partial class ModelOperationService : Node
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
-		Application.Model.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
+		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 		Application.Pick.AskPickHandlingModeRequested -= OnAskPickHandlingModeRequested;
 		Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 

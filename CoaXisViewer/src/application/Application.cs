@@ -7,21 +7,21 @@ public partial class Application : Node
 {
     #region Fields
 
+    // domain facades
     private LogFacade _logFacade;
+    private SettingFacade _settingFacade;
+    private ViewportFacade _viewportFacade;
+    private ModelFacade _modelFacade;
+    private PickFacade _pickFacade;
+    private SelectionFacade _selectionFacade;
     private MeasurementFacade _measurementFacade;
+    private UiFacade _uiFacade;
 
-    private ModelEvent _modelEvent;
-    private PickEvent _pickEvent;
-    private ViewportEvent _viewportEvent;
-
-    private AssetManager _assetManager;
+    private AssetFacade _assetFacade;
 
     // singleton nodes
     private ModelOperationService _modelOperationService;
     private ModelVisualService _modelVisualService;
-    private SelectionService _selectionService;
-    private SettingService _settingService;
-    private UiManager _uiManager;
 
     private DeviceInputHandler _deviceInputHandler;
 
@@ -30,24 +30,17 @@ public partial class Application : Node
     #region Properties
 
     public static Application Instance { get; private set; }
-    
+
+    // domain facades
     public static LogFacade Log => Instance._logFacade;
+    public static SettingFacade Setting => Instance._settingFacade;
+    public static ViewportFacade Viewport => Instance._viewportFacade;
+    public static ModelFacade Model => Instance._modelFacade;
+    public static PickFacade Pick => Instance._pickFacade;
+    public static SelectionFacade Selection => Instance._selectionFacade;
     public static MeasurementFacade Measurement => Instance._measurementFacade;
-
-    public static ModelEvent Model => Instance._modelEvent;
-    public static PickEvent Pick => Instance._pickEvent;
-    public static ViewportEvent Viewport => Instance._viewportEvent;
-
-    public static SelectionService Selection => Instance._selectionService;
-    public static AssetManager Asset => Instance._assetManager;
-    public static UiManager Ui => Instance._uiManager;
-
-    // Service
-    public static ModelOperationService ModelOperationServiceNode => Instance._modelOperationService;
-    public static ModelVisualService ModelVisualServiceNode => Instance._modelVisualService;
-    public static SelectionService SelectionServiceNode => Instance._selectionService;
-    public static SettingService SettingServiceNode => Instance._settingService;
-    public static UiManager UiManagerNode => Instance._uiManager;
+    public static UiFacade Ui => Instance._uiFacade;
+    public static AssetFacade Asset => Instance._assetFacade;
 
     // Input
     public static DeviceInputHandler DeviceInputHandlerNode => Instance._deviceInputHandler;
@@ -78,23 +71,14 @@ public partial class Application : Node
     private void EnsureModules()
     {
         _logFacade = AddModule<LogFacade>("LogFacade");
-
+        _settingFacade = AddModule<SettingFacade>("SettingFacade");
+        _viewportFacade = AddModule<ViewportFacade>("ViewportFacade");
+        _modelFacade = AddModule<ModelFacade>("ModelFacade");
+        _pickFacade = AddModule<PickFacade>("PickFacade");
+        _selectionFacade = AddModule<SelectionFacade>("SelectionFacade");
         _measurementFacade = AddModule<MeasurementFacade>("MeasurementFacade");
-
-        // System
-        _assetManager = AddModule<AssetManager>("AssetManager");
-
-        // Event
-        _modelEvent = AddModule<ModelEvent>("ModelEvent");
-        _pickEvent = AddModule<PickEvent>("PickEvent");
-        _viewportEvent = AddModule<ViewportEvent>("ViewportEvent");
-
-        // Service
-        _modelOperationService = AddModule<ModelOperationService>("ModelOperationService");
-        _modelVisualService = AddModule<ModelVisualService>("ModelVisualService");
-        _selectionService = AddModule<SelectionService>("SelectionService");
-        _settingService = AddModule<SettingService>("SettingService");
-        _uiManager = AddModule<UiManager>("UiManager");
+        _uiFacade = AddModule<UiFacade>("UiFacade");
+        _assetFacade = AddModule<AssetFacade>("AssetFacade");
 
         // Input
         _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");

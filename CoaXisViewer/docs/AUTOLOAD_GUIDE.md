@@ -9,6 +9,8 @@
 - AutoLoad の入口は Application とし、Application が子ノードとして各モジュールを生成・保持する。
 - グローバルアクセスは Application 経由に集約する。
 - Instance 管理が必要な場合は、Application クラス内で明示的に管理する。
+- Application が公開する機能群は Facade としてまとめ、利用側は ModelFacade, PickFacade, ViewportFacade, SelectionFacade のような窓口を経由する。
+- Facade の内部実体は既存の Event / Service 実装を再利用してよく、公開 API の集約点だけを Application に寄せる。
 
 ### 2.2 Event 系
 - Event 系は src/application/event/EventBase.cs を継承する。
@@ -18,13 +20,18 @@
 - Notify 系は通知専用としてそのまま維持する。
 - Signal 名の Requested / Notified は内部イベント表現として残してよい。
 
-### 2.3 _ExitTree の扱い
+### 2.3 Facade 系
+- Facade は Application から見た公開窓口として配置し、外部コードは原則として Facade のみを参照する。
+- Facade は既存の Event / Service を継承または内包してよく、責務は薄いラッパーに留める。
+- 既存の Node アクセサ名を残す場合でも、実体は Facade を返すように統一する。
+
+### 2.4 _ExitTree の扱い
 - _ExitTree で独自の購読解除やリソース解放が必要な場合は、その処理を先に行ってから base._ExitTree() を呼ぶ。
 - Hub や他 AutoLoad の終了順は固定ではないため、購読解除時は対象ノードの有効性を考慮する。
 
 ## 3. 対象クラス
-- Event: ModelEvent, ViewportEvent, PickEvent
-- Services: ModelOperationService, ModelVisualService, Selection, SettingsService, UiManager
+- Event / Facade: ModelEvent, ViewportEvent, PickEvent, ModelFacade, ViewportFacade, PickFacade, SelectionFacade
+- Services: ModelOperationService, ModelVisualService, SettingService, UiManager
 - Systems/Input: LogHub, AssetManager, DeviceInputHandler
 
 ## 4. 新規追加時のチェック

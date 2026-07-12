@@ -27,18 +27,18 @@ public partial class DeviceInputHandler : Node
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            Application.Model.SetMultiSelectionMode(_isMultiSelectMode);
+            Application.Model.Event.SetMultiSelectionMode(_isMultiSelectMode);
         }
 
         if (Input.IsActionJustPressed("load"))
         {
-            Application.Model.LoadModel("res://assets/models/car.glb");
+            Application.Model.Event.LoadModel("res://assets/models/car.glb");
         }
 
         if (Input.IsActionJustPressed("escape"))
         {
             Application.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
-            Application.Model.ClearSelection();
+            Application.Model.Event.ClearSelection();
         }
 
         HandleUndoRedoInput();

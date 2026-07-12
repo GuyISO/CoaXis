@@ -22,8 +22,8 @@ public partial class SelectionService : Node
     public override void _Ready()
     {
         // イベントの購読開始
-        Application.Model.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
-        Application.Model.ClearSelectionRequested += OnClearSelectionRequested;
+        Application.Model.Event.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
+        Application.Model.Event.ClearSelectionRequested += OnClearSelectionRequested;
         Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified += OnPickResultNotified;
         Application.Pick.PickResultsNotified += OnPickResultsNotified;
@@ -32,8 +32,8 @@ public partial class SelectionService : Node
     public override void _ExitTree()
     {
         // イベントの購読解除
-        Application.Model.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
-        Application.Model.ClearSelectionRequested -= OnClearSelectionRequested;
+        Application.Model.Event.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
+        Application.Model.Event.ClearSelectionRequested -= OnClearSelectionRequested;
         Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Pick.PickResultNotified -= OnPickResultNotified;
         Application.Pick.PickResultsNotified -= OnPickResultsNotified;
@@ -205,7 +205,7 @@ public partial class SelectionService : Node
     {
         if (_models.Add(model))
         {
-            Application.Model.NotifyModelSelectionState(model, true);
+            Application.Model.Event.NotifyModelSelectionState(model, true);
             Application.Log.Info($"Selected: {model.Name}");
             return true;
         }
@@ -234,7 +234,7 @@ public partial class SelectionService : Node
     {
         if (_models.Remove(model))
         {
-            Application.Model.NotifyModelSelectionState(model, false);
+            Application.Model.Event.NotifyModelSelectionState(model, false);
             Application.Log.Info($"Deselected: {model.Name}");
             return true;
         }
@@ -306,7 +306,7 @@ public partial class SelectionService : Node
         // モデルの選択解除シグナルとハイライト解除は個々に行う
         foreach (var model in modelsToDeselect)
         {
-            Application.Model.NotifyModelSelectionState(model, false);
+            Application.Model.Event.NotifyModelSelectionState(model, false);
             Application.Log.Info($"Deselected: {model.Name}");
         }
         return true;
