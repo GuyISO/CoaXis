@@ -60,7 +60,7 @@ public partial class LogService : Node
             _fileWriter.Flush();
         }
 
-        Application.Log.NotifyLog(line);
+        Application.Log.Event.NotifyLog(line);
     }
 
     /// <summary>

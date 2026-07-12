@@ -19,16 +19,16 @@ public partial class ModelOperationService : Node
 	{
 		// イベントの購読開始
 		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		Application.Pick.AskPickHandlingModeRequested += OnAskPickHandlingModeRequested;
-		Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
+		Application.Pick.Event.AskPickHandlingModeRequested += OnAskPickHandlingModeRequested;
+		Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
 		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		Application.Pick.AskPickHandlingModeRequested -= OnAskPickHandlingModeRequested;
-		Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+		Application.Pick.Event.AskPickHandlingModeRequested -= OnAskPickHandlingModeRequested;
+		Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 
 		base._ExitTree();
 	}
@@ -52,7 +52,7 @@ public partial class ModelOperationService : Node
 	/// </summary>
 	private void OnAskPickHandlingModeRequested()
 	{
-		Application.Pick.NotifyPickHandlingMode(_currentPickHandlingMode);
+		Application.Pick.Event.NotifyPickHandlingMode(_currentPickHandlingMode);
 	}
 
 	/// <summary>

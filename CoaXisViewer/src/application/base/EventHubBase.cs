@@ -15,7 +15,7 @@ public abstract partial class EventBase<THub> : Node where THub : EventBase<THub
 	protected void Emit(StringName signalName, params Variant[] args)
     {
         EmitSignal(signalName, args);
-        Application.Log.Debug($"{typeof(THub).Name} emitted signal: {signalName}.");
+        Application.Log.Service.Debug($"{typeof(THub).Name} emitted signal: {signalName}.");
     }
 
     #endregion

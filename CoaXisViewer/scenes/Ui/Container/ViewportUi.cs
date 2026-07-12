@@ -68,13 +68,13 @@ public partial class ViewportUi : PanelContainer
 
         // イベントの購読開始
         Application.Model.Event.RootModelNotified += OnRootModelNotified;
-        Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.PositionNotified += OnPositionNotified;
-        Application.Viewport.RotationNotified += OnRotationNotified;
-        Application.Viewport.DistanceNotified += OnDistanceNotified;
-        Application.Viewport.SizeNotified += OnSizeNotified;
-        Application.Viewport.FovNotified += OnFovNotified;
-        Application.Viewport.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.Event.PositionNotified += OnPositionNotified;
+        Application.Viewport.Event.RotationNotified += OnRotationNotified;
+        Application.Viewport.Event.DistanceNotified += OnDistanceNotified;
+        Application.Viewport.Event.SizeNotified += OnSizeNotified;
+        Application.Viewport.Event.FovNotified += OnFovNotified;
+        Application.Viewport.Event.ProjectionTypeNotified += OnProjectionTypeNotified;
     }
 
     public override void _ExitTree()
@@ -90,13 +90,13 @@ public partial class ViewportUi : PanelContainer
 
         // イベントの購読解除
         Application.Model.Event.RootModelNotified -= OnRootModelNotified;
-        Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.PositionNotified -= OnPositionNotified;
-        Application.Viewport.RotationNotified -= OnRotationNotified;
-        Application.Viewport.DistanceNotified -= OnDistanceNotified;
-        Application.Viewport.SizeNotified -= OnSizeNotified;
-        Application.Viewport.FovNotified -= OnFovNotified;
-        Application.Viewport.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.Event.PositionNotified -= OnPositionNotified;
+        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+        Application.Viewport.Event.DistanceNotified -= OnDistanceNotified;
+        Application.Viewport.Event.SizeNotified -= OnSizeNotified;
+        Application.Viewport.Event.FovNotified -= OnFovNotified;
+        Application.Viewport.Event.ProjectionTypeNotified -= OnProjectionTypeNotified;
     }
 
     public override void _Process(double delta)
@@ -109,7 +109,7 @@ public partial class ViewportUi : PanelContainer
 
         if (!_isInitialized)
         {
-            Application.Viewport.AskState();
+            Application.Viewport.Event.AskState();
         }
     }
 
@@ -122,8 +122,8 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonToggleProjectionPressed()
     {
-        Application.Log.Debug("ViewportUi: toggle projection requested.");
-        Application.Viewport.ToggleProjectionType();
+        Application.Log.Service.Debug("ViewportUi: toggle projection requested.");
+        Application.Viewport.Event.ToggleProjectionType();
     }
 
     /// <summary>
@@ -134,12 +134,12 @@ public partial class ViewportUi : PanelContainer
         if (_rootModel == null)
         {
             GD.PushWarning("ViewportUi: fit target model is missing.");
-            Application.Log.Warn("ViewportUi: fit-all requested but default target is missing.");
+            Application.Log.Service.Warn("ViewportUi: fit-all requested but default target is missing.");
             return;
         }
 
-        Application.Log.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
-        Application.Viewport.Fit(new[] { _rootModel }, true);
+        Application.Log.Service.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
+        Application.Viewport.Event.Fit(new[] { _rootModel }, true);
     }
 
     /// <summary>
@@ -147,15 +147,15 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        AnyModel[] fitTargets = Application.Selection.GetModelArray();
+        AnyModel[] fitTargets = Application.Selection.Service.GetModelArray();
         if (fitTargets.Length == 0)
         {
-            Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
+            Application.Log.Service.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
-        Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
-        Application.Viewport.Fit(fitTargets, true);
+        Application.Log.Service.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
+        Application.Viewport.Event.Fit(fitTargets, true);
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonAlignNormalPressed()
     {
-        Application.Pick.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
+        Application.Pick.Event.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
     }
 
     /// <summary>
@@ -172,8 +172,8 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollLeftPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-        Application.Log.Debug("ViewportUi: roll-left requested.");
-        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Log.Service.Debug("ViewportUi: roll-left requested.");
+        Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -182,8 +182,8 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollRightPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-        Application.Log.Debug("ViewportUi: roll-right requested.");
-        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Log.Service.Debug("ViewportUi: roll-right requested.");
+        Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -201,8 +201,8 @@ public partial class ViewportUi : PanelContainer
     /// <param name="value">新しい FOV 値</param>
     private void OnSliderFovValueChanged(double value)
     {
-        Application.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
-        Application.Viewport.SetFov((float)value);
+        Application.Log.Service.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
+        Application.Viewport.Event.SetFov((float)value);
     }
 
     /// <summary>

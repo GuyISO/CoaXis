@@ -24,9 +24,9 @@ public partial class SelectionService : Node
         // イベントの購読開始
         Application.Model.Event.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
         Application.Model.Event.ClearSelectionRequested += OnClearSelectionRequested;
-        Application.Pick.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.PickResultNotified += OnPickResultNotified;
-        Application.Pick.PickResultsNotified += OnPickResultsNotified;
+        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.Event.PickResultNotified += OnPickResultNotified;
+        Application.Pick.Event.PickResultsNotified += OnPickResultsNotified;
     }
 
     public override void _ExitTree()
@@ -34,9 +34,9 @@ public partial class SelectionService : Node
         // イベントの購読解除
         Application.Model.Event.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
         Application.Model.Event.ClearSelectionRequested -= OnClearSelectionRequested;
-        Application.Pick.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.PickResultNotified -= OnPickResultNotified;
-        Application.Pick.PickResultsNotified -= OnPickResultsNotified;
+        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.Event.PickResultNotified -= OnPickResultNotified;
+        Application.Pick.Event.PickResultsNotified -= OnPickResultsNotified;
 
         base._ExitTree();
     }
@@ -45,7 +45,7 @@ public partial class SelectionService : Node
     {
         if (!_isInitialized)
         {
-            Application.Pick.AskPickHandlingMode();
+            Application.Pick.Event.AskPickHandlingMode();
         }
     }
 
@@ -206,7 +206,7 @@ public partial class SelectionService : Node
         if (_models.Add(model))
         {
             Application.Model.Event.NotifyModelSelectionState(model, true);
-            Application.Log.Info($"Selected: {model.Name}");
+            Application.Log.Service.Info($"Selected: {model.Name}");
             return true;
         }
         return false;
@@ -235,7 +235,7 @@ public partial class SelectionService : Node
         if (_models.Remove(model))
         {
             Application.Model.Event.NotifyModelSelectionState(model, false);
-            Application.Log.Info($"Deselected: {model.Name}");
+            Application.Log.Service.Info($"Deselected: {model.Name}");
             return true;
         }
         return false;
@@ -307,7 +307,7 @@ public partial class SelectionService : Node
         foreach (var model in modelsToDeselect)
         {
             Application.Model.Event.NotifyModelSelectionState(model, false);
-            Application.Log.Info($"Deselected: {model.Name}");
+            Application.Log.Service.Info($"Deselected: {model.Name}");
         }
         return true;
     }

@@ -22,17 +22,39 @@
 
 ### 2.3 Facade 系
 - Facade は Application から見た公開窓口として配置し、外部コードは原則として Facade のみを参照する。
-- Facade は既存の Event / Service を継承または内包してよく、責務は薄いラッパーに留める。
+- Facade は Node ベースで実装し、Event / Service は子ノードとして内包する。
 - 既存の Node アクセサ名を残す場合でも、実体は Facade を返すように統一する。
 
-### 2.4 _ExitTree の扱い
+### 2.4 FacadeBase の共通化
+- Domain Facade の共通処理は src/application/base/FacadeBase.cs に集約する。
+- 子ノード生成は FacadeBase の AddModule<TModule>(nodeName) を使い、各 Facade で new/AddChild を重複実装しない。
+
+### 2.5 Domain Facade の実装テンプレート
+- Domain Facade は次の形を基本とする。
+
+```csharp
+public partial class ExampleFacade : FacadeBase
+{
+	public ExampleEvent Event { get; }
+	public ExampleService Service { get; }
+
+	public ExampleFacade()
+	{
+		Event = AddModule<ExampleEvent>("ExampleEvent");
+		Service = AddModule<ExampleService>("ExampleService");
+	}
+}
+```
+
+### 2.6 _ExitTree の扱い
 - _ExitTree で独自の購読解除やリソース解放が必要な場合は、その処理を先に行ってから base._ExitTree() を呼ぶ。
 - Hub や他 AutoLoad の終了順は固定ではないため、購読解除時は対象ノードの有効性を考慮する。
 
 ## 3. 対象クラス
-- Event / Facade: ModelEvent, ViewportEvent, PickEvent, ModelFacade, ViewportFacade, PickFacade, SelectionFacade
-- Services: ModelOperationService, ModelVisualService, SettingService, UiManager
-- Systems/Input: LogHub, AssetManager, DeviceInputHandler
+- Facade: LogFacade, SettingFacade, ViewportFacade, ModelFacade, PickFacade, SelectionFacade, MeasurementFacade, UiFacade, AssetFacade
+- Event: LogEvent, ViewportEvent, ModelEvent, PickEvent, MeasurementEvent
+- Service: LogService, SettingService, ModelOperationService, ModelVisualService, SelectionService, MeasurementService, UiManager, AssetManager
+- Systems/Input: DeviceInputHandler
 
 ## 4. 新規追加時のチェック
 - AutoLoad に登録する理由があるか。

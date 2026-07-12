@@ -37,7 +37,7 @@ public partial class DeviceInputHandler : Node
 
         if (Input.IsActionJustPressed("escape"))
         {
-            Application.Pick.NotifyPickHandlingMode(PickHandlingMode.Selection);
+            Application.Pick.Event.NotifyPickHandlingMode(PickHandlingMode.Selection);
             Application.Model.Event.ClearSelection();
         }
 
@@ -67,13 +67,13 @@ public partial class DeviceInputHandler : Node
 
         if (undoPressed)
         {
-            Application.Log.Debug("DeviceInputHandler: Undo requested.");
+            Application.Log.Service.Debug("DeviceInputHandler: Undo requested.");
             UndoService.Undo();
         }
 
         if (redoPressed)
         {
-            Application.Log.Debug("DeviceInputHandler: Redo requested.");
+            Application.Log.Service.Debug("DeviceInputHandler: Redo requested.");
             UndoService.Redo();
         }
     }
@@ -100,7 +100,7 @@ public partial class DeviceInputHandler : Node
         }
 
         Vector3 translation = translationDirection * (_translateSpeed * delta);
-        Application.Viewport.Translate(translation, SpaceMode.Camera);
+        Application.Viewport.Event.Translate(translation, SpaceMode.Camera);
     }
 
     /// <summary>
@@ -126,7 +126,7 @@ public partial class DeviceInputHandler : Node
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
         Quaternion rotation = yaw * pitch * roll;
 
-        Application.Viewport.Rotate(rotation, SpaceMode.Camera);
+        Application.Viewport.Event.Rotate(rotation, SpaceMode.Camera);
     }
 
     /// <summary>

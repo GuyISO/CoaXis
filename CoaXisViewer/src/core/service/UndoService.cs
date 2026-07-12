@@ -23,15 +23,15 @@ public static class UndoService
     {
         if (command == null)
         {
-            Application.Log.Warn("UndoService.Execute was called with null command.");
+            Application.Log.Service.Warn("UndoService.Execute was called with null command.");
             return;
         }
 
-        Application.Log.Debug($"UndoService Execute: {command.Description}");
+        Application.Log.Service.Debug($"UndoService Execute: {command.Description}");
         command.Do();
         _undoStack.Push(command);
         _redoStack.Clear();
-        Application.Log.Debug($"UndoService Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
+        Application.Log.Service.Debug($"UndoService Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
     }
 
     /// <summary>
@@ -41,15 +41,15 @@ public static class UndoService
     {
         if (_undoStack.Count == 0)
         {
-            Application.Log.Debug("UndoService Undo skipped: undo stack is empty.");
+            Application.Log.Service.Debug("UndoService Undo skipped: undo stack is empty.");
             return;
         }
 
         var cmd = _undoStack.Pop();
-        Application.Log.Debug($"UndoService Undo: {cmd.Description}");
+        Application.Log.Service.Debug($"UndoService Undo: {cmd.Description}");
         cmd.Undo();
         _redoStack.Push(cmd);
-        Application.Log.Debug($"UndoService Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
+        Application.Log.Service.Debug($"UndoService Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
     }
 
     /// <summary>
@@ -59,15 +59,15 @@ public static class UndoService
     {
         if (_redoStack.Count == 0)
         {
-            Application.Log.Debug("UndoService Redo skipped: redo stack is empty.");
+            Application.Log.Service.Debug("UndoService Redo skipped: redo stack is empty.");
             return;
         }
 
         var cmd = _redoStack.Pop();
-        Application.Log.Debug($"UndoService Redo: {cmd.Description}");
+        Application.Log.Service.Debug($"UndoService Redo: {cmd.Description}");
         cmd.Do();
         _undoStack.Push(cmd);
-        Application.Log.Debug($"UndoService Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
+        Application.Log.Service.Debug($"UndoService Stacks: undo={_undoStack.Count}, redo={_redoStack.Count}");
     }
 
     /// <summary>
@@ -75,7 +75,7 @@ public static class UndoService
     /// </summary>
     public static void Clear()
     {
-        Application.Log.Info($"UndoService Clear: undo={_undoStack.Count}, redo={_redoStack.Count}");
+        Application.Log.Service.Info($"UndoService Clear: undo={_undoStack.Count}, redo={_redoStack.Count}");
         _undoStack.Clear();
         _redoStack.Clear();
     }

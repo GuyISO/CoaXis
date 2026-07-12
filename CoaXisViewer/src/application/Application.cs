@@ -19,10 +19,6 @@ public partial class Application : Node
 
     private AssetFacade _assetFacade;
 
-    // singleton nodes
-    private ModelOperationService _modelOperationService;
-    private ModelVisualService _modelVisualService;
-
     private DeviceInputHandler _deviceInputHandler;
 
     #endregion

@@ -1,9 +1,7 @@
-using Godot;
-
 /// <summary>
 /// Application 経由で Model 機能を利用するためのファサード
 /// </summary>
-public partial class ModelFacade : Node
+public partial class ModelFacade : FacadeBase
 {
     public ModelEvent Event { get; }
     public ModelOperationService Operation { get; }
@@ -11,12 +9,8 @@ public partial class ModelFacade : Node
 
     public ModelFacade()
     {
-        Event = new ModelEvent() { Name = "ModelEvent" };
-        Operation = new ModelOperationService() { Name = "ModelOperationService" };
-        Visual = new ModelVisualService() { Name = "ModelVisualService" };
-
-        AddChild(Event);
-        AddChild(Operation);
-        AddChild(Visual);
+        Event = AddModule<ModelEvent>("ModelEvent");
+        Operation = AddModule<ModelOperationService>("ModelOperationService");
+        Visual = AddModule<ModelVisualService>("ModelVisualService");
     }
 }

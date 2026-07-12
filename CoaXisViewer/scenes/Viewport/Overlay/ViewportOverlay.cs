@@ -65,23 +65,23 @@ public partial class ViewportOverlay : Control
         _selectionRectLineVertical2 = _selectionRect.GetNode<Line2D>("LineVertical2");
 
         // イベントの購読登録
-        Application.Viewport.RotateRequested += OnRotateRequested;
-        Application.Viewport.RotationNotified += OnRotationNotified;
-        Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.ArcballRadiusNotified += OnArcballRadiusNotified;
-        Application.Viewport.ArcballHandleNotified += OnArcballHandleNotified;
-        Application.Viewport.PickRectNotified += OnPickRectNotified;
+        Application.Viewport.Event.RotateRequested += OnRotateRequested;
+        Application.Viewport.Event.RotationNotified += OnRotationNotified;
+        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.Event.ArcballRadiusNotified += OnArcballRadiusNotified;
+        Application.Viewport.Event.ArcballHandleNotified += OnArcballHandleNotified;
+        Application.Viewport.Event.PickRectNotified += OnPickRectNotified;
     }
 
     public override void _ExitTree()
     {
         // イベントの購読解除
-        Application.Viewport.RotateRequested -= OnRotateRequested;
-        Application.Viewport.RotationNotified -= OnRotationNotified;
-        Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.ArcballRadiusNotified -= OnArcballRadiusNotified;
-        Application.Viewport.ArcballHandleNotified -= OnArcballHandleNotified;
-        Application.Viewport.PickRectNotified -= OnPickRectNotified;
+        Application.Viewport.Event.RotateRequested -= OnRotateRequested;
+        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.Event.ArcballRadiusNotified -= OnArcballRadiusNotified;
+        Application.Viewport.Event.ArcballHandleNotified -= OnArcballHandleNotified;
+        Application.Viewport.Event.PickRectNotified -= OnPickRectNotified;
     }
 
     public override void _Process(double delta)
@@ -89,7 +89,7 @@ public partial class ViewportOverlay : Control
         if (!_isInitialized)
         {
             // カメラの初期状態を取得してUIに反映する
-            Application.Viewport.AskState();
+            Application.Viewport.Event.AskState();
         }
     }
 

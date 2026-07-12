@@ -14,7 +14,7 @@ public static class ModelColliderBuilder
     /// <param name="model">コライダーを追加する対象モデル</param>
     public static void AddCollider(AnyModel model)
     {
-        Application.Log.Info($"Start adding collider for model: {model.Name}");
+        Application.Log.Service.Info($"Start adding collider for model: {model.Name}");
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         CollisionShape3D collisionShape = new CollisionShape3D();
@@ -45,7 +45,7 @@ public static class ModelColliderBuilder
 
         if (index == 0)
         {
-            Application.Log.Warn($"Skipped adding collider for model: {model.Name}, no mesh faces found.");
+            Application.Log.Service.Warn($"Skipped adding collider for model: {model.Name}, no mesh faces found.");
             return;
         }
 
@@ -59,7 +59,7 @@ public static class ModelColliderBuilder
         collisionShape.Shape = shape;
 
         stopwatch.Stop();
-        Application.Log.Info($"Finished adding collider for model: {model.Name} in {stopwatch.ElapsedMilliseconds} ms");
+        Application.Log.Service.Info($"Finished adding collider for model: {model.Name} in {stopwatch.ElapsedMilliseconds} ms");
     }
 
     // モデル階層の深さに依存せずコライダーを作るため、MeshInstance3D を再帰収集する
