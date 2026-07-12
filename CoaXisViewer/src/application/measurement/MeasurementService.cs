@@ -23,10 +23,6 @@ public partial class MeasurementService : Node
 
     #endregion
 
-    #region Events
-
-    #endregion
-
     #region Lifecycle
 
     public override void _Ready()
@@ -62,6 +58,10 @@ public partial class MeasurementService : Node
 
     #endregion
 
+    #region Events
+
+    #endregion
+
     #region Internal Helpers
 
     private void SubscribeEvents()
@@ -91,7 +91,7 @@ public partial class MeasurementService : Node
     {
         if (pointIndex is < 1 or > 2)
         {
-            Application.Logger.Warn($"MeasurementService: invalid point index {pointIndex}.");
+            Application.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
             return;
         }
 
@@ -129,7 +129,7 @@ public partial class MeasurementService : Node
 
         int index = _pickingPointIndex - 1;
         _points[index] = pickResult;
-        Application.Logger.Debug($"MeasurementService: point {_pickingPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
+        Application.Log.Debug($"MeasurementService: point {_pickingPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
 
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
@@ -205,13 +205,13 @@ public partial class MeasurementService : Node
 
         if (_pointerLabel == null)
         {
-            Application.Logger.Warn("MeasurementService: pointer label scene is not loaded.");
+            Application.Log.Warn("MeasurementService: pointer label scene is not loaded.");
             return;
         }
 
         if (pickResult.Collider == null || !GodotObject.IsInstanceValid(pickResult.Collider))
         {
-            Application.Logger.Warn("MeasurementService: collider is invalid, skip pointer label placement.");
+            Application.Log.Warn("MeasurementService: collider is invalid, skip pointer label placement.");
             return;
         }
 

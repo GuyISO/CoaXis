@@ -67,13 +67,13 @@ public partial class DeviceInputHandler : Node
 
         if (undoPressed)
         {
-            Application.Logger.Debug("DeviceInputHandler: Undo requested.");
+            Application.Log.Debug("DeviceInputHandler: Undo requested.");
             UndoService.Undo();
         }
 
         if (redoPressed)
         {
-            Application.Logger.Debug("DeviceInputHandler: Redo requested.");
+            Application.Log.Debug("DeviceInputHandler: Redo requested.");
             UndoService.Redo();
         }
     }

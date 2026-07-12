@@ -37,7 +37,7 @@ public partial class ShowContainerButton : Button
     {
         if (_container == null)
         {
-            Application.Logger.Warn("ShowContainerButton: Container is not assigned.");
+            Application.Log.Warn("ShowContainerButton: Container is not assigned.");
             return;
         }
 

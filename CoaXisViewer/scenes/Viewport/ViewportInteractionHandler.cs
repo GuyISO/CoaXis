@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// アタッチされている3Dビューの入力を受け取り、ViewportEventHub へ中継する
+/// アタッチされている3Dビューの入力を受け取り、ViewportEvent へ中継する
 /// </summary>
 public partial class ViewportInteractionHandler : SubViewport
 {
@@ -39,7 +39,7 @@ public partial class ViewportInteractionHandler : SubViewport
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
-        Application.Logger.Info("ViewportInteractionHandler initialized.");
+        Application.Log.Info("ViewportInteractionHandler initialized.");
     }
 
     public override void _ExitTree()
@@ -51,7 +51,7 @@ public partial class ViewportInteractionHandler : SubViewport
         Application.Viewport.AskStateRequested -= OnAskStateRequested;
         Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
 
-        Application.Logger.Info("ViewportInteractionHandler released.");
+        Application.Log.Info("ViewportInteractionHandler released.");
     }
 
     public override void _Process(double delta)
@@ -113,7 +113,7 @@ public partial class ViewportInteractionHandler : SubViewport
     }
 
     /// <summary>
-    /// ViewportEventHub からの InteractionModeNotified シグナルを受け取るイベントハンドラ、操作モードを切り替える
+    /// ViewportEvent からの InteractionModeNotified シグナルを受け取るイベントハンドラ、操作モードを切り替える
     /// </summary>
     private void OnInteractionModeNotified(ViewportInteractionMode mode)
     {
@@ -149,7 +149,7 @@ public partial class ViewportInteractionHandler : SubViewport
     #region Internal Helpers
 
     /// <summary>
-    /// 操作モードを切り替え、EventHub を通じて変更を通知する
+    /// 操作モードを切り替え、Event を通じて変更を通知する
     /// </summary>
     /// <param name="mode">新しい操作モード</param>
     private void SetMode(ViewportInteractionMode mode)
@@ -159,7 +159,7 @@ public partial class ViewportInteractionHandler : SubViewport
             return;
         }
 
-        Application.Logger.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
+        Application.Log.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
         _mode = mode;
         Application.Viewport.NotifyInteractionMode(mode);
     }
@@ -277,7 +277,7 @@ public partial class ViewportInteractionHandler : SubViewport
     }
 
     /// <summary>
-    /// 入力モード中の移動量に応じて、EventHub を通じて注視点の移動や回転をリクエストする
+    /// 入力モード中の移動量に応じて、Event を通じて注視点の移動や回転をリクエストする
     /// </summary>
     /// <param name="previousPos">前フレームの画面上位置</param>
     /// <param name="currentPos">現在の画面上位置</param>
@@ -330,13 +330,13 @@ public partial class ViewportInteractionHandler : SubViewport
         if (pickResult.HasHit)
         {
             // ヒットしたら注視点を移動
-            Application.Logger.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
+            Application.Log.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
             Application.Viewport.MovePositionTo(pickResult.Position, useTween);
             return true;
         }
         else
         {
-            Application.Logger.Debug("ViewportInteractionHandler: focus target not found.");
+            Application.Log.Debug("ViewportInteractionHandler: focus target not found.");
             return false;
         }
     }

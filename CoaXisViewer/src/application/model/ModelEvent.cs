@@ -3,7 +3,7 @@
 /// <summary>
 /// モデル関連のイベント集約ハブ
 /// </summary>
-public partial class ModelEventHub : EventHubBase<ModelEventHub>
+public partial class ModelEvent : EventBase<ModelEvent>
 {
 	#region --------------------------------------- Action ---------------------------------------
 

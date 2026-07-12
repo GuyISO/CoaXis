@@ -159,7 +159,7 @@ public partial class ModelVisualService : Node
 		{
 			if (!visited.Add(model))
 			{
-				Application.Logger.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
+				Application.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
 				return false;
 			}
 

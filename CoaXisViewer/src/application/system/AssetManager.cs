@@ -91,7 +91,7 @@ public partial class AssetManager : Node
 
     private void Warn(string message)
     {
-        Application.Logger.Warn(message);
+        Application.Log.Warn(message);
     }
 
     #endregion

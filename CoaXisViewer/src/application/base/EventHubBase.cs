@@ -1,9 +1,9 @@
 using Godot;
 
 /// <summary>
-/// EventHub 系 Autoload の共通基底クラス
+/// Event 系 Autoload の共通基底クラス
 /// </summary>
-public abstract partial class EventHubBase<THub> : Node where THub : EventHubBase<THub>
+public abstract partial class EventBase<THub> : Node where THub : EventBase<THub>
 {
     #region Helper Methods
 
@@ -15,7 +15,7 @@ public abstract partial class EventHubBase<THub> : Node where THub : EventHubBas
 	protected void Emit(StringName signalName, params Variant[] args)
     {
         EmitSignal(signalName, args);
-        Application.Logger.Debug($"{typeof(THub).Name} emitted signal: {signalName}.");
+        Application.Log.Debug($"{typeof(THub).Name} emitted signal: {signalName}.");
     }
 
     #endregion

@@ -122,7 +122,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonToggleProjectionPressed()
     {
-        Application.Logger.Debug("ViewportUi: toggle projection requested.");
+        Application.Log.Debug("ViewportUi: toggle projection requested.");
         Application.Viewport.ToggleProjectionType();
     }
 
@@ -134,11 +134,11 @@ public partial class ViewportUi : PanelContainer
         if (_rootModel == null)
         {
             GD.PushWarning("ViewportUi: fit target model is missing.");
-            Application.Logger.Warn("ViewportUi: fit-all requested but default target is missing.");
+            Application.Log.Warn("ViewportUi: fit-all requested but default target is missing.");
             return;
         }
 
-        Application.Logger.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
+        Application.Log.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
         Application.Viewport.Fit(new[] { _rootModel }, true);
     }
 
@@ -150,11 +150,11 @@ public partial class ViewportUi : PanelContainer
         AnyModel[] fitTargets = Application.Selection.GetModelArray();
         if (fitTargets.Length == 0)
         {
-            Application.Logger.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
+            Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
-        Application.Logger.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
+        Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
         Application.Viewport.Fit(fitTargets, true);
     }
 
@@ -172,7 +172,7 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollLeftPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-        Application.Logger.Debug("ViewportUi: roll-left requested.");
+        Application.Log.Debug("ViewportUi: roll-left requested.");
         Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
@@ -182,7 +182,7 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonRollRightPressed()
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-        Application.Logger.Debug("ViewportUi: roll-right requested.");
+        Application.Log.Debug("ViewportUi: roll-right requested.");
         Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
@@ -201,7 +201,7 @@ public partial class ViewportUi : PanelContainer
     /// <param name="value">新しい FOV 値</param>
     private void OnSliderFovValueChanged(double value)
     {
-        Application.Logger.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
+        Application.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
         Application.Viewport.SetFov((float)value);
     }
 

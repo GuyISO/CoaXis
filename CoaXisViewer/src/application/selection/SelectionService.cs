@@ -206,7 +206,7 @@ public partial class SelectionService : Node
         if (_models.Add(model))
         {
             Application.Model.NotifyModelSelectionState(model, true);
-            Application.Logger.Info($"Selected: {model.Name}");
+            Application.Log.Info($"Selected: {model.Name}");
             return true;
         }
         return false;
@@ -235,7 +235,7 @@ public partial class SelectionService : Node
         if (_models.Remove(model))
         {
             Application.Model.NotifyModelSelectionState(model, false);
-            Application.Logger.Info($"Deselected: {model.Name}");
+            Application.Log.Info($"Deselected: {model.Name}");
             return true;
         }
         return false;
@@ -307,7 +307,7 @@ public partial class SelectionService : Node
         foreach (var model in modelsToDeselect)
         {
             Application.Model.NotifyModelSelectionState(model, false);
-            Application.Logger.Info($"Deselected: {model.Name}");
+            Application.Log.Info($"Deselected: {model.Name}");
         }
         return true;
     }

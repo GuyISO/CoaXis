@@ -84,7 +84,7 @@ public partial class SettingService : Node
             if (TryRead(path, out ViewerSettings loaded))
             {
                 Current = loaded;
-                Application.Logger.Info($"Settings: loaded from '{path}'.");
+                Application.Log.Info($"Settings: loaded from '{path}'.");
                 return true;
             }
         }
@@ -97,11 +97,11 @@ public partial class SettingService : Node
             TryWriteDefault(candidates[1], Current, out writtenPath) ||
             TryWriteDefault(GetUserSettingsPath(), Current, out writtenPath))
         {
-            Application.Logger.Info($"Settings: default file created at '{writtenPath}'.");
+            Application.Log.Info($"Settings: default file created at '{writtenPath}'.");
         }
         else
         {
-            Application.Logger.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
+            Application.Log.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
         }
 
         return false;
@@ -124,7 +124,7 @@ public partial class SettingService : Node
 
             if (loaded == null)
             {
-                Application.Logger.Warn($"Settings: '{path}' is empty. Falling back to default values.");
+                Application.Log.Warn($"Settings: '{path}' is empty. Falling back to default values.");
                 return false;
             }
 
@@ -134,7 +134,7 @@ public partial class SettingService : Node
         }
         catch (Exception ex)
         {
-            Application.Logger.Warn($"Settings: failed to read '{path}'. {ex.Message}");
+            Application.Log.Warn($"Settings: failed to read '{path}'. {ex.Message}");
             return false;
         }
     }
@@ -166,7 +166,7 @@ public partial class SettingService : Node
         }
         catch (Exception ex)
         {
-            Application.Logger.Warn($"Settings: failed to write default file '{path}'. {ex.Message}");
+            Application.Log.Warn($"Settings: failed to write default file '{path}'. {ex.Message}");
             return false;
         }
     }

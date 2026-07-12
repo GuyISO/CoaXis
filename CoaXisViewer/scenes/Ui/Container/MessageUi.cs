@@ -27,13 +27,13 @@ public partial class MessageUi : PanelContainer
         _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
 
         // イベント購読の登録
-        Application.Logger.Logged += OnLogged;
+        Application.Log.Event.LogNotified += OnLogNotified;
     }
 
     public override void _ExitTree()
     {
         // イベント購読の解除
-        Application.Logger.Logged -= OnLogged;
+        Application.Log.Event.LogNotified -= OnLogNotified;
     }
 
     #endregion
@@ -44,7 +44,7 @@ public partial class MessageUi : PanelContainer
     /// ログ出力と同時に画面へログを表示する
     /// </summary>
     /// <param name="line">記録されたメッセージ</param>
-    private void OnLogged(string line)
+    private void OnLogNotified(string line)
     {
         AddLine(line);
     }

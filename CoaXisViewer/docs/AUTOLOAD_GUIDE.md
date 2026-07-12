@@ -10,9 +10,9 @@
 - グローバルアクセスは Application 経由に集約する。
 - Instance 管理が必要な場合は、Application クラス内で明示的に管理する。
 
-### 2.2 EventHub 系
-- EventHub 系は src/application/event/EventHubBase.cs を継承する。
-- EventHubBase<T> は Emit を共通化し、未初期化時の警告と発火ログを集約する。
+### 2.2 Event 系
+- Event 系は src/application/event/EventBase.cs を継承する。
+- EventBase<T> は Emit を共通化し、未初期化時の警告と発火ログを集約する。
 - 各 Hub は Signal 定義と Action / Notify API を持ち、呼び出しは Application から行う。
 - Request 系の公開メソッド名は使わず、AskRootModel, SetMultiSelectionMode, ClearSelection のように動作名だけで統一する。
 - Notify 系は通知専用としてそのまま維持する。
@@ -23,7 +23,7 @@
 - Hub や他 AutoLoad の終了順は固定ではないため、購読解除時は対象ノードの有効性を考慮する。
 
 ## 3. 対象クラス
-- EventHub: ModelEventHub, ViewportEventHub, PickEventHub
+- Event: ModelEvent, ViewportEvent, PickEvent
 - Services: ModelOperationService, ModelVisualService, Selection, SettingsService, UiManager
 - Systems/Input: LogHub, AssetManager, DeviceInputHandler
 
@@ -31,5 +31,5 @@
 - AutoLoad に登録する理由があるか。
 - Application 配下のモジュールとして配置するべきか。
 - Application 経由で公開する API を最小化できているか。
-- Signal 発火共通化が必要なら EventHubBase<T> を使うか。
+- Signal 発火共通化が必要なら EventBase<T> を使うか。
 - _ExitTree に cleanup がある場合、base._ExitTree() を最後に呼んでいるか。

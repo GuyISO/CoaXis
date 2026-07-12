@@ -3,17 +3,15 @@ using System;
 using System.IO;
 
 /// <summary>
-/// ログ関連のイベント集約ハブで、ログ通知と出力を一元管理する Autoload ノード
+/// ログ機能のサービス
 /// </summary>
-public partial class LogHub : Node
+public partial class LogService : Node
 {
     #region Fields
 
     private StreamWriter _fileWriter;
     private string _logFilePath = string.Empty;
     private bool _enableFileLog = false;
-
-    [Signal] public delegate void LoggedEventHandler(string line);
 
     #endregion
 
@@ -30,13 +28,11 @@ public partial class LogHub : Node
     {
         _enableFileLog = false;
         _fileWriter?.Dispose();
-
-        base._ExitTree();
     }
 
     #endregion
 
-    #region Public Methods
+    #region Helper Methods
 
     /// <summary>
     /// ログレベルとメッセージを指定してログを出力する
@@ -64,8 +60,7 @@ public partial class LogHub : Node
             _fileWriter.Flush();
         }
 
-        // イベントの発行
-        EmitSignal(SignalName.Logged, line);
+        Application.Log.NotifyLog(line);
     }
 
     /// <summary>

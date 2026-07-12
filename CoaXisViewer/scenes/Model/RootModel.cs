@@ -27,7 +27,7 @@ public partial class RootModel : AnyModel
     #region Events
 
     /// <summary>
-    /// ルートモデルの通知要求イベントのハンドラで、ModelEventHub に対して自身を通知する
+    /// ルートモデルの通知要求イベントのハンドラで、ModelEvent に対して自身を通知する
     /// </summary>
     private void OnAskRootModelRequested()
     {

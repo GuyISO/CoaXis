@@ -3,7 +3,7 @@
 /// <summary>
 /// ビューポート関連のイベント集約ハブ
 /// </summary>
-public partial class ViewportEventHub : EventHubBase<ViewportEventHub>
+public partial class ViewportEvent : EventBase<ViewportEvent>
 {
     #region --------------------------------------- Action ---------------------------------------
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// ピック関連のイベント集約ハブ
 /// </summary>
-public partial class PickEventHub : EventHubBase<PickEventHub>
+public partial class PickEvent : EventBase<PickEvent>
 {
     #region --------------------------------------- Action ---------------------------------------
 

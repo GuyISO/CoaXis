@@ -73,7 +73,7 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonPick1Pressed()
     {
-        Application.Logger.Debug("MeasurementUi: pick point 1 requested.");
+        Application.Log.Debug("MeasurementUi: pick point 1 requested.");
         Application.Measurement.SetPickPoint(1);
     }
 
@@ -82,7 +82,7 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonPick2Pressed()
     {
-        Application.Logger.Debug("MeasurementUi: pick point 2 requested.");
+        Application.Log.Debug("MeasurementUi: pick point 2 requested.");
         Application.Measurement.SetPickPoint(2);
     }
 

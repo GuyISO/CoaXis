@@ -28,13 +28,13 @@ public partial class UiManager : Node
     {
         if (container == null)
         {
-            Application.Logger.Warn("UiManager: container is null.");
+            Application.Log.Warn("UiManager: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Logger.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
@@ -68,13 +68,13 @@ public partial class UiManager : Node
     {
         if (container == null)
         {
-            Application.Logger.Warn("UiManager: container is null.");
+            Application.Log.Warn("UiManager: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Logger.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
