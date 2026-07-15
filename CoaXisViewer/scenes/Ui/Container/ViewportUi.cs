@@ -175,7 +175,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonAlignNormalPressed()
     {
-        Application.Pick.Event.NotifyPickHandlingMode(PickHandlingMode.NormalToFace);
+        Application.Pick.Service.SetHandlingMode(PickHandlingMode.NormalToFace);
     }
 
     /// <summary>

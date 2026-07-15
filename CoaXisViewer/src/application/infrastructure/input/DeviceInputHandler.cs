@@ -69,7 +69,7 @@ public partial class DeviceInputHandler : Node
 
         if (Input.IsActionJustPressed("escape"))
         {
-            Application.Pick.Event.NotifyPickHandlingMode(PickHandlingMode.Selection);
+            Application.Pick.Service.SetHandlingMode(PickHandlingMode.Selection);
             Application.Model.Event.ClearSelection();
         }
     }

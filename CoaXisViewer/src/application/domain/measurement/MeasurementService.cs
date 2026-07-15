@@ -75,7 +75,7 @@ public partial class MeasurementService : Node
 
         _pointIndex = pointIndex;
         
-        Application.Pick.Event.NotifyPickHandlingMode(PickHandlingMode.Measurement);
+        Application.Pick.Service.SetHandlingMode(PickHandlingMode.Measurement);
         Application.Measurement.Event.NotifyPoint(pointIndex);
     }
 

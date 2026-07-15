@@ -6,29 +6,18 @@ using System;
 /// </summary>
 public partial class ModelOperationService : Node
 {
-	#region Fields
-
-	// 選択操作モードの現在値を保持するフィールド、初期値は選択操作とする
-	private static PickHandlingMode _currentPickHandlingMode = PickHandlingMode.Selection;
-
-	#endregion
-
 	#region Lifecycle
 
 	public override void _Ready()
 	{
 		// イベントの購読開始
 		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		Application.Pick.Event.AskPickHandlingModeRequested += OnAskPickHandlingModeRequested;
-		Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
 	}
 
 	public override void _ExitTree()
 	{
 		// イベントの購読解除
 		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		Application.Pick.Event.AskPickHandlingModeRequested -= OnAskPickHandlingModeRequested;
-		Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
 
 		base._ExitTree();
 	}
@@ -45,23 +34,6 @@ public partial class ModelOperationService : Node
 	{
 		var command = new SetModelVisibilityCommand([model], !model.Visible);
 		UndoService.Execute(command);
-	}
-
-	/// <summary>
-	/// 選択操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
-	/// </summary>
-	private void OnAskPickHandlingModeRequested()
-	{
-		Application.Pick.Event.NotifyPickHandlingMode(_currentPickHandlingMode);
-	}
-
-	/// <summary>
-	/// 選択操作モードが通知されたときに呼び出されるイベントハンドラ
-	/// </summary>
-	/// <param name="mode">通知された選択操作モード</param>
-	private void OnPickHandlingModeNotified(PickHandlingMode mode)
-	{
-		_currentPickHandlingMode = mode;
 	}
 
 	#endregion
