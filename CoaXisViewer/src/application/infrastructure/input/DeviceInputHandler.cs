@@ -41,7 +41,7 @@ public partial class DeviceInputHandler : Node
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            Application.Model.Event.SetMultiSelectionMode(_isMultiSelectMode);
+            Application.Selection.Event.SetMode(SelectionMode.Toggle);
         }
     }
 
@@ -70,7 +70,7 @@ public partial class DeviceInputHandler : Node
         if (Input.IsActionJustPressed("escape"))
         {
             Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
-            Application.Model.Event.ClearSelection();
+            Application.Selection.Event.Clear();
         }
     }
 

@@ -49,6 +49,21 @@ public enum ViewportLayer
 }
 
 /// <summary>
+/// モデルの選択モードを表す列挙型
+/// </summary>
+public enum SelectionMode
+{
+    /// <summary>対象のみを選択するデフォルトの選択モード</summary>
+    Set,
+    /// <summary>追加選択モード</summary>
+    Add,
+    /// <summary>削除選択モード</summary>
+    Remove,
+    /// <summary>トグル選択モード</summary>
+    Toggle,
+}
+
+/// <summary>
 /// Viewportの操作モードを表す列挙型
 /// </summary>
 public enum ViewportInteractionMode

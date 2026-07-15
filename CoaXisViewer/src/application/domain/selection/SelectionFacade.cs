@@ -3,10 +3,12 @@
 /// </summary>
 public partial class SelectionFacade : FacadeBase
 {
+	public SelectionEvent Event { get; }
 	public SelectionService Service { get; }
 
 	public SelectionFacade()
 	{
+		Event = AddModule<SelectionEvent>("SelectionEvent");
 		Service = AddModule<SelectionService>("SelectionService");
 	}
 }

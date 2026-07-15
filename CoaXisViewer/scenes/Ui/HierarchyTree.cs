@@ -212,7 +212,7 @@ public partial class HierarchyTree : Tree
     private void SubscribeApplicationEvents()
     {
         Application.Model.Event.AddModelRequested += OnAddModelRequested;
-        Application.Model.Event.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+        Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
         Application.Model.Event.RootModelNotified += OnRootModelNotified;
     }
@@ -223,7 +223,7 @@ public partial class HierarchyTree : Tree
     private void UnsubscribeApplicationEvents()
     {
         Application.Model.Event.AddModelRequested -= OnAddModelRequested;
-        Application.Model.Event.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+        Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
         Application.Model.Event.RootModelNotified -= OnRootModelNotified;
     }

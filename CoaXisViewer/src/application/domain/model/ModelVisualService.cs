@@ -36,7 +36,7 @@ public partial class ModelVisualService : Node
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Model.Event.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
 		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
 	}
 
@@ -45,7 +45,7 @@ public partial class ModelVisualService : Node
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Model.Event.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
 		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 	}
 

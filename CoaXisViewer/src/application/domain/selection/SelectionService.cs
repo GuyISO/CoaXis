@@ -11,8 +11,9 @@ public partial class SelectionService : Node
     #region Fields
 
     private bool _isInitialized = false;
-    private bool _isMultiSelectionMode = false;
-    private PickHandlingMode _currentPickHandlingMode;
+    private SelectionMode _mode = SelectionMode.Set;
+
+    // 選択状態の管理対象となるモデルのコレクション、HashSet を使用して重複を防ぐ
     private HashSet<AnyModel> _models = new HashSet<AnyModel>();
 
     #endregion
@@ -48,9 +49,8 @@ public partial class SelectionService : Node
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Model.Event.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
-        Application.Model.Event.ClearSelectionRequested += OnClearSelectionRequested;
-        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Selection.Event.SetModeRequested += OnSetModeRequested;
+        Application.Selection.Event.ClearRequested += OnClearRequested;
         Application.Pick.Event.ResultNotified += OnPickResultNotified;
         Application.Pick.Event.ResultsNotified += OnPickResultsNotified;
     }
@@ -60,9 +60,8 @@ public partial class SelectionService : Node
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Model.Event.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
-        Application.Model.Event.ClearSelectionRequested -= OnClearSelectionRequested;
-        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Selection.Event.SetModeRequested -= OnSetModeRequested;
+        Application.Selection.Event.ClearRequested -= OnClearRequested;
         Application.Pick.Event.ResultNotified -= OnPickResultNotified;
         Application.Pick.Event.ResultsNotified -= OnPickResultsNotified;
     }
@@ -75,28 +74,23 @@ public partial class SelectionService : Node
     /// マルチ選択モードの有効化/無効化要求を受け取る
     /// </summary>
     /// <param name="enable">有効化する場合はtrue、無効化する場合はfalse</param>
-    private void OnSetMultiSelectionModeRequested(bool enable)
+    private void OnSetModeRequested(SelectionMode mode)
     {
-        _isMultiSelectionMode = enable;
+        if (_mode != mode)
+        {
+            _mode = mode;
+            Application.Log.Service.Debug($"SelectionService: Selection mode changed to {_mode}.");
+            Application.Selection.Event.NotifyMode(_mode);
+        }
+            
     }
 
     /// <summary>
     /// 選択解除要求を受け取る
     /// </summary>
-    private void OnClearSelectionRequested()
+    private void OnClearRequested()
     {
         Clear();
-    }
-
-    /// <summary>
-    /// 選択操作モードの通知を受け取る
-    /// </summary>
-    /// <param name="mode">通知された選択操作モード</param>
-    private void OnPickHandlingModeNotified(PickHandlingMode mode)
-    {
-        // 初回通知を受け取った時点で初期化済みとする
-        _isInitialized = true;
-        _currentPickHandlingMode = mode;
     }
 
     /// <summary>
@@ -105,25 +99,29 @@ public partial class SelectionService : Node
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (_currentPickHandlingMode != PickHandlingMode.Selection)
+        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Selection)
         {
             return; // 選択操作モードでない場合は無視
         }
 
-        // ピック結果が空なら選択状態クリア
-        if (pickResult == null || pickResult.Model == null)
+        AnyModel model = pickResult.Model;
+        switch (_mode)
         {
-            Clear();
-            return;
-        }
-
-        if (_isMultiSelectionMode)
-        {
-            Toggle(pickResult.Model);
-        }
-        else
-        {
-            Set(pickResult.Model);
+            case SelectionMode.Set:
+                Set(model);
+                break;
+            case SelectionMode.Add:
+                Add(model);
+                break;
+            case SelectionMode.Remove:
+                Remove(model);
+                break;
+            case SelectionMode.Toggle:
+                Toggle(model);
+                break;
+            default:
+                Application.Log.Service.Warn($"SelectionService: Unknown selection mode {_mode}.");
+                break;
         }
     }
 
@@ -133,26 +131,29 @@ public partial class SelectionService : Node
     /// <param name="pickResults">ピック結果の配列</param>
     private void OnPickResultsNotified(PickResult[] pickResults)
     {
-        if (_currentPickHandlingMode != PickHandlingMode.Selection)
+        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Selection)
         {
             return; // 選択操作モードでない場合は無視
         }
 
-        // ピック結果が空なら選択状態クリア
-        if (pickResults == null || pickResults.Length == 0)
+        AnyModel[] models = pickResults.Select(result => result.Model).ToArray();
+        switch (_mode)
         {
-            Clear();
-            return;
-        }
-
-        var models = pickResults.Select(pr => pr.Model).Where(m => m != null).ToArray();
-        if (_isMultiSelectionMode)
-        {
-            Toggle(models);
-        }
-        else
-        {
-            Set(models);
+            case SelectionMode.Set:
+                Set(models);
+                break;
+            case SelectionMode.Add:
+                Add(models);
+                break;
+            case SelectionMode.Remove:
+                Remove(models);
+                break;
+            case SelectionMode.Toggle:
+                Toggle(models);
+                break;
+            default:
+                Application.Log.Service.Warn($"SelectionService: Unknown selection mode {_mode}.");
+                break;
         }
     }
 
@@ -223,7 +224,7 @@ public partial class SelectionService : Node
     {
         if (_models.Add(model))
         {
-            Application.Model.Event.NotifyModelSelectionState(model, true);
+            Application.Selection.Event.NotifyModelState(model, true);
             Application.Log.Service.Info($"Selected: {model.Name}");
             return true;
         }
@@ -252,7 +253,7 @@ public partial class SelectionService : Node
     {
         if (_models.Remove(model))
         {
-            Application.Model.Event.NotifyModelSelectionState(model, false);
+            Application.Selection.Event.NotifyModelState(model, false);
             Application.Log.Service.Info($"Deselected: {model.Name}");
             return true;
         }
@@ -324,7 +325,7 @@ public partial class SelectionService : Node
         // モデルの選択解除シグナルとハイライト解除は個々に行う
         foreach (var model in modelsToDeselect)
         {
-            Application.Model.Event.NotifyModelSelectionState(model, false);
+            Application.Selection.Event.NotifyModelState(model, false);
             Application.Log.Service.Info($"Deselected: {model.Name}");
         }
         return true;
