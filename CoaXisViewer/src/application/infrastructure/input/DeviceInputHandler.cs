@@ -22,14 +22,46 @@ public partial class DeviceInputHandler : Node
 
     public override void _Process(double delta)
     {
-        // マルチセレクトモードの状態を更新する
+        HandleMultiSelectModeInput();
+        HandleButtonInput();
+        HandleTranslationInput((float)delta);
+        HandleRotationInput((float)delta);
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// マルチセレクトモードの切り替えを処理する
+    /// </summary>
+    private void HandleMultiSelectModeInput()
+    { 
         bool wasMultiSelectMode = _isMultiSelectMode;
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
             Application.Model.Event.SetMultiSelectionMode(_isMultiSelectMode);
         }
+    }
 
+    /// <summary>
+    /// Undo/Redo 入力に応じてコマンド履歴を操作する
+    /// </summary>
+    private void HandleButtonInput()
+    {
+        if (Input.IsActionJustPressed("undo"))
+        {
+            Application.Log.Service.Debug("DeviceInputHandler: Undo requested.");
+            UndoService.Undo();
+        }
+
+        if (Input.IsActionJustPressed("redo"))
+        {
+            Application.Log.Service.Debug("DeviceInputHandler: Redo requested.");
+            UndoService.Redo();
+        }
+        
         if (Input.IsActionJustPressed("load"))
         {
             Application.Model.Event.LoadModel("res://assets/models/car.glb");
@@ -39,42 +71,6 @@ public partial class DeviceInputHandler : Node
         {
             Application.Pick.Event.NotifyPickHandlingMode(PickHandlingMode.Selection);
             Application.Model.Event.ClearSelection();
-        }
-
-        HandleUndoRedoInput();
-
-        // ユーザーの入力に基づいてカメラの平行移動と回転をリクエストする
-        float dt = (float)delta;
-        HandleTranslationInput(dt);
-        HandleRotationInput(dt);
-    }
-
-    #endregion
-
-    #region Internal Helpers
-
-    /// <summary>
-    /// Undo/Redo 入力に応じてコマンド履歴を操作する
-    /// </summary>
-    private void HandleUndoRedoInput()
-    {
-        bool undoPressed = Input.IsActionJustPressed("undo");
-        bool redoPressed = Input.IsActionJustPressed("redo");
-        if (!undoPressed && !redoPressed)
-        {
-            return;
-        }
-
-        if (undoPressed)
-        {
-            Application.Log.Service.Debug("DeviceInputHandler: Undo requested.");
-            UndoService.Undo();
-        }
-
-        if (redoPressed)
-        {
-            Application.Log.Service.Debug("DeviceInputHandler: Redo requested.");
-            UndoService.Redo();
         }
     }
 

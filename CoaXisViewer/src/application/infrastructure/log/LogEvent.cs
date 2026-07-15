@@ -8,6 +8,7 @@ public partial class LogEvent : EventBase<LogEvent>
     #region --------------------------------------- Action ---------------------------------------
 
     // ログはイベントによる要求はせず、直接 LogService に出力するため、Action は定義しない
+    // ログをアクションで要求すると、ログ出力の要求とログ出力の通知が同時に発生し、無限ループするため
 
     #endregion
 

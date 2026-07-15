@@ -1,15 +1,22 @@
 # Viewerに実装予定の機能
 
-## リファクタリング
-    Application層へのEvent、Serviceなどの移行
+## Applicationに追加
+infra
+    Settingもつくりかけ
+    Assetもつくりかけ
+    Save&Load機能
+    Undo&Redo機能
+    IPC
+
+domain
+    Modelの移動Snapping機能
+    VFX配置機能
+    断面表示
 
 ## 細かい修正
 測定機能
     表示されるラベルと線を豪華にする、
     配置する親ノードを見直して選択されないようにする、（UIの子で入れてしまえる？）
-PickHandleモードのUI反映
-    現在の状態が各UIでわかるように表示(トグルボタン化など)
-    大元のPickHandleモードをPickEventHubに持たせるようにする？
 選択
     複数選択でもMultiSelectだとToggleになっているので使いづらい、AddかRemoveかのどちらかにする
 

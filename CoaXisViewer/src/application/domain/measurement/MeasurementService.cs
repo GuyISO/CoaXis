@@ -10,16 +10,16 @@ public partial class MeasurementService : Node
 
     private bool _isInitialized = false;
     private PickHandlingMode _pickHandlingMode;
-    private int _pickingPointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
+    private int _pointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
 
     private readonly PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/Part/PointerLabel.tscn")!;
     private readonly PointerLabel[] _pointerLabelInstances = new PointerLabel[2];
-    private readonly ImmediateMesh _measurementLineMesh = new ImmediateMesh();
+    private readonly ImmediateMesh _lineMesh = new ImmediateMesh();
 
     private readonly PickResult[] _points = new PickResult[2] { new PickResult(), new PickResult() };
 
-    private Node3D _measurementVisualRoot = null!;
-    private MeshInstance3D _measurementLine = null!;
+    private Node3D _visualRoot = null!;
+    private MeshInstance3D _line = null!;
 
     #endregion
 
@@ -36,11 +36,11 @@ public partial class MeasurementService : Node
         UnsubscribeEvents();
         ClearPointerLabels();
 
-        if (_measurementVisualRoot != null && GodotObject.IsInstanceValid(_measurementVisualRoot))
+        if (_visualRoot != null && GodotObject.IsInstanceValid(_visualRoot))
         {
-            _measurementVisualRoot.QueueFree();
-            _measurementVisualRoot = null;
-            _measurementLine = null;
+            _visualRoot.QueueFree();
+            _visualRoot = null;
+            _line = null;
         }
 
         base._ExitTree();
@@ -60,34 +60,12 @@ public partial class MeasurementService : Node
 
     #region Events
 
-    #endregion
-
-    #region Internal Helpers
-
-    private void SubscribeEvents()
+    private void OnAskResultRequested()
     {
-        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified += OnPickResultNotified;
-
-        Application.Measurement.Event.AskMeasurementResultRequested += OnAskMeasurementResultRequested;
-        Application.Measurement.Event.SetPickPointRequested += OnPickPointRequested;
+        Application.Measurement.Event.NotifyResult(GetCurrentResult());
     }
 
-    private void UnsubscribeEvents()
-    {
-        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified -= OnPickResultNotified;
-
-        Application.Measurement.Event.AskMeasurementResultRequested -= OnAskMeasurementResultRequested;
-        Application.Measurement.Event.SetPickPointRequested -= OnPickPointRequested;
-    }
-
-    private void OnAskMeasurementResultRequested()
-    {
-        Application.Measurement.Event.NotifyMeasurementResult(GetCurrentResult());
-    }
-
-    private void OnPickPointRequested(int pointIndex)
+    private void OnSetPointRequested(int pointIndex)
     {
         if (pointIndex is < 1 or > 2)
         {
@@ -95,8 +73,10 @@ public partial class MeasurementService : Node
             return;
         }
 
+        _pointIndex = pointIndex;
+        
         Application.Pick.Event.NotifyPickHandlingMode(PickHandlingMode.Measurement);
-        _pickingPointIndex = pointIndex;
+        Application.Measurement.Event.NotifyPoint(pointIndex);
     }
 
     private void OnPickHandlingModeNotified(PickHandlingMode mode)
@@ -106,7 +86,8 @@ public partial class MeasurementService : Node
 
         if (mode != PickHandlingMode.Measurement)
         {
-            _pickingPointIndex = 0;
+            _pointIndex = 0;
+            Application.Measurement.Event.NotifyPoint(0);
         }
     }
 
@@ -117,7 +98,7 @@ public partial class MeasurementService : Node
             return;
         }
 
-        if (_pickingPointIndex == 0)
+        if (_pointIndex == 0)
         {
             return;
         }
@@ -127,14 +108,40 @@ public partial class MeasurementService : Node
             return;
         }
 
-        int index = _pickingPointIndex - 1;
+        int index = _pointIndex - 1;
         _points[index] = pickResult;
-        Application.Log.Service.Debug($"MeasurementService: point {_pickingPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
+        Application.Log.Service.Debug($"MeasurementService: point {_pointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
 
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
         UpdateMeasurementLine();
-        Application.Measurement.Event.NotifyMeasurementResult(GetCurrentResult());
+        Application.Measurement.Event.NotifyResult(GetCurrentResult());
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeEvents()
+    {
+        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.Event.PickResultNotified += OnPickResultNotified;
+        Application.Measurement.Event.AskResultRequested += OnAskResultRequested;
+        Application.Measurement.Event.SetPointRequested += OnSetPointRequested;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeEvents()
+    {
+        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.Event.PickResultNotified -= OnPickResultNotified;
+        Application.Measurement.Event.AskResultRequested -= OnAskResultRequested;
+        Application.Measurement.Event.SetPointRequested -= OnSetPointRequested;
     }
 
     internal MeasurementResult GetCurrentResult()
@@ -250,7 +257,7 @@ public partial class MeasurementService : Node
 
     private void EnsureMeasurementVisuals()
     {
-        if (_measurementVisualRoot != null && GodotObject.IsInstanceValid(_measurementVisualRoot))
+        if (_visualRoot != null && GodotObject.IsInstanceValid(_visualRoot))
         {
             return;
         }
@@ -261,50 +268,50 @@ public partial class MeasurementService : Node
             return;
         }
 
-        _measurementVisualRoot = new Node3D
+        _visualRoot = new Node3D
         {
             Name = "MeasurementVisualRoot"
         };
-        sceneRoot.AddChild(_measurementVisualRoot);
+        sceneRoot.AddChild(_visualRoot);
 
-        _measurementLine = new MeshInstance3D
+        _line = new MeshInstance3D
         {
             Name = "MeasurementLine",
-            Mesh = _measurementLineMesh,
+            Mesh = _lineMesh,
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off
         };
 
-        _measurementLine.MaterialOverride = new StandardMaterial3D
+        _line.MaterialOverride = new StandardMaterial3D
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
             AlbedoColor = new Color(0.98f, 0.82f, 0.12f, 1.0f)
         };
 
-        _measurementVisualRoot.AddChild(_measurementLine);
-        _measurementLine.Visible = false;
+        _visualRoot.AddChild(_line);
+        _line.Visible = false;
     }
 
     private void UpdateMeasurementLine()
     {
-        if (_measurementLine == null || !GodotObject.IsInstanceValid(_measurementLine))
+        if (_line == null || !GodotObject.IsInstanceValid(_line))
         {
             return;
         }
 
-        _measurementLineMesh.ClearSurfaces();
+        _lineMesh.ClearSurfaces();
 
         if (!(_points[0].HasHit && _points[1].HasHit))
         {
-            _measurementLine.Visible = false;
+            _line.Visible = false;
             return;
         }
 
-        _measurementLineMesh.SurfaceBegin(Mesh.PrimitiveType.Lines);
-        _measurementLineMesh.SurfaceAddVertex(_points[0].Position);
-        _measurementLineMesh.SurfaceAddVertex(_points[1].Position);
-        _measurementLineMesh.SurfaceEnd();
+        _lineMesh.SurfaceBegin(Mesh.PrimitiveType.Lines);
+        _lineMesh.SurfaceAddVertex(_points[0].Position);
+        _lineMesh.SurfaceAddVertex(_points[1].Position);
+        _lineMesh.SurfaceEnd();
 
-        _measurementLine.Visible = true;
+        _line.Visible = true;
     }
 
     #endregion

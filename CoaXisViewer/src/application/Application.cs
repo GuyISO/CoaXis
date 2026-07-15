@@ -3,23 +3,23 @@ using Godot;
 /// <summary>
 /// AutoLoad 登録ノードのエントリポイント。
 /// </summary>
-public partial class Application : Node
+public partial class Application : FacadeBase
 {
     #region Fields
 
-    // domain facades
+    // infrastructure
     private LogFacade _logFacade;
     private SettingFacade _settingFacade;
-    private ViewportFacade _viewportFacade;
+    private AssetFacade _assetFacade;
+    private DeviceInputHandler _deviceInputHandler;
+
+    // domain
+    private MeasurementFacade _measurementFacade;
     private ModelFacade _modelFacade;
     private PickFacade _pickFacade;
     private SelectionFacade _selectionFacade;
-    private MeasurementFacade _measurementFacade;
     private UiFacade _uiFacade;
-
-    private AssetFacade _assetFacade;
-
-    private DeviceInputHandler _deviceInputHandler;
+    private ViewportFacade _viewportFacade;
 
     #endregion
 
@@ -27,19 +27,19 @@ public partial class Application : Node
 
     public static Application Instance { get; private set; }
 
-    // domain facades
+    // infrastructure
     public static LogFacade Log => Instance._logFacade;
     public static SettingFacade Setting => Instance._settingFacade;
-    public static ViewportFacade Viewport => Instance._viewportFacade;
+    public static AssetFacade Asset => Instance._assetFacade;
+    public static DeviceInputHandler DeviceInputHandlerNode => Instance._deviceInputHandler;
+
+    // domain
+    public static MeasurementFacade Measurement => Instance._measurementFacade;
     public static ModelFacade Model => Instance._modelFacade;
     public static PickFacade Pick => Instance._pickFacade;
     public static SelectionFacade Selection => Instance._selectionFacade;
-    public static MeasurementFacade Measurement => Instance._measurementFacade;
     public static UiFacade Ui => Instance._uiFacade;
-    public static AssetFacade Asset => Instance._assetFacade;
-
-    // Input
-    public static DeviceInputHandler DeviceInputHandlerNode => Instance._deviceInputHandler;
+    public static ViewportFacade Viewport => Instance._viewportFacade;
 
     #endregion
 
@@ -49,7 +49,8 @@ public partial class Application : Node
     {
         Instance = this;
 
-        EnsureModules();
+        EnsureInfrastructureModules();
+        EnsureDomainModules();
     }
 
     public override void _ExitTree()
@@ -59,42 +60,30 @@ public partial class Application : Node
 
     #endregion
 
-    #region Private Methods
+    #region Internal Helpers
 
     /// <summary>
     /// 依存関係を考慮してモジュールを初期化する。
     /// </summary>
-    private void EnsureModules()
+    private void EnsureInfrastructureModules()
     {
         _logFacade = AddModule<LogFacade>("LogFacade");
         _settingFacade = AddModule<SettingFacade>("SettingFacade");
-        _viewportFacade = AddModule<ViewportFacade>("ViewportFacade");
-        _modelFacade = AddModule<ModelFacade>("ModelFacade");
-        _pickFacade = AddModule<PickFacade>("PickFacade");
-        _selectionFacade = AddModule<SelectionFacade>("SelectionFacade");
-        _measurementFacade = AddModule<MeasurementFacade>("MeasurementFacade");
-        _uiFacade = AddModule<UiFacade>("UiFacade");
         _assetFacade = AddModule<AssetFacade>("AssetFacade");
-
-        // Input
         _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");
     }
 
-    private TModule AddModule<TModule>(string nodeName) where TModule : Node, new()
+    /// <summary>
+    /// モジュールを初期化する。
+    /// </summary>
+    private void EnsureDomainModules()
     {
-        TModule existingModule = GetNodeOrNull<TModule>(nodeName);
-        if (existingModule != null)
-        {
-            return existingModule;
-        }
-
-        TModule module = new TModule
-        {
-            Name = nodeName
-        };
-
-        AddChild(module);
-        return module;
+        _measurementFacade = AddModule<MeasurementFacade>("MeasurementFacade");
+        _modelFacade = AddModule<ModelFacade>("ModelFacade");
+        _pickFacade = AddModule<PickFacade>("PickFacade");
+        _selectionFacade = AddModule<SelectionFacade>("SelectionFacade");
+        _uiFacade = AddModule<UiFacade>("UiFacade");
+        _viewportFacade = AddModule<ViewportFacade>("ViewportFacade");
     }
 
     #endregion

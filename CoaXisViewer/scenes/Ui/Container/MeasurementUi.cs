@@ -8,6 +8,8 @@ public partial class MeasurementUi : PanelContainer
 {
     #region Fields
 
+    private bool _isInitialized = false;
+
     // 関連ノードの参照
     private readonly Label[] _labelPositionXs = new Label[2];
     private readonly Label[] _labelPositionYs = new Label[2];
@@ -28,7 +30,101 @@ public partial class MeasurementUi : PanelContainer
 
     public override void _Ready()
     {
-        // シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
+        EnsureChildNodes();
+        SubscribeUiEvents();
+        SubscribeApplicationEvents();
+    }
+
+    public override void _Process(double delta)
+    {
+        if (!_isInitialized)
+        {
+            Application.Measurement.Event.AskResult();
+        }
+    }
+
+    public override void _ExitTree()
+    {
+        UnsubscribeUiEvents();
+        UnsubscribeApplicationEvents();
+    }
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// ピックボタン1のクリックイベントハンドラ、ポイント1の選択をリクエストする
+    /// </summary>
+    private void OnButtonPick1Pressed()
+    {
+        Application.Log.Service.Debug("MeasurementUi: pick point 1 requested.");
+        Application.Measurement.Event.SetPoint(1);
+    }
+
+    /// <summary>
+    /// ピックボタン2のクリックイベントハンドラ、ポイント2の選択をリクエストする
+    /// </summary>
+    private void OnButtonPick2Pressed()
+    {
+        Application.Log.Service.Debug("MeasurementUi: pick point 2 requested.");
+        Application.Measurement.Event.SetPoint(2);
+    }
+
+    /// <summary>
+    /// 測定結果の通知を受け取り、UIラベルを更新する
+    /// </summary>
+    /// <param name="result">測定結果</param>
+    private void OnResultNotified(MeasurementResult result)
+    {
+        // 初回実行時に初期化済フラグを立てる
+        _isInitialized = true;
+
+        UpdatePointLabels(0, result.HasPoint1, result.Position1, result.Normal1);
+        UpdatePointLabels(1, result.HasPoint2, result.Position2, result.Normal2);
+
+        _labelDeltaX.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.X.ToString("F3") : "-";
+        _labelDeltaY.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.Y.ToString("F3") : "-";
+        _labelDeltaZ.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.Z.ToString("F3") : "-";
+        _labelDistance.Text = result.HasPoint1 && result.HasPoint2 ? result.Distance.ToString("F3") : "-";
+        _labelAngle.Text = (result.HasPoint1 && result.HasPoint2 && !float.IsNaN(result.Angle)) ? result.Angle.ToString("F1") : "-";
+    }
+
+    /// <summary>
+    /// 測定ポイントの通知を受け取り、UIラベルの有効/無効状態を更新する
+    /// </summary>
+    /// <param name="pointIndex">測定ポイントのインデックス (0: 未選択、1: ポイント1、2: ポイント2)</param>
+    private void OnPointNotified(int pointIndex)
+    {
+        switch (pointIndex)
+        {
+            case 0:
+                _buttonPicks[0].Disabled = false;
+                _buttonPicks[1].Disabled = false;
+                break;
+            case 1:
+                _buttonPicks[0].Disabled = true;
+                _buttonPicks[1].Disabled = false;
+                break;
+            case 2:
+                _buttonPicks[0].Disabled = false;
+                _buttonPicks[1].Disabled = true;
+                break;
+            default:
+                Application.Log.Service.Warn($"MeasurementUi: invalid pick point index {pointIndex}.");
+                break;
+        }
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// 関連ノードの参照を解決する。シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する  
+    /// </summary>
+    private void EnsureChildNodes()
+    {
         Container[] container = new Container[2];
         for (int i = 0; i < 2; i++)
         {
@@ -46,66 +142,53 @@ public partial class MeasurementUi : PanelContainer
         _labelDeltaX = (Label)FindChild("LabelValueDeltaX");
         _labelDeltaY = (Label)FindChild("LabelValueDeltaY");
         _labelDeltaZ = (Label)FindChild("LabelValueDeltaZ");
+    }
 
+    /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
         // UIイベントの購読開始
         _buttonPicks[0].Pressed += OnButtonPick1Pressed;
         _buttonPicks[1].Pressed += OnButtonPick2Pressed;
-
-        Application.Measurement.Event.MeasurementResultNotified += OnMeasurementUpdated;
-        Application.Measurement.Event.AskMeasurementResult();
     }
 
-    public override void _ExitTree()
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
     {
         // UIイベントの購読解除
         _buttonPicks[0].Pressed -= OnButtonPick1Pressed;
         _buttonPicks[1].Pressed -= OnButtonPick2Pressed;
-
-        Application.Measurement.Event.MeasurementResultNotified -= OnMeasurementUpdated;
-    }
-
-    #endregion
-
-    #region Events
-
-    /// <summary>
-    /// ピックボタン1のクリックイベントハンドラ、ポイント1の選択をリクエストする
-    /// </summary>
-    private void OnButtonPick1Pressed()
-    {
-        Application.Log.Service.Debug("MeasurementUi: pick point 1 requested.");
-        Application.Measurement.Event.SetPickPoint(1);
     }
 
     /// <summary>
-    /// ピックボタン2のクリックイベントハンドラ、ポイント2の選択をリクエストする
+    /// Applicationイベントの購読を開始する
     /// </summary>
-    private void OnButtonPick2Pressed()
+    private void SubscribeApplicationEvents()
     {
-        Application.Log.Service.Debug("MeasurementUi: pick point 2 requested.");
-        Application.Measurement.Event.SetPickPoint(2);
+        Application.Measurement.Event.ResultNotified += OnResultNotified;
+        Application.Measurement.Event.PointNotified += OnPointNotified;
     }
 
     /// <summary>
-    /// 測定結果の通知を受け取り、UIラベルを更新する
+    /// Applicationイベントの購読を解除する
     /// </summary>
-    /// <param name="result">測定結果</param>
-    private void OnMeasurementUpdated(MeasurementResult result)
+    private void UnsubscribeApplicationEvents()
     {
-        UpdatePointLabels(0, result.HasPoint1, result.Position1, result.Normal1);
-        UpdatePointLabels(1, result.HasPoint2, result.Position2, result.Normal2);
-
-        _labelDeltaX.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.X.ToString("F3") : "-";
-        _labelDeltaY.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.Y.ToString("F3") : "-";
-        _labelDeltaZ.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.Z.ToString("F3") : "-";
-        _labelDistance.Text = result.HasPoint1 && result.HasPoint2 ? result.Distance.ToString("F3") : "-";
-        _labelAngle.Text = (result.HasPoint1 && result.HasPoint2 && !float.IsNaN(result.Angle)) ? result.Angle.ToString("F1") : "-";
+        Application.Measurement.Event.ResultNotified -= OnResultNotified;
+        Application.Measurement.Event.PointNotified -= OnPointNotified;
     }
 
-    #endregion
-
-    #region Internal Helpers
-
+    /// <summary>
+    /// 測定結果を受け取り、UIラベルを更新する
+    /// </summary>
+    /// <param name="index">ポイントのインデックス（0または1）</param>
+    /// <param name="hasPoint">ポイントが有効かどうか</param>
+    /// <param name="position">ポイントの位置</param>
+    /// <param name="normal">ポイントの法線</param>
     private void UpdatePointLabels(int index, bool hasPoint, Vector3 position, Vector3 normal)
     {
         if (!hasPoint)

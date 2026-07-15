@@ -5,7 +5,7 @@ using Godot;
 /// </summary>
 public abstract partial class EventBase<THub> : Node where THub : EventBase<THub>
 {
-    #region Helper Methods
+    #region Internal Helpers
 
     /// <summary>
     /// シグナルを発行するためのヘルパーメソッド

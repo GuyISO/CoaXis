@@ -5,14 +5,22 @@ using Godot;
 /// </summary>
 public abstract partial class FacadeBase : Node
 {
+    #region Internal Helpers
+
     /// <summary>
-    /// 指定型の子ノードを生成して登録する
+    /// 指定された型のモジュールを追加する。すでに存在する場合は既存のモジュールを返す。
     /// </summary>
-    /// <typeparam name="TModule">生成するモジュール型</typeparam>
-    /// <param name="nodeName">生成ノード名</param>
-    /// <returns>生成して登録した子ノード</returns>
+    /// <typeparam name="TModule">追加するモジュールの型。</typeparam>
+    /// <param name="nodeName">モジュールのノード名。</param>
+    /// <returns>追加された、もしくは既存のモジュール。</returns>
     protected TModule AddModule<TModule>(string nodeName) where TModule : Node, new()
     {
+        TModule existingModule = GetNodeOrNull<TModule>(nodeName);
+        if (existingModule != null)
+        {
+            return existingModule;
+        }
+
         TModule module = new TModule
         {
             Name = nodeName
@@ -21,4 +29,6 @@ public abstract partial class FacadeBase : Node
         AddChild(module);
         return module;
     }
+
+    #endregion
 }

@@ -67,6 +67,7 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
 
         // イベントの購読開始
+        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
         Application.Model.Event.RootModelNotified += OnRootModelNotified;
         Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
         Application.Viewport.Event.PositionNotified += OnPositionNotified;
@@ -89,6 +90,7 @@ public partial class ViewportUi : PanelContainer
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
 
         // イベントの購読解除
+        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Model.Event.RootModelNotified -= OnRootModelNotified;
         Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
         Application.Viewport.Event.PositionNotified -= OnPositionNotified;
@@ -116,6 +118,16 @@ public partial class ViewportUi : PanelContainer
     #endregion
 
     #region Events
+
+    /// <summary>
+    /// ピック操作モードが通知されたときに呼び出されるイベントハンドラ
+    /// </summary>
+    /// <param name="mode">通知されたピック操作モード</param>
+    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    {
+        // ビューポート操作モードが NormalToFace の場合、Align Normal ボタンを押下状態にする
+        _buttonAlignNormal.Disabled = mode == PickHandlingMode.NormalToFace;
+    }
 
     /// <summary>
     /// 投影切替ボタンのクリックイベントハンドラ、カメラの投影タイプ切替をリクエストする
