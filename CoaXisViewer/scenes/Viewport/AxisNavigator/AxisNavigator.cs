@@ -25,20 +25,15 @@ public partial class AxisNavigator : Control
 
     public override void _Ready()
     {
-        // 関連ノードのキャッシュ
-        _subViewportContainer = GetNodeOrNull<SubViewportContainer>("SubViewportContainer");
-        _subViewport = _subViewportContainer?.GetNodeOrNull<SubViewport>("SubViewport");
-        _focalPoint = _subViewport?.GetNodeOrNull<Node3D>("FocalPoint");
-        _camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
-
-        // イベント購読の登録
-        Application.Viewport.Event.RotationNotified += OnRotationNotified;
+        EnsureChildNodes();
+        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        // イベント購読の解除
-        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+        UnsubscribeApplicationEvents();
+
+        base._ExitTree();
     }
 
     public override void _Process(double delta)
@@ -86,6 +81,33 @@ public partial class AxisNavigator : Control
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// 子ノードを解決し、フィールドに保持する
+    /// </summary>
+    private void EnsureChildNodes()
+    {
+        _subViewportContainer = GetNodeOrNull<SubViewportContainer>("SubViewportContainer");
+        _subViewport = _subViewportContainer?.GetNodeOrNull<SubViewport>("SubViewport");
+        _focalPoint = _subViewport?.GetNodeOrNull<Node3D>("FocalPoint");
+        _camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.RotationNotified += OnRotationNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+    }
 
     /// <summary>
     /// 指定されたノードの名前を回転角度（度）として解釈しその向きにカメラを移動させ

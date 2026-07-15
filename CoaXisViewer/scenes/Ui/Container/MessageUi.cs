@@ -23,17 +23,15 @@ public partial class MessageUi : PanelContainer
 
     public override void _Ready()
     {
-        // 関連ノードのキャッシュ
-        _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
-
-        // イベント購読の登録
-        Application.Log.Event.LogNotified += OnLogNotified;
+        EnsureChildNodes();
+        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        // イベント購読の解除
-        Application.Log.Event.LogNotified -= OnLogNotified;
+        UnsubscribeApplicationEvents();
+
+        base._ExitTree();
     }
 
     #endregion
@@ -52,6 +50,21 @@ public partial class MessageUi : PanelContainer
     #endregion
 
     #region Internal Helpers
+
+    private void EnsureChildNodes()
+    {
+        _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
+    }
+
+    private void SubscribeApplicationEvents()
+    {
+        Application.Log.Event.LogNotified += OnLogNotified;
+    }
+
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Log.Event.LogNotified -= OnLogNotified;
+    }
 
     /// <summary>
     /// 1行ログを画面へ追加する

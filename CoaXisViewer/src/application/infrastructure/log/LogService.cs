@@ -28,6 +28,8 @@ public partial class LogService : Node
     {
         _enableFileLog = false;
         _fileWriter?.Dispose();
+
+        base._ExitTree();
     }
 
     #endregion

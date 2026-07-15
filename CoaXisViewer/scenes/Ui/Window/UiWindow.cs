@@ -16,16 +16,16 @@ public partial class UiWindow : Window
 
     public override void _Ready()
     {
-        // ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラを登録
-        CloseRequested += OnCloseRequested;
+        SubscribeUiEvents();
     }
 
     public override void _ExitTree()
     {
-        // ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラを解除
-        CloseRequested -= OnCloseRequested;
+        UnsubscribeUiEvents();
 
         ClearContent(); // コンテンツをクリアしてリソースを解放
+
+        base._ExitTree();
     }
 
     #endregion
@@ -96,6 +96,22 @@ public partial class UiWindow : Window
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        CloseRequested += OnCloseRequested;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        CloseRequested -= OnCloseRequested;
+    }
 
     /// <summary>
     /// ウィンドウサイズを子コンテナの最小サイズに合わせて調整し、コンテンツに適したサイズで表示できるようにする

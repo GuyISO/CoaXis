@@ -56,6 +56,8 @@ public partial class Application : FacadeBase
     public override void _ExitTree()
     {
         Instance = null;
+
+        base._ExitTree();
     }
 
     #endregion

@@ -16,17 +16,31 @@ public partial class ShowContainerButton : Button
 
     public override void _Ready()
     {
-        // UIイベントの登録
-        Pressed += OnPressed;
+        SubscribeUiEvents();
     }
 
     #endregion
 
     public override void _ExitTree()
     {
-        // UIイベントの解除
+        UnsubscribeUiEvents();
+
+        base._ExitTree();
+    }
+
+    #region Internal Helpers
+
+    private void SubscribeUiEvents()
+    {
+        Pressed += OnPressed;
+    }
+
+    private void UnsubscribeUiEvents()
+    {
         Pressed -= OnPressed;
     }
+
+    #endregion
 
     #region Events
 

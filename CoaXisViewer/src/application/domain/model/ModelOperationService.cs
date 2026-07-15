@@ -10,16 +10,34 @@ public partial class ModelOperationService : Node
 
 	public override void _Ready()
 	{
-		// イベントの購読開始
-		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+		SubscribeApplicationEvents();
 	}
 
 	public override void _ExitTree()
 	{
-		// イベントの購読解除
-		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
+		UnsubscribeApplicationEvents();
 
 		base._ExitTree();
+	}
+
+	#endregion
+
+	#region Internal Helpers
+
+	/// <summary>
+	/// Applicationイベントの購読を開始する
+	/// </summary>
+	private void SubscribeApplicationEvents()
+	{
+		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+	}
+
+	/// <summary>
+	/// Applicationイベントの購読を解除する
+	/// </summary>
+	private void UnsubscribeApplicationEvents()
+	{
+		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 	}
 
 	#endregion

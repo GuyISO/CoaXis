@@ -30,12 +30,8 @@ public partial class ViewportInteractionHandler : SubViewport
 
     public override void _Ready()
     {
-        // ビューポートサイズの変更を検知してキャッシュを更新するためのシグナル接続
-        SizeChanged += OnSizeChanged;
-
-        // イベントの購読
-        Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
-        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
+        SubscribeUiEvents();
+        SubscribeApplicationEvents();
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
@@ -44,14 +40,12 @@ public partial class ViewportInteractionHandler : SubViewport
 
     public override void _ExitTree()
     {
-        // シグナルの切断
-        SizeChanged -= OnSizeChanged;
-
-        // イベントの購読解除
-        Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
-        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
+        UnsubscribeUiEvents();
+        UnsubscribeApplicationEvents();
 
         Application.Log.Service.Info("ViewportInteractionHandler released.");
+
+        base._ExitTree();
     }
 
     public override void _Process(double delta)
@@ -147,6 +141,40 @@ public partial class ViewportInteractionHandler : SubViewport
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        SizeChanged += OnSizeChanged;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        SizeChanged -= OnSizeChanged;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
+        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
+        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
+    }
 
     /// <summary>
     /// 操作モードを切り替え、Event を通じて変更を通知する
@@ -529,7 +557,7 @@ public partial class ViewportInteractionHandler : SubViewport
     private void PickByPoint(Vector2 screenPos)
     {
         var pickResult = PickUtility.PickByRay(GetCamera3D(), screenPos);
-        Application.Pick.Event.NotifyPickResult(pickResult);
+        Application.Pick.Event.NotifyResult(pickResult);
     }
 
     /// <summary>
@@ -543,7 +571,7 @@ public partial class ViewportInteractionHandler : SubViewport
         var frustumShape = CreateFrustumShape(topLeft, bottomRight);
         var camera = GetCamera3D();
         var pickResults = PickUtility.PickByShape(camera, frustumShape, true);
-        Application.Pick.Event.NotifyPickResults(pickResults);
+        Application.Pick.Event.NotifyResults(pickResults);
     }
 
     /// <summary>

@@ -19,35 +19,17 @@ public partial class HierarchyTree : Tree
 
     public override void _Ready()
     {
-        // Tree選択イベントの購読開始
-        MultiSelected += OnMultiSelected;
-        CellSelected += OnCellSelected;
-
-        // イベントの購読
-        Application.Model.Event.AddModelRequested += OnAddModelRequested;
-        Application.Model.Event.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-        Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
-        Application.Model.Event.RootModelNotified += OnRootModelNotified;
-
-        _visibleIcon = Application.Asset.Service.GetVisibilityIcon(true, 24);
-        _invisibleIcon = Application.Asset.Service.GetVisibilityIcon(false, 24);
-
-        // VisibleButton 列を固定幅にする
-        SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
-        SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
+        EnsureState();
+        SubscribeUiEvents();
+        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        // Tree選択イベントの購読解除
-        MultiSelected -= OnMultiSelected;
-        CellSelected -= OnCellSelected;
+        UnsubscribeUiEvents();
+        UnsubscribeApplicationEvents();
 
-        // イベントの購読解除
-        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
-        Application.Model.Event.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-        Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
-        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
+        base._ExitTree();
     }
 
     public override void _Process(double delta)
@@ -187,6 +169,63 @@ public partial class HierarchyTree : Tree
             AddToTree(_rootModel);
             Application.Log.Service.Info("HierarchyTree: RootModel notified and added to tree.");
         }
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// ツリー表示に必要な初期状態を整える
+    /// </summary>
+    private void EnsureState()
+    {
+        _visibleIcon = Application.Asset.Service.GetVisibilityIcon(true, 24);
+        _invisibleIcon = Application.Asset.Service.GetVisibilityIcon(false, 24);
+
+        // VisibleButton 列を固定幅にする
+        SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
+        SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
+    }
+
+    /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        MultiSelected += OnMultiSelected;
+        CellSelected += OnCellSelected;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        MultiSelected -= OnMultiSelected;
+        CellSelected -= OnCellSelected;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Model.Event.AddModelRequested += OnAddModelRequested;
+        Application.Model.Event.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+        Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        Application.Model.Event.RootModelNotified += OnRootModelNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
+        Application.Model.Event.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+        Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
     }
 
     #endregion

@@ -10,14 +10,28 @@ public partial class RootModel : AnyModel
 
     public override void _Ready()
     {
-        // イベントハンドラの登録
-        Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
-        Application.Model.Event.LoadModelRequested += OnLoadModelRequested;
+        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        // イベントハンドラの登録解除
+        UnsubscribeApplicationEvents();
+
+        base._ExitTree();
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    private void SubscribeApplicationEvents()
+    {
+        Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
+        Application.Model.Event.LoadModelRequested += OnLoadModelRequested;
+    }
+
+    private void UnsubscribeApplicationEvents()
+    {
         Application.Model.Event.AskRootModelRequested -= OnAskRootModelRequested;
         Application.Model.Event.LoadModelRequested -= OnLoadModelRequested;
     }

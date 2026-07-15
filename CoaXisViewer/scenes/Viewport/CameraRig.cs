@@ -28,45 +28,15 @@ public partial class CameraRig : Node3D
 
     public override void _Ready()
     {
-        // 関連ノードのキャッシュ
-        _camera = GetNode<Camera3D>("Camera3D");
-
-        // イベント購読の登録
-        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified += OnPickResultNotified;
-        Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
-        Application.Viewport.Event.MovePositionToRequested += OnMovePositionToRequested;
-        Application.Viewport.Event.MoveRotationToRequested += OnMoveRotationToRequested;
-        Application.Viewport.Event.SetSizeRequested += OnSetSizeRequested;
-        Application.Viewport.Event.SetDistanceRequested += OnSetDistanceRequested;
-        Application.Viewport.Event.SetFovRequested += OnSetFovRequested;
-        Application.Viewport.Event.SetProjectionTypeRequested += OnSetProjectionTypeRequested;
-        Application.Viewport.Event.TranslateRequested += OnTranslateRequested;
-        Application.Viewport.Event.RotateRequested += OnRotateRequested;
-        Application.Viewport.Event.ZoomRequested += OnZoomRequested;
-        Application.Viewport.Event.ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
-        Application.Viewport.Event.FitRequested += OnFitRequested;
-        Application.Viewport.Event.AlignNormalToRequested += OnAlignNormalToRequested;
+        EnsureChildNodes();
+        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        // イベント購読の解除
-        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified -= OnPickResultNotified;
-        Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
-        Application.Viewport.Event.MovePositionToRequested -= OnMovePositionToRequested;
-        Application.Viewport.Event.MoveRotationToRequested -= OnMoveRotationToRequested;
-        Application.Viewport.Event.SetSizeRequested -= OnSetSizeRequested;
-        Application.Viewport.Event.SetDistanceRequested -= OnSetDistanceRequested;
-        Application.Viewport.Event.SetFovRequested -= OnSetFovRequested;
-        Application.Viewport.Event.SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
-        Application.Viewport.Event.TranslateRequested -= OnTranslateRequested;
-        Application.Viewport.Event.RotateRequested -= OnRotateRequested;
-        Application.Viewport.Event.ZoomRequested -= OnZoomRequested;
-        Application.Viewport.Event.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
-        Application.Viewport.Event.FitRequested -= OnFitRequested;
-        Application.Viewport.Event.AlignNormalToRequested -= OnAlignNormalToRequested;
+        UnsubscribeApplicationEvents();
+
+        base._ExitTree();
     }
 
     #endregion
@@ -236,6 +206,58 @@ public partial class CameraRig : Node3D
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// 子ノードを解決し、フィールドに保持する
+    /// </summary>
+    private void EnsureChildNodes()
+    {
+        _camera = GetNode<Camera3D>("Camera3D");
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified += OnPickResultNotified;
+        Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
+        Application.Viewport.Event.MovePositionToRequested += OnMovePositionToRequested;
+        Application.Viewport.Event.MoveRotationToRequested += OnMoveRotationToRequested;
+        Application.Viewport.Event.SetSizeRequested += OnSetSizeRequested;
+        Application.Viewport.Event.SetDistanceRequested += OnSetDistanceRequested;
+        Application.Viewport.Event.SetFovRequested += OnSetFovRequested;
+        Application.Viewport.Event.SetProjectionTypeRequested += OnSetProjectionTypeRequested;
+        Application.Viewport.Event.TranslateRequested += OnTranslateRequested;
+        Application.Viewport.Event.RotateRequested += OnRotateRequested;
+        Application.Viewport.Event.ZoomRequested += OnZoomRequested;
+        Application.Viewport.Event.ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
+        Application.Viewport.Event.FitRequested += OnFitRequested;
+        Application.Viewport.Event.AlignNormalToRequested += OnAlignNormalToRequested;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
+        Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
+        Application.Viewport.Event.MovePositionToRequested -= OnMovePositionToRequested;
+        Application.Viewport.Event.MoveRotationToRequested -= OnMoveRotationToRequested;
+        Application.Viewport.Event.SetSizeRequested -= OnSetSizeRequested;
+        Application.Viewport.Event.SetDistanceRequested -= OnSetDistanceRequested;
+        Application.Viewport.Event.SetFovRequested -= OnSetFovRequested;
+        Application.Viewport.Event.SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
+        Application.Viewport.Event.TranslateRequested -= OnTranslateRequested;
+        Application.Viewport.Event.RotateRequested -= OnRotateRequested;
+        Application.Viewport.Event.ZoomRequested -= OnZoomRequested;
+        Application.Viewport.Event.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
+        Application.Viewport.Event.FitRequested -= OnFitRequested;
+        Application.Viewport.Event.AlignNormalToRequested -= OnAlignNormalToRequested;
+    }
 
     /// <summary>
     /// 注視点の位置を更新する

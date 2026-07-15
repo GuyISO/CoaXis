@@ -47,6 +47,8 @@ public partial class MeasurementUi : PanelContainer
     {
         UnsubscribeUiEvents();
         UnsubscribeApplicationEvents();
+
+        base._ExitTree();
     }
 
     #endregion

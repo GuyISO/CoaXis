@@ -21,22 +21,12 @@ public partial class SelectionService : Node
 
     public override void _Ready()
     {
-        // イベントの購読開始
-        Application.Model.Event.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
-        Application.Model.Event.ClearSelectionRequested += OnClearSelectionRequested;
-        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified += OnPickResultNotified;
-        Application.Pick.Event.PickResultsNotified += OnPickResultsNotified;
+        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        // イベントの購読解除
-        Application.Model.Event.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
-        Application.Model.Event.ClearSelectionRequested -= OnClearSelectionRequested;
-        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified -= OnPickResultNotified;
-        Application.Pick.Event.PickResultsNotified -= OnPickResultsNotified;
+        UnsubscribeApplicationEvents();
 
         base._ExitTree();
     }
@@ -45,8 +35,36 @@ public partial class SelectionService : Node
     {
         if (!_isInitialized)
         {
-            Application.Pick.Event.AskPickHandlingMode();
+            Application.Pick.Event.AskHandlingMode();
         }
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Model.Event.SetMultiSelectionModeRequested += OnSetMultiSelectionModeRequested;
+        Application.Model.Event.ClearSelectionRequested += OnClearSelectionRequested;
+        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified += OnPickResultNotified;
+        Application.Pick.Event.ResultsNotified += OnPickResultsNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Model.Event.SetMultiSelectionModeRequested -= OnSetMultiSelectionModeRequested;
+        Application.Model.Event.ClearSelectionRequested -= OnClearSelectionRequested;
+        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
+        Application.Pick.Event.ResultsNotified -= OnPickResultsNotified;
     }
 
     #endregion

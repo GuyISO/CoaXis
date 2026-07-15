@@ -8,7 +8,16 @@ public partial class PickService : Node
     #region Fields
 
     // 選択操作モードの現在値を保持するフィールド、初期値は選択操作とする
-    private PickHandlingMode _currentPickHandlingMode = PickHandlingMode.Selection;
+    private PickHandlingMode _handlingMode = PickHandlingMode.Selection;
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// 現在の選択操作モードを取得する
+    /// </summary>
+    internal PickHandlingMode HandlingMode => _handlingMode;
 
     #endregion
 
@@ -16,14 +25,12 @@ public partial class PickService : Node
 
     public override void _Ready()
     {
-        Application.Pick.Event.AskPickHandlingModeRequested += OnAskPickHandlingModeRequested;
-        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
+        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        Application.Pick.Event.AskPickHandlingModeRequested -= OnAskPickHandlingModeRequested;
-        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
+        UnsubscribeApplicationEvents();
 
         base._ExitTree();
     }
@@ -35,38 +42,55 @@ public partial class PickService : Node
     /// <summary>
     /// 選択操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
     /// </summary>
-    private void OnAskPickHandlingModeRequested()
+    private void OnAskHandlingModeRequested()
     {
-        Application.Pick.Event.NotifyPickHandlingMode(_currentPickHandlingMode);
+        Application.Pick.Event.NotifyHandlingMode(_handlingMode);
     }
 
     /// <summary>
-    /// 選択操作モードが通知されたときに呼び出されるイベントハンドラ
+    /// 選択操作モードの変更がリクエストされたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="mode">通知された選択操作モード</param>
-    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    /// <param name="mode">設定する選択操作モード</param>
+    private void OnSetHandlingModeRequested(PickHandlingMode mode)
     {
-        _currentPickHandlingMode = mode;
+        SetHandlingMode(mode);
     }
 
     #endregion
 
-    #region Public API
+    #region Internal Helpers
 
     /// <summary>
-    /// 現在の選択操作モードを取得する
+    /// Applicationイベントの購読を開始する
     /// </summary>
-    internal PickHandlingMode CurrentHandlingMode => _currentPickHandlingMode;
+    private void SubscribeApplicationEvents()
+    {
+        Application.Pick.Event.AskHandlingModeRequested += OnAskHandlingModeRequested;
+        Application.Pick.Event.SetHandlingModeRequested += OnSetHandlingModeRequested;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Pick.Event.AskHandlingModeRequested -= OnAskHandlingModeRequested;
+        Application.Pick.Event.SetHandlingModeRequested -= OnSetHandlingModeRequested;
+    }
 
     /// <summary>
     /// 選択操作モードを変更し、変更内容を通知する
     /// </summary>
     /// <param name="mode">設定する選択操作モード</param>
-    internal void SetHandlingMode(PickHandlingMode mode)
+    private void SetHandlingMode(PickHandlingMode mode)
     {
-        _currentPickHandlingMode = mode;
-        Application.Pick.Event.NotifyPickHandlingMode(mode);
+        if (_handlingMode != mode)
+        {
+            _handlingMode = mode;
+            Application.Pick.Event.NotifyHandlingMode(mode);
+        }
     }
 
     #endregion
+
 }

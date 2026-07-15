@@ -50,7 +50,7 @@ public partial class MeasurementService : Node
     {
         if (!_isInitialized)
         {
-            Application.Pick.Event.AskPickHandlingMode();
+            Application.Pick.Event.AskHandlingMode();
         }
 
         EnsureMeasurementVisuals();
@@ -75,7 +75,7 @@ public partial class MeasurementService : Node
 
         _pointIndex = pointIndex;
         
-        Application.Pick.Service.SetHandlingMode(PickHandlingMode.Measurement);
+        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Measurement);
         Application.Measurement.Event.NotifyPoint(pointIndex);
     }
 
@@ -127,8 +127,8 @@ public partial class MeasurementService : Node
     /// </summary>
     private void SubscribeEvents()
     {
-        Application.Pick.Event.PickHandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified += OnPickResultNotified;
+        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified += OnPickResultNotified;
         Application.Measurement.Event.AskResultRequested += OnAskResultRequested;
         Application.Measurement.Event.SetPointRequested += OnSetPointRequested;
     }
@@ -138,8 +138,8 @@ public partial class MeasurementService : Node
     /// </summary>
     private void UnsubscribeEvents()
     {
-        Application.Pick.Event.PickHandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.Event.PickResultNotified -= OnPickResultNotified;
+        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
         Application.Measurement.Event.AskResultRequested -= OnAskResultRequested;
         Application.Measurement.Event.SetPointRequested -= OnSetPointRequested;
     }

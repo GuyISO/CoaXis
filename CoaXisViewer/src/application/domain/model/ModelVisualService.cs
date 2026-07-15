@@ -17,18 +17,36 @@ public partial class ModelVisualService : Node
 
 	public override void _Ready()
 	{
-		// イベントの購読開始
-		Application.Model.Event.ModelSelectionStateNotified += OnModelSelectionStateNotified;
-		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+		SubscribeApplicationEvents();
 	}
 
 	public override void _ExitTree()
 	{
-		// イベントの購読解除
-		Application.Model.Event.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
-		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+		UnsubscribeApplicationEvents();
 
 		base._ExitTree();
+	}
+
+	#endregion
+
+	#region Event Subscriptions
+
+	/// <summary>
+	/// Applicationイベントの購読を開始する
+	/// </summary>
+	private void SubscribeApplicationEvents()
+	{
+		Application.Model.Event.ModelSelectionStateNotified += OnModelSelectionStateNotified;
+		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+	}
+
+	/// <summary>
+	/// Applicationイベントの購読を解除する
+	/// </summary>
+	private void UnsubscribeApplicationEvents()
+	{
+		Application.Model.Event.ModelSelectionStateNotified -= OnModelSelectionStateNotified;
+		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 	}
 
 	#endregion
