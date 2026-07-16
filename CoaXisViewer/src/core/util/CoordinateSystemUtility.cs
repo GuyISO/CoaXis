@@ -13,14 +13,46 @@ using System;
 /// </remarks>
 public static class CoordinateSystemUtility
 {
+    private const float MillimetersPerMeter = 1000.0f;
+
     #region Public Methods
 
     /// <summary>
-    /// CATIA のベクトルを Godot のベクトルへ変換する。
+    /// CATIA(mm) の位置ベクトルを Godot(m) の位置ベクトルへ変換する。
     /// </summary>
-    /// <param name="catiaVector">CATIA 座標系のベクトル</param>
-    /// <returns>Godot 座標系に変換したベクトル</returns>
+    /// <param name="catiaVector">CATIA 座標系・mm のベクトル</param>
+    /// <returns>Godot 座標系・m に変換した位置ベクトル</returns>
     public static Vector3 CatiaToGodot(Vector3 catiaVector)
+    {
+        return CatiaDirectionToGodot(catiaVector) / MillimetersPerMeter;
+    }
+
+    /// <summary>
+    /// CATIA(mm) の距離値を Godot(m) の距離値へ変換する。
+    /// </summary>
+    /// <param name="catiaDistanceMm">CATIA 単位(mm)の距離</param>
+    /// <returns>Godot 単位(m)の距離</returns>
+    public static float CatiaDistanceToGodot(float catiaDistanceMm)
+    {
+        return catiaDistanceMm / MillimetersPerMeter;
+    }
+
+    /// <summary>
+    /// Godot(m) の距離値を CATIA(mm) の距離値へ変換する。
+    /// </summary>
+    /// <param name="godotDistanceM">Godot 単位(m)の距離</param>
+    /// <returns>CATIA 単位(mm)の距離</returns>
+    public static float GodotDistanceToCatia(float godotDistanceM)
+    {
+        return godotDistanceM * MillimetersPerMeter;
+    }
+
+    /// <summary>
+    /// CATIA の方向ベクトルを Godot の方向ベクトルへ変換する（単位換算なし）。
+    /// </summary>
+    /// <param name="catiaVector">CATIA 座標系の方向ベクトル</param>
+    /// <returns>Godot 座標系に変換したベクトル</returns>
+    public static Vector3 CatiaDirectionToGodot(Vector3 catiaVector)
     {
         // CATIA(X aft, Y right, Z up) -> Godot(X left, Y up, Z forward)
         // Xg = Yc, Yg = Zc, Zg = Xc
@@ -28,11 +60,21 @@ public static class CoordinateSystemUtility
     }
 
     /// <summary>
-    /// Godot のベクトルを CATIA のベクトルへ変換する。
+    /// Godot(m) の位置ベクトルを CATIA(mm) の位置ベクトルへ変換する。
     /// </summary>
-    /// <param name="godotVector">Godot 座標系のベクトル</param>
-    /// <returns>CATIA 座標系に変換したベクトル</returns>
+    /// <param name="godotVector">Godot 座標系・m のベクトル</param>
+    /// <returns>CATIA 座標系・mm に変換した位置ベクトル</returns>
     public static Vector3 GodotToCatia(Vector3 godotVector)
+    {
+        return GodotDirectionToCatia(godotVector) * MillimetersPerMeter;
+    }
+
+    /// <summary>
+    /// Godot の方向ベクトルを CATIA の方向ベクトルへ変換する（単位換算なし）。
+    /// </summary>
+    /// <param name="godotVector">Godot 座標系の方向ベクトル</param>
+    /// <returns>CATIA 座標系に変換した方向ベクトル</returns>
+    public static Vector3 GodotDirectionToCatia(Vector3 godotVector)
     {
         // Godot(X left, Y up, Z forward) -> CATIA(X aft, Y right, Z up)
         // Xc = Zg, Yc = Xg, Zc = Yg
@@ -47,9 +89,9 @@ public static class CoordinateSystemUtility
     public static Basis CatiaToGodot(Basis catiaBasis)
     {
         return new Basis(
-            CatiaToGodot(catiaBasis.X),
-            CatiaToGodot(catiaBasis.Y),
-            CatiaToGodot(catiaBasis.Z)
+            CatiaDirectionToGodot(catiaBasis.X),
+            CatiaDirectionToGodot(catiaBasis.Y),
+            CatiaDirectionToGodot(catiaBasis.Z)
         ).Orthonormalized();
     }
 
@@ -61,9 +103,9 @@ public static class CoordinateSystemUtility
     public static Basis GodotToCatia(Basis godotBasis)
     {
         return new Basis(
-            GodotToCatia(godotBasis.X),
-            GodotToCatia(godotBasis.Y),
-            GodotToCatia(godotBasis.Z)
+            GodotDirectionToCatia(godotBasis.X),
+            GodotDirectionToCatia(godotBasis.Y),
+            GodotDirectionToCatia(godotBasis.Z)
         ).Orthonormalized();
     }
 

@@ -174,14 +174,14 @@ public partial class MeasurementService : Node
 
         if (_points[0].HasHit)
         {
-            position1 = CoordinateSystemUtility.GodotToCatia(_points[0].Position) * 1000.0f;
-            normal1 = CoordinateSystemUtility.GodotToCatia(_points[0].Normal);
+            position1 = _points[0].Position;
+            normal1 = _points[0].Normal;
         }
 
         if (_points[1].HasHit)
         {
-            position2 = CoordinateSystemUtility.GodotToCatia(_points[1].Position) * 1000.0f;
-            normal2 = CoordinateSystemUtility.GodotToCatia(_points[1].Normal);
+            position2 = _points[1].Position;
+            normal2 = _points[1].Normal;
         }
 
         if (_points[0].HasHit && _points[1].HasHit)
@@ -247,16 +247,13 @@ public partial class MeasurementService : Node
         }
 
         PointerLabel pointerLabel = _pointerLabel.Instantiate<PointerLabel>();
+        AddChild(pointerLabel);
+
         pointerLabel.Name = $"MeasurementPoint{index + 1}";
-        pickResult.Collider.AddChild(pointerLabel);
-
         pointerLabel.GlobalPosition = pickResult.Position;
-        if (pickResult.Normal.LengthSquared() > Mathf.Epsilon)
-        {
-            pointerLabel.LookAt(pointerLabel.GlobalPosition + pickResult.Normal.Normalized(), Vector3.Up, true);
-        }
-
+        pointerLabel.SetOrientationFromNormal(pickResult.Normal);
         pointerLabel.SetText($"Point{index + 1}");
+
         _pointerLabelInstances[index] = pointerLabel;
     }
 
@@ -296,17 +293,11 @@ public partial class MeasurementService : Node
             return;
         }
 
-        Node sceneRoot = GetTree()?.CurrentScene;
-        if (sceneRoot == null)
-        {
-            return;
-        }
-
         _visualRoot = new Node3D
         {
             Name = "MeasurementVisualRoot"
         };
-        sceneRoot.AddChild(_visualRoot);
+        AddChild(_visualRoot);
 
         _line = new MeshInstance3D
         {
@@ -325,6 +316,9 @@ public partial class MeasurementService : Node
         _line.Visible = false;
     }
 
+    /// <summary>
+    /// 測定用のラインを更新する
+    /// </summary>
     private void UpdateMeasurementLine()
     {
         if (_line == null || !GodotObject.IsInstanceValid(_line))

@@ -9,6 +9,7 @@
 | Category | Store In | Notes |
 |---|---|---|
 | ライフサイクル規約 | `.github/skills/godot-node-lifecycle-rules/SKILL.md` | Godot Node の Ready/ExitTree など |
+| 座標系境界規約 | `.github/instructions/coordinate-system.instructions.md` | 内部計算は Godot、UI/DB/IPC/ファイルI/O は CATIA |
 | 実装共通規約 | `.github/instructions/design-philosophy.instructions.md` | 全体的に効かせたい判断基準 |
 | 意思決定履歴 | `.github/design-philosophy/registry.md` | 日付付きで履歴を蓄積 |
 | 追加ワークフロー | `.github/skills/capture-design-philosophy/SKILL.md` | 依頼を資産化する手順 |

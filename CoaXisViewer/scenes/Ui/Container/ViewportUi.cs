@@ -271,9 +271,9 @@ public partial class ViewportUi : PanelContainer
     private void OnPositionNotified(Vector3 position)
     {
         Vector3 catiaPosition = CoordinateSystemUtility.GodotToCatia(position);
-        _labelPositionX.Text = (catiaPosition.X * 1000f).ToString("F3");
-        _labelPositionY.Text = (catiaPosition.Y * 1000f).ToString("F3");
-        _labelPositionZ.Text = (catiaPosition.Z * 1000f).ToString("F3");
+        _labelPositionX.Text = catiaPosition.X.ToString("F3");
+        _labelPositionY.Text = catiaPosition.Y.ToString("F3");
+        _labelPositionZ.Text = catiaPosition.Z.ToString("F3");
     }
 
     /// <summary>
@@ -295,7 +295,7 @@ public partial class ViewportUi : PanelContainer
     /// <param name="distance">カメラの距離</param>
     private void OnDistanceNotified(float distance)
     {
-        _labelDistance.Text = (distance * 1000f).ToString("F3");
+        _labelDistance.Text = CoordinateSystemUtility.GodotDistanceToCatia(distance).ToString("F3");
     }
 
     /// <summary>
@@ -304,7 +304,7 @@ public partial class ViewportUi : PanelContainer
     /// <param name="size">カメラのサイズ</param>
     private void OnSizeNotified(float size)
     {
-        _labelSize.Text = (size * 1000f).ToString("F3");
+        _labelSize.Text = CoordinateSystemUtility.GodotDistanceToCatia(size).ToString("F3");
     }
 
     /// <summary>

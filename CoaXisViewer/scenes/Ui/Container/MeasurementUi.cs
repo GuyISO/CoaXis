@@ -144,14 +144,39 @@ public partial class MeasurementUi : PanelContainer
         // 初回実行時に初期化済フラグを立てる
         _isInitialized = true;
 
-        UpdatePointLabels(0, result.HasPoint1, result.Position1, result.Normal1);
-        UpdatePointLabels(1, result.HasPoint2, result.Position2, result.Normal2);
+        Vector3 position1ForDisplay = Vector3.Zero;
+        Vector3 position2ForDisplay = Vector3.Zero;
+        Vector3 normal1ForDisplay = Vector3.Zero;
+        Vector3 normal2ForDisplay = Vector3.Zero;
 
-        _labelDeltaX.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.X.ToString("F3") : "-";
-        _labelDeltaY.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.Y.ToString("F3") : "-";
-        _labelDeltaZ.Text = result.HasPoint1 && result.HasPoint2 ? result.Delta.Z.ToString("F3") : "-";
-        _labelDistance.Text = result.HasPoint1 && result.HasPoint2 ? result.Distance.ToString("F3") : "-";
-        _labelAngle.Text = (result.HasPoint1 && result.HasPoint2 && !float.IsNaN(result.Angle)) ? result.Angle.ToString("F1") : "-";
+        if (result.HasPoint1)
+        {
+            position1ForDisplay = CoordinateSystemUtility.GodotToCatia(result.Position1);
+            normal1ForDisplay = CoordinateSystemUtility.GodotDirectionToCatia(result.Normal1);
+        }
+
+        if (result.HasPoint2)
+        {
+            position2ForDisplay = CoordinateSystemUtility.GodotToCatia(result.Position2);
+            normal2ForDisplay = CoordinateSystemUtility.GodotDirectionToCatia(result.Normal2);
+        }
+
+        bool hasBothPoints = result.HasPoint1 && result.HasPoint2;
+        Vector3 deltaForDisplay = hasBothPoints
+            ? CoordinateSystemUtility.GodotToCatia(result.Delta)
+            : Vector3.Zero;
+        float distanceForDisplay = hasBothPoints
+            ? CoordinateSystemUtility.GodotDistanceToCatia(result.Distance)
+            : float.NaN;
+
+        UpdatePointLabels(0, result.HasPoint1, position1ForDisplay, normal1ForDisplay);
+        UpdatePointLabels(1, result.HasPoint2, position2ForDisplay, normal2ForDisplay);
+
+        _labelDeltaX.Text = hasBothPoints ? deltaForDisplay.X.ToString("F3") : "-";
+        _labelDeltaY.Text = hasBothPoints ? deltaForDisplay.Y.ToString("F3") : "-";
+        _labelDeltaZ.Text = hasBothPoints ? deltaForDisplay.Z.ToString("F3") : "-";
+        _labelDistance.Text = hasBothPoints ? distanceForDisplay.ToString("F3") : "-";
+        _labelAngle.Text = (hasBothPoints && !float.IsNaN(result.Angle)) ? result.Angle.ToString("F1") : "-";
     }
 
     /// <summary>

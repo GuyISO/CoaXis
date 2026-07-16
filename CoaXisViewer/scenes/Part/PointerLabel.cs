@@ -73,5 +73,28 @@ public partial class PointerLabel : Node3D
 		_labelRight.Modulate = color;
 	}
 
+	/// <summary>
+	/// 渡された法線方向へラベルの向きを設定する
+	/// </summary>
+	/// <param name="normal">向き設定に使う法線ベクトル</param>
+	public void SetOrientationFromNormal(Vector3 normal)
+	{
+		if (normal.LengthSquared() <= Mathf.Epsilon)
+		{
+			return;
+		}
+
+		Vector3 forward = normal.Normalized();
+		Vector3 up = Vector3.Up;
+
+		// LookAt の target と up がほぼ平行な場合、別軸を up として使う。
+		if (Mathf.Abs(forward.Dot(up)) > 0.999f)
+		{
+			up = Vector3.Right;
+		}
+
+		LookAt(GlobalPosition + forward, up, true);
+	}
+
 	#endregion
 }

@@ -41,7 +41,8 @@ public partial class DeviceInputHandler : Node
         _isMultiSelectMode = Input.IsActionPressed("select_multiple");
         if (wasMultiSelectMode != _isMultiSelectMode)
         {
-            Application.Selection.Event.SetMode(SelectionMode.Toggle);
+            SelectionMode nextMode = _isMultiSelectMode ? SelectionMode.Toggle : SelectionMode.Set;
+            Application.Selection.Event.SetMode(nextMode);
         }
     }
 

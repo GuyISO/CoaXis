@@ -93,7 +93,11 @@ public partial class SelectionService : Node
 
         if (pickResult == null || pickResult.Model == null)
         {
-            return; // ピック結果がnullの場合は無視
+            if (_mode == SelectionMode.Set)
+            {
+                Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
+            }
+            return;
         }
 
         AnyModel model = pickResult.Model;
@@ -130,7 +134,11 @@ public partial class SelectionService : Node
 
         if (pickResults == null || pickResults.Length == 0)
         {
-            return; // ピック結果がない場合は無視
+            if (_mode == SelectionMode.Set)
+            {
+                Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
+            }
+            return;
         }
 
         AnyModel[] models = pickResults.Select(result => result.Model).ToArray();

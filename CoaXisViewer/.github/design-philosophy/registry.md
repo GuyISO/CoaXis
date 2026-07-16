@@ -50,3 +50,13 @@
   - `.github/skills/godot-node-lifecycle-rules/SKILL.md`
   - `.github/design-philosophy/registry.md`
 - Notes: 従来の `SubscribeEvents` / `UnsubscribeEvents` 配置ルールを拡張した
+
+- Date: 2026-07-16
+- Trigger: Measurement の座標運用を「内部計算=Godot、外部境界=CATIA」へ統一
+- Decision: 内部計算では Godot 座標系を維持し、UI/DB/IPC/ファイル出力の境界でのみ CATIA 変換と単位換算を行う
+- Scope: 座標系を扱う C# 実装全般
+- Artifacts Updated:
+  - `.github/instructions/coordinate-system.instructions.md`
+  - `.github/design-philosophy/index.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: 境界変換は CoordinateSystemUtility を必須とする
