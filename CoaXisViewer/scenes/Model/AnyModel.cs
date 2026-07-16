@@ -64,15 +64,20 @@ public partial class AnyModel : Node3D
 
     public override void _Ready()
     {
-        Mesh = new Node3D();
-        Mesh.Name = "Mesh";
-        AddChild(Mesh);
-        Collider = new StaticBody3D();
-        Collider.Name = "Collider";
-        AddChild(Collider);
-        Effect = new Node3D();
-        Effect.Name = "Effect";
-        AddChild(Effect);
+        Mesh = CreateNode<Node3D>("Mesh");
+        Collider = CreateNode<StaticBody3D>("Collider");
+        Effect = CreateNode<Node3D>("Effect");
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    private T CreateNode<T>(string name) where T : Node, new()
+    {
+        var node = new T { Name = name };
+        AddChild(node);
+        return node;
     }
 
     #endregion
