@@ -22,23 +22,25 @@ public partial class RootModel : AnyModel
 
     #endregion
 
-    #region Internal Helpers
+    #region Events
 
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
     private void SubscribeApplicationEvents()
     {
         Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
         Application.Model.Event.LoadModelRequested += OnLoadModelRequested;
     }
 
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
     private void UnsubscribeApplicationEvents()
     {
         Application.Model.Event.AskRootModelRequested -= OnAskRootModelRequested;
         Application.Model.Event.LoadModelRequested -= OnLoadModelRequested;
     }
-
-    #endregion
-
-    #region Events
 
     /// <summary>
     /// ルートモデルの通知要求イベントのハンドラで、ModelEvent に対して自身を通知する

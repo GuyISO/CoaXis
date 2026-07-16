@@ -89,6 +89,40 @@ public partial class ViewportInteractionHandler : SubViewport
     #region Events
 
     /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        SizeChanged += OnSizeChanged;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        SizeChanged -= OnSizeChanged;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
+        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
+        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
+    }
+
+    /// <summary>
     /// ビューポートサイズ変更時に呼び出されるイベントハンドラ
     /// </summary>
     private void OnSizeChanged()
@@ -141,40 +175,6 @@ public partial class ViewportInteractionHandler : SubViewport
     #endregion
 
     #region Internal Helpers
-
-    /// <summary>
-    /// UIイベントの購読を開始する
-    /// </summary>
-    private void SubscribeUiEvents()
-    {
-        SizeChanged += OnSizeChanged;
-    }
-
-    /// <summary>
-    /// UIイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeUiEvents()
-    {
-        SizeChanged -= OnSizeChanged;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
-        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
-        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
-    }
 
     /// <summary>
     /// 操作モードを切り替え、Event を通じて変更を通知する

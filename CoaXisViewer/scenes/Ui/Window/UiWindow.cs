@@ -33,6 +33,22 @@ public partial class UiWindow : Window
     #region Events
 
     /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        CloseRequested += OnCloseRequested;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        CloseRequested -= OnCloseRequested;
+    }
+
+    /// <summary>
     /// ウィンドウのクローズがリクエストされたときに呼び出されるイベントハンドラ
     /// </summary>
     private void OnCloseRequested()
@@ -96,22 +112,6 @@ public partial class UiWindow : Window
     #endregion
 
     #region Internal Helpers
-
-    /// <summary>
-    /// UIイベントの購読を開始する
-    /// </summary>
-    private void SubscribeUiEvents()
-    {
-        CloseRequested += OnCloseRequested;
-    }
-
-    /// <summary>
-    /// UIイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeUiEvents()
-    {
-        CloseRequested -= OnCloseRequested;
-    }
 
     /// <summary>
     /// ウィンドウサイズを子コンテナの最小サイズに合わせて調整し、コンテンツに適したサイズで表示できるようにする

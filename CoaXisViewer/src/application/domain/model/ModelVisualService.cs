@@ -29,7 +29,7 @@ public partial class ModelVisualService : Node
 
 	#endregion
 
-	#region Event Subscriptions
+	#region Events
 
 	/// <summary>
 	/// Applicationイベントの購読を開始する
@@ -48,10 +48,6 @@ public partial class ModelVisualService : Node
 		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
 		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 	}
-
-	#endregion
-
-	#region Events
 
 	/// <summary>
 	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ

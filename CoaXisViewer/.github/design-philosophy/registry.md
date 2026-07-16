@@ -32,3 +32,21 @@
   - `.github/skills/capture-design-philosophy/SKILL.md`
   - `.github/design-philosophy/index.md`
 - Notes: 以後、設計思想依頼ごとに registry への追記を必須化
+
+- Date: 2026-07-16
+- Trigger: Subscribe/Unsubscribe メソッドを Events region の最上部に置く運用へ変更
+- Decision: `SubscribeEvents` / `UnsubscribeEvents`（同等メソッド含む）は `Events` region 先頭に配置する
+- Scope: Godot C# の Node 継承クラス
+- Artifacts Updated:
+  - `.github/skills/godot-node-lifecycle-rules/SKILL.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: `Lifecycle -> Events -> Public API` の region 順序は維持する
+
+- Date: 2026-07-16
+- Trigger: UiEvents系購読と EnsureChildNodes 系の参照確立メソッドも整列対象へ拡張
+- Decision: `SubscribeUiEvents` / `UnsubscribeUiEvents` などの類似購読と、`EnsureChildNodes` などの参照確立メソッドも `Events` region 先頭に配置する
+- Scope: Godot C# の Node 継承クラス
+- Artifacts Updated:
+  - `.github/skills/godot-node-lifecycle-rules/SKILL.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: 従来の `SubscribeEvents` / `UnsubscribeEvents` 配置ルールを拡張した

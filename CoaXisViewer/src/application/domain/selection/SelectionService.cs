@@ -10,7 +10,6 @@ public partial class SelectionService : Node
 {
     #region Fields
 
-    private bool _isInitialized = false;
     private SelectionMode _mode = SelectionMode.Set;
 
     // 選択状態の管理対象となるモデルのコレクション、HashSet を使用して重複を防ぐ
@@ -32,17 +31,9 @@ public partial class SelectionService : Node
         base._ExitTree();
     }
 
-    public override void _Process(double delta)
-    {
-        if (!_isInitialized)
-        {
-            Application.Pick.Event.AskHandlingMode();
-        }
-    }
-
     #endregion
 
-    #region Internal Helpers
+    #region Events
 
     /// <summary>
     /// Applicationイベントの購読を開始する
@@ -65,10 +56,6 @@ public partial class SelectionService : Node
         Application.Pick.Event.ResultNotified -= OnPickResultNotified;
         Application.Pick.Event.ResultsNotified -= OnPickResultsNotified;
     }
-
-    #endregion
-
-    #region Events
 
     /// <summary>
     /// マルチ選択モードの有効化/無効化要求を受け取る
@@ -104,6 +91,11 @@ public partial class SelectionService : Node
             return; // 選択操作モードでない場合は無視
         }
 
+        if (pickResult == null || pickResult.Model == null)
+        {
+            return; // ピック結果がnullの場合は無視
+        }
+
         AnyModel model = pickResult.Model;
         switch (_mode)
         {
@@ -134,6 +126,11 @@ public partial class SelectionService : Node
         if (Application.Pick.Service.HandlingMode != PickHandlingMode.Selection)
         {
             return; // 選択操作モードでない場合は無視
+        }
+
+        if (pickResults == null || pickResults.Length == 0)
+        {
+            return; // ピック結果がない場合は無視
         }
 
         AnyModel[] models = pickResults.Select(result => result.Model).ToArray();

@@ -39,6 +39,30 @@ public partial class MessageUi : PanelContainer
     #region Events
 
     /// <summary>
+    /// 子ノードのキャッシュを行う
+    /// </summary>
+    private void EnsureChildNodes()
+    {
+        _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Log.Event.LogNotified += OnLogNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Log.Event.LogNotified -= OnLogNotified;
+    }
+
+    /// <summary>
     /// ログ出力と同時に画面へログを表示する
     /// </summary>
     /// <param name="line">記録されたメッセージ</param>
@@ -50,21 +74,6 @@ public partial class MessageUi : PanelContainer
     #endregion
 
     #region Internal Helpers
-
-    private void EnsureChildNodes()
-    {
-        _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
-    }
-
-    private void SubscribeApplicationEvents()
-    {
-        Application.Log.Event.LogNotified += OnLogNotified;
-    }
-
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Log.Event.LogNotified -= OnLogNotified;
-    }
 
     /// <summary>
     /// 1行ログを画面へ追加する

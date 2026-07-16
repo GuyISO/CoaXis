@@ -69,6 +69,92 @@ public partial class ViewportUi : PanelContainer
     #region Events
 
     /// <summary>
+    /// 子ノードを解決し、フィールドに保持する
+    /// </summary>
+    private void EnsureChildNodes()
+    {
+        // シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
+        _labelMode = (Label)FindChild("LabelValueMode");
+        _labelProjection = (Label)FindChild("LabelValueProjection");
+        _buttonToggleProjection = (Button)FindChild("ButtonToggleProjection");
+        _buttonFitAllIn = (Button)FindChild("ButtonFitAllIn");
+        _buttonFitToSelection = (Button)FindChild("ButtonFitToSelection");
+        _buttonAlignNormal = (Button)FindChild("ButtonAlignNormal");
+        _buttonRollLeft = (Button)FindChild("ButtonRollLeft");
+        _buttonRollRight = (Button)FindChild("ButtonRollRight");
+        _labelPositionX = (Label)FindChild("LabelValuePositionX");
+        _labelPositionY = (Label)FindChild("LabelValuePositionY");
+        _labelPositionZ = (Label)FindChild("LabelValuePositionZ");
+        _labelRotationX = (Label)FindChild("LabelValueRotationX");
+        _labelRotationY = (Label)FindChild("LabelValueRotationY");
+        _labelRotationZ = (Label)FindChild("LabelValueRotationZ");
+        _labelSize = (Label)FindChild("LabelValueSize");
+        _labelDistance = (Label)FindChild("LabelValueDistance");
+        _labelFov = (Label)FindChild("LabelValueFov");
+        _sliderFov = (HSlider)FindChild("HSliderFov");
+    }
+    
+    /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        _buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
+        _buttonFitAllIn.Pressed += OnButtonFitAllInPressed;
+        _buttonFitToSelection.Pressed += OnButtonFitToSelectionPressed;
+        _buttonAlignNormal.Pressed += OnButtonAlignNormalPressed;
+        _buttonRollLeft.Pressed += OnButtonRollLeftPressed;
+        _buttonRollRight.Pressed += OnButtonRollRightPressed;
+        _sliderFov.ValueChanged += OnSliderFovValueChanged;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        _buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
+        _buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
+        _buttonFitToSelection.Pressed -= OnButtonFitToSelectionPressed;
+        _buttonAlignNormal.Pressed -= OnButtonAlignNormalPressed;
+        _buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
+        _buttonRollRight.Pressed -= OnButtonRollRightPressed;
+        _sliderFov.ValueChanged -= OnSliderFovValueChanged;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Model.Event.RootModelNotified += OnRootModelNotified;
+        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.Event.PositionNotified += OnPositionNotified;
+        Application.Viewport.Event.RotationNotified += OnRotationNotified;
+        Application.Viewport.Event.DistanceNotified += OnDistanceNotified;
+        Application.Viewport.Event.SizeNotified += OnSizeNotified;
+        Application.Viewport.Event.FovNotified += OnFovNotified;
+        Application.Viewport.Event.ProjectionTypeNotified += OnProjectionTypeNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
+        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.Event.PositionNotified -= OnPositionNotified;
+        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+        Application.Viewport.Event.DistanceNotified -= OnDistanceNotified;
+        Application.Viewport.Event.SizeNotified -= OnSizeNotified;
+        Application.Viewport.Event.FovNotified -= OnFovNotified;
+        Application.Viewport.Event.ProjectionTypeNotified -= OnProjectionTypeNotified;
+    }
+
+    /// <summary>
     /// ピック操作モードが通知されたときに呼び出されるイベントハンドラ
     /// </summary>
     /// <param name="mode">通知されたピック操作モード</param>
@@ -238,96 +324,6 @@ public partial class ViewportUi : PanelContainer
     private void OnProjectionTypeNotified(Camera3D.ProjectionType type)
     {
         _labelProjection.Text = type.ToString();
-    }
-
-    #endregion
-
-    #region Internal Helpers
-
-    /// <summary>
-    /// 子ノードを解決し、フィールドに保持する
-    /// </summary>
-    private void EnsureChildNodes()
-    {
-        // シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
-        _labelMode = (Label)FindChild("LabelValueMode");
-        _labelProjection = (Label)FindChild("LabelValueProjection");
-        _buttonToggleProjection = (Button)FindChild("ButtonToggleProjection");
-        _buttonFitAllIn = (Button)FindChild("ButtonFitAllIn");
-        _buttonFitToSelection = (Button)FindChild("ButtonFitToSelection");
-        _buttonAlignNormal = (Button)FindChild("ButtonAlignNormal");
-        _buttonRollLeft = (Button)FindChild("ButtonRollLeft");
-        _buttonRollRight = (Button)FindChild("ButtonRollRight");
-        _labelPositionX = (Label)FindChild("LabelValuePositionX");
-        _labelPositionY = (Label)FindChild("LabelValuePositionY");
-        _labelPositionZ = (Label)FindChild("LabelValuePositionZ");
-        _labelRotationX = (Label)FindChild("LabelValueRotationX");
-        _labelRotationY = (Label)FindChild("LabelValueRotationY");
-        _labelRotationZ = (Label)FindChild("LabelValueRotationZ");
-        _labelSize = (Label)FindChild("LabelValueSize");
-        _labelDistance = (Label)FindChild("LabelValueDistance");
-        _labelFov = (Label)FindChild("LabelValueFov");
-        _sliderFov = (HSlider)FindChild("HSliderFov");
-    }
-
-    /// <summary>
-    /// UIイベントの購読を開始する
-    /// </summary>
-    private void SubscribeUiEvents()
-    {
-        _buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
-        _buttonFitAllIn.Pressed += OnButtonFitAllInPressed;
-        _buttonFitToSelection.Pressed += OnButtonFitToSelectionPressed;
-        _buttonAlignNormal.Pressed += OnButtonAlignNormalPressed;
-        _buttonRollLeft.Pressed += OnButtonRollLeftPressed;
-        _buttonRollRight.Pressed += OnButtonRollRightPressed;
-        _sliderFov.ValueChanged += OnSliderFovValueChanged;
-    }
-
-    /// <summary>
-    /// UIイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeUiEvents()
-    {
-        _buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
-        _buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
-        _buttonFitToSelection.Pressed -= OnButtonFitToSelectionPressed;
-        _buttonAlignNormal.Pressed -= OnButtonAlignNormalPressed;
-        _buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
-        _buttonRollRight.Pressed -= OnButtonRollRightPressed;
-        _sliderFov.ValueChanged -= OnSliderFovValueChanged;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Model.Event.RootModelNotified += OnRootModelNotified;
-        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.Event.PositionNotified += OnPositionNotified;
-        Application.Viewport.Event.RotationNotified += OnRotationNotified;
-        Application.Viewport.Event.DistanceNotified += OnDistanceNotified;
-        Application.Viewport.Event.SizeNotified += OnSizeNotified;
-        Application.Viewport.Event.FovNotified += OnFovNotified;
-        Application.Viewport.Event.ProjectionTypeNotified += OnProjectionTypeNotified;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
-        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.Event.PositionNotified -= OnPositionNotified;
-        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
-        Application.Viewport.Event.DistanceNotified -= OnDistanceNotified;
-        Application.Viewport.Event.SizeNotified -= OnSizeNotified;
-        Application.Viewport.Event.FovNotified -= OnFovNotified;
-        Application.Viewport.Event.ProjectionTypeNotified -= OnProjectionTypeNotified;
     }
 
     #endregion

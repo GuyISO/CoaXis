@@ -72,6 +72,54 @@ public partial class ViewportOverlay : Control
     #region Events
 
     /// <summary>
+    /// 子ノードを解決し、フィールドに保持する
+    /// </summary>
+    private void EnsureChildNodes()
+    {
+        _centerAxis = GetNode<Control>("CenterAxis");
+        _centerAxisLineXPositive = _centerAxis.GetNode<Line2D>("LineXPositive");
+        _centerAxisLineXNegative = _centerAxis.GetNode<Line2D>("LineXNegative");
+        _centerAxisLineYPositive = _centerAxis.GetNode<Line2D>("LineYPositive");
+        _centerAxisLineYNegative = _centerAxis.GetNode<Line2D>("LineYNegative");
+        _centerAxisLineZ = _centerAxis.GetNode<Line2D>("LineZ");
+        _arcballCross = GetNode<Control>("ArcballCross");
+        _arcballCrossLineX = _arcballCross.GetNode<Line2D>("LineX");
+        _arcballCrossLineY = _arcballCross.GetNode<Line2D>("LineY");
+        _arcballOutline = GetNode<Control>("ArcballOutline");
+        _selectionRect = GetNode<Control>("PickRect");
+        _selectionRectLineHorizontal1 = _selectionRect.GetNode<Line2D>("LineHorizontal1");
+        _selectionRectLineHorizontal2 = _selectionRect.GetNode<Line2D>("LineHorizontal2");
+        _selectionRectLineVertical1 = _selectionRect.GetNode<Line2D>("LineVertical1");
+        _selectionRectLineVertical2 = _selectionRect.GetNode<Line2D>("LineVertical2");
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.RotateRequested += OnRotateRequested;
+        Application.Viewport.Event.RotationNotified += OnRotationNotified;
+        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.Event.ArcballRadiusNotified += OnArcballRadiusNotified;
+        Application.Viewport.Event.ArcballHandleNotified += OnArcballHandleNotified;
+        Application.Viewport.Event.PickRectNotified += OnPickRectNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Viewport.Event.RotateRequested -= OnRotateRequested;
+        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.Event.ArcballRadiusNotified -= OnArcballRadiusNotified;
+        Application.Viewport.Event.ArcballHandleNotified -= OnArcballHandleNotified;
+        Application.Viewport.Event.PickRectNotified -= OnPickRectNotified;
+    }
+
+    /// <summary>
     /// カメラの回転設定がリクエストされたときに呼び出されるイベントハンドラ、アークボールの接線ベクトルを回転に合わせて更新する
     /// </summary>
     /// <param name="rotation">リクエストされた回転</param>
@@ -143,54 +191,6 @@ public partial class ViewportOverlay : Control
     #endregion
 
     #region Internal Helpers
-
-    /// <summary>
-    /// 子ノードを解決し、フィールドに保持する
-    /// </summary>
-    private void EnsureChildNodes()
-    {
-        _centerAxis = GetNode<Control>("CenterAxis");
-        _centerAxisLineXPositive = _centerAxis.GetNode<Line2D>("LineXPositive");
-        _centerAxisLineXNegative = _centerAxis.GetNode<Line2D>("LineXNegative");
-        _centerAxisLineYPositive = _centerAxis.GetNode<Line2D>("LineYPositive");
-        _centerAxisLineYNegative = _centerAxis.GetNode<Line2D>("LineYNegative");
-        _centerAxisLineZ = _centerAxis.GetNode<Line2D>("LineZ");
-        _arcballCross = GetNode<Control>("ArcballCross");
-        _arcballCrossLineX = _arcballCross.GetNode<Line2D>("LineX");
-        _arcballCrossLineY = _arcballCross.GetNode<Line2D>("LineY");
-        _arcballOutline = GetNode<Control>("ArcballOutline");
-        _selectionRect = GetNode<Control>("PickRect");
-        _selectionRectLineHorizontal1 = _selectionRect.GetNode<Line2D>("LineHorizontal1");
-        _selectionRectLineHorizontal2 = _selectionRect.GetNode<Line2D>("LineHorizontal2");
-        _selectionRectLineVertical1 = _selectionRect.GetNode<Line2D>("LineVertical1");
-        _selectionRectLineVertical2 = _selectionRect.GetNode<Line2D>("LineVertical2");
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Viewport.Event.RotateRequested += OnRotateRequested;
-        Application.Viewport.Event.RotationNotified += OnRotationNotified;
-        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.Event.ArcballRadiusNotified += OnArcballRadiusNotified;
-        Application.Viewport.Event.ArcballHandleNotified += OnArcballHandleNotified;
-        Application.Viewport.Event.PickRectNotified += OnPickRectNotified;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Viewport.Event.RotateRequested -= OnRotateRequested;
-        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
-        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.Event.ArcballRadiusNotified -= OnArcballRadiusNotified;
-        Application.Viewport.Event.ArcballHandleNotified -= OnArcballHandleNotified;
-        Application.Viewport.Event.PickRectNotified -= OnPickRectNotified;
-    }
 
     /// <summary>
     /// アークボールの回転を更新する回転は現在の回転に乗算されて累積される

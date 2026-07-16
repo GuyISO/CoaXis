@@ -8,8 +8,7 @@ public partial class MeasurementService : Node
 {
     #region Fields
 
-    private bool _isInitialized = false;
-    private PickHandlingMode _pickHandlingMode;
+    // 現在測定対象とするポイントのインデックス（1または2）。0の場合は未選択状態を示す
     private int _pointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
 
     private readonly PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/Part/PointerLabel.tscn")!;
@@ -46,25 +45,44 @@ public partial class MeasurementService : Node
         base._ExitTree();
     }
 
-    public override void _Process(double delta)
-    {
-        if (!_isInitialized)
-        {
-            Application.Pick.Event.AskHandlingMode();
-        }
-
-        EnsureMeasurementVisuals();
-    }
-
     #endregion
 
     #region Events
 
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeEvents()
+    {
+        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified += OnPickResultNotified;
+        Application.Measurement.Event.AskResultRequested += OnAskResultRequested;
+        Application.Measurement.Event.SetPointRequested += OnSetPointRequested;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeEvents()
+    {
+        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
+        Application.Measurement.Event.AskResultRequested -= OnAskResultRequested;
+        Application.Measurement.Event.SetPointRequested -= OnSetPointRequested;
+    }
+
+    /// <summary>
+    /// 測定結果の通知がリクエストされたときに呼び出されるイベントハンドラ
+    /// </summary>
     private void OnAskResultRequested()
     {
         Application.Measurement.Event.NotifyResult(GetCurrentResult());
     }
 
+    /// <summary>
+    /// 測定対象ポイントの設定がリクエストされたときに呼び出されるイベントハンドラ
+    /// </summary>
+    /// <param name="pointIndex">設定するポイントのインデックス（1または2）。0の場合は未選択状態を示す</param>
     private void OnSetPointRequested(int pointIndex)
     {
         if (pointIndex is < 1 or > 2)
@@ -79,11 +97,12 @@ public partial class MeasurementService : Node
         Application.Measurement.Event.NotifyPoint(pointIndex);
     }
 
+    /// <summary>
+    /// ピック操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
+    /// </summary>
+    /// <param name="mode">通知されたピック操作モード</param>
     private void OnPickHandlingModeNotified(PickHandlingMode mode)
     {
-        _isInitialized = true;
-        _pickHandlingMode = mode;
-
         if (mode != PickHandlingMode.Measurement)
         {
             _pointIndex = 0;
@@ -91,9 +110,13 @@ public partial class MeasurementService : Node
         }
     }
 
+    /// <summary>
+    /// ピック結果の通知がリクエストされたときに呼び出されるイベントハンドラ
+    /// </summary>
+    /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (_pickHandlingMode != PickHandlingMode.Measurement)
+        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Measurement)
         {
             return;
         }
@@ -120,35 +143,25 @@ public partial class MeasurementService : Node
 
     #endregion
 
-    #region Internal Helpers
+    #region Public API
 
     /// <summary>
-    /// Applicationイベントの購読を開始する
+    /// 現在の測定結果を取得する
     /// </summary>
-    private void SubscribeEvents()
-    {
-        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.Event.ResultNotified += OnPickResultNotified;
-        Application.Measurement.Event.AskResultRequested += OnAskResultRequested;
-        Application.Measurement.Event.SetPointRequested += OnSetPointRequested;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeEvents()
-    {
-        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
-        Application.Measurement.Event.AskResultRequested -= OnAskResultRequested;
-        Application.Measurement.Event.SetPointRequested -= OnSetPointRequested;
-    }
-
+    /// <returns>現在の測定結果</returns>
     internal MeasurementResult GetCurrentResult()
     {
         return ComputeMeasurementResult();
     }
 
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// 現在の測定結果を計算する
+    /// </summary>
+    /// <returns>現在の測定結果</returns>
     private MeasurementResult ComputeMeasurementResult()
     {
         Vector3 position1 = Vector3.Zero;
@@ -190,6 +203,12 @@ public partial class MeasurementService : Node
             delta);
     }
 
+    /// <summary>
+    /// 2つの法線ベクトルのなす角を度単位で計算する
+    /// </summary>
+    /// <param name="normal1">法線ベクトル1</param>
+    /// <param name="normal2">法線ベクトル2</param>
+    /// <returns>2つの法線ベクトルのなす角（度単位）</returns>
     private static float ComputeNormalAngleDegrees(Vector3 normal1, Vector3 normal2)
     {
         if (normal1.LengthSquared() <= Mathf.Epsilon || normal2.LengthSquared() <= Mathf.Epsilon)
@@ -201,6 +220,11 @@ public partial class MeasurementService : Node
         return Mathf.RadToDeg(Mathf.Acos(dot));
     }
 
+    /// <summary>
+    /// 指定したインデックスのポイントラベルを更新する
+    /// </summary>
+    /// <param name="index">更新するポイントラベルのインデックス（0または1）</param>
+    /// <param name="pickResult">ポイントラベルの位置と法線を決定するピック結果</param> 
     private void UpdatePointerLabel(int index, PickResult pickResult)
     {
         RemovePointerLabel(index);
@@ -236,6 +260,10 @@ public partial class MeasurementService : Node
         _pointerLabelInstances[index] = pointerLabel;
     }
 
+    /// <summary>
+    /// 指定したインデックスのポイントラベルを削除する
+    /// </summary>
+    /// <param name="index">削除するポイントラベルのインデックス（0または1）</param>
     private void RemovePointerLabel(int index)
     {
         PointerLabel pointerLabel = _pointerLabelInstances[index];
@@ -247,6 +275,9 @@ public partial class MeasurementService : Node
         _pointerLabelInstances[index] = null;
     }
 
+    /// <summary>
+    /// すべてのポイントラベルを削除する
+    /// </summary>
     private void ClearPointerLabels()
     {
         for (int i = 0; i < _pointerLabelInstances.Length; i++)
@@ -255,6 +286,9 @@ public partial class MeasurementService : Node
         }
     }
 
+    /// <summary>
+    /// 測定用のビジュアルノードをシーンに追加する
+    /// </summary>
     private void EnsureMeasurementVisuals()
     {
         if (_visualRoot != null && GodotObject.IsInstanceValid(_visualRoot))

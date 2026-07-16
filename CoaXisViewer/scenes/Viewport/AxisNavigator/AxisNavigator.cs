@@ -72,16 +72,6 @@ public partial class AxisNavigator : Control
 
     #region Events
 
-    private void OnRotationNotified(Quaternion rotation)
-    {
-        _isInitialized = true;
-        _focalPoint.Quaternion = rotation;
-    }
-
-    #endregion
-
-    #region Internal Helpers
-
     /// <summary>
     /// 子ノードを解決し、フィールドに保持する
     /// </summary>
@@ -108,6 +98,16 @@ public partial class AxisNavigator : Control
     {
         Application.Viewport.Event.RotationNotified -= OnRotationNotified;
     }
+
+    private void OnRotationNotified(Quaternion rotation)
+    {
+        _isInitialized = true;
+        _focalPoint.Quaternion = rotation;
+    }
+
+    #endregion
+
+    #region Internal Helpers
 
     /// <summary>
     /// 指定されたノードの名前を回転角度（度）として解釈しその向きにカメラを移動させ

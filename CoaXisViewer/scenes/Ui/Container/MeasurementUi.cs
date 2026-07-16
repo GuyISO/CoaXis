@@ -56,6 +56,68 @@ public partial class MeasurementUi : PanelContainer
     #region Events
 
     /// <summary>
+    /// 関連ノードの参照を解決する。シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
+    /// </summary>
+    private void EnsureChildNodes()
+    {
+        Container[] container = new Container[2];
+        for (int i = 0; i < 2; i++)
+        {
+            container[i] = (Container)FindChild($"VBoxContainerPickResult{i + 1}");
+            _labelPositionXs[i] = (Label)container[i].FindChild($"LabelValuePositionX");
+            _labelPositionYs[i] = (Label)container[i].FindChild($"LabelValuePositionY");
+            _labelPositionZs[i] = (Label)container[i].FindChild($"LabelValuePositionZ");
+            _labelNormalXs[i] = (Label)container[i].FindChild($"LabelValueNormalX");
+            _labelNormalYs[i] = (Label)container[i].FindChild($"LabelValueNormalY");
+            _labelNormalZs[i] = (Label)container[i].FindChild($"LabelValueNormalZ");
+            _buttonPicks[i] = (Button)container[i].FindChild($"ButtonPick");
+        }
+        _labelDistance = (Label)FindChild("LabelValueDistance");
+        _labelAngle = (Label)FindChild("LabelValueAngle");
+        _labelDeltaX = (Label)FindChild("LabelValueDeltaX");
+        _labelDeltaY = (Label)FindChild("LabelValueDeltaY");
+        _labelDeltaZ = (Label)FindChild("LabelValueDeltaZ");
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Measurement.Event.ResultNotified += OnResultNotified;
+        Application.Measurement.Event.PointNotified += OnPointNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Measurement.Event.ResultNotified -= OnResultNotified;
+        Application.Measurement.Event.PointNotified -= OnPointNotified;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        // UIイベントの購読開始
+        _buttonPicks[0].Pressed += OnButtonPick1Pressed;
+        _buttonPicks[1].Pressed += OnButtonPick2Pressed;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        // UIイベントの購読解除
+        _buttonPicks[0].Pressed -= OnButtonPick1Pressed;
+        _buttonPicks[1].Pressed -= OnButtonPick2Pressed;
+    }
+
+    /// <summary>
     /// ピックボタン1のクリックイベントハンドラ、ポイント1の選択をリクエストする
     /// </summary>
     private void OnButtonPick1Pressed()
@@ -121,68 +183,6 @@ public partial class MeasurementUi : PanelContainer
     #endregion
 
     #region Internal Helpers
-
-    /// <summary>
-    /// 関連ノードの参照を解決する。シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する  
-    /// </summary>
-    private void EnsureChildNodes()
-    {
-        Container[] container = new Container[2];
-        for (int i = 0; i < 2; i++)
-        {
-            container[i] = (Container)FindChild($"VBoxContainerPickResult{i + 1}");
-            _labelPositionXs[i] = (Label)container[i].FindChild($"LabelValuePositionX");
-            _labelPositionYs[i] = (Label)container[i].FindChild($"LabelValuePositionY");
-            _labelPositionZs[i] = (Label)container[i].FindChild($"LabelValuePositionZ");
-            _labelNormalXs[i] = (Label)container[i].FindChild($"LabelValueNormalX");
-            _labelNormalYs[i] = (Label)container[i].FindChild($"LabelValueNormalY");
-            _labelNormalZs[i] = (Label)container[i].FindChild($"LabelValueNormalZ");
-            _buttonPicks[i] = (Button)container[i].FindChild($"ButtonPick");
-        }
-        _labelDistance = (Label)FindChild("LabelValueDistance");
-        _labelAngle = (Label)FindChild("LabelValueAngle");
-        _labelDeltaX = (Label)FindChild("LabelValueDeltaX");
-        _labelDeltaY = (Label)FindChild("LabelValueDeltaY");
-        _labelDeltaZ = (Label)FindChild("LabelValueDeltaZ");
-    }
-
-    /// <summary>
-    /// UIイベントの購読を開始する
-    /// </summary>
-    private void SubscribeUiEvents()
-    {
-        // UIイベントの購読開始
-        _buttonPicks[0].Pressed += OnButtonPick1Pressed;
-        _buttonPicks[1].Pressed += OnButtonPick2Pressed;
-    }
-
-    /// <summary>
-    /// UIイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeUiEvents()
-    {
-        // UIイベントの購読解除
-        _buttonPicks[0].Pressed -= OnButtonPick1Pressed;
-        _buttonPicks[1].Pressed -= OnButtonPick2Pressed;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Measurement.Event.ResultNotified += OnResultNotified;
-        Application.Measurement.Event.PointNotified += OnPointNotified;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Measurement.Event.ResultNotified -= OnResultNotified;
-        Application.Measurement.Event.PointNotified -= OnPointNotified;
-    }
 
     /// <summary>
     /// 測定結果を受け取り、UIラベルを更新する

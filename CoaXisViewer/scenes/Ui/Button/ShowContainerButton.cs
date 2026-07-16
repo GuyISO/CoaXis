@@ -28,7 +28,7 @@ public partial class ShowContainerButton : Button
         base._ExitTree();
     }
 
-    #region Internal Helpers
+    #region Events
 
     private void SubscribeUiEvents()
     {
@@ -39,10 +39,6 @@ public partial class ShowContainerButton : Button
     {
         Pressed -= OnPressed;
     }
-
-    #endregion
-
-    #region Events
 
     /// <summary>
     /// ボタンが押されたときに呼ばれるイベントハンドラ

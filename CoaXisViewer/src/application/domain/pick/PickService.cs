@@ -40,6 +40,24 @@ public partial class PickService : Node
     #region Events
 
     /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Pick.Event.AskHandlingModeRequested += OnAskHandlingModeRequested;
+        Application.Pick.Event.SetHandlingModeRequested += OnSetHandlingModeRequested;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Pick.Event.AskHandlingModeRequested -= OnAskHandlingModeRequested;
+        Application.Pick.Event.SetHandlingModeRequested -= OnSetHandlingModeRequested;
+    }
+
+    /// <summary>
     /// 選択操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
     /// </summary>
     private void OnAskHandlingModeRequested()
@@ -59,24 +77,6 @@ public partial class PickService : Node
     #endregion
 
     #region Internal Helpers
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Pick.Event.AskHandlingModeRequested += OnAskHandlingModeRequested;
-        Application.Pick.Event.SetHandlingModeRequested += OnSetHandlingModeRequested;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Pick.Event.AskHandlingModeRequested -= OnAskHandlingModeRequested;
-        Application.Pick.Event.SetHandlingModeRequested -= OnSetHandlingModeRequested;
-    }
 
     /// <summary>
     /// 選択操作モードを変更し、変更内容を通知する

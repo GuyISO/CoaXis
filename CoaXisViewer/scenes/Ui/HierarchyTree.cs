@@ -46,6 +46,46 @@ public partial class HierarchyTree : Tree
     #region Events
 
     /// <summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
+    private void SubscribeUiEvents()
+    {
+        MultiSelected += OnMultiSelected;
+        CellSelected += OnCellSelected;
+    }
+
+    /// <summary>
+    /// UIイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeUiEvents()
+    {
+        MultiSelected -= OnMultiSelected;
+        CellSelected -= OnCellSelected;
+    }
+    
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Model.Event.AddModelRequested += OnAddModelRequested;
+        Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
+        Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        Application.Model.Event.RootModelNotified += OnRootModelNotified;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
+        Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
+        Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
+    }
+
+    /// <summary>
     /// TreeItem が選択・解除されたときのイベントハンドラ
     /// </summary>
     private void OnMultiSelected(TreeItem item, long column, bool selected)
@@ -188,45 +228,6 @@ public partial class HierarchyTree : Tree
         SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
     }
 
-    /// <summary>
-    /// UIイベントの購読を開始する
-    /// </summary>
-    private void SubscribeUiEvents()
-    {
-        MultiSelected += OnMultiSelected;
-        CellSelected += OnCellSelected;
-    }
-
-    /// <summary>
-    /// UIイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeUiEvents()
-    {
-        MultiSelected -= OnMultiSelected;
-        CellSelected -= OnCellSelected;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Model.Event.AddModelRequested += OnAddModelRequested;
-        Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
-        Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
-        Application.Model.Event.RootModelNotified += OnRootModelNotified;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
-        Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
-        Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
-        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
-    }
 
     #endregion
 

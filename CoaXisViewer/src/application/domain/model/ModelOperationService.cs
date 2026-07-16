@@ -22,7 +22,7 @@ public partial class ModelOperationService : Node
 
 	#endregion
 
-	#region Internal Helpers
+	#region Events
 
 	/// <summary>
 	/// Applicationイベントの購読を開始する
@@ -39,10 +39,6 @@ public partial class ModelOperationService : Node
 	{
 		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 	}
-
-	#endregion
-
-	#region Events
 
 	/// <summary>
 	/// モデルの表示状態切替がリクエストされたときに呼び出されるイベントハンドラ
