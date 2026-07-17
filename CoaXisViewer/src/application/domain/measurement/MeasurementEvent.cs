@@ -26,6 +26,16 @@ public partial class MeasurementEvent : EventBase<MeasurementEvent>
         Emit(SignalName.SetPointRequested, pointIndex);
     }
 
+    [Signal] public delegate void ClearPointRequestedEventHandler(int pointIndex);
+    /// <summary>
+    /// 測定ポイントのクリアをリクエストする
+    /// </summary>
+    /// <param name="pointIndex">1 または 2</param>
+    internal void ClearPoint(int pointIndex)
+    {
+        Emit(SignalName.ClearPointRequested, pointIndex);
+    }
+
     #endregion
 
     #region --------------------------------------- Notification ---------------------------------------

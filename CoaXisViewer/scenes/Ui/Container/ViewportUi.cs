@@ -161,7 +161,7 @@ public partial class ViewportUi : PanelContainer
     private void OnPickHandlingModeNotified(PickHandlingMode mode)
     {
         // ビューポート操作モードが NormalToFace の場合、Align Normal ボタンを押下状態にする
-        _buttonAlignNormal.Disabled = mode == PickHandlingMode.NormalToFace;
+        _buttonAlignNormal.ButtonPressed = mode == PickHandlingMode.NormalToFace;
     }
 
     /// <summary>

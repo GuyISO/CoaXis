@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://n15owgw2vkc3"]
 
-[ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://scenes/Model/RootModel.cs" id="1_1011c"]
-[ext_resource type="Script" uid="uid://co6erwykahhud" path="res://scenes/Model/AnyModel.cs" id="2_xumao"]
+[ext_resource type="Script" uid="uid://bo7f6on861hwa" path="res://scenes/model/RootModel.cs" id="1_1011c"]
+[ext_resource type="Script" uid="uid://co6erwykahhud" path="res://scenes/model/AnyModel.cs" id="2_xumao"]
 [ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/materials/default.tres" id="3_s773y"]
 
 [sub_resource type="BoxMesh" id="BoxMesh_cvmbd"]

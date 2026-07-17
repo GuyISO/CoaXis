@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://dkq5ovq6ymdm"]
 
-[ext_resource type="PackedScene" uid="uid://b85xs047w8kh8" path="res://scenes/Ui/Button/ShowContainerButton.tscn" id="1_0wdie"]
-[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/Ui/Container/MessageUi.tscn" id="2_y2duu"]
-[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/Ui/Container/ViewportUi.tscn" id="3_6a6xr"]
-[ext_resource type="PackedScene" uid="uid://cmde2bylb3cu1" path="res://scenes/Ui/Container/MeasurementUi.tscn" id="4_g4gva"]
-[ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/Viewport/ViewportContainer.tscn" id="5_y2duu"]
-[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://scenes/Ui/FpsUi.cs" id="6_5i13y"]
-[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/Ui/HierarchyTree.cs" id="6_6a6xr"]
+[ext_resource type="PackedScene" uid="uid://b85xs047w8kh8" path="res://scenes/ui/button/ShowContainerButton.tscn" id="1_0wdie"]
+[ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/ui/container/MessageUi.tscn" id="2_y2duu"]
+[ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/container/ViewportUi.tscn" id="3_6a6xr"]
+[ext_resource type="PackedScene" uid="uid://cmde2bylb3cu1" path="res://scenes/ui/container/MeasurementUi.tscn" id="4_g4gva"]
+[ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/viewport/ViewportContainer.tscn" id="5_y2duu"]
+[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://scenes/ui/FpsUi.cs" id="6_5i13y"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/ui/HierarchyTree.cs" id="6_6a6xr"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3

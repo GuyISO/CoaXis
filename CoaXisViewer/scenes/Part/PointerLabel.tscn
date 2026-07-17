@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dik7rronncw1v"]
 
-[ext_resource type="Script" uid="uid://b7t5ab3b62avf" path="res://scenes/Part/PointerLabel.cs" id="1_3ds83"]
+[ext_resource type="Script" uid="uid://b7t5ab3b62avf" path="res://scenes/part/PointerLabel.cs" id="1_3ds83"]
 
 [sub_resource type="PrismMesh" id="PrismMesh_chofk"]
 

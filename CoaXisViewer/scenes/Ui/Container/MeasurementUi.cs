@@ -18,6 +18,7 @@ public partial class MeasurementUi : PanelContainer
     private readonly Label[] _labelNormalYs = new Label[2];
     private readonly Label[] _labelNormalZs = new Label[2];
     private readonly Button[] _buttonPicks = new Button[2];
+    private readonly Button[] _buttonClears = new Button[2];
     private Label _labelDistance = null!;
     private Label _labelAngle = null!;
     private Label _labelDeltaX = null!;
@@ -71,6 +72,7 @@ public partial class MeasurementUi : PanelContainer
             _labelNormalYs[i] = (Label)container[i].FindChild($"LabelValueNormalY");
             _labelNormalZs[i] = (Label)container[i].FindChild($"LabelValueNormalZ");
             _buttonPicks[i] = (Button)container[i].FindChild($"ButtonPick");
+            _buttonClears[i] = (Button)container[i].FindChild($"ButtonClear");
         }
         _labelDistance = (Label)FindChild("LabelValueDistance");
         _labelAngle = (Label)FindChild("LabelValueAngle");
@@ -102,9 +104,10 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void SubscribeUiEvents()
     {
-        // UIイベントの購読開始
         _buttonPicks[0].Pressed += OnButtonPick1Pressed;
         _buttonPicks[1].Pressed += OnButtonPick2Pressed;
+        _buttonClears[0].Pressed += OnButtonClear1Pressed;
+        _buttonClears[1].Pressed += OnButtonClear2Pressed;
     }
 
     /// <summary>
@@ -112,9 +115,10 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void UnsubscribeUiEvents()
     {
-        // UIイベントの購読解除
         _buttonPicks[0].Pressed -= OnButtonPick1Pressed;
         _buttonPicks[1].Pressed -= OnButtonPick2Pressed;
+        _buttonClears[0].Pressed -= OnButtonClear1Pressed;
+        _buttonClears[1].Pressed -= OnButtonClear2Pressed;
     }
 
     /// <summary>
@@ -133,6 +137,24 @@ public partial class MeasurementUi : PanelContainer
     {
         Application.Log.Service.Debug("MeasurementUi: pick point 2 requested.");
         Application.Measurement.Event.SetPoint(2);
+    }
+
+    /// <summary>
+    /// クリアボタン1のクリックイベントハンドラ、ポイント1のクリアをリクエストする
+    /// </summary>
+    private void OnButtonClear1Pressed()
+    {
+        Application.Log.Service.Debug("MeasurementUi: clear point 1 requested.");
+        Application.Measurement.Event.ClearPoint(1);
+    }
+
+    /// <summary>
+    /// クリアボタン2のクリックイベントハンドラ、ポイント2のクリアをリクエストする
+    /// </summary>
+    private void OnButtonClear2Pressed()
+    {
+        Application.Log.Service.Debug("MeasurementUi: clear point 2 requested.");
+        Application.Measurement.Event.ClearPoint(2);
     }
 
     /// <summary>
@@ -188,16 +210,16 @@ public partial class MeasurementUi : PanelContainer
         switch (pointIndex)
         {
             case 0:
-                _buttonPicks[0].Disabled = false;
-                _buttonPicks[1].Disabled = false;
+                _buttonPicks[0].ButtonPressed = false;
+                _buttonPicks[1].ButtonPressed = false;
                 break;
             case 1:
-                _buttonPicks[0].Disabled = true;
-                _buttonPicks[1].Disabled = false;
+                _buttonPicks[0].ButtonPressed = true;
+                _buttonPicks[1].ButtonPressed = false;
                 break;
             case 2:
-                _buttonPicks[0].Disabled = false;
-                _buttonPicks[1].Disabled = true;
+                _buttonPicks[0].ButtonPressed = false;
+                _buttonPicks[1].ButtonPressed = true;
                 break;
             default:
                 Application.Log.Service.Warn($"MeasurementUi: invalid pick point index {pointIndex}.");

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cmde2bylb3cu1"]
 
-[ext_resource type="Script" uid="uid://b3fjt6iecg5gv" path="res://scenes/Ui/Container/MeasurementUi.cs" id="1_1r4nc"]
+[ext_resource type="Script" uid="uid://b3fjt6iecg5gv" path="res://scenes/ui/container/MeasurementUi.cs" id="1_1r4nc"]
 
 [node name="Measurement" type="PanelContainer" unique_id=1128003110]
 custom_minimum_size = Vector2(280, 0)
@@ -144,8 +144,14 @@ vertical_alignment = 1
 
 [node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=1566134602]
 layout_mode = 2
-tooltip_text = "モデル全体が画面に収まるようにカメラを調整します"
+tooltip_text = "測定点を取得します"
+toggle_mode = true
 text = "Pick"
+
+[node name="ButtonClear" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=1785677978]
+layout_mode = 2
+tooltip_text = "測定点を消去します"
+text = "Clear"
 
 [node name="VBoxContainerPickResult2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1674100131]
 layout_mode = 2
@@ -257,10 +263,16 @@ vertical_alignment = 1
 layout_mode = 2
 vertical_alignment = 1
 
-[node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=1629386737]
+[node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=845942979]
 layout_mode = 2
-tooltip_text = "モデル全体が画面に収まるようにカメラを調整します"
+tooltip_text = "測定点を取得します"
+toggle_mode = true
 text = "Pick"
+
+[node name="ButtonClear" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=772489631]
+layout_mode = 2
+tooltip_text = "測定点を消去します"
+text = "Clear"
 
 [node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=406113100]
 custom_minimum_size = Vector2(0, 1)

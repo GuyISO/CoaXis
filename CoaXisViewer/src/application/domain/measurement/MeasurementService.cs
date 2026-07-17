@@ -58,6 +58,7 @@ public partial class MeasurementService : Node
         Application.Pick.Event.ResultNotified += OnPickResultNotified;
         Application.Measurement.Event.AskResultRequested += OnAskResultRequested;
         Application.Measurement.Event.SetPointRequested += OnSetPointRequested;
+        Application.Measurement.Event.ClearPointRequested += OnClearPointRequested;
     }
 
     /// <summary>
@@ -69,6 +70,7 @@ public partial class MeasurementService : Node
         Application.Pick.Event.ResultNotified -= OnPickResultNotified;
         Application.Measurement.Event.AskResultRequested -= OnAskResultRequested;
         Application.Measurement.Event.SetPointRequested -= OnSetPointRequested;
+        Application.Measurement.Event.ClearPointRequested -= OnClearPointRequested;
     }
 
     /// <summary>
@@ -95,6 +97,25 @@ public partial class MeasurementService : Node
         
         Application.Pick.Event.SetHandlingMode(PickHandlingMode.Measurement);
         Application.Measurement.Event.NotifyPoint(pointIndex);
+    }
+
+    /// <summary>
+    /// 測定対象ポイントのクリアがリクエストされたときに呼び出されるイベントハンドラ
+    /// </summary>
+    /// <param name="pointIndex">クリアするポイントのインデックス（1または2）</param>
+    private void OnClearPointRequested(int pointIndex)
+    {
+        if (pointIndex is < 1 or > 2)
+        {
+            Application.Log.Service.Warn($"MeasurementService: invalid point index {pointIndex}.");
+            return;
+        }
+
+        int index = pointIndex - 1;
+        _points[index] = new PickResult();
+        RemovePointerLabel(index);
+        UpdateMeasurementLine();
+        Application.Measurement.Event.NotifyResult(GetCurrentResult());
     }
 
     /// <summary>

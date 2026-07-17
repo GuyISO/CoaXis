@@ -1,9 +1,9 @@
 [gd_scene format=3 uid="uid://crt7sb6bahnhp"]
 
-[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://scenes/Viewport/ViewportInteractionHandler.cs" id="1_a2s2r"]
-[ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://scenes/Viewport/CameraRig.cs" id="2_woemn"]
-[ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/Viewport/Overlay/ViewportOverlay.tscn" id="3_uud5i"]
-[ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/Viewport/AxisNavigator/AxisNavigator.tscn" id="4_o0c0q"]
+[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://scenes/viewport/ViewportInteractionHandler.cs" id="1_a2s2r"]
+[ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://scenes/viewport/CameraRig.cs" id="2_woemn"]
+[ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/overlay/ViewportOverlay.tscn" id="3_uud5i"]
+[ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewport/axis_navigator/AxisNavigator.tscn" id="4_o0c0q"]
 
 [node name="ViewportContainer" type="SubViewportContainer" unique_id=999195544]
 anchors_preset = 15

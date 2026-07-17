@@ -1,6 +1,6 @@
 [gd_scene format=4 uid="uid://dan222xlokome"]
 
-[ext_resource type="PackedScene" uid="uid://c48iefv166wer" path="res://scenes/Viewport/AxisNavigator/Dreamliner.tscn" id="2_760fb"]
+[ext_resource type="PackedScene" uid="uid://c48iefv166wer" path="res://scenes/viewport/axis_navigator/Dreamliner.tscn" id="2_760fb"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5a0cl"]
 albedo_color = Color(0.5019608, 0.5019608, 0.5019608, 1)

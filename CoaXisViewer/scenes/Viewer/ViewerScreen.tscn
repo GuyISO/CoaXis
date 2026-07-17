@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://uo4vh7cwjcs8"]
 
-[ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/Viewport/ViewportContainer.tscn" id="1_f1a0t"]
-[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/Ui/HierarchyTree.cs" id="2_hlj6n"]
+[ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/viewport/ViewportContainer.tscn" id="1_f1a0t"]
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/ui/HierarchyTree.cs" id="2_hlj6n"]
 
 [node name="ViewerScreen" type="Control" unique_id=1110778621]
 layout_mode = 3

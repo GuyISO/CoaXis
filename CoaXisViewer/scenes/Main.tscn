@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://dvoc2r3mse54i"]
 
-[ext_resource type="PackedScene" uid="uid://n15owgw2vkc3" path="res://scenes/Model/RootModel.tscn" id="1_nxtc6"]
-[ext_resource type="PackedScene" uid="uid://dkq5ovq6ymdm" path="res://scenes/Viewer/Canvas.tscn" id="2_rvslj"]
+[ext_resource type="PackedScene" uid="uid://n15owgw2vkc3" path="res://scenes/model/RootModel.tscn" id="1_nxtc6"]
+[ext_resource type="PackedScene" uid="uid://dkq5ovq6ymdm" path="res://scenes/viewer/Canvas.tscn" id="2_rvslj"]
 
 [sub_resource type="Environment" id="Environment_2xmat"]
 background_mode = 1

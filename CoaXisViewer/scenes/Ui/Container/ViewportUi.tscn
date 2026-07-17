@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://ctjbhouwd3kn7"]
 
-[ext_resource type="Script" uid="uid://cqf7jel4l6pjq" path="res://scenes/Ui/Container/ViewportUi.cs" id="1_vtpwr"]
+[ext_resource type="Script" uid="uid://cqf7jel4l6pjq" path="res://scenes/ui/container/ViewportUi.cs" id="1_vtpwr"]
 
 [sub_resource type="Theme" id="Theme_iww46"]
 default_font_size = 0
@@ -247,6 +247,7 @@ text = "FitToSelection
 [node name="ButtonAlignNormal" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1752955195]
 layout_mode = 2
 tooltip_text = "選択した面に垂直にビューを移動します"
+toggle_mode = true
 text = "AlignNormal"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1678572172]
