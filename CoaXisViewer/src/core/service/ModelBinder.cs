@@ -7,7 +7,7 @@ using System.Collections.Generic;
 /// モデルのヒエラルキーを TreeItem に反映するための登録処理と登録解除処理、対応取得処理を提供する
 /// </summary>
 /// <remarks>
-/// 実際の動的ロード時は ModelManager でメインシーンへ追加し、その後 ModelEvent の通知で HierarchyTree が更新されて ModelBinder に登録される
+/// 実際の動的ロード時は ModelService でメインシーンへ追加し、その後 ModelEvent の通知で HierarchyTree が更新されて ModelBinder に登録される
 /// </remarks>
 public static class ModelBinder
 {

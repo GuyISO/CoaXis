@@ -56,6 +56,8 @@ public partial class RootModel : AnyModel
     /// <param name="path">ロードするモデルのパス</param>
     private async void OnLoadModelRequested(string path)
     {
+        // TODO: 暫定的にこの直下に入れているのでドメインに合わせて洗練させる
+
         AnyModel model = new AnyModel();
         model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
         AddChild(model);

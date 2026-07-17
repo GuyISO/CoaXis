@@ -228,7 +228,6 @@ public partial class HierarchyTree : Tree
         SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
     }
 
-
     #endregion
 
     /// <summary>
@@ -261,6 +260,11 @@ public partial class HierarchyTree : Tree
         }
     }
 
+    /// <summary>
+    /// AnyModel を TreeItem に追加する（親モデルを指定して追加する）
+    /// </summary>
+    /// <param name="childModel">追加する子モデル</param>
+    /// <param name="parentModel">追加先の親モデル</param>
     private void AddToTree(AnyModel childModel, AnyModel parentModel)
     {
         TreeItem parentTreeItem = ModelBinder.GetItem(parentModel);

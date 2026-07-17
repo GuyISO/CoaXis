@@ -8,10 +8,12 @@ public partial class ViewportUi : PanelContainer
 {
     #region Fields
 
+    // デフォルトのフィット対象モデル
     private RootModel _rootModel = null!;
 
     private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
 
+    // 関連ノードのキャッシュ
     private Label _labelMode = null!;
     private Label _labelProjection = null!;
     private Button _buttonToggleProjection = null!;

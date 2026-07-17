@@ -9,6 +9,7 @@ public partial class MessageUi : PanelContainer
 {
     #region Fields
 
+    // TODO: 変えれるようにする？
     [Export] private int _maxLines = 50;
 
     // 関連ノードのキャッシュ

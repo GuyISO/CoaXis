@@ -10,10 +10,12 @@ public partial class ViewportInteractionHandler : SubViewport
     #region Fields
 
     [ExportGroup("Settings")]
+    // TODO: 設定値の調整は、将来的に Application 側の設定管理に移行する
     [Export] private float _zoomFactor = 1.0f; // ズーム倍率変更時の係数
     [Export] private float _arcballRegionRatio = 0.45f; // 画面サイズに対する、Orbit/Rollの切り替え用の円領域の半径比率
     [Export] private float _moveThreshold = 1.0f; // マウス移動の閾値（この値未満の移動は移動なしとみなす）
     [ExportGroup("Materials")]
+    // TODO: マテリアルの設定はもういらないかも、将来的に Application 側の設定管理に移行する
     [Export] private Material _defaultMaterial; // 通常表示用のマテリアル（将来の拡張で使用予定）
     [Export] private Material _selectedMaterial; // 選択ハイライト用のマテリアル（将来の拡張で使用予定）
 
@@ -42,8 +44,6 @@ public partial class ViewportInteractionHandler : SubViewport
     {
         UnsubscribeUiEvents();
         UnsubscribeApplicationEvents();
-
-        Application.Log.Info("ViewportInteractionHandler released.");
 
         base._ExitTree();
     }
@@ -510,7 +510,7 @@ public partial class ViewportInteractionHandler : SubViewport
         // 原点からの距離
         float len = Mathf.Sqrt(x * x + y * y);
 
-        if (len < 1e-6f)
+        if (len < Mathf.Epsilon) // ほぼ中心の場合は、回転軸を適当に設定してゼロ除算を回避
         {
             // ど真ん中（中心）なら X 軸方向に置く（Roll の基準方向）
             return Vector3.Right;
@@ -539,7 +539,7 @@ public partial class ViewportInteractionHandler : SubViewport
         float dot = Mathf.Clamp(p0.Dot(p1), -1.0f, 1.0f);
         float angle = Mathf.Acos(dot);
 
-        if (axis.LengthSquared() < 1e-6f)
+        if (axis.LengthSquared() < Mathf.Epsilon) // ほぼ同一位置の場合は回転軸を適当に設定してゼロ除算を回避
         {
             axis = Vector3.Up; // どこでもいいが、ゼロ除算回避
         }

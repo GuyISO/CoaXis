@@ -11,6 +11,7 @@ public partial class CameraRig : Node3D
 {
     #region Fields
 
+    // TODO: 設定で変更できるようにする？定数化する
     [ExportGroup("Settings")]
     [Export] private float _zoomBase = 1.005f; // ズーム倍率変更時の底、exponent1あたりの拡大倍率
     [Export] private float _minZoomValue = 0.01f; // ズームの最小値、これ以上近づけないようにするための制限値

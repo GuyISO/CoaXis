@@ -18,6 +18,7 @@ public partial class ViewportOverlay : Control
     private const float ArcballCrossAngularSize = 0.24f;
     private const int ArcballCrossCurveSegments = 12;
 
+    // TODO: これらの色はテーマカラーに合わせて変更できるようにする、Godot側で使用しているものもあり
     [Export] private Color _lineColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);
 
     private bool _isInitialized = false; // ビューポートの初期状態を取得してUIに反映するためのフラグ
@@ -343,7 +344,7 @@ public partial class ViewportOverlay : Control
     private static void SetSplitAxisLines(Line2D positiveLine, Line2D negativeLine, Vector2 axisDirection, float positiveGapScale = 1.0f)
     {
         float axisLength = axisDirection.Length();
-        if (axisLength < 1e-6f)
+        if (axisLength < Mathf.Epsilon) // ほぼゼロの場合はラインを描画しない
         {
             SetLinePoints(positiveLine, Vector2.Zero, Vector2.Zero);
             SetLinePoints(negativeLine, Vector2.Zero, Vector2.Zero);

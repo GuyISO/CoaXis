@@ -1,6 +1,3 @@
-using Godot;
-using System;
-
 /// <summary>
 /// コマンドの基底クラス、Undo/Redo 操作の単位となる
 /// </summary>

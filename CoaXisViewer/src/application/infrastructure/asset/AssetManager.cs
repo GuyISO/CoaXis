@@ -8,6 +8,9 @@ public partial class AssetManager : Node
 {
     #region Fields
 
+
+    // TODO: 全然できていないので、アセット管理の仕組みをちゃんと作る
+
     private const string VisibleIconPath = "res://assets/icon/visible.svg";
     private const string InvisibleIconPath = "res://assets/icon/invisible.svg";
 
@@ -49,7 +52,7 @@ public partial class AssetManager : Node
     {
         if (!IsInsideTree())
         {
-            Warn($"AssetManager is not initialized. path='{path}', size={size}");
+            Application.Log.Warn($"AssetManager is not initialized. path='{path}', size={size}");
             return null;
         }
 
@@ -71,14 +74,14 @@ public partial class AssetManager : Node
         Texture2D source = GD.Load<Texture2D>(path);
         if (source == null)
         {
-            Warn($"AssetManager: icon load failed. path='{path}'");
+            Application.Log.Warn($"AssetManager: icon load failed. path='{path}'");
             return null;
         }
 
         Image image = source.GetImage();
         if (image == null)
         {
-            Warn($"AssetManager: icon image is null. path='{path}'");
+            Application.Log.Warn($"AssetManager: icon image is null. path='{path}'");
             _iconCache[key] = source;
             return source;
         }
@@ -87,11 +90,6 @@ public partial class AssetManager : Node
         Texture2D resized = ImageTexture.CreateFromImage(image);
         _iconCache[key] = resized;
         return resized;
-    }
-
-    private void Warn(string message)
-    {
-        Application.Log.Warn(message);
     }
 
     #endregion

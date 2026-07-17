@@ -136,7 +136,7 @@ public static class PickUtility
         // requireFullContainment が true の場合、さらにフィルタリングして完全に内包されているオブジェクトのみを残す
         if (requireFullContainment)
         {
-            // TODO: なんか難しいので、いつか実装したい
+            // TODO: なんか難しくて未実装なので、いつか実装したい
         }
 
         return pickResults.ToArray();

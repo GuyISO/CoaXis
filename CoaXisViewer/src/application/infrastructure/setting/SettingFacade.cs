@@ -3,10 +3,12 @@
 /// </summary>
 public partial class SettingFacade : FacadeBase
 {
+	public SettingEvent Event { get; }
 	public SettingService Service { get; }
 
 	public SettingFacade()
 	{
+		Event = AddModule<SettingEvent>("SettingEvent");
 		Service = AddModule<SettingService>("SettingService");
 	}
 }
