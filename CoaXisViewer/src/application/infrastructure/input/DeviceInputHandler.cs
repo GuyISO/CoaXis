@@ -8,7 +8,7 @@ public partial class DeviceInputHandler : Node
 {
     #region Fields
 
-    // TODO: 将来的にユーザーが設定可能な値にする
+    // TODO: ユーザーが設定可能な値にする
     [ExportGroup("Settings")]
     [Export] private float _translateSpeed = 8.0f;
     [Export] private float _rotateSpeedDegrees = 90.0f;
@@ -53,13 +53,13 @@ public partial class DeviceInputHandler : Node
     {
         if (Input.IsActionJustPressed("undo"))
         {
-            Application.Log.Service.Debug("DeviceInputHandler: Undo requested.");
+            Application.Log.Debug("DeviceInputHandler: Undo requested.");
             UndoService.Undo();
         }
 
         if (Input.IsActionJustPressed("redo"))
         {
-            Application.Log.Service.Debug("DeviceInputHandler: Redo requested.");
+            Application.Log.Debug("DeviceInputHandler: Redo requested.");
             UndoService.Redo();
         }
         

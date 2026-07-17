@@ -143,7 +143,7 @@ public partial class HierarchyTree : Tree
         AnyModel model = ModelBinder.GetModel(item);
         if (model == null)
         {
-            Application.Log.Service.Warn("HierarchyTree: clicked item has no associated model.");
+            Application.Log.Warn("HierarchyTree: clicked item has no associated model.");
             return;
         }
 
@@ -189,7 +189,7 @@ public partial class HierarchyTree : Tree
     /// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
     private void OnModelVisibilityStateNotified(AnyModel model, bool isVisible)
     {
-        Application.Log.Service.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
+        Application.Log.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
         TreeItem item = ModelBinder.GetItem(model);
         if (item != null)
         {
@@ -207,7 +207,7 @@ public partial class HierarchyTree : Tree
         {
             _rootModel = rootModel;
             AddToTree(_rootModel);
-            Application.Log.Service.Info("HierarchyTree: RootModel notified and added to tree.");
+            Application.Log.Info("HierarchyTree: RootModel notified and added to tree.");
         }
     }
 
@@ -250,7 +250,7 @@ public partial class HierarchyTree : Tree
         // AnyModel と TreeItem の対応を登録
         if (!ModelBinder.Bind(model, item))
         {
-            Application.Log.Service.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
+            Application.Log.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
         }
 
         // 子ノードを再帰的に追加

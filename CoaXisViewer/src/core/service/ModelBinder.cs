@@ -30,7 +30,7 @@ public static class ModelBinder
     {
         if (item == null)
         {
-            Application.Log.Service.Warn("ModelBinder.GetModel called with null item.");
+            Application.Log.Warn("ModelBinder.GetModel called with null item.");
             return null;
         }
 
@@ -46,7 +46,7 @@ public static class ModelBinder
     {
         if (model == null)
         {
-            Application.Log.Service.Warn("ModelBinder.GetItem called with null model.");
+            Application.Log.Warn("ModelBinder.GetItem called with null model.");
             return null;
         }
 
@@ -63,26 +63,26 @@ public static class ModelBinder
     {
         if (model == null || item == null)
         {
-            Application.Log.Service.Warn("ModelBinder.Bind skipped: model or item is null.");
+            Application.Log.Warn("ModelBinder.Bind skipped: model or item is null.");
             return false;
         }
 
         if (_modelToItem.ContainsKey(model))
         {
-            Application.Log.Service.Warn($"ModelBinder.Bind skipped: model '{model.Name}' is already bound.");
+            Application.Log.Warn($"ModelBinder.Bind skipped: model '{model.Name}' is already bound.");
             return false; // すでに登録されている
         }
 
         if (_itemToModel.ContainsKey(item))
         {
-            Application.Log.Service.Warn("ModelBinder.Bind skipped: tree item is already bound.");
+            Application.Log.Warn("ModelBinder.Bind skipped: tree item is already bound.");
             return false; // すでに登録されている
         }
 
         _modelToItem[model] = item;
         _itemToModel[item] = model;
 
-        Application.Log.Service.Debug($"ModelBinder.Bind: model='{model.Name}', mappings={_modelToItem.Count}");
+        Application.Log.Debug($"ModelBinder.Bind: model='{model.Name}', mappings={_modelToItem.Count}");
 
         return true;
     }
@@ -95,20 +95,20 @@ public static class ModelBinder
     {
         if (model == null)
         {
-            Application.Log.Service.Warn("ModelBinder.Unbind(model) skipped: model is null.");
+            Application.Log.Warn("ModelBinder.Unbind(model) skipped: model is null.");
             return;
         }
 
         if (!_modelToItem.TryGetValue(model, out var item))
         {
-            Application.Log.Service.Debug($"ModelBinder.Unbind(model) skipped: model '{model.Name}' is not bound.");
+            Application.Log.Debug($"ModelBinder.Unbind(model) skipped: model '{model.Name}' is not bound.");
             return;
         }
 
         _itemToModel.Remove(item);
         _modelToItem.Remove(model);
 
-        Application.Log.Service.Debug($"ModelBinder.Unbind(model): model='{model.Name}', mappings={_modelToItem.Count}");
+        Application.Log.Debug($"ModelBinder.Unbind(model): model='{model.Name}', mappings={_modelToItem.Count}");
 
         item.Free();
     }
@@ -121,20 +121,20 @@ public static class ModelBinder
     {
         if (item == null)
         {
-            Application.Log.Service.Warn("ModelBinder.Unbind(item) skipped: item is null.");
+            Application.Log.Warn("ModelBinder.Unbind(item) skipped: item is null.");
             return;
         }
 
         if (!_itemToModel.TryGetValue(item, out var model))
         {
-            Application.Log.Service.Debug("ModelBinder.Unbind(item) skipped: item is not bound.");
+            Application.Log.Debug("ModelBinder.Unbind(item) skipped: item is not bound.");
             return;
         }
 
         _modelToItem.Remove(model);
         _itemToModel.Remove(item);
 
-        Application.Log.Service.Debug($"ModelBinder.Unbind(item): model='{model.Name}', mappings={_modelToItem.Count}");
+        Application.Log.Debug($"ModelBinder.Unbind(item): model='{model.Name}', mappings={_modelToItem.Count}");
 
         item.Free();
     }

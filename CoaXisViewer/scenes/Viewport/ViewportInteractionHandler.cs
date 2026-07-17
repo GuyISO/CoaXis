@@ -35,7 +35,7 @@ public partial class ViewportInteractionHandler : SubViewport
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
-        Application.Log.Service.Info("ViewportInteractionHandler initialized.");
+        Application.Log.Info("ViewportInteractionHandler initialized.");
     }
 
     public override void _ExitTree()
@@ -43,7 +43,7 @@ public partial class ViewportInteractionHandler : SubViewport
         UnsubscribeUiEvents();
         UnsubscribeApplicationEvents();
 
-        Application.Log.Service.Info("ViewportInteractionHandler released.");
+        Application.Log.Info("ViewportInteractionHandler released.");
 
         base._ExitTree();
     }
@@ -187,7 +187,7 @@ public partial class ViewportInteractionHandler : SubViewport
             return;
         }
 
-        Application.Log.Service.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
+        Application.Log.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
         _mode = mode;
         Application.Viewport.Event.NotifyInteractionMode(mode);
     }
@@ -358,13 +358,13 @@ public partial class ViewportInteractionHandler : SubViewport
         if (pickResult.HasHit)
         {
             // ヒットしたら注視点を移動
-            Application.Log.Service.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
+            Application.Log.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
             Application.Viewport.Event.MovePositionTo(pickResult.Position, useTween);
             return true;
         }
         else
         {
-            Application.Log.Service.Debug("ViewportInteractionHandler: focus target not found.");
+            Application.Log.Debug("ViewportInteractionHandler: focus target not found.");
             return false;
         }
     }

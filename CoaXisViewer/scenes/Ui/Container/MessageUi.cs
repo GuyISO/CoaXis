@@ -51,7 +51,7 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Log.Event.LogNotified += OnLogNotified;
+        Application.Log.Notified += OnLogNotified;
     }
 
     /// <summary>
@@ -59,7 +59,7 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Log.Event.LogNotified -= OnLogNotified;
+        Application.Log.Notified -= OnLogNotified;
     }
 
     /// <summary>

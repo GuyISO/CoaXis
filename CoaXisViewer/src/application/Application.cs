@@ -8,7 +8,7 @@ public partial class Application : FacadeBase
     #region Fields
 
     // infrastructure
-    private LogFacade _logFacade;
+    private LogHub _logHub;
     private SettingFacade _settingFacade;
     private AssetFacade _assetFacade;
     private DeviceInputHandler _deviceInputHandler;
@@ -28,7 +28,7 @@ public partial class Application : FacadeBase
     public static Application Instance { get; private set; }
 
     // infrastructure
-    public static LogFacade Log => Instance._logFacade;
+    public static LogHub Log => Instance._logHub;
     public static SettingFacade Setting => Instance._settingFacade;
     public static AssetFacade Asset => Instance._assetFacade;
     public static DeviceInputHandler DeviceInputHandlerNode => Instance._deviceInputHandler;
@@ -69,7 +69,7 @@ public partial class Application : FacadeBase
     /// </summary>
     private void EnsureInfrastructureModules()
     {
-        _logFacade = AddModule<LogFacade>("LogFacade");
+        _logHub = AddModule<LogHub>("LogHub");
         _settingFacade = AddModule<SettingFacade>("SettingFacade");
         _assetFacade = AddModule<AssetFacade>("AssetFacade");
         _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");

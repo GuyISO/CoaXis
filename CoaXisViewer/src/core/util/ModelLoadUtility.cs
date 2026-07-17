@@ -18,7 +18,7 @@ public static class ModelLoadUtility
     public static async Task<bool> LoadModelAsync(AnyModel model, string path)
     {
         // 所要時間計測開始
-        Application.Log.Service.Info($"Start loading model: {path}");
+        Application.Log.Info($"Start loading model: {path}");
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
         // 非同期でglTFモデルを読み込む
@@ -32,12 +32,12 @@ public static class ModelLoadUtility
             model.Mesh.AddChild(scene);
 
             sw.Stop();
-            Application.Log.Service.Info($"Finished loading model: {path} in {sw.ElapsedMilliseconds} ms");
+            Application.Log.Info($"Finished loading model: {path} in {sw.ElapsedMilliseconds} ms");
             return true;
         }
         else
         {
-            Application.Log.Service.Error($"Failed to load model: {path}, Error: {error}");
+            Application.Log.Error($"Failed to load model: {path}, Error: {error}");
             return false;
         }
     }

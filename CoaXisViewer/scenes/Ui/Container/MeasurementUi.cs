@@ -126,7 +126,7 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonPick1Pressed()
     {
-        Application.Log.Service.Debug("MeasurementUi: pick point 1 requested.");
+        Application.Log.Debug("MeasurementUi: pick point 1 requested.");
         Application.Measurement.Event.SetPoint(1);
     }
 
@@ -135,7 +135,7 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonPick2Pressed()
     {
-        Application.Log.Service.Debug("MeasurementUi: pick point 2 requested.");
+        Application.Log.Debug("MeasurementUi: pick point 2 requested.");
         Application.Measurement.Event.SetPoint(2);
     }
 
@@ -144,7 +144,7 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonClear1Pressed()
     {
-        Application.Log.Service.Debug("MeasurementUi: clear point 1 requested.");
+        Application.Log.Debug("MeasurementUi: clear point 1 requested.");
         Application.Measurement.Event.ClearPoint(1);
     }
 
@@ -153,7 +153,7 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void OnButtonClear2Pressed()
     {
-        Application.Log.Service.Debug("MeasurementUi: clear point 2 requested.");
+        Application.Log.Debug("MeasurementUi: clear point 2 requested.");
         Application.Measurement.Event.ClearPoint(2);
     }
 
@@ -222,7 +222,7 @@ public partial class MeasurementUi : PanelContainer
                 _buttonPicks[1].ButtonPressed = true;
                 break;
             default:
-                Application.Log.Service.Warn($"MeasurementUi: invalid pick point index {pointIndex}.");
+                Application.Log.Warn($"MeasurementUi: invalid pick point index {pointIndex}.");
                 break;
         }
     }

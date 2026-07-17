@@ -53,7 +53,7 @@ public partial class ExampleFacade : FacadeBase
 ## 3. 対象クラス
 - Facade: LogFacade, SettingFacade, ViewportFacade, ModelFacade, PickFacade, SelectionFacade, MeasurementFacade, UiFacade, AssetFacade
 - Event: LogEvent, ViewportEvent, ModelEvent, PickEvent, MeasurementEvent
-- Service: LogService, SettingService, ModelOperationService, ModelVisualService, SelectionService, MeasurementService, UiManager, AssetManager
+- Service: LogService, SettingService, ModelOperationService, ModelVisualService, SelectionService, MeasurementService, UiService, AssetManager
 - Systems/Input: DeviceInputHandler
 
 ## 4. 新規追加時のチェック

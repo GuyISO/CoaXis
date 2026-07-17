@@ -11,6 +11,7 @@ public partial class MeasurementService : Node
     // 現在測定対象とするポイントのインデックス（1または2）。0の場合は未選択状態を示す
     private int _pointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
 
+    // TODO: ファイルパスを参照するのやめる
     private readonly PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/Part/PointerLabel.tscn")!;
     private readonly PointerLabel[] _pointerLabelInstances = new PointerLabel[2];
     private readonly ImmediateMesh _lineMesh = new ImmediateMesh();
@@ -89,7 +90,7 @@ public partial class MeasurementService : Node
     {
         if (pointIndex is < 1 or > 2)
         {
-            Application.Log.Service.Warn($"MeasurementService: invalid point index {pointIndex}.");
+            Application.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
             return;
         }
 
@@ -107,7 +108,7 @@ public partial class MeasurementService : Node
     {
         if (pointIndex is < 1 or > 2)
         {
-            Application.Log.Service.Warn($"MeasurementService: invalid point index {pointIndex}.");
+            Application.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
             return;
         }
 
@@ -154,7 +155,7 @@ public partial class MeasurementService : Node
 
         int index = _pointIndex - 1;
         _points[index] = pickResult;
-        Application.Log.Service.Debug($"MeasurementService: point {_pointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
+        Application.Log.Debug($"MeasurementService: point {_pointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
 
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
@@ -257,13 +258,13 @@ public partial class MeasurementService : Node
 
         if (_pointerLabel == null)
         {
-            Application.Log.Service.Warn("MeasurementService: pointer label scene is not loaded.");
+            Application.Log.Warn("MeasurementService: pointer label scene is not loaded.");
             return;
         }
 
         if (pickResult.Collider == null || !GodotObject.IsInstanceValid(pickResult.Collider))
         {
-            Application.Log.Service.Warn("MeasurementService: collider is invalid, skip pointer label placement.");
+            Application.Log.Warn("MeasurementService: collider is invalid, skip pointer label placement.");
             return;
         }
 
@@ -330,6 +331,7 @@ public partial class MeasurementService : Node
         _line.MaterialOverride = new StandardMaterial3D
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            // TODO: 色を設定ファイルから取得するようにする
             AlbedoColor = new Color(0.98f, 0.82f, 0.12f, 1.0f)
         };
 

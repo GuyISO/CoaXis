@@ -1,14 +1,14 @@
 using Godot;
-using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデル選択状態に応じてハイライト表示を切り替える Autoload ノード
+/// モデルのロードや状態操作を管理する Autoload ノード
 /// </summary>
-public partial class ModelVisualService : Node
+public partial class ModelService : Node
 {
 	#region Fields
 
+	// TODO: ファイルパスの直接参照やめる
 	private static Material _selectedMaterial = ResourceLoader.Load<Material>("res://assets/materials/selected.tres");
 
 	#endregion
@@ -37,6 +37,7 @@ public partial class ModelVisualService : Node
 	private void SubscribeApplicationEvents()
 	{
 		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
+		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
 	}
 
@@ -46,7 +47,18 @@ public partial class ModelVisualService : Node
 	private void UnsubscribeApplicationEvents()
 	{
 		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
+		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+	}
+
+	/// <summary>
+	/// モデルの表示状態切替がリクエストされたときに呼び出されるイベントハンドラ
+	/// </summary>
+	/// <param name="model">表示状態を切り替えるモデル</param>
+	private void OnToggleModelVisibilityRequested(AnyModel model)
+	{
+		var command = new SetModelVisibilityCommand([model], !model.Visible);
+		UndoService.Execute(command);
 	}
 
 	/// <summary>
@@ -173,7 +185,7 @@ public partial class ModelVisualService : Node
 		{
 			if (!visited.Add(model))
 			{
-				Application.Log.Service.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
+				Application.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
 				return false;
 			}
 

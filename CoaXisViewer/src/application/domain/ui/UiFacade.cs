@@ -3,10 +3,10 @@
 /// </summary>
 public partial class UiFacade : FacadeBase
 {
-	public UiManager Service { get; }
+	public UiService Service { get; }
 
 	public UiFacade()
 	{
-		Service = AddModule<UiManager>("UiManager");
+		Service = AddModule<UiService>("UiService");
 	}
 }

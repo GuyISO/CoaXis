@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// UI管理用 Autoload ノード
 /// </summary>
-public partial class UiManager : Node
+public partial class UiService : Node
 {
     #region Fields
 
@@ -28,13 +28,13 @@ public partial class UiManager : Node
     {
         if (container == null)
         {
-            Application.Log.Service.Warn("UiManager: container is null.");
+            Application.Log.Warn("UiService: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Log.Service.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
@@ -68,13 +68,13 @@ public partial class UiManager : Node
     {
         if (container == null)
         {
-            Application.Log.Service.Warn("UiManager: container is null.");
+            Application.Log.Warn("UiService: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Log.Service.Warn("UiManager: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
@@ -122,5 +122,4 @@ public partial class UiManager : Node
     }
 
     #endregion
-
 }

@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// UiManager に対して Containerを継承したUIの表示を要求するボタンへアタッチして使用する
+/// UiService に対して Containerを継承したUIの表示を要求するボタンへアタッチして使用する
 /// </summary>
 public partial class ShowContainerButton : Button
 {
@@ -47,11 +47,11 @@ public partial class ShowContainerButton : Button
     {
         if (_container == null)
         {
-            Application.Log.Service.Warn("ShowContainerButton: Container is not assigned.");
+            Application.Log.Warn("ShowContainerButton: Container is not assigned.");
             return;
         }
 
-        // UiManager に対してコンテナの表示を要求する
+        // UiService に対してコンテナの表示を要求する
         Application.Ui.Service.Show(_container.Instantiate<Container>());
     }
 

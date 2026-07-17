@@ -66,10 +66,9 @@ public partial class SelectionService : Node
         if (_mode != mode)
         {
             _mode = mode;
-            Application.Log.Service.Debug($"SelectionService: Selection mode changed to {_mode}.");
+            Application.Log.Debug($"SelectionService: Selection mode changed to {_mode}.");
             Application.Selection.Event.NotifyMode(_mode);
-        }
-            
+        }   
     }
 
     /// <summary>
@@ -116,7 +115,7 @@ public partial class SelectionService : Node
                 Toggle(model);
                 break;
             default:
-                Application.Log.Service.Warn($"SelectionService: Unknown selection mode {_mode}.");
+                Application.Log.Warn($"SelectionService: Unknown selection mode {_mode}.");
                 break;
         }
     }
@@ -157,7 +156,7 @@ public partial class SelectionService : Node
                 Toggle(models);
                 break;
             default:
-                Application.Log.Service.Warn($"SelectionService: Unknown selection mode {_mode}.");
+                Application.Log.Warn($"SelectionService: Unknown selection mode {_mode}.");
                 break;
         }
     }
@@ -230,7 +229,7 @@ public partial class SelectionService : Node
         if (_models.Add(model))
         {
             Application.Selection.Event.NotifyModelState(model, true);
-            Application.Log.Service.Info($"Selected: {model.Name}");
+            Application.Log.Info($"Selected: {model.Name}");
             return true;
         }
         return false;
@@ -259,7 +258,7 @@ public partial class SelectionService : Node
         if (_models.Remove(model))
         {
             Application.Selection.Event.NotifyModelState(model, false);
-            Application.Log.Service.Info($"Deselected: {model.Name}");
+            Application.Log.Info($"Deselected: {model.Name}");
             return true;
         }
         return false;
@@ -331,7 +330,7 @@ public partial class SelectionService : Node
         foreach (var model in modelsToDeselect)
         {
             Application.Selection.Event.NotifyModelState(model, false);
-            Application.Log.Service.Info($"Deselected: {model.Name}");
+            Application.Log.Info($"Deselected: {model.Name}");
         }
         return true;
     }

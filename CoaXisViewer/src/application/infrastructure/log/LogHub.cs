@@ -3,15 +3,17 @@ using System;
 using System.IO;
 
 /// <summary>
-/// ログ機能のサービス
+/// ログ機能のハブとなる Autoload ノード
 /// </summary>
-public partial class LogService : Node
+public partial class LogHub : Node
 {
     #region Fields
 
     private StreamWriter _fileWriter;
     private string _logFilePath = string.Empty;
     private bool _enableFileLog = false;
+
+    [Signal] public delegate void NotifiedEventHandler(string message);
 
     #endregion
 
@@ -62,7 +64,8 @@ public partial class LogService : Node
             _fileWriter.Flush();
         }
 
-        Application.Log.Event.NotifyLog(line);
+        // Signalの発行
+        EmitSignal(SignalName.Notified, line);
     }
 
     /// <summary>

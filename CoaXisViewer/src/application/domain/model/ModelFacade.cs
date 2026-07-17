@@ -4,13 +4,11 @@
 public partial class ModelFacade : FacadeBase
 {
     public ModelEvent Event { get; }
-    public ModelOperationService Operation { get; }
-    public ModelVisualService Visual { get; }
+    public ModelService Service { get; }
 
     public ModelFacade()
     {
         Event = AddModule<ModelEvent>("ModelEvent");
-        Operation = AddModule<ModelOperationService>("ModelOperationService");
-        Visual = AddModule<ModelVisualService>("ModelVisualService");
+        Service = AddModule<ModelService>("ModelService");
     }
 }

@@ -57,7 +57,7 @@ TemporaryDependencyNodeTargetIdentifier=net8.0
  CoaXisViewer.AssemblyInfo.cs
 src/
  global/Enums.cs
- ui/UiManager.cs
+ ui/UiService.cs
  viewer/CameraController.cs
 
 [metadataReferences]
