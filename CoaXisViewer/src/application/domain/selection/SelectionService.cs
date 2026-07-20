@@ -166,6 +166,11 @@ public partial class SelectionService : Node
     #region Public Methods
 
     /// <summary>
+    /// 現在の選択モードを取得する
+    /// </summary>
+    internal SelectionMode Mode => _mode;
+
+    /// <summary>
     /// 現在の選択モデルのコレクションの複製を取得する
     /// </summary>
     internal IReadOnlyCollection<AnyModel> GetModels => _models.ToList().AsReadOnly();

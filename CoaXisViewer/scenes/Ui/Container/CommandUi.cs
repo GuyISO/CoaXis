@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 /// <summary>
-/// メインのビューポート状態表示と操作用のパネル
+/// コマンド履歴表示と操作用のパネル
 /// </summary>
 public partial class CommandUi : PanelContainer
 {
