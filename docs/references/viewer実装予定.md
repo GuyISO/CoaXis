@@ -7,11 +7,12 @@ infra
     Save&Load機能
     Undo&Redo機能
     IPC
+        これらもNodeを継承する
 
 domain
     Modelの移動Snapping機能
-    VFX配置機能
-    断面表示
+    VFX配置機能、Modelとの紐づけもする
+    断面表示、将来的にほしい
 
 ## 細かい修正
 測定機能

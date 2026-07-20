@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// 測定結果を表すオブジェクト
 /// </summary>
-public partial class MeasurementResult : GodotObject
+public partial class MeasurementResult : RefCounted
 {
     public bool HasPoint1 { get; }
     public bool HasPoint2 { get; }

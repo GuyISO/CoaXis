@@ -487,6 +487,24 @@ public partial class ViewportOverlay : Control
         return mode == ViewportInteractionMode.PickRect;
     }
 
+    private void ChangeColor(Color color)
+    {
+        _lineColor = color;
+        _centerAxisLineXPositive.DefaultColor = color;
+        _centerAxisLineXNegative.DefaultColor = color;
+        _centerAxisLineYPositive.DefaultColor = color;
+        _centerAxisLineYNegative.DefaultColor = color;
+        _centerAxisLineZ.DefaultColor = color;
+        _arcballCrossLineX.DefaultColor = color;
+        _arcballCrossLineY.DefaultColor = color;
+        _selectionRectLineHorizontal1.DefaultColor = color;
+        _selectionRectLineHorizontal2.DefaultColor = color;
+        _selectionRectLineVertical1.DefaultColor = color;
+        _selectionRectLineVertical2.DefaultColor = color;
+
+        DrawArcballOutline();
+    }
+
     #endregion
 }
 

@@ -3,7 +3,7 @@
 /// <summary>
 /// レイキャストや範囲選択で空間上から取得した情報を表すオブジェクト
 /// </summary>
-public partial class PickResult : GodotObject
+public partial class PickResult : RefCounted
 {
     /// <summary>
     /// 取得に成功したかどうかを示す

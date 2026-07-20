@@ -5,6 +5,14 @@
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/overlay/ViewportOverlay.tscn" id="3_uud5i"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewport/axis_navigator/AxisNavigator.tscn" id="4_o0c0q"]
 
+[sub_resource type="Environment" id="Environment_a2qnf"]
+background_mode = 1
+background_color = Color(0.2, 0.2, 0.4, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.2
+reflected_light_source = 1
+
 [node name="ViewportContainer" type="SubViewportContainer" unique_id=999195544]
 anchors_preset = 15
 anchor_right = 1.0
@@ -29,6 +37,15 @@ cull_mask = 1048573
 current = true
 fov = 35.0
 near = 0.001
+
+[node name="Environments" type="Node3D" parent="Viewport" unique_id=1420569429]
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="Viewport/Environments" unique_id=884284846]
+transform = Transform3D(0.14644663, 0.8535534, -0.50000006, -0.50000006, 0.50000006, 0.70710677, 0.8535534, 0.14644666, 0.5, 0, 0, 0)
+layers = 1048573
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="Viewport/Environments" unique_id=627193504]
+environment = SubResource("Environment_a2qnf")
 
 [node name="ViewportOverlay" parent="Viewport" unique_id=440684067 instance=ExtResource("3_uud5i")]
 

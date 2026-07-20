@@ -58,7 +58,7 @@ public partial class ModelService : Node
 	private void OnToggleModelVisibilityRequested(AnyModel model)
 	{
 		var command = new SetModelVisibilityCommand([model], !model.Visible);
-		UndoService.Execute(command);
+		Application.Command.Event.Execute(command);
 	}
 
 	/// <summary>

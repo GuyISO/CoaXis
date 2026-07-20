@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// AnyModel の表示状態を変更する Undo/Redo 対応コマンド、バッチで複数モデルの表示状態を変更することも可能
 /// </summary>
-public sealed class SetModelVisibilityCommand : CommandBase
+public sealed partial class SetModelVisibilityCommand : CommandBase
 {
     #region Fields
 

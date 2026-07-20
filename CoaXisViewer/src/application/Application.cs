@@ -14,6 +14,7 @@ public partial class Application : FacadeBase
     private DeviceInputHandler _deviceInputHandler;
 
     // domain
+    private CommandFacade _commandFacade;
     private MeasurementFacade _measurementFacade;
     private ModelFacade _modelFacade;
     private PickFacade _pickFacade;
@@ -34,6 +35,7 @@ public partial class Application : FacadeBase
     public static DeviceInputHandler DeviceInputHandlerNode => Instance._deviceInputHandler;
 
     // domain
+    public static CommandFacade Command => Instance._commandFacade;
     public static MeasurementFacade Measurement => Instance._measurementFacade;
     public static ModelFacade Model => Instance._modelFacade;
     public static PickFacade Pick => Instance._pickFacade;
@@ -80,6 +82,7 @@ public partial class Application : FacadeBase
     /// </summary>
     private void EnsureDomainModules()
     {
+        _commandFacade = AddModule<CommandFacade>("CommandFacade");
         _measurementFacade = AddModule<MeasurementFacade>("MeasurementFacade");
         _modelFacade = AddModule<ModelFacade>("ModelFacade");
         _pickFacade = AddModule<PickFacade>("PickFacade");

@@ -60,3 +60,12 @@
   - `.github/design-philosophy/index.md`
   - `.github/design-philosophy/registry.md`
 - Notes: 境界変換は CoordinateSystemUtility を必須とする
+
+- Date: 2026-07-20
+- Trigger: Godot の signal で運ぶ payload 型をどう扱うかを統一
+- Decision: Signal 引数に渡す自前の参照型は `RefCounted` を継承し、`GodotObject` の直継承は避ける
+- Scope: signal payload として設計する C# クラス全般
+- Artifacts Updated:
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: `MeasurementResult` と `PickResult` を対象に適用

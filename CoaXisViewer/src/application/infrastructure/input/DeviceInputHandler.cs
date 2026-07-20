@@ -54,13 +54,13 @@ public partial class DeviceInputHandler : Node
         if (Input.IsActionJustPressed("undo"))
         {
             Application.Log.Debug("DeviceInputHandler: Undo requested.");
-            UndoService.Undo();
+            Application.Command.Event.Undo();
         }
 
         if (Input.IsActionJustPressed("redo"))
         {
             Application.Log.Debug("DeviceInputHandler: Redo requested.");
-            UndoService.Redo();
+            Application.Command.Event.Redo();
         }
         
         if (Input.IsActionJustPressed("load"))
