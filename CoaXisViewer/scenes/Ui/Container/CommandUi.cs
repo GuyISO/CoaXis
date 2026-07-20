@@ -1,5 +1,5 @@
 using Godot;
-using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// メインのビューポート状態表示と操作用のパネル
@@ -8,30 +8,18 @@ public partial class CommandUi : PanelContainer
 {
     #region Fields
 
-    // デフォルトのフィット対象モデル
-    private RootModel _rootModel = null!;
-
     private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
+    private bool _isUpdatingTree = false;
+    private bool _isRequestingCursorMove = false;
+    private bool _isRebuildQueued = false;
+    private int _cursor = 0;
+    private readonly List<CommandBase> _history = new();
 
     // 関連ノードのキャッシュ
-    private Label _labelMode = null!;
-    private Label _labelProjection = null!;
-    private Button _buttonToggleProjection = null!;
-    private Button _buttonFitAllIn = null!;
-    private Button _buttonFitToSelection = null!;
-    private Button _buttonAlignNormal = null!;
-    private Button _buttonRollLeft = null!;
-    private Button _buttonRollRight = null!;
-    private Label _labelPositionX = null!;
-    private Label _labelPositionY = null!;
-    private Label _labelPositionZ = null!;
-    private Label _labelRotationX = null!;
-    private Label _labelRotationY = null!;
-    private Label _labelRotationZ = null!;
-    private Label _labelSize = null!;
-    private Label _labelDistance = null!;
-    private Label _labelFov = null!;
-    private HSlider _sliderFov = null!;
+    private Tree _tree = null!;
+
+    private static readonly Color DoColor = Colors.White;
+    private static readonly Color UndoColor = Colors.Gray;
 
     #endregion
 
@@ -54,15 +42,9 @@ public partial class CommandUi : PanelContainer
 
     public override void _Process(double delta)
     {
-        // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
-        if (_rootModel == null)
-        {
-            Application.Model.Event.AskRootModel();
-        }
-
         if (!_isInitialized)
         {
-            Application.Viewport.Event.AskState();
+            Application.Command.Event.AskState();
         }
     }
 
@@ -75,25 +57,18 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void EnsureChildNodes()
     {
-        // シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
-        _labelMode = (Label)FindChild("LabelValueMode");
-        _labelProjection = (Label)FindChild("LabelValueProjection");
-        _buttonToggleProjection = (Button)FindChild("ButtonToggleProjection");
-        _buttonFitAllIn = (Button)FindChild("ButtonFitAllIn");
-        _buttonFitToSelection = (Button)FindChild("ButtonFitToSelection");
-        _buttonAlignNormal = (Button)FindChild("ButtonAlignNormal");
-        _buttonRollLeft = (Button)FindChild("ButtonRollLeft");
-        _buttonRollRight = (Button)FindChild("ButtonRollRight");
-        _labelPositionX = (Label)FindChild("LabelValuePositionX");
-        _labelPositionY = (Label)FindChild("LabelValuePositionY");
-        _labelPositionZ = (Label)FindChild("LabelValuePositionZ");
-        _labelRotationX = (Label)FindChild("LabelValueRotationX");
-        _labelRotationY = (Label)FindChild("LabelValueRotationY");
-        _labelRotationZ = (Label)FindChild("LabelValueRotationZ");
-        _labelSize = (Label)FindChild("LabelValueSize");
-        _labelDistance = (Label)FindChild("LabelValueDistance");
-        _labelFov = (Label)FindChild("LabelValueFov");
-        _sliderFov = (HSlider)FindChild("HSliderFov");
+        _tree = (Tree)FindChild("Tree");
+        _tree.Columns = 4;
+        _tree.SetColumnTitle(0, "No");
+        _tree.SetColumnTitle(1, "Name");
+        _tree.SetColumnTitle(2, "Description");
+        _tree.SetColumnTitle(3, "State");
+        _tree.SetColumnExpand(0, false);
+        _tree.SetColumnExpand(1, true);
+        _tree.SetColumnExpand(2, true);
+        _tree.SetColumnExpand(3, false);
+        _tree.SetColumnCustomMinimumWidth(0, 64);
+        _tree.SetColumnCustomMinimumWidth(3, 64);
     }
     
     /// <summary>
@@ -101,13 +76,8 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void SubscribeUiEvents()
     {
-        _buttonToggleProjection.Pressed += OnButtonToggleProjectionPressed;
-        _buttonFitAllIn.Pressed += OnButtonFitAllInPressed;
-        _buttonFitToSelection.Pressed += OnButtonFitToSelectionPressed;
-        _buttonAlignNormal.Pressed += OnButtonAlignNormalPressed;
-        _buttonRollLeft.Pressed += OnButtonRollLeftPressed;
-        _buttonRollRight.Pressed += OnButtonRollRightPressed;
-        _sliderFov.ValueChanged += OnSliderFovValueChanged;
+        _tree.ItemSelected += OnTreeItemSelected;
+        _tree.ItemActivated += OnTreeItemActivated;
     }
 
     /// <summary>
@@ -115,13 +85,8 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void UnsubscribeUiEvents()
     {
-        _buttonToggleProjection.Pressed -= OnButtonToggleProjectionPressed;
-        _buttonFitAllIn.Pressed -= OnButtonFitAllInPressed;
-        _buttonFitToSelection.Pressed -= OnButtonFitToSelectionPressed;
-        _buttonAlignNormal.Pressed -= OnButtonAlignNormalPressed;
-        _buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
-        _buttonRollRight.Pressed -= OnButtonRollRightPressed;
-        _sliderFov.ValueChanged -= OnSliderFovValueChanged;
+        _tree.ItemSelected -= OnTreeItemSelected;
+        _tree.ItemActivated -= OnTreeItemActivated;
     }
 
     /// <summary>
@@ -129,15 +94,7 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Model.Event.RootModelNotified += OnRootModelNotified;
-        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.Event.PositionNotified += OnPositionNotified;
-        Application.Viewport.Event.RotationNotified += OnRotationNotified;
-        Application.Viewport.Event.DistanceNotified += OnDistanceNotified;
-        Application.Viewport.Event.SizeNotified += OnSizeNotified;
-        Application.Viewport.Event.FovNotified += OnFovNotified;
-        Application.Viewport.Event.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Command.Event.StateNotified += OnStateNotified;
     }
 
     /// <summary>
@@ -145,187 +102,188 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
-        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.Event.PositionNotified -= OnPositionNotified;
-        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
-        Application.Viewport.Event.DistanceNotified -= OnDistanceNotified;
-        Application.Viewport.Event.SizeNotified -= OnSizeNotified;
-        Application.Viewport.Event.FovNotified -= OnFovNotified;
-        Application.Viewport.Event.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Command.Event.StateNotified -= OnStateNotified;
     }
 
     /// <summary>
-    /// ピック操作モードが通知されたときに呼び出されるイベントハンドラ
+    /// コマンド履歴状態の通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="mode">通知されたピック操作モード</param>
-    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    /// <param name="history">通知された履歴配列</param>
+    /// <param name="cursor">通知されたカーソル位置</param>
+    private void OnStateNotified(CommandBase[] history, int cursor)
     {
-        // ビューポート操作モードが NormalToFace の場合、Align Normal ボタンを押下状態にする
-        _buttonAlignNormal.ButtonPressed = mode == PickHandlingMode.NormalToFace;
-    }
-
-    /// <summary>
-    /// 投影切替ボタンのクリックイベントハンドラ、カメラの投影タイプ切替をリクエストする
-    /// </summary>
-    private void OnButtonToggleProjectionPressed()
-    {
-        Application.Log.Debug("ViewportUi: toggle projection requested.");
-        Application.Viewport.Event.ToggleProjectionType();
-    }
-
-    /// <summary>
-    /// Fit All In ボタンのクリックイベントハンドラ、カメラのフィット操作をリクエストする
-    /// </summary>
-    private void OnButtonFitAllInPressed()
-    {
-        if (_rootModel == null)
+        _history.Clear();
+        if (history != null)
         {
-            GD.PushWarning("ViewportUi: fit target model is missing.");
-            Application.Log.Warn("ViewportUi: fit-all requested but default target is missing.");
-            return;
+            _history.AddRange(history);
         }
 
-        Application.Log.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
-        Application.Viewport.Event.Fit(new[] { _rootModel }, true);
-    }
-
-    /// <summary>
-    /// Fit To Selection ボタンのクリックイベントハンドラ、選択中ノードへのFitをリクエストする
-    /// </summary>
-    private void OnButtonFitToSelectionPressed()
-    {
-        AnyModel[] fitTargets = Application.Selection.Service.GetModelArray();
-        if (fitTargets.Length == 0)
-        {
-            Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
-            return;
-        }
-
-        Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
-        Application.Viewport.Event.Fit(fitTargets, true);
-    }
-
-    /// <summary>
-    /// Align Normal ボタンのクリックイベントハンドラ、カメラの法線方向合わせ操作をリクエストする
-    /// </summary>
-    private void OnButtonAlignNormalPressed()
-    {
-        Application.Pick.Event.SetHandlingMode(PickHandlingMode.NormalToFace);
-    }
-
-    /// <summary>
-    /// Roll Left ボタンのクリックイベントハンドラ、カメラの左ロール操作をリクエストする
-    /// </summary>
-    private void OnButtonRollLeftPressed()
-    {
-        Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
-        Application.Log.Debug("ViewportUi: roll-left requested.");
-        Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
-    }
-
-    /// <summary>
-    /// Roll Right ボタンのクリックイベントハンドラ、カメラの右ロール操作をリクエストする
-    /// </summary>
-    private void OnButtonRollRightPressed()
-    {
-        Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
-        Application.Log.Debug("ViewportUi: roll-right requested.");
-        Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
-    }
-
-    /// <summary>
-    /// RootModel が通知されたときに呼び出されるイベントハンドラ、キャッシュを更新する
-    /// </summary>
-    /// <param name="rootModel">通知されたルートモデル</param>
-    private void OnRootModelNotified(RootModel rootModel)
-    {
-        _rootModel = rootModel;
-    }
-
-    /// <summary>
-    /// FOVスライダーの値変更イベントハンドラ、カメラのFOV設定をリクエストする
-    /// </summary>
-    /// <param name="value">新しい FOV 値</param>
-    private void OnSliderFovValueChanged(double value)
-    {
-        Application.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
-        Application.Viewport.Event.SetFov((float)value);
-    }
-
-    /// <summary>
-    /// ビューポートの操作モードが通知されたときに呼び出されるイベントハンドラ
-    /// </summary>
-    /// <param name="mode">ビューポートの操作モード</param>
-    private void OnInteractionModeNotified(ViewportInteractionMode mode)
-    {
-        // Application.Viewport.AskState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
+        _cursor = cursor;
         _isInitialized = true;
-
-        _labelMode.Text = mode.ToString();
+        _isRequestingCursorMove = false;
+        QueueRebuildTimelineTree();
     }
 
     /// <summary>
-    /// カメラの位置が通知されたときに呼び出されるイベントハンドラ
+    /// 履歴ツリーの選択変更時に呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="position">カメラの位置</param>
-    private void OnPositionNotified(Vector3 position)
+    private void OnTreeItemSelected()
     {
-        Vector3 catiaPosition = CoordinateSystemUtility.GodotToCatia(position);
-        _labelPositionX.Text = catiaPosition.X.ToString("F3");
-        _labelPositionY.Text = catiaPosition.Y.ToString("F3");
-        _labelPositionZ.Text = catiaPosition.Z.ToString("F3");
+        RequestCursorMoveFromSelection();
     }
 
     /// <summary>
-    /// カメラの回転が通知されたときに呼び出されるイベントハンドラ
+    /// 履歴ツリーのアイテムが確定されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="rotation">カメラの回転を表すクォータニオン</param>
-    private void OnRotationNotified(Quaternion rotation)
+    private void OnTreeItemActivated()
     {
-        Quaternion catiaRotation = CoordinateSystemUtility.GodotToCatia(rotation);
-        Vector3 rotationDegrees = catiaRotation.GetEuler() * (180f / Mathf.Pi);
-        _labelRotationX.Text = rotationDegrees.X.ToString("F3");
-        _labelRotationY.Text = rotationDegrees.Y.ToString("F3");
-        _labelRotationZ.Text = rotationDegrees.Z.ToString("F3");
+        RequestCursorMoveFromSelection();
     }
 
     /// <summary>
-    /// カメラの距離が通知されたときに呼び出されるイベントハンドラ
+    /// 現在選択されている履歴行へのカーソル移動をリクエストする
     /// </summary>
-    /// <param name="distance">カメラの距離</param>
-    private void OnDistanceNotified(float distance)
+    private void RequestCursorMoveFromSelection()
     {
-        _labelDistance.Text = CoordinateSystemUtility.GodotDistanceToCatia(distance).ToString("F3");
+        if (_isUpdatingTree || _isRequestingCursorMove)
+        {
+            return;
+        }
+
+        TreeItem selected = _tree.GetSelected();
+        if (selected == null)
+        {
+            return;
+        }
+
+        Variant metadata = selected.GetMetadata(0);
+        if (metadata.VariantType != Variant.Type.Int)
+        {
+            return;
+        }
+
+        int nextCursor = (int)metadata + 1;
+        if (nextCursor == _cursor)
+        {
+            return;
+        }
+
+        _isRequestingCursorMove = true;
+        Application.Command.Event.SetCursor(nextCursor);
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// タイムラインツリー再構築を遅延キューへ積む
+    /// </summary>
+    private void QueueRebuildTimelineTree()
+    {
+        if (_isRebuildQueued)
+        {
+            return;
+        }
+
+        _isRebuildQueued = true;
+        CallDeferred(MethodName.RebuildTimelineTreeDeferred);
     }
 
     /// <summary>
-    /// カメラのサイズが通知されたときに呼び出されるイベントハンドラ
+    /// 遅延呼び出しでタイムラインツリーを再構築する
     /// </summary>
-    /// <param name="size">カメラのサイズ</param>
-    private void OnSizeNotified(float size)
+    private void RebuildTimelineTreeDeferred()
     {
-        _labelSize.Text = CoordinateSystemUtility.GodotDistanceToCatia(size).ToString("F3");
+        _isRebuildQueued = false;
+        if (_tree == null || !GodotObject.IsInstanceValid(_tree))
+        {
+            return;
+        }
+
+        RebuildTimelineTree();
     }
 
     /// <summary>
-    /// カメラのFOVが通知されたときに呼び出されるイベントハンドラ
+    /// タイムラインツリーを現在の履歴状態で再構築する
     /// </summary>
-    /// <param name="fov">カメラのFOV</param>
-    private void OnFovNotified(float fov)
+    private void RebuildTimelineTree()
     {
-        _labelFov.Text = fov.ToString("F1");
-        _sliderFov.Value = fov;
+        if (_tree == null || !GodotObject.IsInstanceValid(_tree))
+        {
+            return;
+        }
+
+        _isUpdatingTree = true;
+
+        try
+        {
+            _tree.Clear();
+            TreeItem root = _tree.CreateItem();
+            if (root == null)
+            {
+                return;
+            }
+
+            for (int i = 0; i < _history.Count; i++)
+            {
+                CommandBase command = _history[i];
+                TreeItem item = _tree.CreateItem(root);
+                if (item == null)
+                {
+                    continue;
+                }
+
+                item.SetMetadata(0, i);
+                item.SetText(0, i.ToString());
+                item.SetText(1, command?.GetType().Name ?? "(null)");
+                item.SetText(2, command?.Description ?? string.Empty);
+
+                string state = ResolveState(i, _cursor);
+                Color color = ResolveStateColor(i, _cursor);
+                item.SetText(3, state);
+
+                for (int column = 0; column < 4; column++)
+                {
+                    item.SetCustomColor(column, color);
+                }
+
+                if (i == _cursor - 1)
+                {
+                    item.Select(0);
+                }
+            }
+        }
+        finally
+        {
+            _isUpdatingTree = false;
+        }
     }
 
     /// <summary>
-    /// カメラの投影タイプが通知されたときに呼び出されるイベントハンドラ
+    /// 履歴インデックスに対応する状態文字列を返す
     /// </summary>
-    /// <param name="type">カメラの投影タイプ</param>
-    private void OnProjectionTypeNotified(Camera3D.ProjectionType type)
+    private static string ResolveState(int index, int cursor)
     {
-        _labelProjection.Text = type.ToString();
+        if (index < cursor)
+        {
+            return "Do";
+        }
+
+        return "Undo";
+    }
+
+    /// <summary>
+    /// 履歴インデックスに対応する表示色を返す
+    /// </summary>
+    private static Color ResolveStateColor(int index, int cursor)
+    {
+        if (index < cursor)
+        {
+            return DoColor;
+        }
+
+        return UndoColor;
     }
 
     #endregion

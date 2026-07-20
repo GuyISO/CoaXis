@@ -7,6 +7,15 @@ public partial class CommandEvent : EventBase<CommandEvent>
 {
 	#region Action
 
+	[Signal] public delegate void AskStateRequestedEventHandler();
+	/// <summary>
+	/// コマンド履歴状態の通知をリクエストする
+	/// </summary>
+	internal void AskState()
+	{
+		Emit(SignalName.AskStateRequested);
+	}
+
 	[Signal] public delegate void ExecuteRequestedEventHandler(CommandBase command);
 	/// <summary>
 	/// コマンドの実行をリクエストする
@@ -42,6 +51,31 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	internal void Clear()
 	{
 		Emit(SignalName.ClearRequested);
+	}
+
+	[Signal] public delegate void SetCursorRequestedEventHandler(int cursor);
+	/// <summary>
+	/// 指定位置までのタイムトラベルをリクエストする
+	/// </summary>
+	/// <param name="cursor">移動先カーソル位置</param>
+	internal void SetCursor(int cursor)
+	{
+		Emit(SignalName.SetCursorRequested, cursor);
+	}
+
+	#endregion
+
+	#region Notification
+
+	[Signal] public delegate void StateNotifiedEventHandler(CommandBase[] history, int cursor);
+	/// <summary>
+	/// コマンド履歴状態を通知する
+	/// </summary>
+	/// <param name="history">履歴配列</param>
+	/// <param name="cursor">現在カーソル位置（-1 の場合は未実行）</param>
+	internal void NotifyState(CommandBase[] history, int cursor)
+	{
+		Emit(SignalName.StateNotified, history, cursor);
 	}
 
 	#endregion

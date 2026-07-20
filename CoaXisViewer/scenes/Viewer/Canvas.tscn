@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cfpvvau2incc4" path="res://scenes/ui/container/MessageUi.tscn" id="2_y2duu"]
 [ext_resource type="PackedScene" uid="uid://ctjbhouwd3kn7" path="res://scenes/ui/container/ViewportUi.tscn" id="3_6a6xr"]
 [ext_resource type="PackedScene" uid="uid://cmde2bylb3cu1" path="res://scenes/ui/container/MeasurementUi.tscn" id="4_g4gva"]
+[ext_resource type="PackedScene" uid="uid://bpcl2jg87jpcu" path="res://scenes/ui/container/CommandUi.tscn" id="5_cki6e"]
 [ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/viewport/ViewportContainer.tscn" id="5_y2duu"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://scenes/ui/FpsUi.cs" id="6_5i13y"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/ui/HierarchyTree.cs" id="6_6a6xr"]
@@ -46,6 +47,12 @@ layout_mode = 2
 tooltip_text = "計測パネルを表示します"
 text = "Measurement"
 _container = ExtResource("4_g4gva")
+
+[node name="ButtonShowCommandUi" parent="VBoxContainer/TopBar" unique_id=116854459 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "コマンド実行履歴パネルを表示します"
+text = "Command"
+_container = ExtResource("5_cki6e")
 
 [node name="Panel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
 layout_mode = 2
