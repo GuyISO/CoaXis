@@ -142,5 +142,37 @@ public static class PickUtility
         return pickResults.ToArray();
     }
 
+    /// <summary>
+    /// AnyModel のみがわかっている状態から PickResult を生成する
+    /// </summary>
+    /// <param name="model">選択対象のモデル</param>
+    /// <returns>モデル情報を含む PickResult。位置・法線・距離は未設定のため Zero/0 を返す</returns>
+    public static PickResult PickByModel(AnyModel model)
+    {
+        if (model == null)
+        {
+            return new PickResult();
+        }
+
+        Node3D collider = null;
+        Rid rid = default;
+
+        if (model.Collider != null && GodotObject.IsInstanceValid(model.Collider))
+        {
+            collider = model.Collider;
+            rid = model.Collider.GetRid();
+        }
+
+        return new PickResult(
+            hasHit: true,
+            collider: collider,
+            rid: rid,
+            model: model,
+            position: Vector3.Zero,
+            normal: Vector3.Zero,
+            distance: 0f
+        );
+    }
+
     #endregion
 }

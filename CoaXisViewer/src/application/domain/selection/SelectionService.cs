@@ -90,6 +90,7 @@ public partial class SelectionService : Node
             return; // 選択操作モードでない場合は無視
         }
 
+        // ピック結果が null またはモデルが null の場合、Setモードの場合は選択をクリアする、Hitしているかは選択においては関係ない
         if (pickResult == null || pickResult.Model == null)
         {
             if (_mode == SelectionMode.Set)

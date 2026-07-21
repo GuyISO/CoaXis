@@ -148,7 +148,7 @@ public partial class MeasurementService : Node
             return;
         }
 
-        if (pickResult == null || pickResult.Model == null)
+        if (!pickResult.HasHit)
         {
             return;
         }

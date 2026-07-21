@@ -100,15 +100,23 @@ public partial class HierarchyTree : Tree
             }
         }
 
+        AnyModel model = ModelBinder.GetModel(item);
+        if (model == null)
+        {
+            Application.Log.Warn("HierarchyTree: selected item has no associated model.");
+            return;
+        }
+
         if (selected)
         {
-            // 選択されたアイテムに対応する AnyModel を選択状態にする
-            Application.Selection.Service.Add(ModelBinder.GetModel(item));
+            PickResult pickResult = PickUtility.PickByModel(model);
+            Application.Pick.Event.NotifyResult(pickResult);
         }
-        else
+
+        // 選択操作モードが Selection 以外の場合は、選択状態をの通知を行わないようにする
+        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Selection)
         {
-            // 選択が解除されたアイテムに対応する AnyModel を選択解除状態にする
-            Application.Selection.Service.Remove(ModelBinder.GetModel(item));
+            item.Deselect((int)column);
         }
     }
 
