@@ -265,6 +265,11 @@ public partial class SelectionService : Node
         {
             Application.Selection.Event.NotifyModelState(model, false);
             Application.Log.Info($"Deselected: {model.Name}");
+            // 選択状態のモデルがなくなった場合、クリア通知も行う
+            if (_models.Count == 0)
+            {
+                Application.Selection.Event.NotifyCleared();
+            }
             return true;
         }
         return false;
@@ -337,6 +342,7 @@ public partial class SelectionService : Node
         {
             Application.Selection.Event.NotifyModelState(model, false);
             Application.Log.Info($"Deselected: {model.Name}");
+            Application.Selection.Event.NotifyCleared();
         }
         return true;
     }

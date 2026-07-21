@@ -14,15 +14,15 @@ public partial class DeviceInputHandler : Node
     [Export] private float _rotateSpeedDegrees = 90.0f;
     [Export] private float _rollSpeedDegrees = 120.0f;
 
-    private bool _isMultiSelectMode = false;
-
     #endregion
 
     #region Lifecycle
 
     public override void _Process(double delta)
     {
-        HandleMultiSelectModeInput();
+        HandleSelectModeInput("select_add", SelectionMode.Add);
+        HandleSelectModeInput("select_remove", SelectionMode.Remove);
+        HandleSelectModeInput("select_toggle", SelectionMode.Toggle);
         HandleButtonInput();
         HandleTranslationInput((float)delta);
         HandleRotationInput((float)delta);
@@ -33,16 +33,17 @@ public partial class DeviceInputHandler : Node
     #region Internal Helpers
 
     /// <summary>
-    /// マルチセレクトモードの切り替えを処理する
+    /// 選択モードの切り替えを処理する
     /// </summary>
-    private void HandleMultiSelectModeInput()
+    private void HandleSelectModeInput(string actionName, SelectionMode assignMode)
     { 
-        bool wasMultiSelectMode = _isMultiSelectMode;
-        _isMultiSelectMode = Input.IsActionPressed("select_multiple");
-        if (wasMultiSelectMode != _isMultiSelectMode)
+        if (Input.IsActionJustPressed(actionName))
         {
-            SelectionMode nextMode = _isMultiSelectMode ? SelectionMode.Toggle : SelectionMode.Set;
-            Application.Selection.Event.SetMode(nextMode);
+            Application.Selection.Event.SetMode(assignMode);
+        }
+        else if (Input.IsActionJustReleased(actionName) && Application.Selection.Service.Mode == assignMode)
+        {
+            Application.Selection.Event.SetMode(SelectionMode.Set);
         }
     }
 
@@ -71,6 +72,7 @@ public partial class DeviceInputHandler : Node
         if (Input.IsActionJustPressed("escape"))
         {
             Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
+            Application.Selection.Event.SetMode(SelectionMode.Set);
             Application.Selection.Event.Clear();
         }
     }

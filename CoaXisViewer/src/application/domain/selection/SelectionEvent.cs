@@ -51,5 +51,14 @@ public partial class SelectionEvent : EventBase<SelectionEvent>
         Emit(SignalName.ModelStateNotified, model, isSelected);
     }
 
+    [Signal] public delegate void ClearedNotifiedEventHandler();
+    /// <summary>
+    /// 選択がクリアされたことを通知する
+    /// </summary>
+    internal void NotifyCleared()
+    {
+        Emit(SignalName.ClearedNotified);
+    }
+
     #endregion
 }

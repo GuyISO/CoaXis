@@ -13,6 +13,9 @@ public partial class HierarchyTree : Tree
     private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
     private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
 
+    private Color _selectedColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);
+    private Color _defaultColor = new Color(1.0f, 1.0f, 1.0f); // デフォルトの背景色
+
     #endregion
 
     #region Lifecycle
@@ -22,6 +25,8 @@ public partial class HierarchyTree : Tree
         EnsureState();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
+
+        _defaultColor = GetThemeColor("bg_color", "Tree"); // デフォルトの背景色をテーマから取得
     }
 
     public override void _ExitTree()
@@ -68,8 +73,9 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Model.Event.AddModelRequested += OnAddModelRequested;
         Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
+        Application.Selection.Event.ClearedNotified += OnClearedNotified;
+        Application.Model.Event.AddModelRequested += OnAddModelRequested;
         Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
         Application.Model.Event.RootModelNotified += OnRootModelNotified;
     }
@@ -79,8 +85,9 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
         Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
+        Application.Selection.Event.ClearedNotified -= OnClearedNotified;
+        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
         Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
         Application.Model.Event.RootModelNotified -= OnRootModelNotified;
     }
@@ -90,33 +97,12 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void OnMultiSelected(TreeItem item, long column, bool selected)
     {
-        if (column != (int)HierarchyTreeColumn.Name)
+        //if (selected)
         {
-            // 名前列以外の列が選択された場合はそのセルの選択状態を解除して終了する
-            if (selected)
-            {
-                item.Deselect((int)column);
-                return;
-            }
-        }
-
-        AnyModel model = ModelBinder.GetModel(item);
-        if (model == null)
-        {
-            Application.Log.Warn("HierarchyTree: selected item has no associated model.");
-            return;
-        }
-
-        if (selected)
-        {
+            // 選択されたモデルをPickした扱いとする
+            AnyModel model = ModelBinder.GetModel(item);
             PickResult pickResult = PickUtility.PickByModel(model);
             Application.Pick.Event.NotifyResult(pickResult);
-        }
-
-        // 選択操作モードが Selection 以外の場合は、選択状態をの通知を行わないようにする
-        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Selection)
-        {
-            item.Deselect((int)column);
         }
     }
 
@@ -160,16 +146,6 @@ public partial class HierarchyTree : Tree
     }
 
     /// <summary>
-    /// モデルの追加がリクエストされたときのイベントハンドラ
-    /// </summary>
-    /// <param name="child">追加する子モデル</param>
-    /// <param name="parent">追加先の親モデル</param>
-    private void OnAddModelRequested(AnyModel child, AnyModel parent)
-    {
-        AddToTree(child, parent);
-    }
-
-    /// <summary>
     /// モデルの選択状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="model">選択状態が変更されたモデル</param>
@@ -181,13 +157,29 @@ public partial class HierarchyTree : Tree
         {
             if (isSelected)
             {
-                item.Select((int)HierarchyTreeColumn.Name);
+                // TODO: 選択状態の色を設定する
+                item.SetCustomBgColor((int)HierarchyTreeColumn.Name, _selectedColor);
             }
             else
             {
-                item.Deselect((int)HierarchyTreeColumn.Name);
+                item.ClearCustomBgColor((int)HierarchyTreeColumn.Name);
             }
         }
+    }
+
+    private void OnClearedNotified()
+    {
+        DeselectAll();
+    }
+
+    /// <summary>
+    /// モデルの追加がリクエストされたときのイベントハンドラ
+    /// </summary>
+    /// <param name="child">追加する子モデル</param>
+    /// <param name="parent">追加先の親モデル</param>
+    private void OnAddModelRequested(AnyModel child, AnyModel parent)
+    {
+        AddToTree(child, parent);
     }
 
     /// <summary>

@@ -164,7 +164,7 @@ public static class PickUtility
         }
 
         return new PickResult(
-            hasHit: true,
+            hasHit: false,
             collider: collider,
             rid: rid,
             model: model,

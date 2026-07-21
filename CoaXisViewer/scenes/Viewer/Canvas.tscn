@@ -9,6 +9,7 @@
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://scenes/ui/FpsUi.cs" id="6_5i13y"]
 [ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/ui/HierarchyTree.cs" id="6_6a6xr"]
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/container/SelectionUi.tscn" id="6_npq5x"]
+[ext_resource type="PackedScene" uid="uid://cgtr3vluexxxg" path="res://scenes/ui/container/PickUi.tscn" id="7_64vlc"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -61,6 +62,12 @@ tooltip_text = "選択状態パネルを表示します"
 text = "Selection"
 _container = ExtResource("6_npq5x")
 
+[node name="ButtonShowPickUi" parent="VBoxContainer/TopBar" unique_id=559011128 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "モデル取得パネルを表示します"
+text = "Pick"
+_container = ExtResource("7_64vlc")
+
 [node name="Panel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -109,7 +116,9 @@ offset_right = 500.0
 grow_vertical = 2
 size_flags_horizontal = 2
 size_flags_vertical = 3
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 columns = 2
+allow_reselect = true
 select_mode = 2
 script = ExtResource("6_6a6xr")
 
