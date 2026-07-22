@@ -119,7 +119,6 @@ size_flags_vertical = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 columns = 2
 allow_reselect = true
-select_mode = 2
 script = ExtResource("6_6a6xr")
 
 [node name="RightBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=617452991]

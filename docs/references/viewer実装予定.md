@@ -1,5 +1,8 @@
 # Viewerに実装予定の機能
 
+つぎはまず、背景色と選択状態色を設定できるようにする
+Treeの挙動も詰める、貫通レイキャストUIも作る
+
 ## Applicationに追加
 infra
     Settingもつくりかけ

@@ -12,8 +12,9 @@ public partial class HierarchyTree : Tree
     private RootModel _rootModel = null; // 3Dモデル用ルートノードのキャッシュ
     private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
     private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
+    private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
 
-    private Color _selectedColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);
+    private Color _selectedColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);    
     private Color _defaultColor = new Color(1.0f, 1.0f, 1.0f); // デフォルトの背景色
 
     #endregion
@@ -55,7 +56,6 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void SubscribeUiEvents()
     {
-        MultiSelected += OnMultiSelected;
         CellSelected += OnCellSelected;
     }
 
@@ -64,7 +64,6 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void UnsubscribeUiEvents()
     {
-        MultiSelected -= OnMultiSelected;
         CellSelected -= OnCellSelected;
     }
     
@@ -93,20 +92,6 @@ public partial class HierarchyTree : Tree
     }
 
     /// <summary>
-    /// TreeItem が選択・解除されたときのイベントハンドラ
-    /// </summary>
-    private void OnMultiSelected(TreeItem item, long column, bool selected)
-    {
-        //if (selected)
-        {
-            // 選択されたモデルをPickした扱いとする
-            AnyModel model = ModelBinder.GetModel(item);
-            PickResult pickResult = PickUtility.PickByModel(model);
-            Application.Pick.Event.NotifyResult(pickResult);
-        }
-    }
-
-    /// <summary>
     /// セルが選択されたときのイベントハンドラ、主にボタンのクリックを検知するために使用する
     /// </summary>
     private void OnCellSelected()
@@ -120,6 +105,9 @@ public partial class HierarchyTree : Tree
 
         switch (column)
         {
+            case (int)HierarchyTreeColumn.Name:
+                HandleSingleSelection(item);
+                break;
             case (int)HierarchyTreeColumn.VisibleButton:
                 OnVisibleButtonClicked(item);
                 break;
@@ -159,10 +147,15 @@ public partial class HierarchyTree : Tree
             {
                 // TODO: 選択状態の色を設定する
                 item.SetCustomBgColor((int)HierarchyTreeColumn.Name, _selectedColor);
+                _lastSelectedItem = item;
             }
             else
             {
                 item.ClearCustomBgColor((int)HierarchyTreeColumn.Name);
+                if (_lastSelectedItem == item)
+                {
+                    _lastSelectedItem = null;
+                }
             }
         }
     }
@@ -170,6 +163,7 @@ public partial class HierarchyTree : Tree
     private void OnClearedNotified()
     {
         DeselectAll();
+        _lastSelectedItem = null;
     }
 
     /// <summary>
@@ -222,10 +216,30 @@ public partial class HierarchyTree : Tree
     {
         _visibleIcon = Application.Asset.Service.GetVisibilityIcon(true, 24);
         _invisibleIcon = Application.Asset.Service.GetVisibilityIcon(false, 24);
+        SelectMode = SelectModeEnum.Single;
 
         // VisibleButton 列を固定幅にする
         SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
         SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
+    }
+
+    /// <summary>
+    /// Tree のセル選択を単一選択として処理する
+    /// </summary>
+    /// <param name="item">選択された TreeItem</param>
+    private void HandleSingleSelection(TreeItem item)
+    {
+        AnyModel model = ModelBinder.GetModel(item);
+        if (model == null)
+        {
+            Application.Log.Warn("HierarchyTree: selected item has no associated model.");
+            return;
+        }
+
+        // 選択されたモデルを Pick した扱いとして通知する
+        PickResult pickResult = PickUtility.PickByModel(model);
+        Application.Pick.Event.NotifyResult(pickResult);
+        _lastSelectedItem = item;
     }
 
     #endregion
