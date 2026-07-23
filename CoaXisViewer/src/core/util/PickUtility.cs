@@ -174,5 +174,31 @@ public static class PickUtility
         );
     }
 
+    /// <summary>
+    /// AnyModel 群のみがわかっている状態から PickResult 配列を生成する
+    /// </summary>
+    /// <param name="models">選択対象のモデル配列</param>
+    /// <returns>モデル情報を含む PickResult の配列</returns>
+    public static PickResult[] PickByModels(IReadOnlyList<AnyModel> models)
+    {
+        if (models == null || models.Count == 0)
+        {
+            return System.Array.Empty<PickResult>();
+        }
+
+        var results = new List<PickResult>(models.Count);
+        foreach (AnyModel model in models)
+        {
+            if (model == null)
+            {
+                continue;
+            }
+
+            results.Add(PickByModel(model));
+        }
+
+        return results.ToArray();
+    }
+
     #endregion
 }

@@ -342,8 +342,9 @@ public partial class SelectionService : Node
         {
             Application.Selection.Event.NotifyModelState(model, false);
             Application.Log.Info($"Deselected: {model.Name}");
-            Application.Selection.Event.NotifyCleared();
         }
+
+        Application.Selection.Event.NotifyCleared();
         return true;
     }
 

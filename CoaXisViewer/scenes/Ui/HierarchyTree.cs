@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// 階層ツリーの表示と操作を行うUIコンポーネント
@@ -98,8 +99,6 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void OnCellSelected()
     {
-        DeselectAll(); // 選択状態は基本的にUI上に残さない
-        
         TreeItem item = GetSelected();
         if (item == null)
         {
@@ -107,6 +106,8 @@ public partial class HierarchyTree : Tree
         }
 
         int column = GetSelectedColumn();
+
+        DeselectAll(); // 選択状態は基本的にUI上に残さない
 
         switch (column)
         {
@@ -135,7 +136,6 @@ public partial class HierarchyTree : Tree
             {
                 // TODO: 選択状態の色を設定する
                 item.SetCustomBgColor((int)HierarchyTreeColumn.Name, _selectedColor);
-                _lastSelectedItem = item;
             }
             else
             {
@@ -228,10 +228,131 @@ public partial class HierarchyTree : Tree
             return;
         }
 
-        // 選択されたモデルを Pick した扱いとして通知する
-        PickResult pickResult = PickUtility.PickByModel(model);
-        Application.Pick.Event.NotifyResult(pickResult);
-        _lastSelectedItem = item;
+        SelectionMode mode = Application.Selection.Service.Mode;
+        bool shouldHandleAsSingle = ShouldHandleAsSingleSelection(mode);
+
+        if (shouldHandleAsSingle)
+        {
+            Application.Pick.Event.NotifyResult(PickUtility.PickByModel(model));
+            return;
+        }
+
+        switch (mode)
+        {
+            // AddやRemoveモードのときは範囲選択として扱い、複数モデルの選択を通知する
+            case SelectionMode.Add:
+            case SelectionMode.Remove:
+                AnyModel[] models = GetRangeModels(_lastSelectedItem, item);
+                Application.Pick.Event.NotifyResults(PickUtility.PickByModels(models));
+                break;
+            default:
+                Application.Log.Warn($"HierarchyTree: unsupported selection mode '{mode}'.");
+                break;
+        }
+    }
+
+    /// <summary>
+    /// 単一選択として扱うべきかどうかを判定する
+    /// </summary>
+    /// <param name="mode">現在の選択モード</param>
+    /// <returns>単一選択として扱う場合は true</returns>
+    private bool ShouldHandleAsSingleSelection(SelectionMode mode)
+    {
+        if (mode == SelectionMode.Set || mode == SelectionMode.Toggle)
+        {
+            return true;
+        }
+
+        if (_lastSelectedItem == null)
+        {
+            return true;
+        }
+
+        return Application.Selection.Service.Count == 0;
+    }
+
+    /// <summary>
+    /// lastItem から selectedItem までの同親・同階層アイテムを選択対象モデルとして取得する
+    /// </summary>
+    /// <param name="lastItem">範囲選択の起点</param>
+    /// <param name="selectedItem">範囲選択の終点</param>
+    /// <returns>選択対象となるモデル配列</returns>
+    private AnyModel[] GetRangeModels(TreeItem lastItem, TreeItem selectedItem)
+    {
+        AnyModel selectedModel = _modelBinder.GetModel(selectedItem);
+        if (selectedModel == null)
+        {
+            return Array.Empty<AnyModel>();
+        }
+
+        if (lastItem == null || lastItem == selectedItem)
+        {
+            return new[] { selectedModel };
+        }
+
+        List<TreeItem> orderedItems = GetTreeItemsInDisplayOrder();
+        int lastIndex = orderedItems.IndexOf(lastItem);
+        int selectedIndex = orderedItems.IndexOf(selectedItem);
+        if (lastIndex < 0 || selectedIndex < 0)
+        {
+            return new[] { selectedModel };
+        }
+
+        int start = Math.Min(lastIndex, selectedIndex);
+        int end = Math.Max(lastIndex, selectedIndex);
+
+        var models = new List<AnyModel>();
+        for (int i = start; i <= end; i++)
+        {
+            AnyModel rangeModel = _modelBinder.GetModel(orderedItems[i]);
+            if (rangeModel != null)
+            {
+                models.Add(rangeModel);
+            }
+        }
+
+        if (models.Count == 0)
+        {
+            models.Add(selectedModel);
+        }
+
+        return models.ToArray();
+    }
+
+    /// <summary>
+    /// Tree の表示順（深さ優先の前順）で TreeItem 一覧を取得する
+    /// </summary>
+    private List<TreeItem> GetTreeItemsInDisplayOrder()
+    {
+        var orderedItems = new List<TreeItem>();
+        TreeItem root = GetRoot();
+        if (root == null)
+        {
+            return orderedItems;
+        }
+
+        CollectTreeItemsPreOrder(root, orderedItems);
+        return orderedItems;
+    }
+
+    /// <summary>
+    /// TreeItem を前順で再帰走査して収集する
+    /// </summary>
+    private static void CollectTreeItemsPreOrder(TreeItem item, List<TreeItem> result)
+    {
+        if (item == null)
+        {
+            return;
+        }
+
+        result.Add(item);
+
+        TreeItem child = item.GetFirstChild();
+        while (child != null)
+        {
+            CollectTreeItemsPreOrder(child, result);
+            child = child.GetNext();
+        }
     }
 
     /// <summary>

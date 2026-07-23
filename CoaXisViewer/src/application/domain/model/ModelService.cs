@@ -109,8 +109,8 @@ public partial class ModelService : Node
 	{
 		if (enable)
 		{
-			// 選択状態の適用は子孫のMeshInstance3Dすべてにとりあえず適用すればよい
-			var meshInstances = GetMeshInstancesRecursively(model);
+			// モデル自身のメッシュにのみ適用し、子モデル分は HighLightModel の再帰で処理する
+			var meshInstances = GetMeshInstancesUnderModel(model);
 			foreach (var meshInstance in meshInstances)
 			{
 				meshInstance.MaterialOverride = _selectedMaterial;
@@ -118,10 +118,10 @@ public partial class ModelService : Node
 		}
 		else
 		{
-			// 選択状態の解除は、祖先のNode3Dに選択状態のものがいなければ子孫のMeshInstance3Dすべてから選択状態を解除する判定が必要
+			// 選択解除時は子モデルを巻き込まず、モデル自身のメッシュのみ解除対象とする
 			if (!HasSelectedAncestor(model))
 			{
-				var meshInstances = GetMeshInstancesRecursively(model);
+				var meshInstances = GetMeshInstancesUnderModel(model);
 				foreach (var meshInstance in meshInstances)
 				{
 					meshInstance.MaterialOverride = null;
@@ -171,6 +171,41 @@ public partial class ModelService : Node
 		}
 
 		return meshInstances;
+	}
+
+	/// <summary>
+	/// 指定モデル配下のうち、子モデル配下を除いた MeshInstance3D を再帰的に取得する
+	/// </summary>
+	/// <param name="model">取得対象のモデル</param>
+	private static List<MeshInstance3D> GetMeshInstancesUnderModel(AnyModel model)
+	{
+		var meshInstances = new List<MeshInstance3D>();
+		CollectMeshInstancesUnderModel(model, meshInstances, isRoot: true);
+		return meshInstances;
+	}
+
+	/// <summary>
+	/// 子モデル境界で探索を止めながら MeshInstance3D を収集する
+	/// </summary>
+	/// <param name="node">探索対象ノード</param>
+	/// <param name="results">収集先リスト</param>
+	/// <param name="isRoot">探索開始ノードかどうか</param>
+	private static void CollectMeshInstancesUnderModel(Node node, List<MeshInstance3D> results, bool isRoot = false)
+	{
+		if (!isRoot && node is AnyModel)
+		{
+			return;
+		}
+
+		if (node is MeshInstance3D meshInstance)
+		{
+			results.Add(meshInstance);
+		}
+
+		foreach (Node childNode in node.GetChildren())
+		{
+			CollectMeshInstancesUnderModel(childNode, results);
+		}
 	}
 
 	/// <summary>
