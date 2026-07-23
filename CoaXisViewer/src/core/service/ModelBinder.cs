@@ -3,19 +3,19 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// AnyModel と TreeItem の対応を管理する静的クラス
+/// AnyModel と TreeItem の対応を管理するクラス
 /// モデルのヒエラルキーを TreeItem に反映するための登録処理と登録解除処理、対応取得処理を提供する
 /// </summary>
 /// <remarks>
-/// 実際の動的ロード時は ModelService でメインシーンへ追加し、その後 ModelEvent の通知で HierarchyTree が更新されて ModelBinder に登録される
+/// 実際の動的ロード時は ModelService でメインシーンへ追加し、その後 ModelEvent の通知で HierarchyTree が更新されて各ツリーの ModelBinder に登録される
 /// </remarks>
-public static class ModelBinder
+public class ModelBinder
 {
     #region Fields
 
     // AnyModel ↔ TreeItem の対応辞書
-    private static readonly Dictionary<AnyModel, TreeItem> _modelToItem = new();
-    private static readonly Dictionary<TreeItem, AnyModel> _itemToModel = new();
+    private readonly Dictionary<AnyModel, TreeItem> _modelToItem = new();
+    private readonly Dictionary<TreeItem, AnyModel> _itemToModel = new();
 
     #endregion
 
@@ -26,7 +26,7 @@ public static class ModelBinder
     /// </summary>
     /// <param name="item">対応を取得する TreeItem</param>
     /// <returns>対応する AnyModel</returns>
-    public static AnyModel GetModel(TreeItem item)
+    public AnyModel GetModel(TreeItem item)
     {
         if (item == null)
         {
@@ -42,7 +42,7 @@ public static class ModelBinder
     /// </summary>
     /// <param name="model">対応を取得する AnyModel</param>
     /// <returns>対応する TreeItem</returns>
-    public static TreeItem GetItem(AnyModel model)
+    public TreeItem GetItem(AnyModel model)
     {
         if (model == null)
         {
@@ -59,7 +59,7 @@ public static class ModelBinder
     /// <param name="model">登録する AnyModel</param>
     /// <param name="item">対応する TreeItem</param>
     /// <returns>登録に成功した場合は true、すでに登録されている場合は false</returns>
-    public static bool Bind(AnyModel model, TreeItem item)
+    public bool Bind(AnyModel model, TreeItem item)
     {
         if (model == null || item == null)
         {
@@ -91,7 +91,7 @@ public static class ModelBinder
     /// AnyModel を登録解除する
     /// </summary>
     /// <param name="model">登録解除する AnyModel</param>
-    public static void Unbind(AnyModel model)
+    public void Unbind(AnyModel model)
     {
         if (model == null)
         {
@@ -117,7 +117,7 @@ public static class ModelBinder
     /// TreeItem を登録解除する
     /// </summary>
     /// <param name="item">登録解除する TreeItem</param>
-    public static void Unbind(TreeItem item)
+    public void Unbind(TreeItem item)
     {
         if (item == null)
         {
@@ -137,6 +137,26 @@ public static class ModelBinder
         Application.Log.Debug($"ModelBinder.Unbind(item): model='{model.Name}', mappings={_modelToItem.Count}");
 
         item.Free();
+    }
+
+    /// <summary>
+    /// このバインダーが保持する対応をすべて解除する
+    /// </summary>
+    /// <param name="freeItems">true の場合は TreeItem も解放する</param>
+    public void Clear(bool freeItems = false)
+    {
+        if (freeItems)
+        {
+            foreach (TreeItem item in _itemToModel.Keys)
+            {
+                item?.Free();
+            }
+        }
+
+        _itemToModel.Clear();
+        _modelToItem.Clear();
+
+        Application.Log.Debug("ModelBinder.Clear: mappings=0");
     }
 
     #endregion

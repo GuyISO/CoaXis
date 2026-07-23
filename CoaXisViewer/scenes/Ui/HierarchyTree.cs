@@ -13,6 +13,7 @@ public partial class HierarchyTree : Tree
     private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
     private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
+    private readonly ModelBinder _modelBinder = new(); // このツリー専用のモデルバインダー
 
     private Color _selectedColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);    
     private Color _defaultColor = new Color(1.0f, 1.0f, 1.0f); // デフォルトの背景色
@@ -32,6 +33,7 @@ public partial class HierarchyTree : Tree
 
     public override void _ExitTree()
     {
+        _modelBinder.Clear();
         UnsubscribeUiEvents();
         UnsubscribeApplicationEvents();
 
@@ -96,41 +98,27 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void OnCellSelected()
     {
-        int column = GetSelectedColumn();
+        DeselectAll(); // 選択状態は基本的にUI上に残さない
+        
         TreeItem item = GetSelected();
         if (item == null)
         {
             return;
         }
 
+        int column = GetSelectedColumn();
+
         switch (column)
         {
             case (int)HierarchyTreeColumn.Name:
-                HandleSingleSelection(item);
+                HandleSelected(item);
                 break;
             case (int)HierarchyTreeColumn.VisibleButton:
-                OnVisibleButtonClicked(item);
+                HandleVisibleButtonClicked(item);
                 break;
             default:
                 break;
         }
-    }
-
-    /// <summary>
-    /// VisibleButton がクリックされたときのイベントハンドラ
-    /// </summary>
-    /// <param name="item">クリックされた TreeItem</param>
-    private void OnVisibleButtonClicked(TreeItem item)
-    {
-        AnyModel model = ModelBinder.GetModel(item);
-        if (model == null)
-        {
-            Application.Log.Warn("HierarchyTree: clicked item has no associated model.");
-            return;
-        }
-
-        // モデルの表示状態を切り替える
-        Application.Model.Event.ToggleModelVisibility(model);
     }
 
     /// <summary>
@@ -140,7 +128,7 @@ public partial class HierarchyTree : Tree
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
     private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
     {
-        TreeItem item = ModelBinder.GetItem(model);
+        TreeItem item = _modelBinder.GetItem(model);
         if (item != null)
         {
             if (isSelected)
@@ -160,8 +148,12 @@ public partial class HierarchyTree : Tree
         }
     }
 
+    /// <summary>
+    /// 選択がクリアされたことを通知されたときのイベントハンドラ
+    /// </summary>
     private void OnClearedNotified()
     {
+        // 基本的にUI上に選択状態は残さないので選択状態でないはずだが、念のためすべての選択状態を解除する
         DeselectAll();
         _lastSelectedItem = null;
     }
@@ -184,7 +176,7 @@ public partial class HierarchyTree : Tree
     private void OnModelVisibilityStateNotified(AnyModel model, bool isVisible)
     {
         Application.Log.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
-        TreeItem item = ModelBinder.GetItem(model);
+        TreeItem item = _modelBinder.GetItem(model);
         if (item != null)
         {
             item.SetIcon((int)HierarchyTreeColumn.VisibleButton, isVisible ? _visibleIcon : _invisibleIcon);
@@ -224,12 +216,12 @@ public partial class HierarchyTree : Tree
     }
 
     /// <summary>
-    /// Tree のセル選択を単一選択として処理する
+    /// TreeItem が選択されたときの処理を行う
     /// </summary>
     /// <param name="item">選択された TreeItem</param>
-    private void HandleSingleSelection(TreeItem item)
+    private void HandleSelected(TreeItem item)
     {
-        AnyModel model = ModelBinder.GetModel(item);
+        AnyModel model = _modelBinder.GetModel(item);
         if (model == null)
         {
             Application.Log.Warn("HierarchyTree: selected item has no associated model.");
@@ -242,6 +234,23 @@ public partial class HierarchyTree : Tree
         _lastSelectedItem = item;
     }
 
+    /// <summary>
+    /// TreeItem の VisibleButton がクリックされたときの処理を行う
+    /// </summary>
+    /// <param name="item">クリックされた TreeItem</param>
+    private void HandleVisibleButtonClicked(TreeItem item)
+    {
+        AnyModel model = _modelBinder.GetModel(item);
+        if (model == null)
+        {
+            Application.Log.Warn("HierarchyTree: clicked item has no associated model.");
+            return;
+        }
+
+        // モデルの表示状態を切り替える
+        Application.Model.Event.ToggleModelVisibility(model);
+    }
+
     #endregion
 
     /// <summary>
@@ -251,7 +260,7 @@ public partial class HierarchyTree : Tree
     /// <param name="parentTreeItem">親の TreeItem</param>
     private void AddToTree(AnyModel model, TreeItem parentTreeItem = null)
     {
-        // ツリーにアイテムを追加、親が null の場合はルートアイテムとして追加される便利仕様
+        // ツリーにアイテムを追加、親が null の場合は初回のみルートアイテムとして追加される便利仕様
         TreeItem item = CreateItem(parentTreeItem);
         item.SetText((int)HierarchyTreeColumn.Name, model.Name);
 
@@ -261,7 +270,7 @@ public partial class HierarchyTree : Tree
         //item.SetEditable((int)HierarchyTreeColumn.VisibleButton, true); // アイコンをクリックして編集可能にする
 
         // AnyModel と TreeItem の対応を登録
-        if (!ModelBinder.Bind(model, item))
+        if (!_modelBinder.Bind(model, item))
         {
             Application.Log.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
         }
@@ -281,7 +290,7 @@ public partial class HierarchyTree : Tree
     /// <param name="parentModel">追加先の親モデル</param>
     private void AddToTree(AnyModel childModel, AnyModel parentModel)
     {
-        TreeItem parentTreeItem = ModelBinder.GetItem(parentModel);
+        TreeItem parentTreeItem = _modelBinder.GetItem(parentModel);
         if (parentTreeItem != null)
         {
             AddToTree(childModel, parentTreeItem);

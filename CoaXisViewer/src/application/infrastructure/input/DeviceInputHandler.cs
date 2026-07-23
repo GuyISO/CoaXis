@@ -20,9 +20,9 @@ public partial class DeviceInputHandler : Node
 
     public override void _Process(double delta)
     {
-        HandleSelectModeInput("select_add", SelectionMode.Add);
-        HandleSelectModeInput("select_remove", SelectionMode.Remove);
-        HandleSelectModeInput("select_toggle", SelectionMode.Toggle);
+        HandleSelectModeInput("switch_selection_mode_add", SelectionMode.Add);
+        HandleSelectModeInput("switch_selection_mode_remove", SelectionMode.Remove);
+        HandleSelectModeInput("switch_selection_mode_toggle", SelectionMode.Toggle);
         HandleButtonInput();
         HandleTranslationInput((float)delta);
         HandleRotationInput((float)delta);
