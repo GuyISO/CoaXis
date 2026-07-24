@@ -20,6 +20,7 @@ public partial class MeasurementService : Node
 
     private Node3D _visualRoot = null!;
     private MeshInstance3D _line = null!;
+    private StandardMaterial3D _lineMaterial = null!;
 
     #endregion
 
@@ -29,6 +30,7 @@ public partial class MeasurementService : Node
     {
         SubscribeEvents();
         EnsureMeasurementVisuals();
+        ApplySettings();
     }
 
     public override void _ExitTree()
@@ -60,6 +62,7 @@ public partial class MeasurementService : Node
         Application.Measurement.Event.AskResultRequested += OnAskResultRequested;
         Application.Measurement.Event.SetPointRequested += OnSetPointRequested;
         Application.Measurement.Event.ClearPointRequested += OnClearPointRequested;
+        Application.Setting.Event.SettingsNotified += ApplySettings;
     }
 
     /// <summary>
@@ -72,6 +75,7 @@ public partial class MeasurementService : Node
         Application.Measurement.Event.AskResultRequested -= OnAskResultRequested;
         Application.Measurement.Event.SetPointRequested -= OnSetPointRequested;
         Application.Measurement.Event.ClearPointRequested -= OnClearPointRequested;
+        Application.Setting.Event.SettingsNotified -= ApplySettings;
     }
 
     /// <summary>
@@ -179,6 +183,19 @@ public partial class MeasurementService : Node
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// 設定値を反映する
+    /// </summary>
+    private void ApplySettings()
+    {
+        if (_lineMaterial == null || !GodotObject.IsInstanceValid(_lineMaterial))
+        {
+            return;
+        }
+
+        _lineMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Service.Current.Color.MeasurementLineColor);
+    }
 
     /// <summary>
     /// 現在の測定結果を計算する
@@ -328,11 +345,10 @@ public partial class MeasurementService : Node
             CastShadow = GeometryInstance3D.ShadowCastingSetting.Off
         };
 
-        _line.MaterialOverride = new StandardMaterial3D
+        _line.MaterialOverride = _lineMaterial = new StandardMaterial3D
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            // TODO: 色を設定ファイルから取得するようにする
-            AlbedoColor = new Color(0.98f, 0.82f, 0.12f, 1.0f)
+            AlbedoColor = Color.FromHtml(Application.Setting.Service.Current.Color.MeasurementLineColor)
         };
 
         _visualRoot.AddChild(_line);

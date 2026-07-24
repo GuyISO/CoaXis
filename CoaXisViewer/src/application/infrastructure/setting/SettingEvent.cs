@@ -7,27 +7,19 @@ public partial class SettingEvent : EventBase<SettingEvent>
 {
     #region --------------------------------------- Action ---------------------------------------
 
-    [Signal] public delegate void AskValueRequestedEventHandler();
-    /// <summary>
-    /// 設定値の通知をリクエストする
-    /// </summary>
-    internal void AskValue()
-    {
-        Emit(SignalName.AskValueRequested);
-    }
+
 
     #endregion
 
     #region --------------------------------------- Notification ---------------------------------------
 
-    [Signal] public delegate void ValueNotifiedEventHandler(string value);
+    [Signal] public delegate void SettingsNotifiedEventHandler();
     /// <summary>
-    /// 設定値の通知を行う
+    /// 設定の再読み込みが完了したことを通知する
     /// </summary>
-    /// <param name="value">通知する値</param>
-    internal void NotifyValue(string value)
+    internal void NotifySettingsNotified()
     {
-        Emit(SignalName.ValueNotified, value);
+        Emit(SignalName.SettingsNotified);
     }
 
     #endregion

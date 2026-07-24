@@ -11,12 +11,10 @@ public partial class CameraRig : Node3D
 {
     #region Fields
 
-    // TODO: 設定で変更できるようにする？定数化する
-    [ExportGroup("Settings")]
-    [Export] private float _zoomBase = 1.005f; // ズーム倍率変更時の底、exponent1あたりの拡大倍率
-    [Export] private float _minZoomValue = 0.01f; // ズームの最小値、これ以上近づけないようにするための制限値
-    [Export] private float _fitPadding = 1.1f; // Fit All In 時に、対象が画面にぴったり収まるようにするための余白倍率
-    [Export] private float _tweenDuration = 0.5f; // Tween を使用する場合のアニメーション時間（秒）
+    private float _zoomBase;        // ズーム倍率変更時の底、exponent1あたりの拡大倍率
+    private float _minZoomValue;    // ズームの最小値、これ以上近づけないようにするための制限値
+    private float _fitPadding;      // Fit All In 時に、対象が画面にぴったり収まるようにするための余白倍率
+    private float _tweenDuration;   // Tween を使用する場合のアニメーション時間（秒）
 
     private Camera3D _camera; // 操作対象のカメラノード
 
@@ -28,6 +26,7 @@ public partial class CameraRig : Node3D
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
+        ApplySettings();
     }
 
     public override void _ExitTree()
@@ -55,6 +54,7 @@ public partial class CameraRig : Node3D
     private void SubscribeApplicationEvents()
     {
         Application.Pick.Event.ResultNotified += OnPickResultNotified;
+        Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
         Application.Viewport.Event.MovePositionToRequested += OnMovePositionToRequested;
         Application.Viewport.Event.MoveRotationToRequested += OnMoveRotationToRequested;
@@ -76,6 +76,7 @@ public partial class CameraRig : Node3D
     private void UnsubscribeApplicationEvents()
     {
         Application.Pick.Event.ResultNotified -= OnPickResultNotified;
+        Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
         Application.Viewport.Event.MovePositionToRequested -= OnMovePositionToRequested;
         Application.Viewport.Event.MoveRotationToRequested -= OnMoveRotationToRequested;
@@ -89,6 +90,18 @@ public partial class CameraRig : Node3D
         Application.Viewport.Event.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
         Application.Viewport.Event.FitRequested -= OnFitRequested;
         Application.Viewport.Event.AlignNormalToRequested -= OnAlignNormalToRequested;
+    }
+
+    /// <summary>
+    /// 設定値を反映する
+    /// </summary>
+    private void ApplySettings()
+    {
+        CameraSettings s = Application.Setting.Service.Current.Camera;
+        _zoomBase = s.ZoomBase;
+        _minZoomValue = s.MinZoomValue;
+        _fitPadding = s.FitPadding;
+        _tweenDuration = s.TweenDuration;
     }
 
     /// <summary>

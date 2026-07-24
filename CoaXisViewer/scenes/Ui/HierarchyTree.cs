@@ -16,8 +16,7 @@ public partial class HierarchyTree : Tree
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
     private readonly ModelBinder _binder = new(); // このツリー専用のモデルバインダー
 
-    private Color _selectedColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);    
-    private Color _defaultColor = new Color(1.0f, 1.0f, 1.0f); // デフォルトの背景色
+    private Color _selectedColor;
 
     private bool _isInternalSelectionChange = false; // 内部的な選択状態の変更を通知するフラグ
 
@@ -30,8 +29,7 @@ public partial class HierarchyTree : Tree
         EnsureState();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
-
-        _defaultColor = GetThemeColor("bg_color", "Tree"); // デフォルトの背景色をテーマから取得
+        ApplySettings();
     }
 
     public override void _ExitTree()
@@ -77,6 +75,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void SubscribeApplicationEvents()
     {
+        Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified += OnClearedNotified;
         Application.Model.Event.AddModelRequested += OnAddModelRequested;
@@ -89,6 +88,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
+        Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified -= OnClearedNotified;
         Application.Model.Event.AddModelRequested -= OnAddModelRequested;
@@ -212,6 +212,14 @@ public partial class HierarchyTree : Tree
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// 設定値を反映する
+    /// </summary>
+    private void ApplySettings()
+    {
+        _selectedColor = Color.FromHtml(Application.Setting.Service.Current.Color.HierarchySelectedColor);
+    }
 
     /// <summary>
     /// ツリー表示に必要な初期状態を整える

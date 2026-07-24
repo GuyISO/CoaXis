@@ -8,15 +8,14 @@ public partial class PointerLabel : Node3D
 {
 	#region Fields
 
-	// 関連ノードのキャッシュ
+	// 関連ノ�Eド�EキャチE��ュ
 	private Node3D _components;
 	private MeshInstance3D _pointer;
 	private Node3D _labels;
 	private Label3D _labelLeft;
 	private Label3D _labelRight;
 
-	[Export]
-	private float _rotationSpeedDegPerSec = 90.0f;
+	private float _rotationSpeedDegPerSec;
 
 	#endregion
 
@@ -24,12 +23,22 @@ public partial class PointerLabel : Node3D
 
 	public override void _Ready()
 	{
-		// 関連ノードのキャッシュ
+		// 関連ノ�Eド�EキャチE��ュ
 		_components = GetNode<Node3D>("Components");
 		_pointer = _components.GetNode<MeshInstance3D>("Pointer");
 		_labels = _components.GetNode<Node3D>("Labels");
 		_labelLeft = _labels.GetNode<Label3D>("LabelLeft");
 		_labelRight = _labels.GetNode<Label3D>("LabelRight");
+
+		Application.Setting.Event.SettingsNotified += ApplySettings;
+		ApplySettings();
+	}
+
+	public override void _ExitTree()
+	{
+		Application.Setting.Event.SettingsNotified -= ApplySettings;
+
+		base._ExitTree();
 	}
 
 	public override void _Process(double delta)
@@ -42,8 +51,15 @@ public partial class PointerLabel : Node3D
 	#region Public Methods
 
 	/// <summary>
-	/// ポインタの色を設定する
+	/// 設定値を反映する
 	/// </summary>
+	private void ApplySettings()
+	{
+		_rotationSpeedDegPerSec = Application.Setting.Service.Current.Input.PointerRotationSpeedDeg;
+	}
+
+	/// <summary>
+	/// ポインタの色を設定すめE	/// </summary>
 	/// <param name="color"></param>
 	public void SetPointerColor(Color color)
 	{
@@ -54,8 +70,7 @@ public partial class PointerLabel : Node3D
 	}
 
 	/// <summary>
-	/// ラベルのテキストを設定する
-	/// </summary>
+	/// ラベルのチE��ストを設定すめE	/// </summary>
 	/// <param name="text"></param>
 	public void SetText(string text)
 	{
@@ -64,8 +79,7 @@ public partial class PointerLabel : Node3D
 	}
 
 	/// <summary>
-	/// ラベルの色を設定する
-	/// </summary>
+	/// ラベルの色を設定すめE	/// </summary>
 	/// <param name="color"></param>
 	public void SetTextColor(Color color)
 	{
@@ -74,9 +88,8 @@ public partial class PointerLabel : Node3D
 	}
 
 	/// <summary>
-	/// 渡された法線方向へラベルの向きを設定する
-	/// </summary>
-	/// <param name="normal">向き設定に使う法線ベクトル</param>
+	/// 渡された法線方向へラベルの向きを設定すめE	/// </summary>
+	/// <param name="normal">向き設定に使ぁE��線�Eクトル</param>
 	public void SetOrientationFromNormal(Vector3 normal)
 	{
 		if (normal.LengthSquared() <= Mathf.Epsilon)
@@ -87,8 +100,7 @@ public partial class PointerLabel : Node3D
 		Vector3 forward = normal.Normalized();
 		Vector3 up = Vector3.Up;
 
-		// LookAt の target と up がほぼ平行な場合、別軸を up として使う。
-		if (Mathf.Abs(forward.Dot(up)) > 0.999f)
+		// LookAt の target と up がほぼ平行な場合、別軸めEup として使ぁE��E		if (Mathf.Abs(forward.Dot(up)) > 0.999f)
 		{
 			up = Vector3.Right;
 		}

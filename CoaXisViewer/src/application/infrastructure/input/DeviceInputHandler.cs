@@ -2,21 +2,31 @@ using Godot;
 using System;
 
 /// <summary>
-/// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
-/// </summary>
+/// ユーザーのキーボ�Eドやコントローラー入力を処琁E��めEAutoload ノ�EチE/// </summary>
 public partial class DeviceInputHandler : Node
 {
     #region Fields
 
-    // TODO: ユーザーが設定可能な値にする
-    [ExportGroup("Settings")]
-    [Export] private float _translateSpeed = 8.0f;
-    [Export] private float _rotateSpeedDegrees = 90.0f;
-    [Export] private float _rollSpeedDegrees = 120.0f;
+    private float _translateSpeed;
+    private float _rotateSpeedDegrees;
+    private float _rollSpeedDegrees;
 
     #endregion
 
     #region Lifecycle
+
+    public override void _Ready()
+    {
+        Application.Setting.Event.SettingsNotified += ApplySettings;
+        ApplySettings();
+    }
+
+    public override void _ExitTree()
+    {
+        Application.Setting.Event.SettingsNotified -= ApplySettings;
+
+        base._ExitTree();
+    }
 
     public override void _Process(double delta)
     {
@@ -33,8 +43,7 @@ public partial class DeviceInputHandler : Node
     #region Internal Helpers
 
     /// <summary>
-    /// 選択モードの切り替えを処理する
-    /// </summary>
+    /// 選択モード�E刁E��替えを処琁E��めE    /// </summary>
     private void HandleSelectModeInput(string actionName, SelectionMode assignMode)
     { 
         if (Input.IsActionJustPressed(actionName))
@@ -48,8 +57,7 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// Undo/Redo 入力に応じてコマンド履歴を操作する
-    /// </summary>
+    /// Undo/Redo 入力に応じてコマンド履歴を操作すめE    /// </summary>
     private void HandleButtonInput()
     {
         if (Input.IsActionJustPressed("undo"))
@@ -78,9 +86,8 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// ユーザーの入力に基づいてカメラの平行移動をリクエストする
-    /// </summary>
-    /// <param name="delta">前のフレームからの経過時間（秒）</param>
+    /// ユーザーの入力に基づぁE��カメラの平行移動をリクエストすめE    /// </summary>
+    /// <param name="delta">前�Eフレームからの経過時間�E�秒！E/param>
     private void HandleTranslationInput(float delta)
     {
         float x = GetAxis("translate_camera_left", "translate_camera_right");
@@ -103,9 +110,8 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// ユーザーの入力に基づいてカメラの回転をリクエストする
-    /// </summary>
-    /// <param name="delta">前のフレームからの経過時間（秒）</param>
+    /// ユーザーの入力に基づぁE��カメラの回転をリクエストすめE    /// </summary>
+    /// <param name="delta">前�Eフレームからの経過時間�E�秒！E/param>
     private void HandleRotationInput(float delta)
     {
         float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
@@ -129,14 +135,24 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// 指定されたアクションに基づいて軸の値を取得する
-    /// </summary>
-    /// <param name="negativeAction">負の方向のアクション名</param>
-    /// <param name="positiveAction">正の方向のアクション名</param>
-    /// <returns>軸の値（-1.0から1.0の範囲）</returns>
+    /// 持E��されたアクションに基づぁE��軸の値を取得すめE    /// </summary>
+    /// <param name="negativeAction">負の方向�Eアクション吁E/param>
+    /// <param name="positiveAction">正の方向�Eアクション吁E/param>
+    /// <returns>軸の値�E�E1.0から1.0の篁E���E�E/returns>
     private float GetAxis(string negativeAction, string positiveAction)
     {
         return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);
+    }
+
+    /// <summary>
+    /// 設定値を反映する
+    /// </summary>
+    private void ApplySettings()
+    {
+        InputSettings s = Application.Setting.Service.Current.Input;
+        _translateSpeed = s.TranslateSpeed;
+        _rotateSpeedDegrees = s.RotateSpeedDeg;
+        _rollSpeedDegrees = s.RollSpeedDeg;
     }
 
     #endregion

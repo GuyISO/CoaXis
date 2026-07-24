@@ -18,8 +18,8 @@ public partial class ViewportOverlay : Control
     private const float ArcballCrossAngularSize = 0.24f;
     private const int ArcballCrossCurveSegments = 12;
 
-    // TODO: これらの色はテーマカラーに合わせて変更できるようにする、Godot側で使用しているものもあり
-    [Export] private Color _lineColor = new Color(231f / 255f, 177f / 255f, 246f / 255f);
+    // オーバーレイの線の色、設定から読み込み　_Ready 後に ApplySettings() で初期化する
+    private Color _lineColor;
 
     private bool _isInitialized = false; // ビューポートの初期状態を取得してUIに反映するためのフラグ
     private float _arcballRadius = 0.0f; // アークボールの半径
@@ -50,6 +50,7 @@ public partial class ViewportOverlay : Control
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
+        ApplySettings();
     }
 
     public override void _ExitTree()
@@ -99,6 +100,7 @@ public partial class ViewportOverlay : Control
     /// </summary>
     private void SubscribeApplicationEvents()
     {
+        Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Viewport.Event.RotateRequested += OnRotateRequested;
         Application.Viewport.Event.RotationNotified += OnRotationNotified;
         Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
@@ -112,6 +114,7 @@ public partial class ViewportOverlay : Control
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
+        Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Viewport.Event.RotateRequested -= OnRotateRequested;
         Application.Viewport.Event.RotationNotified -= OnRotationNotified;
         Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
@@ -503,6 +506,14 @@ public partial class ViewportOverlay : Control
         _selectionRectLineVertical2.DefaultColor = color;
 
         DrawArcballOutline();
+    }
+
+    /// <summary>
+    /// 設定値を反映する
+    /// </summary>
+    private void ApplySettings()
+    {
+        ChangeColor(Color.FromHtml(Application.Setting.Service.Current.Color.OverlayLineColor));
     }
 
     #endregion

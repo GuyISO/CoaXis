@@ -1,5 +1,5 @@
 /// <summary>
-/// Application 経由で Setting 機能を利用するためのファサード
+/// Application 経由で Setting 機�Eを利用するためのファサーチE
 /// </summary>
 public partial class SettingFacade : FacadeBase
 {
@@ -10,5 +10,14 @@ public partial class SettingFacade : FacadeBase
 	{
 		Event = AddModule<SettingEvent>("SettingEvent");
 		Service = AddModule<SettingService>("SettingService");
+	}
+
+	/// <summary>
+	/// 外部設定ファイルを�E読み込みし、購読老E��変更を通知する
+	/// </summary>
+	internal void Reload()
+	{
+		Service.Reload();
+		Event.NotifySettingsNotified();
 	}
 }

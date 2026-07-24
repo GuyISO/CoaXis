@@ -10,14 +10,13 @@ public partial class ViewportInteractionHandler : SubViewport
     #region Fields
 
     [ExportGroup("Settings")]
-    // TODO: 設定値の調整は、将来的に Application 側の設定管理に移行する
-    [Export] private float _zoomFactor = 1.0f; // ズーム倍率変更時の係数
-    [Export] private float _arcballRegionRatio = 0.45f; // 画面サイズに対する、Orbit/Rollの切り替え用の円領域の半径比率
-    [Export] private float _moveThreshold = 1.0f; // マウス移動の閾値（この値未満の移動は移動なしとみなす）
-    [ExportGroup("Materials")]
     // TODO: マテリアルの設定はもういらないかも、将来的に Application 側の設定管理に移行する
     [Export] private Material _defaultMaterial; // 通常表示用のマテリアル（将来の拡張で使用予定）
     [Export] private Material _selectedMaterial; // 選択ハイライト用のマテリアル（将来の拡張で使用予定）
+
+    private float _zoomFactor;         // ズーム倍率変更時の係数
+    private float _arcballRegionRatio; // 画面サイズに対する Orbit/Roll 切り替え用の円領域の半径比率
+    private float _moveThreshold;      // マウス移動の閘値（この値未満の移動は移動なしとみなす）
 
     private ViewportInteractionMode _mode = ViewportInteractionMode.None; // 現在の操作モード
     private Vector2 _lastPosition = Vector2.Zero; // 移動量算出のために前フレームの操作座標を保持
@@ -34,6 +33,7 @@ public partial class ViewportInteractionHandler : SubViewport
     {
         SubscribeUiEvents();
         SubscribeApplicationEvents();
+        ApplySettings();
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
@@ -109,6 +109,7 @@ public partial class ViewportInteractionHandler : SubViewport
     /// </summary>
     private void SubscribeApplicationEvents()
     {
+        Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
         Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
     }
@@ -118,6 +119,7 @@ public partial class ViewportInteractionHandler : SubViewport
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
+        Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
         Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
     }
@@ -175,6 +177,17 @@ public partial class ViewportInteractionHandler : SubViewport
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// 設定値を反映する
+    /// </summary>
+    private void ApplySettings()
+    {
+        InputSettings s = Application.Setting.Service.Current.Input;
+        _zoomFactor = s.ZoomFactor;
+        _arcballRegionRatio = s.ArcballRegionRatio;
+        _moveThreshold = s.MoveThreshold;
+    }
 
     /// <summary>
     /// 操作モードを切り替え、Event を通じて変更を通知する

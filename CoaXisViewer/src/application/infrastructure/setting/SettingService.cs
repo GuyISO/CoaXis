@@ -236,6 +236,21 @@ public sealed class ViewerSettings
     public IpcSettings Ipc { get; set; } = new IpcSettings();
 
     /// <summary>
+    /// カメラ操作に関する設定セクション。
+    /// </summary>
+    public CameraSettings Camera { get; set; } = new CameraSettings();
+
+    /// <summary>
+    /// 入力操作の感度に関する設定セクション。
+    /// </summary>
+    public InputSettings Input { get; set; } = new InputSettings();
+
+    /// <summary>
+    /// UI・描画に関する色設定セクション。
+    /// </summary>
+    public ColorSettings Color { get; set; } = new ColorSettings();
+
+    /// <summary>
     /// 既定設定を生成する。
     /// </summary>
     /// <returns>安全に起動可能な最小設定</returns>
@@ -247,7 +262,10 @@ public sealed class ViewerSettings
             {
                 PipeName = "CoaXisViewerPipe",
                 StartPipeServerOnReady = true
-            }
+            },
+            Camera = new CameraSettings(),
+            Input = new InputSettings(),
+            Color = new ColorSettings()
         };
     }
 
@@ -258,6 +276,12 @@ public sealed class ViewerSettings
     {
         Ipc ??= new IpcSettings();
         Ipc.Normalize();
+        Camera ??= new CameraSettings();
+        Camera.Normalize();
+        Input ??= new InputSettings();
+        Input.Normalize();
+        Color ??= new ColorSettings();
+        Color.Normalize();
     }
 }
 
@@ -285,5 +309,141 @@ public sealed class IpcSettings
         {
             PipeName = "CoaXisViewerPipe";
         }
+    }
+}
+
+/// <summary>
+/// カメラ操作に適用する設定値。
+/// </summary>
+public sealed class CameraSettings
+{
+    /// <summary>
+    /// ズーム倍率変更時の底。exponent 1 あたりの拡大倍率。
+    /// </summary>
+    public float ZoomBase { get; set; } = 1.005f;
+
+    /// <summary>
+    /// ズームの最小値。これ以上近づけないようにするための制限値。
+    /// </summary>
+    public float MinZoomValue { get; set; } = 0.01f;
+
+    /// <summary>
+    /// Fit All In 時に対象が画面にぴったり収まるようにするための余白倍率。
+    /// </summary>
+    public float FitPadding { get; set; } = 1.1f;
+
+    /// <summary>
+    /// Tween を使用する場合のアニメーション時間（秒）。
+    /// </summary>
+    public float TweenDuration { get; set; } = 0.5f;
+
+    /// <summary>
+    /// カメラ設定の不正値を補正する。
+    /// </summary>
+    public void Normalize()
+    {
+        if (ZoomBase <= 1.0f) ZoomBase = 1.005f;
+        if (MinZoomValue <= 0f) MinZoomValue = 0.01f;
+        if (FitPadding < 1.0f) FitPadding = 1.1f;
+        if (TweenDuration < 0f) TweenDuration = 0.5f;
+    }
+}
+
+/// <summary>
+/// 入力操作の感度に適用する設定値。
+/// </summary>
+public sealed class InputSettings
+{
+    /// <summary>
+    /// キーボード平行移動速度（m/s）。
+    /// </summary>
+    public float TranslateSpeed { get; set; } = 8.0f;
+
+    /// <summary>
+    /// キーボード回転速度（度/秒）。
+    /// </summary>
+    public float RotateSpeedDeg { get; set; } = 90.0f;
+
+    /// <summary>
+    /// キーボードロール回転速度（度/秒）。
+    /// </summary>
+    public float RollSpeedDeg { get; set; } = 120.0f;
+
+    /// <summary>
+    /// マウスホイールによるズーム倍率係数。
+    /// </summary>
+    public float ZoomFactor { get; set; } = 1.0f;
+
+    /// <summary>
+    /// 画面サイズに対する Orbit/Roll 切り替え用の円領域の半径比率。
+    /// </summary>
+    public float ArcballRegionRatio { get; set; } = 0.45f;
+
+    /// <summary>
+    /// マウス移動の閾値（この値未満の移動は移動なしとみなす）。
+    /// </summary>
+    public float MoveThreshold { get; set; } = 1.0f;
+
+    /// <summary>
+    /// PointerLabel の回転速度（度/秒）。
+    /// </summary>
+    public float PointerRotationSpeedDeg { get; set; } = 90.0f;
+
+    /// <summary>
+    /// 入力感度設定の不正値を補正する。
+    /// </summary>
+    public void Normalize()
+    {
+        if (TranslateSpeed <= 0f) TranslateSpeed = 8.0f;
+        if (RotateSpeedDeg <= 0f) RotateSpeedDeg = 90.0f;
+        if (RollSpeedDeg <= 0f) RollSpeedDeg = 120.0f;
+        if (ZoomFactor <= 0f) ZoomFactor = 1.0f;
+        if (ArcballRegionRatio <= 0f || ArcballRegionRatio >= 1f) ArcballRegionRatio = 0.45f;
+        if (MoveThreshold < 0f) MoveThreshold = 1.0f;
+        if (PointerRotationSpeedDeg < 0f) PointerRotationSpeedDeg = 90.0f;
+    }
+}
+
+/// <summary>
+/// UI・描画に適用する色設定値。
+/// JSON 上は "#RRGGBBAA" 形式の文字列で管理し、読み込み時に Godot の Color へ変換する。
+/// </summary>
+public sealed class ColorSettings
+{
+    /// <summary>
+    /// ビューポートオーバーレイ（中心軸・アークボール）の線色。
+    /// </summary>
+    public string OverlayLineColor { get; set; } = "#E7B1F6FF";
+
+    /// <summary>
+    /// 階層ツリーの選択行の背景色。
+    /// </summary>
+    public string HierarchySelectedColor { get; set; } = "#E7B1F6FF";
+
+    /// <summary>
+    /// コマンド履歴の Do（実行済み）行のテキスト色。
+    /// </summary>
+    public string CommandDoColor { get; set; } = "#FFFFFFFF";
+
+    /// <summary>
+    /// コマンド履歴の Undo（取り消し済み）行のテキスト色。
+    /// </summary>
+    public string CommandUndoColor { get; set; } = "#808080FF";
+
+    /// <summary>
+    /// 測定ラインのマテリアル色。
+    /// </summary>
+    public string MeasurementLineColor { get; set; } = "#FAD11FFF";
+
+    /// <summary>
+    /// 色設定の不正値を補正する。
+    /// </summary>
+    public void Normalize()
+    {
+        if (string.IsNullOrWhiteSpace(OverlayLineColor)) OverlayLineColor = "#E7B1F6FF";
+        if (string.IsNullOrWhiteSpace(HierarchySelectedColor)) HierarchySelectedColor = "#E7B1F6FF";
+        if (string.IsNullOrWhiteSpace(CommandDoColor)) CommandDoColor = "#FFFFFFFF";
+        if (string.IsNullOrWhiteSpace(CommandUndoColor)) CommandUndoColor = "#808080FF";
+        if (string.IsNullOrWhiteSpace(MeasurementLineColor)) MeasurementLineColor = "#FAD11FFF";
     }
 }
