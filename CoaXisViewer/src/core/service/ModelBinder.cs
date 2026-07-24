@@ -3,92 +3,96 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// AnyModel と TreeItem の対応を管理するクラス
-/// モデルのヒエラルキーを TreeItem に反映するための登録処理と登録解除処理、対応取得処理を提供する
+/// AnyModel と TreeItem の対応を双方向に管理する
+/// モデルから TreeItem、TreeItem からモデルを相互に引ける対応表として利用する
 /// </summary>
 /// <remarks>
-/// 実際の動的ロード時は ModelService でメインシーンへ追加し、その後 ModelEvent の通知で HierarchyTree が更新されて各ツリーの ModelBinder に登録される
+/// このクラスは対応関係の保持と解除のみを担当する
+/// TreeItem の生成、表示更新、バインド対象の追加タイミングは呼び出し側で制御する
 /// </remarks>
 public class ModelBinder
 {
     #region Fields
 
     // AnyModel ↔ TreeItem の対応辞書
-    private readonly Dictionary<AnyModel, TreeItem> _modelToItem = new();
-    private readonly Dictionary<TreeItem, AnyModel> _itemToModel = new();
+    private readonly Dictionary<AnyModel, TreeItem> _modelToTreeItem = new();
+    private readonly Dictionary<TreeItem, AnyModel> _treeItemToModel = new();
 
     #endregion
 
     #region Public Methods
 
     /// <summary>
-    /// TreeItem から対応する AnyModel を取得する
+    /// 指定した TreeItem に対応する AnyModel を取得する
     /// </summary>
-    /// <param name="item">対応を取得する TreeItem</param>
-    /// <returns>対応する AnyModel</returns>
-    public AnyModel GetModel(TreeItem item)
+    /// <param name="treeItem">対応を取得する TreeItem</param>
+    /// <returns>対応する AnyModel、対応がない場合は null</returns>
+    public AnyModel GetModel(TreeItem treeItem)
     {
-        if (item == null)
+        if (treeItem == null)
         {
-            Application.Log.Warn("ModelBinder.GetModel called with null item.");
+            Application.Log.Warn("ModelBinder.GetModel called with null tree item.");
             return null;
         }
 
-        return _itemToModel.TryGetValue(item, out var model) ? model : null;
+        return _treeItemToModel.TryGetValue(treeItem, out var model) ? model : null;
     }
 
     /// <summary>
-    /// AnyModel から対応する TreeItem を取得する
+    /// 指定した AnyModel に対応する TreeItem を取得する
     /// </summary>
     /// <param name="model">対応を取得する AnyModel</param>
-    /// <returns>対応する TreeItem</returns>
-    public TreeItem GetItem(AnyModel model)
+    /// <returns>対応する TreeItem、対応がない場合は null</returns>
+    public TreeItem GetTreeItem(AnyModel model)
     {
         if (model == null)
         {
-            Application.Log.Warn("ModelBinder.GetItem called with null model.");
+            Application.Log.Warn("ModelBinder.GetTreeItem called with null model.");
             return null;
         }
 
-        return _modelToItem.TryGetValue(model, out var item) ? item : null;
+        return _modelToTreeItem.TryGetValue(model, out var treeItem) ? treeItem : null;
     }
 
     /// <summary>
-    /// AnyModel を登録する
+    /// AnyModel と TreeItem の対応を登録する
     /// </summary>
     /// <param name="model">登録する AnyModel</param>
-    /// <param name="item">対応する TreeItem</param>
-    /// <returns>登録に成功した場合は true、すでに登録されている場合は false</returns>
-    public bool Bind(AnyModel model, TreeItem item)
+    /// <param name="treeItem">対応する TreeItem</param>
+    /// <returns>
+    /// 登録に成功した場合は true
+    /// いずれかが null、またはどちらかが既に別の対応で登録済みの場合は false
+    /// </returns>
+    public bool Bind(AnyModel model, TreeItem treeItem)
     {
-        if (model == null || item == null)
+        if (model == null || treeItem == null)
         {
-            Application.Log.Warn("ModelBinder.Bind skipped: model or item is null.");
+            Application.Log.Warn("ModelBinder.Bind skipped: model or tree item is null.");
             return false;
         }
 
-        if (_modelToItem.ContainsKey(model))
+        if (_modelToTreeItem.ContainsKey(model))
         {
             Application.Log.Warn($"ModelBinder.Bind skipped: model '{model.Name}' is already bound.");
             return false; // すでに登録されている
         }
 
-        if (_itemToModel.ContainsKey(item))
+        if (_treeItemToModel.ContainsKey(treeItem))
         {
             Application.Log.Warn("ModelBinder.Bind skipped: tree item is already bound.");
             return false; // すでに登録されている
         }
 
-        _modelToItem[model] = item;
-        _itemToModel[item] = model;
+        _modelToTreeItem[model] = treeItem;
+        _treeItemToModel[treeItem] = model;
 
-        Application.Log.Debug($"ModelBinder.Bind: model='{model.Name}', mappings={_modelToItem.Count}");
+        Application.Log.Debug($"ModelBinder.Bind: model='{model.Name}', mappings={_modelToTreeItem.Count}");
 
         return true;
     }
 
     /// <summary>
-    /// AnyModel を登録解除する
+    /// 指定した AnyModel の対応を解除し、対応していた TreeItem を解放する
     /// </summary>
     /// <param name="model">登録解除する AnyModel</param>
     public void Unbind(AnyModel model)
@@ -99,62 +103,62 @@ public class ModelBinder
             return;
         }
 
-        if (!_modelToItem.TryGetValue(model, out var item))
+        if (!_modelToTreeItem.TryGetValue(model, out var treeItem))
         {
             Application.Log.Debug($"ModelBinder.Unbind(model) skipped: model '{model.Name}' is not bound.");
             return;
         }
 
-        _itemToModel.Remove(item);
-        _modelToItem.Remove(model);
+        _treeItemToModel.Remove(treeItem);
+        _modelToTreeItem.Remove(model);
 
-        Application.Log.Debug($"ModelBinder.Unbind(model): model='{model.Name}', mappings={_modelToItem.Count}");
+        Application.Log.Debug($"ModelBinder.Unbind(model): model='{model.Name}', mappings={_modelToTreeItem.Count}");
 
-        item.Free();
+        treeItem.Free();
     }
 
     /// <summary>
-    /// TreeItem を登録解除する
+    /// 指定した TreeItem の対応を解除し、TreeItem 自身を解放する
     /// </summary>
-    /// <param name="item">登録解除する TreeItem</param>
-    public void Unbind(TreeItem item)
+    /// <param name="treeItem">登録解除する TreeItem</param>
+    public void Unbind(TreeItem treeItem)
     {
-        if (item == null)
+        if (treeItem == null)
         {
-            Application.Log.Warn("ModelBinder.Unbind(item) skipped: item is null.");
+            Application.Log.Warn("ModelBinder.Unbind(treeItem) skipped: tree item is null.");
             return;
         }
 
-        if (!_itemToModel.TryGetValue(item, out var model))
+        if (!_treeItemToModel.TryGetValue(treeItem, out var model))
         {
-            Application.Log.Debug("ModelBinder.Unbind(item) skipped: item is not bound.");
+            Application.Log.Debug("ModelBinder.Unbind(treeItem) skipped: tree item is not bound.");
             return;
         }
 
-        _modelToItem.Remove(model);
-        _itemToModel.Remove(item);
+        _modelToTreeItem.Remove(model);
+        _treeItemToModel.Remove(treeItem);
 
-        Application.Log.Debug($"ModelBinder.Unbind(item): model='{model.Name}', mappings={_modelToItem.Count}");
+        Application.Log.Debug($"ModelBinder.Unbind(treeItem): model='{model.Name}', mappings={_modelToTreeItem.Count}");
 
-        item.Free();
+        treeItem.Free();
     }
 
     /// <summary>
     /// このバインダーが保持する対応をすべて解除する
     /// </summary>
-    /// <param name="freeItems">true の場合は TreeItem も解放する</param>
+    /// <param name="freeItems">true の場合は、保持しているすべての TreeItem も解放する</param>
     public void Clear(bool freeItems = false)
     {
         if (freeItems)
         {
-            foreach (TreeItem item in _itemToModel.Keys)
+            foreach (TreeItem treeItem in _treeItemToModel.Keys)
             {
-                item?.Free();
+                treeItem?.Free();
             }
         }
 
-        _itemToModel.Clear();
-        _modelToItem.Clear();
+        _treeItemToModel.Clear();
+        _modelToTreeItem.Clear();
 
         Application.Log.Debug("ModelBinder.Clear: mappings=0");
     }
