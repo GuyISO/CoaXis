@@ -1,6 +1,5 @@
 [gd_scene format=3 uid="uid://dvoc2r3mse54i"]
 
-[ext_resource type="PackedScene" uid="uid://n15owgw2vkc3" path="res://scenes/model/RootModel.tscn" id="1_nxtc6"]
 [ext_resource type="PackedScene" uid="uid://dkq5ovq6ymdm" path="res://scenes/viewer/Canvas.tscn" id="2_rvslj"]
 
 [sub_resource type="Environment" id="Environment_2xmat"]
@@ -17,7 +16,5 @@ reflected_light_source = 1
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="Environments" unique_id=1359785220]
 environment = SubResource("Environment_2xmat")
-
-[node name="RootModel" parent="." unique_id=128872870 instance=ExtResource("1_nxtc6")]
 
 [node name="Canvas" parent="." unique_id=1312684224 instance=ExtResource("2_rvslj")]

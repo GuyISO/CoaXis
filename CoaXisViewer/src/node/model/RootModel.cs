@@ -2,14 +2,25 @@ using Godot;
 using System;
 
 /// <summary>
-/// RootModel はシーンルートに配置されるモデルで、モデルロード要求イベントを受け取り非同期でモデルをロードしてシーンへ追加する役割を持つ
+/// モデルのルートノードで、シーンルートに配置されるモデル
 /// </summary>
 public partial class RootModel : AnyModel
 {
+    #region Properties
+
+    /// <summary>
+    /// RootModel は常に親モデルを持たない
+    /// </summary>
+    public override AnyModel ParentModel => null;
+
+    #endregion
+
     #region Lifecycle
 
     public override void _Ready()
     {
+        base._Ready();
+
         SubscribeApplicationEvents();
     }
 
@@ -29,7 +40,6 @@ public partial class RootModel : AnyModel
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
         Application.Model.Event.LoadModelRequested += OnLoadModelRequested;
     }
 
@@ -38,16 +48,7 @@ public partial class RootModel : AnyModel
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Model.Event.AskRootModelRequested -= OnAskRootModelRequested;
         Application.Model.Event.LoadModelRequested -= OnLoadModelRequested;
-    }
-
-    /// <summary>
-    /// ルートモデルの通知要求イベントのハンドラで、ModelEvent に対して自身を通知する
-    /// </summary>
-    private void OnAskRootModelRequested()
-    {
-        Application.Model.Event.NotifyRootModel(this);
     }
 
     /// <summary>
@@ -58,7 +59,7 @@ public partial class RootModel : AnyModel
     {
         // TODO: 暫定的にこの直下に入れているのでドメインに合わせて洗練させる
 
-        AnyModel model = new AnyModel();
+        AnyModel model = new SurfaceModel();
         model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
         AddChild(model);
 
@@ -76,6 +77,15 @@ public partial class RootModel : AnyModel
 
         Application.Model.Event.AddModel(model, this);
 
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    protected override AnyComponents CreateComponents()
+    {
+        return new RootComponents();
     }
 
     #endregion

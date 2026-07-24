@@ -40,7 +40,7 @@ public static class PickUtility
             hasHit: true,
             collider: result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
             rid: result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-            model: result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
+            model: result.ContainsKey("collider") ? GetParentModel((Node3D)result["collider"]) : null,
             position: (Vector3)result["position"],
             normal: result.ContainsKey("normal") ? (Vector3)result["normal"] : Vector3.Zero,
             distance: origin.DistanceTo((Vector3)result["position"])
@@ -125,7 +125,7 @@ public static class PickUtility
                     hasHit: true,
                     collider: result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
                     rid: result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-                    model: result.ContainsKey("collider") ? ((Node3D)result["collider"]).GetParentOrNull<AnyModel>() : null,
+                    model: result.ContainsKey("collider") ? GetParentModel((Node3D)result["collider"]) : null,
                     position: Vector3.Zero, // IntersectShape は position を返さない
                     normal: Vector3.Zero,
                     distance: 0f
@@ -157,10 +157,11 @@ public static class PickUtility
         Node3D collider = null;
         Rid rid = default;
 
-        if (model.Collider != null && GodotObject.IsInstanceValid(model.Collider))
+        AnyComponents components = model.Components;
+        if (components != null && components.Collider != null && GodotObject.IsInstanceValid(components.Collider))
         {
-            collider = model.Collider;
-            rid = model.Collider.GetRid();
+            collider = components.Collider;
+            rid = components.Collider.GetRid();
         }
 
         return new PickResult(
@@ -201,4 +202,29 @@ public static class PickUtility
     }
 
     #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// コライダーの親階層から AnyModel を取得する
+    /// </summary>
+    private static AnyModel GetParentModel(Node node)
+    {
+        Node current = node;
+
+        while (current != null)
+        {
+            if (current is AnyModel model)
+            {
+                return model;
+            }
+
+            current = current.GetParent();
+        }
+
+        return null;
+    }
+
+    #endregion
+
 }

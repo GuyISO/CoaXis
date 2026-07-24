@@ -18,7 +18,7 @@ public partial class PickResult : RefCounted
     /// </summary>
     public Rid Rid { get; }
     /// <summary>
-    /// 取得したコライダーの親ノードへの参照で、本プロジェクトではコライダーを AnyModel の子ノードとして配置するためその参照を取得しやすくしている
+    /// 取得したコライダーの親階層上にある AnyModel への参照で、本プロジェクトではコライダーを AnyComponents の子ノードとして配置するためその祖先を取得しやすくしている
     /// </summary>
     public AnyModel Model { get; }
     /// <summary>

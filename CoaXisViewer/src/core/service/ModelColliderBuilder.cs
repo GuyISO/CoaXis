@@ -17,15 +17,22 @@ public static class ModelColliderBuilder
         Application.Log.Info($"Start adding collider for model: {model.Name}");
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
+        AnyComponents components = model.Components;
+        if (components == null)
+        {
+            Application.Log.Warn($"Skipped adding collider for model: {model.Name}, components are not initialized.");
+            return;
+        }
+
         CollisionShape3D collisionShape = new CollisionShape3D();
-        model.Collider.AddChild(collisionShape);
+        components.Collider.AddChild(collisionShape);
 
         List<MeshInstance3D> meshes = new List<MeshInstance3D>();
-        CollectMeshes(model.Mesh, meshes);
+        CollectMeshes(components.Mesh, meshes);
 
         Vector3[] allFaces = new Vector3[meshes.Sum(meshInstance => meshInstance.Mesh?.GetFaces().Length ?? 0)];
         int index = 0;
-        Transform3D inverseTransform = model.Collider.GlobalTransform.AffineInverse();
+        Transform3D inverseTransform = components.Collider.GlobalTransform.AffineInverse();
 
         foreach (MeshInstance3D meshInstance in meshes)
         {

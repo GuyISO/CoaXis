@@ -21,6 +21,13 @@ public static class ModelLoadUtility
         Application.Log.Info($"Start loading model: {path}");
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
+        AnyComponents components = model.Components;
+        if (components == null)
+        {
+            Application.Log.Error($"Failed to load model: {path}, components are not initialized.");
+            return false;
+        }
+
         // 非同期でglTFモデルを読み込む
         var doc = new GltfDocument();
         var state = new GltfState();
@@ -29,7 +36,7 @@ public static class ModelLoadUtility
         if (error == Error.Ok)
         {
             var scene = (Node3D)doc.GenerateScene(state);
-            model.Mesh.AddChild(scene);
+            components.Mesh.AddChild(scene);
 
             sw.Stop();
             Application.Log.Info($"Finished loading model: {path} in {sw.ElapsedMilliseconds} ms");

@@ -3,8 +3,7 @@
 ## すぐやる
 
 つぎはまず、背景色と選択状態色を設定できるようにする
-Treeの複数選択挙動も詰める、貫通レイキャストUIも作る
-なぜTreeカーソルで動かない？
+貫通レイキャストUIも作る
 カメラ状態を保存・復元する機能を追加、UIに一覧で保存して、選択して復元できるようにする、外部ファイルかレジストリにも保存してアプリケーションを閉じても復元できるようにする
 
 ## Applicationに追加
@@ -23,7 +22,8 @@ domain
 ## 細かい修正
 測定機能
     表示されるラベルやと線を豪華にする、
-
+Tree
+    階層を跨いで複数選択するのができない？
 
 ## 3D表示関係
 モデルのマテリアル変更以外のハイライト方法
@@ -40,6 +40,9 @@ domain
     設定変更したら、Settings.jsonに保存する機能を実装する
 貫通レイキャスト
     一覧と選択UI
+右クリックメニュー
+    右クリックで表示されるコンテキストメニューを実装する
+    メニュー項目の追加や削除が容易に行えるようにする
 
 ## 設定
 設定画面とsettings.jsonの連携
@@ -58,14 +61,15 @@ Modelの移動機能
 ## その他
 将来的に汎用ビューワーソフトとして使用できるように、以下のモデル構造に対応させる
 
-ViewState
-    ProductPlan
-        ComponentPlan
-        PointPlan
-        LinePlan
-        SurfacePlan
-        AnnotationPlan
-        ResourcePlan
+RootModel
+    ViewState
+        ProductPlan
+            ComponentPlan
+            PointPlan
+            LinePlan
+            SurfacePlan
+            AnnotationPlan
+            ResourcePlan
 
 ## 先延ばしにしたやつとか
 矩形での複数選択

@@ -10,6 +10,38 @@ public partial class ModelService : Node
 
 	// TODO: ファイルパスの直接参照やめる
 	private static Material _selectedMaterial = ResourceLoader.Load<Material>("res://assets/materials/selected.tres");
+	private RootModel _rootModel;
+	private readonly ModelGuidRegistry _modelGuidRegistry = new();
+
+	#endregion
+
+	#region Properties
+
+	/// <summary>
+	/// RootModel を取得する
+	/// </summary>
+	/// <remarks>RootModel が存在しない場合は動的に生成する</remarks>
+	internal RootModel Root
+	{
+		get
+		{
+			if (_rootModel == null || !GodotObject.IsInstanceValid(_rootModel))
+			{
+				EnsureRootModel();
+			}
+			return _rootModel;
+		}
+	}
+
+	/// <summary>
+	/// AnyModel から Guid へのマッピング
+	/// </summary>
+	internal IReadOnlyDictionary<AnyModel, System.Guid> ModelToGuidMap => _modelGuidRegistry.ModelToGuidMap;
+
+	/// <summary>
+	/// Guid から AnyModel へのマッピング
+	/// </summary>
+	internal IReadOnlyDictionary<System.Guid, AnyModel> GuidToModelMap => _modelGuidRegistry.GuidToModelMap;
 
 	#endregion
 
@@ -17,12 +49,15 @@ public partial class ModelService : Node
 
 	public override void _Ready()
 	{
+		EnsureRootModel();
 		SubscribeApplicationEvents();
+		Application.Model.Event.NotifyRootModel(_rootModel);
 	}
 
 	public override void _ExitTree()
 	{
 		UnsubscribeApplicationEvents();
+		_modelGuidRegistry.Clear();
 
 		base._ExitTree();
 	}
@@ -36,9 +71,11 @@ public partial class ModelService : Node
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
+		Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
+		Application.Model.Event.AddModelRequested += OnAddModelRequested;
 		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
 	}
 
 	/// <summary>
@@ -46,9 +83,32 @@ public partial class ModelService : Node
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
+		Application.Model.Event.AskRootModelRequested -= OnAskRootModelRequested;
+		Application.Model.Event.AddModelRequested -= OnAddModelRequested;
 		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
+	}
+
+	/// <summary>
+	/// モデル追加通知を受けたときに Guid マッピングへ登録する
+	/// </summary>
+	private void OnAddModelRequested(AnyModel childModel, AnyModel parentModel)
+	{
+		_modelGuidRegistry.RegisterRecursively(childModel);
+	}
+
+	/// <summary>
+	/// ルートモデル通知要求イベントのハンドラ
+	/// </summary>
+	private void OnAskRootModelRequested()
+	{
+		if (_rootModel == null || !GodotObject.IsInstanceValid(_rootModel))
+		{
+			EnsureRootModel();
+		}
+
+		Application.Model.Event.NotifyRootModel(_rootModel);
 	}
 
 	/// <summary>
@@ -62,16 +122,6 @@ public partial class ModelService : Node
 	}
 
 	/// <summary>
-	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ
-	/// </summary>
-	/// <param name="model">選択状態が変更されたモデル</param>
-	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-	private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
-	{
-		HighLightModel(model, isSelected);
-	}
-
-	/// <summary>
 	/// モデルの表示状態が変更されたときに呼び出されるイベントハンドラ
 	/// </summary>
 	/// <param name="model">表示状態が変更されたモデル</param>
@@ -79,6 +129,16 @@ public partial class ModelService : Node
 	private void OnModelVisibilityStateNotified(AnyModel model, bool isVisible)
 	{
 		model.Visible = isVisible;
+	}
+
+	/// <summary>
+	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ
+	/// </summary>
+	/// <param name="model">選択状態が変更されたモデル</param>
+	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
+	private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
+	{
+		HighLightModel(model, isSelected);
 	}
 
 	#endregion
@@ -231,6 +291,25 @@ public partial class ModelService : Node
 			model = model.ParentModel;
 		}
 		return false;
+	}
+
+	/// <summary>
+	/// ModelService 直下に RootModel を動的生成する
+	/// </summary>
+	private void EnsureRootModel()
+	{
+		if (_rootModel != null && GodotObject.IsInstanceValid(_rootModel))
+		{
+			return;
+		}
+
+		_rootModel = new RootModel
+		{
+			Name = "RootModel"
+		};
+
+		AddChild(_rootModel);
+		_modelGuidRegistry.RegisterRecursively(_rootModel);
 	}
 
 	#endregion
