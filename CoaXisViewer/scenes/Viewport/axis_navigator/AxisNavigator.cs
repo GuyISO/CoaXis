@@ -59,7 +59,7 @@ public partial class AxisNavigator : Control
                 return;
             }
 
-            PickResult pickResult = PickUtility.PickByRay(_camera, localMouse, 1u << 1); // mask 2 only
+            PickResult pickResult = PickUtility.PickByRay(_camera, localMouse, (uint)ViewportLayer.AxisNavigator);
             if (pickResult.HasHit)
             {
                 ViewLookAt(pickResult.Collider);

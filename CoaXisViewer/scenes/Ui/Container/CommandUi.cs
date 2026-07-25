@@ -18,9 +18,6 @@ public partial class CommandUi : PanelContainer
     // 関連ノードをキャッシュ
     private Tree _tree = null!;
 
-    private Color _doColor;
-    private Color _undoColor;
-
     #endregion
 
     #region Lifecycle
@@ -30,7 +27,6 @@ public partial class CommandUi : PanelContainer
         EnsureChildNodes();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
-        ApplySettings();
     }
 
     public override void _ExitTree()
@@ -59,17 +55,26 @@ public partial class CommandUi : PanelContainer
     private void EnsureChildNodes()
     {
         _tree = (Tree)FindChild("Tree");
-        _tree.Columns = 4;
-        _tree.SetColumnTitle(0, "No");
-        _tree.SetColumnTitle(1, "Name");
-        _tree.SetColumnTitle(2, "Description");
-        _tree.SetColumnTitle(3, "State");
-        _tree.SetColumnExpand(0, false);
-        _tree.SetColumnExpand(1, true);
-        _tree.SetColumnExpand(2, true);
-        _tree.SetColumnExpand(3, false);
-        _tree.SetColumnCustomMinimumWidth(0, 64);
-        _tree.SetColumnCustomMinimumWidth(3, 64);
+        CommandTreeColumn[] columns = System.Enum.GetValues<CommandTreeColumn>();
+        _tree.Columns = columns.Length;
+
+        foreach (CommandTreeColumn column in columns)
+        {
+            int columnIndex = (int)column;
+            _tree.SetColumnTitle(columnIndex, column.ToString());
+
+            bool isExpand = column != CommandTreeColumn.No && column != CommandTreeColumn.State;
+            _tree.SetColumnExpand(columnIndex, isExpand);
+
+            if (column == CommandTreeColumn.No)
+            {
+                _tree.SetColumnCustomMinimumWidth(columnIndex, Constant.Ui.Tree.CommandNoColumnMinWidth);
+            }
+            else if (column == CommandTreeColumn.State)
+            {
+                _tree.SetColumnCustomMinimumWidth(columnIndex, Constant.Ui.Tree.CommandStateColumnMinWidth);
+            }
+        }
     }
     
     /// <summary>
@@ -95,7 +100,6 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Command.Event.StateNotified += OnStateNotified;
     }
 
@@ -104,7 +108,6 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Command.Event.StateNotified -= OnStateNotified;
     }
 
@@ -180,16 +183,6 @@ public partial class CommandUi : PanelContainer
     #region Internal Helpers
 
     /// <summary>
-    /// 設定値を反映する
-    /// </summary>
-    private void ApplySettings()
-    {
-        ColorSettings c = Application.Setting.Service.Current.Color;
-        _doColor = Color.FromHtml(c.CommandDoColor);
-        _undoColor = Color.FromHtml(c.CommandUndoColor);
-    }
-
-    /// <summary>
     /// タイムラインツリー再構築を遅延キューへ積む
     /// </summary>
     private void QueueRebuildTimelineTree()
@@ -247,23 +240,23 @@ public partial class CommandUi : PanelContainer
                     continue;
                 }
 
-                item.SetMetadata(0, i);
-                item.SetText(0, i.ToString());
-                item.SetText(1, command?.GetType().Name ?? "(null)");
-                item.SetText(2, command?.Description ?? string.Empty);
+                item.SetMetadata((int)CommandTreeColumn.No, i);
+                item.SetText((int)CommandTreeColumn.No, i.ToString());
+                item.SetText((int)CommandTreeColumn.Name, command?.GetType().Name ?? "(null)");
+                item.SetText((int)CommandTreeColumn.Description, command?.Description ?? string.Empty);
 
-                string state = ResolveState(i, _cursor);
+                CommandExecutionState state = ResolveState(i, _cursor);
                 Color color = ResolveStateColor(i, _cursor);
-                item.SetText(3, state);
+                item.SetText((int)CommandTreeColumn.State, state.ToString());
 
-                for (int column = 0; column < 4; column++)
+                for (int column = 0; column < _tree.Columns; column++)
                 {
                     item.SetCustomColor(column, color);
                 }
 
                 if (i == _cursor - 1)
                 {
-                    item.Select(0);
+                    item.Select((int)CommandTreeColumn.No);
                 }
             }
         }
@@ -276,14 +269,14 @@ public partial class CommandUi : PanelContainer
     /// <summary>
     /// 履歴インデックスに対応する状態文字列を返す
     /// </summary>
-    private static string ResolveState(int index, int cursor)
+    private static CommandExecutionState ResolveState(int index, int cursor)
     {
         if (index < cursor)
         {
-            return "Do";
+            return CommandExecutionState.Do;
         }
 
-        return "Undo";
+        return CommandExecutionState.Undo;
     }
 
     /// <summary>
@@ -293,10 +286,10 @@ public partial class CommandUi : PanelContainer
     {
         if (index < cursor)
         {
-            return _doColor;
+            return Color.FromHtml(Constant.Color.CommandDoColor);
         }
 
-        return _undoColor;
+        return Color.FromHtml(Constant.Color.CommandUndoColor);
     }
 
     #endregion

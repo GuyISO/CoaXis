@@ -9,14 +9,7 @@ public partial class ViewportInteractionHandler : SubViewport
 {
     #region Fields
 
-    [ExportGroup("Settings")]
-    // TODO: マテリアルの設定はもういらないかも、将来的に Application 側の設定管理に移行する
-    [Export] private Material _defaultMaterial; // 通常表示用のマテリアル（将来の拡張で使用予定）
-    [Export] private Material _selectedMaterial; // 選択ハイライト用のマテリアル（将来の拡張で使用予定）
-
     private float _zoomFactor;         // ズーム倍率変更時の係数
-    private float _arcballRegionRatio; // 画面サイズに対する Orbit/Roll 切り替え用の円領域の半径比率
-    private float _moveThreshold;      // マウス移動の閘値（この値未満の移動は移動なしとみなす）
 
     private ViewportInteractionMode _mode = ViewportInteractionMode.None; // 現在の操作モード
     private Vector2 _lastPosition = Vector2.Zero; // 移動量算出のために前フレームの操作座標を保持
@@ -60,8 +53,8 @@ public partial class ViewportInteractionHandler : SubViewport
         Vector2 currentPos = GetMousePosition();
         float deltaDistance = currentPos.DistanceTo(_lastPosition);
 
-        // 小数点以下の微小な移動を無視するため、1pixel未満の移動は移動なしとみなす
-        if (deltaDistance < _moveThreshold)
+        // 小数点以下の微小な移動を無視するため、設定値 MoveThreshold 未満の移動は移動なしとみなす
+        if (deltaDistance < Constant.Input.MoveThreshold)
         {
             return;
         }
@@ -185,8 +178,6 @@ public partial class ViewportInteractionHandler : SubViewport
     {
         InputSettings s = Application.Setting.Service.Current.Input;
         _zoomFactor = s.ZoomFactor;
-        _arcballRegionRatio = s.ArcballRegionRatio;
-        _moveThreshold = s.MoveThreshold;
     }
 
     /// <summary>
@@ -456,7 +447,7 @@ public partial class ViewportInteractionHandler : SubViewport
     {
         Rect2 rect = GetVisibleRect();
         _screenCenter = rect.Position + rect.Size * 0.5f;
-        _arcballRadius = rect.Size.Y * _arcballRegionRatio;
+        _arcballRadius = rect.Size.Y * Constant.Input.ArcballRegionRatio;
 
         Application.Viewport.Event.NotifyArcballRadius(_arcballRadius);
     }

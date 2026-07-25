@@ -69,3 +69,12 @@
   - `.github/instructions/design-philosophy.instructions.md`
   - `.github/design-philosophy/registry.md`
 - Notes: `MeasurementResult` と `PickResult` を対象に適用
+
+- Date: 2026-07-25
+- Trigger: 設定値を定数化した後の参照方針と即時反映時の描画更新ルールを統一
+- Decision: `Constant` 由来値はキャッシュしない。`SettingService` 由来値は高頻度参照時のみキャッシュする。`SettingsNotified` 購読時は値更新に加えて再描画/再構築を同時に実施する
+- Scope: 設定値を参照する Godot C# コンポーネント全般
+- Artifacts Updated:
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: 判定基準は「参照頻度」と「再描画が必要な見た目更新の有無」で決定する

@@ -27,3 +27,5 @@ description: "Use when: 設計思想・実装方針・責務分割・命名規�
 ## Current Rules
 
 - Godot の Signal 引数に渡す自前の参照型は `RefCounted` を継承する。`GodotObject` の直継承は避け、signal payload として安全に受け渡せる型に限定する。
+- 設定値参照の方針: `Constant` 由来の値はキャッシュしない。`SettingService` 由来の値は「高頻度参照（毎フレーム/入力処理/大量ループ）」の場合のみキャッシュし、低頻度参照は都度取得する。
+- 即時反映の方針: `SettingsNotified` を購読するコンポーネントは、値更新だけで終わらせず、必要な再描画/再構築（例: `QueueRedraw`, `Rebuild`, `Draw*` 再実行）を同一ハンドラ内で必須実施する。

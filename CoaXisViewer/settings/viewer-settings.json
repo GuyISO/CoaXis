@@ -1,8 +1,4 @@
 {
-  "Ipc": {
-    "PipeName": "CoaXisViewerPipe",
-    "StartPipeServerOnReady": true
-  },
   "Camera": {
     "ZoomBase": 1.005,
     "MinZoomValue": 0.01,
@@ -14,15 +10,15 @@
     "RotateSpeedDeg": 90.0,
     "RollSpeedDeg": 120.0,
     "ZoomFactor": 1.0,
-    "ArcballRegionRatio": 0.45,
-    "MoveThreshold": 1.0,
     "PointerRotationSpeedDeg": 90.0
   },
   "Color": {
+    "EnvironmentBackgroundColor": "#333366FF",
     "OverlayLineColor": "#E7B1F6FF",
     "HierarchySelectedColor": "#E7B1F6FF",
-    "CommandDoColor": "#FFFFFFFF",
-    "CommandUndoColor": "#808080FF",
     "MeasurementLineColor": "#FAD11FFF"
+  },
+  "Ui": {
+    "MessageMaxLines": 50
   }
 }

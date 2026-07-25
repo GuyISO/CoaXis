@@ -219,6 +219,36 @@ public partial class HierarchyTree : Tree
     private void ApplySettings()
     {
         _selectedColor = Color.FromHtml(Application.Setting.Service.Current.Color.HierarchySelectedColor);
+        ReapplySelectedRowColors();
+    }
+
+    /// <summary>
+    /// 現在選択中モデルに対して背景色を再適用する
+    /// </summary>
+    private void ReapplySelectedRowColors()
+    {
+        AnyModel[] selectedModels = Application.Selection.Service.GetModelArray();
+        if (selectedModels == null || selectedModels.Length == 0)
+        {
+            return;
+        }
+
+        for (int i = 0; i < selectedModels.Length; i++)
+        {
+            AnyModel model = selectedModels[i];
+            if (model == null)
+            {
+                continue;
+            }
+
+            TreeItem item = _binder.GetTreeItem(model);
+            if (item == null)
+            {
+                continue;
+            }
+
+            item.SetCustomBgColor((int)HierarchyTreeColumn.Name, _selectedColor);
+        }
     }
 
     /// <summary>

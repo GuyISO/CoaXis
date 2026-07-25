@@ -39,6 +39,35 @@ public enum HierarchyTreeColumn
 }
 
 /// <summary>
+/// CommandUi の列を表す列挙型
+/// </summary>
+public enum CommandTreeColumn
+{
+    No,
+    Name,
+    Description,
+    State,
+}
+
+/// <summary>
+/// SelectionUi の列を表す列挙型
+/// </summary>
+public enum SelectionTreeColumn
+{
+    No,
+    Name,
+}
+
+/// <summary>
+/// コマンド履歴の実行状態を表す列挙型
+/// </summary>
+public enum CommandExecutionState
+{
+    Do,
+    Undo,
+}
+
+/// <summary>
 /// Viewportのレイヤーを表す列挙型、Raycast用のビットマスクとしても使用される
 /// </summary>
 public enum ViewportLayer

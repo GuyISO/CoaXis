@@ -186,12 +186,20 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void EnsureTreeColumns()
     {
-        _tree.Columns = 2;
-        _tree.SetColumnTitle(0, "No");
-        _tree.SetColumnTitle(1, "Name");
-        _tree.SetColumnExpand(0, false);
-        _tree.SetColumnExpand(1, true);
-        _tree.SetColumnCustomMinimumWidth(0, 64);
+        SelectionTreeColumn[] columns = System.Enum.GetValues<SelectionTreeColumn>();
+        _tree.Columns = columns.Length;
+
+        foreach (SelectionTreeColumn column in columns)
+        {
+            int columnIndex = (int)column;
+            _tree.SetColumnTitle(columnIndex, column.ToString());
+            _tree.SetColumnExpand(columnIndex, column != SelectionTreeColumn.No);
+
+            if (column == SelectionTreeColumn.No)
+            {
+                _tree.SetColumnCustomMinimumWidth(columnIndex, Constant.Ui.Tree.SelectionNoColumnMinWidth);
+            }
+        }
     }
 
     /// <summary>
@@ -249,8 +257,8 @@ public partial class SelectionUi : PanelContainer
         {
             AnyModel model = _selectedModels[i];
             TreeItem item = _tree.CreateItem(root);
-            item.SetText(0, i.ToString());
-            item.SetText(1, model.Name);
+            item.SetText((int)SelectionTreeColumn.No, i.ToString());
+            item.SetText((int)SelectionTreeColumn.Name, model.Name);
         }
 
         _isUpdatingTree = false;
