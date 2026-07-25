@@ -68,7 +68,7 @@ tooltip_text = "モデル取得パネルを表示します"
 text = "Pick"
 _container = ExtResource("7_64vlc")
 
-[node name="Panel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
+[node name="BlankPanel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
 layout_mode = 2
 size_flags_horizontal = 3
 
@@ -95,7 +95,7 @@ size_flags_vertical = 3
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 
-[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/LeftBar" unique_id=1507152929]
+[node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/LeftBar" unique_id=1507152929]
 layout_mode = 2
 size_flags_vertical = 3
 
@@ -126,7 +126,7 @@ script = ExtResource("6_6a6xr")
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 
-[node name="Panel" type="Panel" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1245432863]
+[node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1245432863]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
@@ -135,7 +135,7 @@ size_flags_vertical = 3
 custom_minimum_size = Vector2(0, 48)
 layout_mode = 2
 
-[node name="Panel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]
+[node name="BlankPanel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]
 layout_mode = 2
 size_flags_horizontal = 3
 

@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://xcbuelasn6jb"]
+
+[ext_resource type="Script" uid="uid://2d1gp702cw4g" path="res://scenes/environment/EnvironmentController.cs" id="1_uxlda"]
+
+[sub_resource type="Environment" id="Environment_elqb8"]
+background_mode = 1
+background_color = Color(0.2, 0.2, 0.4, 1)
+ambient_light_source = 2
+ambient_light_color = Color(1, 1, 1, 1)
+ambient_light_energy = 0.2
+reflected_light_source = 1
+
+[node name="Environments" type="Node3D" unique_id=732137435]
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1313416679]
+environment = SubResource("Environment_elqb8")
+script = ExtResource("1_uxlda")
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="." unique_id=1547430842]
+transform = Transform3D(0.14644663, 0.8535534, -0.50000006, -0.50000006, 0.50000006, 0.70710677, 0.8535534, 0.14644666, 0.5, 0, 0, 0)
+layers = 1048573

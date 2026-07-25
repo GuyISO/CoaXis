@@ -1,20 +1,10 @@
 [gd_scene format=3 uid="uid://dvoc2r3mse54i"]
 
+[ext_resource type="PackedScene" uid="uid://xcbuelasn6jb" path="res://scenes/environment/Environments.tscn" id="1_rvslj"]
 [ext_resource type="PackedScene" uid="uid://dkq5ovq6ymdm" path="res://scenes/viewer/Canvas.tscn" id="2_rvslj"]
-
-[sub_resource type="Environment" id="Environment_2xmat"]
-background_mode = 1
-background_color = Color(0.2, 0.2, 0.4, 1)
-ambient_light_source = 2
-ambient_light_color = Color(1, 1, 1, 1)
-ambient_light_energy = 0.2
-reflected_light_source = 1
 
 [node name="Main" type="Node" unique_id=807387639]
 
-[node name="Environments" type="Node3D" parent="." unique_id=1323646672]
-
-[node name="WorldEnvironment" type="WorldEnvironment" parent="Environments" unique_id=1359785220]
-environment = SubResource("Environment_2xmat")
+[node name="Environments" parent="." unique_id=732137435 instance=ExtResource("1_rvslj")]
 
 [node name="Canvas" parent="." unique_id=1312684224 instance=ExtResource("2_rvslj")]
