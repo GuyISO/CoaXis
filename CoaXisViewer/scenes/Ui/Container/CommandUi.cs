@@ -259,6 +259,30 @@ public partial class CommandUi : PanelContainer
         {
             _isUpdatingTree = false;
         }
+
+        // 最終行のアイテムまでスクロール
+        _tree.ScrollToItem(GetLastTreeItem());
+    }
+
+    /// <summary>
+    /// タイムラインツリーの最終行のアイテムを返す
+    /// </summary>
+    /// <returns>最終行の TreeItem、存在しない場合は null</returns>
+    /// <remarks>単一階層のツリーを想定している</remarks>
+    private TreeItem GetLastTreeItem()
+    {
+        var root = _tree.GetRoot();
+        if (root == null) return null;
+
+        var item = root.GetFirstChild();
+        if (item == null) return null;
+
+        while (item.GetNext() != null)
+        {
+            item = item.GetNext();
+        }
+
+        return item;
     }
 
     /// <summary>

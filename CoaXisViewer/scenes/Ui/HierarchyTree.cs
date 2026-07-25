@@ -388,8 +388,6 @@ public partial class HierarchyTree : Tree
         Application.Model.Event.ToggleModelVisibility(model);
     }
 
-    #endregion
-
     /// <summary>
     /// AnyModel を TreeItem に追加する
     /// </summary>
@@ -433,4 +431,6 @@ public partial class HierarchyTree : Tree
             AddToTree(childModel, parentTreeItem);
         }
     }
+    
+    #endregion
 }
