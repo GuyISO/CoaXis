@@ -256,12 +256,12 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void EnsureState()
     {
-        _visibleIcon = Application.Asset.Service.GetVisibilityIcon(true, 24);
-        _invisibleIcon = Application.Asset.Service.GetVisibilityIcon(false, 24);
+        _visibleIcon = Application.Asset.Service.GetVisibilityIcon(true, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        _invisibleIcon = Application.Asset.Service.GetVisibilityIcon(false, Constant.Ui.Tree.HierarchyVisibleIconSize);
 
-        // VisibleButton 列を固定幅にする
+        // アイコンサイズに合わせて VisibleButton 列を固定幅にする
         SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
-        SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, 24); // 24px など
+        SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, Constant.Ui.Tree.HierarchyVisibleIconSize);
     }
 
     /// <summary>
@@ -286,7 +286,7 @@ public partial class HierarchyTree : Tree
         }
         else
         {
-            // Shift押下時またはAdd/Removeモードでは範囲選択として扱い、複数モデルの選択を通知する
+            // Add/Removeモードでは範囲選択として扱い、複数モデルの選択を通知する
             AnyModel[] models = GetAllModelsInRange(_lastSelectedItem, item);
             Application.Pick.Event.NotifyResults(PickUtility.PickByModels(models));
         }

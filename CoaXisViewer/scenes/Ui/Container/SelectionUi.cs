@@ -194,12 +194,10 @@ public partial class SelectionUi : PanelContainer
             int columnIndex = (int)column;
             _tree.SetColumnTitle(columnIndex, column.ToString());
             _tree.SetColumnExpand(columnIndex, column != SelectionTreeColumn.No);
-
-            if (column == SelectionTreeColumn.No)
-            {
-                _tree.SetColumnCustomMinimumWidth(columnIndex, Constant.Ui.Tree.SelectionNoColumnMinWidth);
-            }
         }
+
+        // 固定幅にして運用する列の幅を指定する
+        _tree.SetColumnCustomMinimumWidth((int)SelectionTreeColumn.No, Constant.Ui.Tree.SelectionNoColumnMinWidth);
     }
 
     /// <summary>

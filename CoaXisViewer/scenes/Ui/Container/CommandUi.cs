@@ -65,16 +65,11 @@ public partial class CommandUi : PanelContainer
 
             bool isExpand = column != CommandTreeColumn.No && column != CommandTreeColumn.State;
             _tree.SetColumnExpand(columnIndex, isExpand);
-
-            if (column == CommandTreeColumn.No)
-            {
-                _tree.SetColumnCustomMinimumWidth(columnIndex, Constant.Ui.Tree.CommandNoColumnMinWidth);
-            }
-            else if (column == CommandTreeColumn.State)
-            {
-                _tree.SetColumnCustomMinimumWidth(columnIndex, Constant.Ui.Tree.CommandStateColumnMinWidth);
-            }
         }
+
+        // 固定幅にして運用する列の幅を指定する
+        _tree.SetColumnCustomMinimumWidth((int)CommandTreeColumn.No, Constant.Ui.Tree.CommandNoColumnMinWidth);
+        _tree.SetColumnCustomMinimumWidth((int)CommandTreeColumn.State, Constant.Ui.Tree.CommandStateColumnMinWidth);
     }
     
     /// <summary>

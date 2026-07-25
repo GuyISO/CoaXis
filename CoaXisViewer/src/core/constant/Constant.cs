@@ -10,6 +10,7 @@ public static class Constant
 			public const int CommandNoColumnMinWidth = 64;
 			public const int CommandStateColumnMinWidth = 64;
 			public const int SelectionNoColumnMinWidth = 64;
+			public const int HierarchyVisibleIconSize = 24;
 		}
 	}
 
