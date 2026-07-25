@@ -4,26 +4,61 @@ using System.Collections.Generic;
 /// <summary>
 /// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード
 /// </summary>
-public partial class AssetManager : Node
+public partial class AssetService : Node
 {
     #region Fields
 
-
-    // TODO: 全然できていないので、アセット管理の仕組みをちゃんと作る
-
     private const string VisibleIconPath = "res://assets/icon/visible.svg";
     private const string InvisibleIconPath = "res://assets/icon/invisible.svg";
+    private const string SelectedMaterialPath = "res://assets/materials/selected.tres";
 
     private readonly Dictionary<string, Texture2D> _iconCache = new Dictionary<string, Texture2D>();
+    private Material _selectedMaterial;
 
     #endregion
 
     #region Lifecycle
 
+    public override void _Ready()
+    {
+        SubscribeApplicationEvents();
+    }
+
     public override void _ExitTree()
     {
+        UnsubscribeApplicationEvents();
         _iconCache.Clear();
+        _selectedMaterial = null;
+
         base._ExitTree();
+    }
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Setting.Event.SettingsNotified += ApplySettings;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Setting.Event.SettingsNotified -= ApplySettings;
+    }
+
+    /// <summary>
+    /// 設定値を反映する
+    /// </summary>
+    private void ApplySettings()
+    {
+        ApplySelectedMaterialColor();
     }
 
     #endregion
@@ -43,6 +78,29 @@ public partial class AssetManager : Node
     }
 
     /// <summary>
+    /// ハイライト表示用のマテリアルを取得する
+    /// </summary>
+    /// <returns>選択ハイライト用マテリアル。取得失敗時は null</returns>
+    internal Material GetSelectedMaterial()
+    {
+        if (_selectedMaterial != null)
+        {
+            return _selectedMaterial;
+        }
+
+        _selectedMaterial = GD.Load<Material>(SelectedMaterialPath);
+        if (_selectedMaterial == null)
+        {
+            Application.Log.Warn($"AssetService: material load failed. path='{SelectedMaterialPath}'");
+            return null;
+        }
+
+        ApplySelectedMaterialColor();
+
+        return _selectedMaterial;
+    }
+
+    /// <summary>
     /// 指定パスのアイコンを取得する
     /// </summary>
     /// <param name="path">アセットパス</param>
@@ -52,7 +110,7 @@ public partial class AssetManager : Node
     {
         if (!IsInsideTree())
         {
-            Application.Log.Warn($"AssetManager is not initialized. path='{path}', size={size}");
+            Application.Log.Warn($"AssetService is not initialized. path='{path}', size={size}");
             return null;
         }
 
@@ -74,14 +132,14 @@ public partial class AssetManager : Node
         Texture2D source = GD.Load<Texture2D>(path);
         if (source == null)
         {
-            Application.Log.Warn($"AssetManager: icon load failed. path='{path}'");
+            Application.Log.Warn($"AssetService: icon load failed. path='{path}'");
             return null;
         }
 
         Image image = source.GetImage();
         if (image == null)
         {
-            Application.Log.Warn($"AssetManager: icon image is null. path='{path}'");
+            Application.Log.Warn($"AssetService: icon image is null. path='{path}'");
             _iconCache[key] = source;
             return source;
         }
@@ -90,6 +148,16 @@ public partial class AssetManager : Node
         Texture2D resized = ImageTexture.CreateFromImage(image);
         _iconCache[key] = resized;
         return resized;
+    }
+
+    private void ApplySelectedMaterialColor()
+    {
+        if (_selectedMaterial is not StandardMaterial3D standardMaterial)
+        {
+            return;
+        }
+
+        standardMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Service.Current.Color.SelectedMaterialColor);
     }
 
     #endregion

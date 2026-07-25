@@ -20,6 +20,11 @@ public sealed class ColorSettings
     public string HierarchySelectedColor { get; set; } = "#E7B1F6FF";
 
     /// <summary>
+    /// モデル選択ハイライト用マテリアルの色。
+    /// </summary>
+    public string SelectedMaterialColor { get; set; } = "#E7B1F6FF";
+
+    /// <summary>
     /// 測定ラインのマテリアル色。
     /// </summary>
     public string MeasurementLineColor { get; set; } = "#FAD11FFF";
@@ -32,6 +37,7 @@ public sealed class ColorSettings
         if (string.IsNullOrWhiteSpace(EnvironmentBackgroundColor)) EnvironmentBackgroundColor = "#333366FF";
         if (string.IsNullOrWhiteSpace(OverlayLineColor)) OverlayLineColor = "#E7B1F6FF";
         if (string.IsNullOrWhiteSpace(HierarchySelectedColor)) HierarchySelectedColor = "#E7B1F6FF";
+        if (string.IsNullOrWhiteSpace(SelectedMaterialColor)) SelectedMaterialColor = "#E7B1F6FF";
         if (string.IsNullOrWhiteSpace(MeasurementLineColor)) MeasurementLineColor = "#FAD11FFF";
     }
 }

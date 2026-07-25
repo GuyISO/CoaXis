@@ -16,6 +16,7 @@
     "EnvironmentBackgroundColor": "#333366FF",
     "OverlayLineColor": "#E7B1F6FF",
     "HierarchySelectedColor": "#E7B1F6FF",
+    "SelectedMaterialColor": "#E7B1F6FF",
     "MeasurementLineColor": "#FAD11FFF"
   },
   "Ui": {

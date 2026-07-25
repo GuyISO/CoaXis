@@ -3,10 +3,10 @@
 /// </summary>
 public partial class AssetFacade : FacadeBase
 {
-	public AssetManager Service { get; }
+	public AssetService Service { get; }
 
 	public AssetFacade()
 	{
-		Service = AddModule<AssetManager>("AssetManager");
+		Service = AddModule<AssetService>("AssetService");
 	}
 }

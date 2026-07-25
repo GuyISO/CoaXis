@@ -8,8 +8,6 @@ public partial class ModelService : Node
 {
 	#region Fields
 
-	// TODO: ファイルパスの直接参照やめる
-	private static Material _selectedMaterial = ResourceLoader.Load<Material>("res://assets/materials/selected.tres");
 	private RootModel _rootModel;
 	private readonly ModelGuidRegistry _modelGuidRegistry = new();
 
@@ -167,13 +165,20 @@ public partial class ModelService : Node
 	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
 	private static void HighlightMesh(AnyModel model, bool enable = true)
 	{
+		Material selectedMaterial = Application.Asset.Service.GetSelectedMaterial();
+
 		if (enable)
 		{
+			if (selectedMaterial == null)
+			{
+				return;
+			}
+
 			// モデル自身のメッシュにのみ適用し、子モデル分は HighLightModel の再帰で処理する
 			var meshInstances = GetMeshInstancesUnderModel(model);
 			foreach (var meshInstance in meshInstances)
 			{
-				meshInstance.MaterialOverride = _selectedMaterial;
+				meshInstance.MaterialOverride = selectedMaterial;
 			}
 		}
 		else

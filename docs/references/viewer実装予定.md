@@ -3,7 +3,6 @@
 ## すぐやる
 
 カメラ状態を保存・復元する機能を追加、UIに一覧で保存して、選択して復元できるようにする、外部ファイルかレジストリにも保存してアプリケーションを閉じても復元できるようにする
-選択状態マテリアルの色を設定できるようにする
 
 ## Applicationに追加
 infra
@@ -62,13 +61,25 @@ Modelの移動機能
 
 RootModel
     ViewState
-        ProductPlan
-            ComponentPlan
-            PointPlan
-            LinePlan
-            SurfacePlan
-            AnnotationPlan
-            ResourcePlan
+        ProductPlans
+            ProductPlan(Assembly)
+                ComponentPlans
+                    ComponentPlan
+            ProductPlan(Part)
+                PointPlans
+                    PointPlan
+                LinePlans
+                    LinePlan
+                SurfacePlans
+                    SurfacePlan
+                AnnotationPlans
+                    AnnotationPlan
+                ParameterPlans
+                    ParameterPlan
+                ResourcePlans
+                    ResourcePlan
+        ViewPoints
+            ViewPoint
 
 ## 先延ばしにしたやつとか
 矩形での複数選択
@@ -76,6 +87,6 @@ RootModel
 オーバーレイのような透過する仕様ツリー
     Godotの仕様上むり？検討する
 Dockable Window
-    各UIをDock可能なContainerの入れ子にして使えるようにもする
+    各UIをDock可能なContainerの入れ子にして使えるようにする
 点群座標をカメラ投影しての点配置
     とりあえず3Dモデルで始めるのでまだ先
