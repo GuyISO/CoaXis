@@ -15,7 +15,7 @@ public partial class CommandUi : PanelContainer
     private int _cursor = 0;
     private readonly List<CommandBase> _history = new();
 
-    // 関連ノ�Eド�EキャチE��ュ
+    // 関連ノードをキャッシュ
     private Tree _tree = null!;
 
     private Color _doColor;
@@ -73,7 +73,8 @@ public partial class CommandUi : PanelContainer
     }
     
     /// <summary>
-    /// UIイベント�E購読を開始すめE    /// </summary>
+    /// UIイベントの購読を開始する
+    /// </summary>
     private void SubscribeUiEvents()
     {
         _tree.ItemSelected += OnTreeItemSelected;
@@ -81,7 +82,7 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// UIイベント�E購読を解除する
+    /// UIイベントの購読を解除する
     /// </summary>
     private void UnsubscribeUiEvents()
     {
@@ -90,7 +91,8 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// Applicationイベント�E購読を開始すめE    /// </summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
     private void SubscribeApplicationEvents()
     {
         Application.Setting.Event.SettingsNotified += ApplySettings;
@@ -98,7 +100,7 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// Applicationイベント�E購読を解除する
+    /// Applicationイベントの購読を解除する
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
@@ -107,9 +109,9 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// コマンド履歴状態�E通知を受け取ったときに呼び出されるイベントハンドラ
+    /// コマンド履歴状態の通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="history">通知された履歴配�E</param>
+    /// <param name="history">通知された履歴配列</param>
     /// <param name="cursor">通知されたカーソル位置</param>
     private void OnStateNotified(CommandBase[] history, int cursor)
     {
@@ -126,7 +128,7 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// 履歴チE��ーの選択変更時に呼び出されるイベントハンドラ
+    /// 履歴ツリーの選択変更時に呼び出されるイベントハンドラ
     /// </summary>
     private void OnTreeItemSelected()
     {
@@ -134,7 +136,7 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// 履歴チE��ーのアイチE��が確定されたときに呼び出されるイベントハンドラ
+    /// 履歴ツリーのアイテムが確定されたときに呼び出されるイベントハンドラ
     /// </summary>
     private void OnTreeItemActivated()
     {
@@ -142,7 +144,8 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// 現在選択されてぁE��履歴行へのカーソル移動をリクエストすめE    /// </summary>
+    /// 現在選択されている履歴行へのカーソル移動をリクエストする
+    /// </summary>
     private void RequestCursorMoveFromSelection()
     {
         if (_isUpdatingTree || _isRequestingCursorMove)
@@ -187,7 +190,7 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// タイムラインチE��ー再構築を遁E��キューへ積�E
+    /// タイムラインツリー再構築を遅延キューへ積む
     /// </summary>
     private void QueueRebuildTimelineTree()
     {
@@ -201,7 +204,8 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// 遁E��呼び出しでタイムラインチE��ーを�E構築すめE    /// </summary>
+    /// 遅延呼び出しでタイムラインツリーを再構築する
+    /// </summary>
     private void RebuildTimelineTreeDeferred()
     {
         _isRebuildQueued = false;
@@ -214,7 +218,8 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// タイムラインチE��ーを現在の履歴状態で再構築すめE    /// </summary>
+    /// タイムラインツリーを現在の履歴状態で再構築する
+    /// </summary>
     private void RebuildTimelineTree()
     {
         if (_tree == null || !GodotObject.IsInstanceValid(_tree))
@@ -269,7 +274,7 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// 履歴インチE��クスに対応する状態文字�Eを返す
+    /// 履歴インデックスに対応する状態文字列を返す
     /// </summary>
     private static string ResolveState(int index, int cursor)
     {
@@ -282,7 +287,7 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// 履歴インチE��クスに対応する表示色を返す
+    /// 履歴インデックスに対応する表示色を返す
     /// </summary>
     private Color ResolveStateColor(int index, int cursor)
     {

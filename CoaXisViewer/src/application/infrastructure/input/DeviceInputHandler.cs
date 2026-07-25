@@ -2,7 +2,8 @@ using Godot;
 using System;
 
 /// <summary>
-/// ユーザーのキーボ�Eドやコントローラー入力を処琁E��めEAutoload ノ�EチE/// </summary>
+/// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
+/// </summary>
 public partial class DeviceInputHandler : Node
 {
     #region Fields
@@ -43,7 +44,8 @@ public partial class DeviceInputHandler : Node
     #region Internal Helpers
 
     /// <summary>
-    /// 選択モード�E刁E��替えを処琁E��めE    /// </summary>
+    /// 選択モードの切り替えを処理する
+    /// </summary>
     private void HandleSelectModeInput(string actionName, SelectionMode assignMode)
     { 
         if (Input.IsActionJustPressed(actionName))
@@ -57,7 +59,8 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// Undo/Redo 入力に応じてコマンド履歴を操作すめE    /// </summary>
+    /// Undo/Redo 入力に応じてコマンド履歴を操作する
+    /// </summary>
     private void HandleButtonInput()
     {
         if (Input.IsActionJustPressed("undo"))
@@ -86,8 +89,9 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// ユーザーの入力に基づぁE��カメラの平行移動をリクエストすめE    /// </summary>
-    /// <param name="delta">前�Eフレームからの経過時間�E�秒！E/param>
+    /// ユーザーの入力に基づき、カメラの平行移動をリクエストする
+    /// </summary>
+    /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleTranslationInput(float delta)
     {
         float x = GetAxis("translate_camera_left", "translate_camera_right");
@@ -110,8 +114,9 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// ユーザーの入力に基づぁE��カメラの回転をリクエストすめE    /// </summary>
-    /// <param name="delta">前�Eフレームからの経過時間�E�秒！E/param>
+    /// ユーザーの入力に基づき、カメラの回転をリクエストする
+    /// </summary>
+    /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleRotationInput(float delta)
     {
         float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
@@ -135,10 +140,11 @@ public partial class DeviceInputHandler : Node
     }
 
     /// <summary>
-    /// 持E��されたアクションに基づぁE��軸の値を取得すめE    /// </summary>
-    /// <param name="negativeAction">負の方向�Eアクション吁E/param>
-    /// <param name="positiveAction">正の方向�Eアクション吁E/param>
-    /// <returns>軸の値�E�E1.0から1.0の篁E���E�E/returns>
+    /// 指定されたアクションに基づき、軸の値を取得する
+    /// </summary>
+    /// <param name="negativeAction">負の方向のアクション名</param>
+    /// <param name="positiveAction">正の方向のアクション名</param>
+    /// <returns>軸の値（-1.0 から 1.0）</returns>
     private float GetAxis(string negativeAction, string positiveAction)
     {
         return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);

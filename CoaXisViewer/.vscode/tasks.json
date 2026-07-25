@@ -10,6 +10,19 @@
                 ".\\CoaXisViewer.sln"
             ],
             "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "verify:utf8",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                ".\\scripts\\verify-utf8.ps1"
+            ],
+            "problemMatcher": []
         }
     ]
 }

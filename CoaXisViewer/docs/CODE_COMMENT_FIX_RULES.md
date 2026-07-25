@@ -52,6 +52,14 @@
 - public メソッドには XML コメント（summary / returns / param）を付与する。
 - 既定値へフォールバックする処理には、理由が分かる1行コメントを置く。
 
+### 3.5 文字化け再発防止
+- コメントや文字列を一括置換する前後で UTF-8 検証を必ず実行する。
+- VS Code は UTF-8 固定（files.encoding=utf8, files.autoGuessEncoding=false）で扱う。
+- 検証手順:
+	- タスク `verify:utf8` を実行する。
+	- もしくは `powershell -NoProfile -ExecutionPolicy Bypass -File .\\scripts\\verify-utf8.ps1` を実行する。
+- `verify-utf8.ps1` が失敗した場合、対象ファイルはコミット前に修復する。
+
 ## 4. C#ファイル構成ルール
 ユーザー操作イベントを含むクラスは region の順序を以下に揃える。
 
@@ -66,3 +74,4 @@
 - イベント購読解除漏れがないか
 - ログやエラー原因が追跡可能か
 - XMLコメントの崩れがないか
+- UTF-8 検証（verify:utf8）が成功しているか

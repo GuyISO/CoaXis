@@ -1,5 +1,5 @@
 /// <summary>
-/// Application 経由で Setting 機�Eを利用するためのファサーチE
+/// Application 経由で Setting 機能を利用するためのファサード
 /// </summary>
 public partial class SettingFacade : FacadeBase
 {
@@ -13,7 +13,7 @@ public partial class SettingFacade : FacadeBase
 	}
 
 	/// <summary>
-	/// 外部設定ファイルを�E読み込みし、購読老E��変更を通知する
+	/// 外部設定ファイルを再読み込みし、購読者へ変更を通知する
 	/// </summary>
 	internal void Reload()
 	{
