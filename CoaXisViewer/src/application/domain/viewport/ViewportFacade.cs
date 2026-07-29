@@ -4,9 +4,11 @@
 public partial class ViewportFacade : FacadeBase
 {
 	public ViewportEvent Event { get; }
+	public ViewportService Service { get; }
 
 	public ViewportFacade()
 	{
-		Event = new ViewportEvent();
+		Event = AddModule<ViewportEvent>("ViewportEvent");
+		Service = AddModule<ViewportService>("ViewportService");
 	}
 }
