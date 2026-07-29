@@ -9,9 +9,6 @@ public partial class ViewportInteractionHandler : SubViewport
 {
     #region Fields
 
-    private float _zoomFactor;         // ズーム倍率変更時の係数
-
-    private ViewportInteractionMode _mode = ViewportInteractionMode.None; // 現在の操作モード
     private Vector2 _lastPosition = Vector2.Zero; // 移動量算出のために前フレームの操作座標を保持
     private Vector2 _startPosition = Vector2.Zero; // 操作開始点の座標を保持
     private bool _hasMoved = false; // ボタンを押してから移動操作したかのフラグ、マウスのクリックと移動の区別に使用
@@ -26,7 +23,6 @@ public partial class ViewportInteractionHandler : SubViewport
     {
         SubscribeUiEvents();
         SubscribeApplicationEvents();
-        ApplySettings();
 
         // ビューポートサイズに基づいて、アークボールのパラメータを初期化する
         RefreshArcballParameters();
@@ -44,7 +40,7 @@ public partial class ViewportInteractionHandler : SubViewport
     public override void _Process(double delta)
     {
         // 入力モードが None のときはマウス移動の検知やカメラ操作の適用を行わず、リソース節約のためここで早期リターンする
-        if (_mode == ViewportInteractionMode.None)
+        if (Application.Viewport.Service.InteractionMode == ViewportInteractionMode.None)
         {
             return;
         }
@@ -102,9 +98,7 @@ public partial class ViewportInteractionHandler : SubViewport
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
-        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
     }
 
     /// <summary>
@@ -112,9 +106,7 @@ public partial class ViewportInteractionHandler : SubViewport
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
-        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
     }
 
     /// <summary>
@@ -130,17 +122,8 @@ public partial class ViewportInteractionHandler : SubViewport
     /// </summary>
     private void OnAskStateRequested()
     {
-        Application.Viewport.Event.NotifyInteractionMode(_mode);
         Application.Viewport.Event.NotifyArcballRadius(_arcballRadius);
         Application.Viewport.Event.NotifyArcballHandle(new Vector3(0, 0, 1)); // アークボールハンドルは初期状態では画面正面方向にしておく
-    }
-
-    /// <summary>
-    /// ViewportEvent からの InteractionModeNotified シグナルを受け取るイベントハンドラ、操作モードを切り替える
-    /// </summary>
-    private void OnInteractionModeNotified(ViewportInteractionMode mode)
-    {
-        SetMode(mode);
     }
 
     /// <summary>
@@ -149,13 +132,15 @@ public partial class ViewportInteractionHandler : SubViewport
     /// <param name="button">マウスボタン入力イベント</param>
     private void OnMouseButtonClicked(InputEventMouseButton button)
     {
+        ViewportInteractionMode mode = Application.Viewport.Service.InteractionMode;
+
         // 入力モードに応じて、マウス入力の処理を分岐する
-        if (_mode == ViewportInteractionMode.None)
+        if (mode == ViewportInteractionMode.None)
         {
             // None モードのときは、カメラ操作開始のトリガーを検知するための処理を行う
             HandleIdleModeInput(button);
         }
-        else if (_mode == ViewportInteractionMode.PickRect)
+        else if (mode == ViewportInteractionMode.PickRect)
         {
             // PickRectモードのときは矩形選択操作の開始・終了を検知するための処理を行う
             HandlePickModeInput(button);
@@ -172,31 +157,6 @@ public partial class ViewportInteractionHandler : SubViewport
     #region Internal Helpers
 
     /// <summary>
-    /// 設定値を反映する
-    /// </summary>
-    private void ApplySettings()
-    {
-        InputSettings s = Application.Setting.Service.Current.Input;
-        _zoomFactor = s.ZoomFactor;
-    }
-
-    /// <summary>
-    /// 操作モードを切り替え、Event を通じて変更を通知する
-    /// </summary>
-    /// <param name="mode">新しい操作モード</param>
-    private void SetMode(ViewportInteractionMode mode)
-    {
-        if (_mode == mode)
-        {
-            return;
-        }
-
-        Application.Log.Debug($"ViewportInteractionHandler: mode changed {_mode} -> {mode}");
-        _mode = mode;
-        Application.Viewport.Event.NotifyInteractionMode(mode);
-    }
-
-    /// <summary>
     /// 入力モードが None のときのマウス入力を処理する
     /// </summary>
     /// <param name="button">マウスボタン入力イベント</param>
@@ -208,7 +168,7 @@ public partial class ViewportInteractionHandler : SubViewport
             // カメラ操作しているかどうかは、移動量が閾値を超えたかで判定するためここでは移動フラグをリセットして現在位置も更新しておく
             _hasMoved = false;
             _lastPosition = button.Position;
-            SetMode(ViewportInteractionMode.CameraPan);
+            Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.CameraPan);
         }
         // 左ボタンのクリック開始を検知したら矩形選択操作を行う
         else if (button.Pressed && button.ButtonIndex == MouseButton.Left)
@@ -218,7 +178,7 @@ public partial class ViewportInteractionHandler : SubViewport
             _lastPosition = button.Position;
             // 矩形選択の開始点を保存
             _startPosition = button.Position;
-            SetMode(ViewportInteractionMode.PickRect);
+            Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.PickRect);
             Application.Viewport.Event.NotifyPickRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
         }
         // 右クリックはメニュー表示
@@ -238,7 +198,7 @@ public partial class ViewportInteractionHandler : SubViewport
         if (button.Canceled)
         {
             // 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する
-            SetMode(ViewportInteractionMode.None);
+            Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.None);
             return;
         }
 
@@ -256,7 +216,7 @@ public partial class ViewportInteractionHandler : SubViewport
                 PickByPoint(button.Position);
             }
 
-            SetMode(ViewportInteractionMode.None);
+            Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.None);
         }
     }
 
@@ -270,7 +230,7 @@ public partial class ViewportInteractionHandler : SubViewport
         if (button.Canceled)
         {
             // 何らかの理由で操作がキャンセルされた場合は、確実にコントロールを終了する
-            SetMode(ViewportInteractionMode.None);
+            Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.None);
             return;
         }
 
@@ -284,7 +244,7 @@ public partial class ViewportInteractionHandler : SubViewport
                     PanCamera(button.Position, _screenCenter); // フォーカスできなかったら、クリック位置にパン扱いとする
                 }
             }
-            SetMode(ViewportInteractionMode.None);
+            Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.None);
             return;
         }
 
@@ -298,14 +258,14 @@ public partial class ViewportInteractionHandler : SubViewport
         if (button.Pressed)
         {
             _hasMoved = true; // クリック操作したら注視点移動しないようににするため、移動フラグを立てる
-            SetMode(IsOnArcball(button.Position) ? ViewportInteractionMode.CameraOrbit : ViewportInteractionMode.CameraRoll);
+            Application.Viewport.Service.SetInteractionMode(IsOnArcball(button.Position) ? ViewportInteractionMode.CameraOrbit : ViewportInteractionMode.CameraRoll);
             Vector3 positionOnArcball = GetPositionOnArcballSphere(button.Position);
             Application.Viewport.Event.NotifyArcballHandle(positionOnArcball);
             return;
         }
 
         // 中ボタンを押したまま右or左クリック終了を検知したら、Zoomモードに切り替え
-        SetMode(ViewportInteractionMode.CameraZoom);
+        Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.CameraZoom);
     }
 
     /// <summary>
@@ -314,12 +274,12 @@ public partial class ViewportInteractionHandler : SubViewport
     /// <param name="previousPos">前フレームの画面上位置</param>
     /// <param name="currentPos">現在の画面上位置</param>
     /// <remarks>
-    /// _modeがNoneのときは呼び出されない前提
+    /// ViewportService の InteractionMode が None のときは呼び出されない前提
     /// currentPos と previousPos は画面上の移動量を算出するために使用し、移動がない場合は呼び出されない
     /// </remarks>
     private void ApplyOperation(Vector2 previousPos, Vector2 currentPos)
     {
-        switch (_mode)
+        switch (Application.Viewport.Service.InteractionMode)
         {
             case ViewportInteractionMode.CameraPan:
                 PanCamera(previousPos, currentPos);
@@ -331,7 +291,7 @@ public partial class ViewportInteractionHandler : SubViewport
                 if (IsOnArcball(currentPos))
                 {
                     // 画面中央寄りに入ったらOrbitに変更、外周寄りはRollのままにする
-                    SetMode(ViewportInteractionMode.CameraOrbit);
+                    Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.CameraOrbit);
                     OrbitCamera(previousPos, currentPos);
                 }
                 else
@@ -435,7 +395,8 @@ public partial class ViewportInteractionHandler : SubViewport
     private void ZoomCamera(Vector2 previousPos, Vector2 currentPos)
     {
         float deltaY = (currentPos.Y - previousPos.Y);
-        float exponent = deltaY * _zoomFactor;
+        float zoomFactor = Application.Setting.Service.Current.Input.ZoomFactor;
+        float exponent = deltaY * zoomFactor;
 
         Application.Viewport.Event.Zoom(exponent);
     }
