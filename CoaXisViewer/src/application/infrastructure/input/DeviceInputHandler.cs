@@ -6,26 +6,14 @@ using System;
 /// </summary>
 public partial class DeviceInputHandler : Node
 {
-    #region Fields
-
-    private float _translateSpeed;
-    private float _rotateSpeedDegrees;
-    private float _rollSpeedDegrees;
-
-    #endregion
-
     #region Lifecycle
 
     public override void _Ready()
     {
-        Application.Setting.Event.SettingsNotified += ApplySettings;
-        ApplySettings();
     }
 
     public override void _ExitTree()
     {
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
-
         base._ExitTree();
     }
 
@@ -94,6 +82,7 @@ public partial class DeviceInputHandler : Node
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleTranslationInput(float delta)
     {
+        InputSettings settings = Application.Setting.Service.Current.Input;
         float x = GetAxis("translate_camera_left", "translate_camera_right");
         float y = GetAxis("translate_camera_down", "translate_camera_up");
         float z = GetAxis("translate_camera_forward", "translate_camera_backward");
@@ -109,7 +98,7 @@ public partial class DeviceInputHandler : Node
             translationDirection = translationDirection.Normalized();
         }
 
-        Vector3 translation = translationDirection * (_translateSpeed * delta);
+        Vector3 translation = translationDirection * (settings.TranslateSpeed * delta);
         Application.Viewport.Event.Translate(translation, SpaceMode.Camera);
     }
 
@@ -119,6 +108,7 @@ public partial class DeviceInputHandler : Node
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleRotationInput(float delta)
     {
+        InputSettings settings = Application.Setting.Service.Current.Input;
         float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
         float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
         float rollInput = GetAxis("rotate_camera_clockwise", "rotate_camera_counterclockwise");
@@ -128,9 +118,9 @@ public partial class DeviceInputHandler : Node
             return;
         }
 
-        float yawAngle = Mathf.DegToRad(yawInput * _rotateSpeedDegrees * delta);
-        float pitchAngle = Mathf.DegToRad(pitchInput * _rotateSpeedDegrees * delta);
-        float rollAngle = Mathf.DegToRad(rollInput * _rollSpeedDegrees * delta);
+        float yawAngle = Mathf.DegToRad(yawInput * settings.RotateSpeedDeg * delta);
+        float pitchAngle = Mathf.DegToRad(pitchInput * settings.RotateSpeedDeg * delta);
+        float rollAngle = Mathf.DegToRad(rollInput * settings.RollSpeedDeg * delta);
         Quaternion yaw = new Quaternion(Vector3.Up, yawAngle);
         Quaternion pitch = new Quaternion(Vector3.Right, pitchAngle);
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
@@ -148,17 +138,6 @@ public partial class DeviceInputHandler : Node
     private float GetAxis(string negativeAction, string positiveAction)
     {
         return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);
-    }
-
-    /// <summary>
-    /// 設定値を反映する
-    /// </summary>
-    private void ApplySettings()
-    {
-        InputSettings s = Application.Setting.Service.Current.Input;
-        _translateSpeed = s.TranslateSpeed;
-        _rotateSpeedDegrees = s.RotateSpeedDeg;
-        _rollSpeedDegrees = s.RollSpeedDeg;
     }
 
     #endregion

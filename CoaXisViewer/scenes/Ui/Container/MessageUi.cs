@@ -9,8 +9,6 @@ public partial class MessageUi : PanelContainer
 {
     #region Fields
 
-    private int _maxLines = UiSettings.DefaultMessageMaxLines;
-
     // 関連ノードのキャッシュ
     private RichTextLabel _label;
 
@@ -25,7 +23,7 @@ public partial class MessageUi : PanelContainer
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
-        ApplySettings();
+        OnSettingsNotified();
     }
 
     public override void _ExitTree()
@@ -53,7 +51,7 @@ public partial class MessageUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Log.Notified += OnLogNotified;
-        Application.Setting.Event.SettingsNotified += ApplySettings;
+        Application.Setting.Event.SettingsNotified += OnSettingsNotified;
     }
 
     /// <summary>
@@ -62,7 +60,7 @@ public partial class MessageUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Log.Notified -= OnLogNotified;
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
+        Application.Setting.Event.SettingsNotified -= OnSettingsNotified;
     }
 
     /// <summary>
@@ -72,6 +70,15 @@ public partial class MessageUi : PanelContainer
     private void OnLogNotified(string line)
     {
         AddLine(line);
+    }
+
+    /// <summary>
+    /// 設定変更通知を受けたときに表示を再整形する
+    /// </summary>
+    private void OnSettingsNotified()
+    {
+        TrimBufferToMaxLines();
+        RefreshLabelText();
     }
 
     #endregion
@@ -93,31 +100,23 @@ public partial class MessageUi : PanelContainer
     }
 
     /// <summary>
-    /// 設定値を反映する
-    /// </summary>
-    private void ApplySettings()
-    {
-        _maxLines = Application.Setting.Service.Current.Ui.MessageMaxLines;
-        TrimBufferToMaxLines();
-        RefreshLabelText();
-    }
-
-    /// <summary>
     /// バッファ行数を上限まで切り詰める
     /// </summary>
     private void TrimBufferToMaxLines()
     {
-        if (_maxLines < UiSettings.MinMessageMaxLines)
+        int maxLines = Application.Setting.Service.Current.Ui.MessageMaxLines;
+
+        if (maxLines < UiSettings.MinMessageMaxLines)
         {
-            _maxLines = UiSettings.DefaultMessageMaxLines;
+            maxLines = UiSettings.DefaultMessageMaxLines;
         }
 
         // 行数制限
         var lines = _buffer.ToString().Split('\n');
-        if (lines.Length > _maxLines)
+        if (lines.Length > maxLines)
         {
             _buffer.Clear();
-            for (int i = lines.Length - _maxLines; i < lines.Length; i++)
+            for (int i = lines.Length - maxLines; i < lines.Length; i++)
                 _buffer.AppendLine(lines[i]);
         }
     }

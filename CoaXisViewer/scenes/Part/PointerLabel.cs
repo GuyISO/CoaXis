@@ -15,8 +15,6 @@ public partial class PointerLabel : Node3D
 	private Label3D _labelLeft;
 	private Label3D _labelRight;
 
-	private float _rotationSpeedDegPerSec;
-
 	#endregion
 
 	#region Lifecycle
@@ -29,34 +27,22 @@ public partial class PointerLabel : Node3D
 		_labels = _components.GetNode<Node3D>("Labels");
 		_labelLeft = _labels.GetNode<Label3D>("LabelLeft");
 		_labelRight = _labels.GetNode<Label3D>("LabelRight");
-
-		Application.Setting.Event.SettingsNotified += ApplySettings;
-		ApplySettings();
 	}
 
 	public override void _ExitTree()
 	{
-		Application.Setting.Event.SettingsNotified -= ApplySettings;
-
 		base._ExitTree();
 	}
 
 	public override void _Process(double delta)
 	{
-		_components.RotateZ(Mathf.DegToRad(_rotationSpeedDegPerSec) * (float)delta);
+		float rotationSpeedDegPerSec = Application.Setting.Service.Current.Input.PointerRotationSpeedDeg;
+		_components.RotateZ(Mathf.DegToRad(rotationSpeedDegPerSec) * (float)delta);
 	}
 
 	#endregion
 
 	#region Public Methods
-
-	/// <summary>
-	/// 設定値を反映する
-	/// </summary>
-	private void ApplySettings()
-	{
-		_rotationSpeedDegPerSec = Application.Setting.Service.Current.Input.PointerRotationSpeedDeg;
-	}
 
 	/// <summary>
 	/// ポインタの色を設定する

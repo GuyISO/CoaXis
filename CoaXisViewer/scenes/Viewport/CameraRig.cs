@@ -11,11 +11,6 @@ public partial class CameraRig : Node3D
 {
     #region Fields
 
-    private float _zoomBase;        // ズーム倍率変更時の底、exponent1あたりの拡大倍率
-    private float _minZoomValue;    // ズームの最小値、これ以上近づけないようにするための制限値
-    private float _fitPadding;      // Fit All In 時に、対象が画面にぴったり収まるようにするための余白倍率
-    private float _tweenDuration;   // Tween を使用する場合のアニメーション時間（秒）
-
     private Camera3D _camera; // 操作対象のカメラノード
 
     #endregion
@@ -26,7 +21,6 @@ public partial class CameraRig : Node3D
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
-        ApplySettings();
     }
 
     public override void _ExitTree()
@@ -54,7 +48,6 @@ public partial class CameraRig : Node3D
     private void SubscribeApplicationEvents()
     {
         Application.Pick.Event.ResultNotified += OnPickResultNotified;
-        Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
         Application.Viewport.Event.MovePositionToRequested += OnMovePositionToRequested;
         Application.Viewport.Event.MoveRotationToRequested += OnMoveRotationToRequested;
@@ -76,7 +69,6 @@ public partial class CameraRig : Node3D
     private void UnsubscribeApplicationEvents()
     {
         Application.Pick.Event.ResultNotified -= OnPickResultNotified;
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
         Application.Viewport.Event.MovePositionToRequested -= OnMovePositionToRequested;
         Application.Viewport.Event.MoveRotationToRequested -= OnMoveRotationToRequested;
@@ -90,18 +82,6 @@ public partial class CameraRig : Node3D
         Application.Viewport.Event.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
         Application.Viewport.Event.FitRequested -= OnFitRequested;
         Application.Viewport.Event.AlignNormalToRequested -= OnAlignNormalToRequested;
-    }
-
-    /// <summary>
-    /// 設定値を反映する
-    /// </summary>
-    private void ApplySettings()
-    {
-        CameraSettings s = Application.Setting.Service.Current.Camera;
-        _zoomBase = s.ZoomBase;
-        _minZoomValue = s.MinZoomValue;
-        _fitPadding = s.FitPadding;
-        _tweenDuration = s.TweenDuration;
     }
 
     /// <summary>
@@ -447,23 +427,26 @@ public partial class CameraRig : Node3D
     /// <param name="useTween"><see langword="true"/> の場合は補間アニメーションを使用する</param>
     private void Zoom(float exponent, bool useTween = false)
     {
-        float scale = Mathf.Pow(_zoomBase, exponent);
+        CameraSettings settings = Application.Setting.Service.Current.Camera;
+        float scale = Mathf.Pow(settings.ZoomBase, exponent);
+        float minZoomValue = settings.MinZoomValue;
+
         // 投影方式ごとにズーム表現が異なるため、変更先を分ける
         if (_camera.Projection == Camera3D.ProjectionType.Orthogonal)
         {
             // 等角投影の場合はサイズを変更してズームを表現する
             float newSize = _camera.Size * scale;
             // サイズが小さくなりすぎて見えなくなるのを防止するため、最小値を設定する
-            float fixedSize = Mathf.Max(newSize, _minZoomValue);
+            float fixedSize = Mathf.Max(newSize, minZoomValue);
             SetSize(fixedSize, useTween);
         }
         else
         {
             // 透視投影の場合はカメラと焦点のZ距離を変更してズームを表現する
             float distance = _camera.Position.Z;
-            float newDistance = Mathf.Max(distance * scale, _minZoomValue);
+            float newDistance = Mathf.Max(distance * scale, minZoomValue);
             // 距離が近すぎて見えなくなるのを防止するため、最小値を設定する
-            float fixedDistance = Mathf.Max(newDistance, _minZoomValue);
+            float fixedDistance = Mathf.Max(newDistance, minZoomValue);
             SetDistance(fixedDistance, useTween);
         }
     }
@@ -486,13 +469,14 @@ public partial class CameraRig : Node3D
     /// <param name="position">補間先の位置</param>
     private void TweenPosition(Vector3 position)
     {
+        float tweenDuration = Application.Setting.Service.Current.Camera.TweenDuration;
         Tween tween = BuildTween();
         Vector3 startPos = Position;
         tween.TweenMethod(Callable.From<float>(t =>
         {
             Position = startPos.Lerp(position, t);
             Application.Viewport.Event.NotifyPosition(Position);
-        }), 0f, 1f, _tweenDuration);
+        }), 0f, 1f, tweenDuration);
     }
 
     /// <summary>
@@ -501,6 +485,7 @@ public partial class CameraRig : Node3D
     /// <param name="rotation">補間先の回転</param>
     private void TweenRotation(Quaternion rotation)
     {
+        float tweenDuration = Application.Setting.Service.Current.Camera.TweenDuration;
         Tween tween = BuildTween();
         Quaternion startRot = Transform.Basis.GetRotationQuaternion();
         tween.TweenMethod(Callable.From<float>(t =>
@@ -510,7 +495,7 @@ public partial class CameraRig : Node3D
                 Transform.Origin
             );
             Application.Viewport.Event.NotifyRotation(Transform.Basis.GetRotationQuaternion());
-        }), 0f, 1f, _tweenDuration);
+        }), 0f, 1f, tweenDuration);
     }
 
     /// <summary>
@@ -519,13 +504,14 @@ public partial class CameraRig : Node3D
     /// <param name="distance">補間先の距離</param>
     private void TweenDistance(float distance)
     {
+        float tweenDuration = Application.Setting.Service.Current.Camera.TweenDuration;
         Tween tween = BuildTween();
         float startDistance = _camera.Position.Z;
         tween.TweenMethod(Callable.From<float>(distance =>
         {
             _camera.Position = new Vector3(0, 0, distance);
             Application.Viewport.Event.NotifyDistance(distance);
-        }), startDistance, distance, _tweenDuration);
+        }), startDistance, distance, tweenDuration);
     }
 
     /// <summary>
@@ -534,13 +520,14 @@ public partial class CameraRig : Node3D
     /// <param name="size">補間先のサイズ</param>
     private void TweenSize(float size)
     {
+        float tweenDuration = Application.Setting.Service.Current.Camera.TweenDuration;
         Tween tween = BuildTween();
         float startSize = _camera.Size;
         tween.TweenMethod(Callable.From<float>(size =>
         {
             _camera.Size = size;
             Application.Viewport.Event.NotifySize(size);
-        }), startSize, size, _tweenDuration);
+        }), startSize, size, tweenDuration);
     }
 
     /// <summary>
@@ -549,13 +536,14 @@ public partial class CameraRig : Node3D
     /// <param name="fov">補間先の視野角</param>
     private void TweenFov(float fov)
     {
+        float tweenDuration = Application.Setting.Service.Current.Camera.TweenDuration;
         Tween tween = BuildTween();
         float startFov = _camera.Fov;
         tween.TweenMethod(Callable.From<float>(fov =>
         {
             _camera.Fov = fov;
             Application.Viewport.Event.NotifyFov(fov);
-        }), startFov, fov, _tweenDuration);
+        }), startFov, fov, tweenDuration);
     }
 
     /// <summary>
@@ -566,6 +554,10 @@ public partial class CameraRig : Node3D
     /// <returns>フィット対象の AABB を取得できた場合は <see langword="true"/></returns>
     private bool Fit(IEnumerable<Node3D> targetRoots, bool useTween = false)
     {
+        CameraSettings settings = Application.Setting.Service.Current.Camera;
+        float fitPadding = settings.FitPadding;
+        float minZoomValue = settings.MinZoomValue;
+
         if (!CameraFitUtility.TryGetWorldAabb(targetRoots, out Aabb worldAabb))
         {
             return false;
@@ -598,7 +590,7 @@ public partial class CameraRig : Node3D
             }
 
             requiredDistance = Mathf.Max(requiredDistance, maxZ + _camera.Near * 1.5f);
-            requiredDistance = Mathf.Max(requiredDistance * _fitPadding, _minZoomValue);
+            requiredDistance = Mathf.Max(requiredDistance * fitPadding, minZoomValue);
 
             SetDistance(requiredDistance, useTween);
         }
@@ -612,7 +604,7 @@ public partial class CameraRig : Node3D
             }
 
             float requiredHeight = 2.0f * Mathf.Max(maxAbsY, maxAbsX / aspect);
-            float targetSize = Mathf.Max(requiredHeight * _fitPadding, _minZoomValue);
+            float targetSize = Mathf.Max(requiredHeight * fitPadding, minZoomValue);
 
             SetSize(targetSize, useTween);
         }
