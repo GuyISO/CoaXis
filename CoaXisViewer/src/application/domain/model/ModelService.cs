@@ -8,8 +8,8 @@ public partial class ModelService : Node
 {
 	#region Fields
 
-	private RootModel _rootModel;
-	private readonly ModelGuidRegistry _modelGuidRegistry = new();
+	private RootModelNode _rootModel;
+	private readonly ModelGuidRegistry _modelGuidRegistry = ModelGuidRegistry.Instance;
 
 	#endregion
 
@@ -19,7 +19,7 @@ public partial class ModelService : Node
 	/// RootModel を取得する
 	/// </summary>
 	/// <remarks>RootModel が存在しない場合は動的に生成する</remarks>
-	internal RootModel Root
+	internal RootModelNode Root
 	{
 		get
 		{
@@ -32,14 +32,14 @@ public partial class ModelService : Node
 	}
 
 	/// <summary>
-	/// AnyModel から Guid へのマッピング
+	/// ModelNode から Guid へのマッピング
 	/// </summary>
-	internal IReadOnlyDictionary<AnyModel, System.Guid> ModelToGuidMap => _modelGuidRegistry.ModelToGuidMap;
+	internal IReadOnlyDictionary<ModelNode, System.Guid> ModelToGuidMap => _modelGuidRegistry.ModelToGuidMap;
 
 	/// <summary>
-	/// Guid から AnyModel へのマッピング
+	/// Guid から ModelNode へのマッピング
 	/// </summary>
-	internal IReadOnlyDictionary<System.Guid, AnyModel> GuidToModelMap => _modelGuidRegistry.GuidToModelMap;
+	internal IReadOnlyDictionary<System.Guid, ModelNode> GuidToModelMap => _modelGuidRegistry.GuidToModelMap;
 
 	#endregion
 
@@ -91,7 +91,7 @@ public partial class ModelService : Node
 	/// <summary>
 	/// モデル追加通知を受けたときに Guid マッピングへ登録する
 	/// </summary>
-	private void OnAddModelRequested(AnyModel childModel, AnyModel parentModel)
+	private void OnAddModelRequested(ModelNode childModel, ModelNode parentModel)
 	{
 		_modelGuidRegistry.RegisterRecursively(childModel);
 	}
@@ -113,7 +113,7 @@ public partial class ModelService : Node
 	/// モデルの表示状態切替がリクエストされたときに呼び出されるイベントハンドラ
 	/// </summary>
 	/// <param name="model">表示状態を切り替えるモデル</param>
-	private void OnToggleModelVisibilityRequested(AnyModel model)
+	private void OnToggleModelVisibilityRequested(ModelNode model)
 	{
 		var command = new SetModelVisibilityCommand([model], !model.Visible);
 		Application.Command.Event.Execute(command);
@@ -124,7 +124,7 @@ public partial class ModelService : Node
 	/// </summary>
 	/// <param name="model">表示状態が変更されたモデル</param>
 	/// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-	private void OnModelVisibilityStateNotified(AnyModel model, bool isVisible)
+	private void OnModelVisibilityStateNotified(ModelNode model, bool isVisible)
 	{
 		model.Visible = isVisible;
 	}
@@ -134,7 +134,7 @@ public partial class ModelService : Node
 	/// </summary>
 	/// <param name="model">選択状態が変更されたモデル</param>
 	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-	private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
+	private void OnModelSelectionStateNotified(ModelNode model, bool isSelected)
 	{
 		HighLightModel(model, isSelected);
 	}
@@ -148,11 +148,11 @@ public partial class ModelService : Node
 	/// </summary>
 	/// <param name="model">切り替えるモデル</param>
 	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalse</param>
-	private static void HighLightModel(AnyModel model, bool enable = true)
+	private static void HighLightModel(ModelNode model, bool enable = true)
 	{
 		// 指定したモデルとその子孫のモデルすべてにハイライト状態を適用する
 		var models = GetModelsRecursively(model);
-		foreach (AnyModel targetModel in models)
+		foreach (ModelNode targetModel in models)
 		{
 			HighlightMesh(targetModel, enable);
 		}
@@ -163,7 +163,7 @@ public partial class ModelService : Node
 	/// </summary>
 	/// <param name="model">切り替えるモデル</param>
 	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
-	private static void HighlightMesh(AnyModel model, bool enable = true)
+	private static void HighlightMesh(ModelNode model, bool enable = true)
 	{
 		Material selectedMaterial = Application.Asset.Service.GetSelectedMaterial();
 
@@ -200,16 +200,16 @@ public partial class ModelService : Node
 	/// </summary>
 	/// <param name="model">取得対象のモデル</param>
 	/// <returns>取得したモデルのリスト</returns>
-	private static List<AnyModel> GetModelsRecursively(AnyModel model)
+	private static List<ModelNode> GetModelsRecursively(ModelNode model)
 	{
-		var models = new List<AnyModel>();
+		var models = new List<ModelNode>();
 
-		if (model is AnyModel)
+		if (model is ModelNode)
 		{
 			models.Add(model);
 		}
 
-		foreach (AnyModel childModel in model.ChildModels)
+		foreach (ModelNode childModel in model.ChildModels)
 		{
 			models.AddRange(GetModelsRecursively(childModel));
 		}
@@ -242,7 +242,7 @@ public partial class ModelService : Node
 	/// 指定モデル配下のうち、子モデル配下を除いた MeshInstance3D を再帰的に取得する
 	/// </summary>
 	/// <param name="model">取得対象のモデル</param>
-	private static List<MeshInstance3D> GetMeshInstancesUnderModel(AnyModel model)
+	private static List<MeshInstance3D> GetMeshInstancesUnderModel(ModelNode model)
 	{
 		var meshInstances = new List<MeshInstance3D>();
 		CollectMeshInstancesUnderModel(model, meshInstances, isRoot: true);
@@ -257,7 +257,7 @@ public partial class ModelService : Node
 	/// <param name="isRoot">探索開始ノードかどうか</param>
 	private static void CollectMeshInstancesUnderModel(Node node, List<MeshInstance3D> results, bool isRoot = false)
 	{
-		if (!isRoot && node is AnyModel)
+		if (!isRoot && node is ModelNode)
 		{
 			return;
 		}
@@ -277,9 +277,9 @@ public partial class ModelService : Node
 	/// 指定したモデルの祖先に選択状態のモデルが存在するかどうかを判定する
 	/// </summary>
 	/// <param name="model">判定対象のモデル</param>
-	private static bool HasSelectedAncestor(AnyModel model)
+	private static bool HasSelectedAncestor(ModelNode model)
 	{
-		HashSet<AnyModel> visited = new HashSet<AnyModel>();
+		HashSet<ModelNode> visited = new HashSet<ModelNode>();
 
 		while (model != null)
 		{
@@ -308,7 +308,7 @@ public partial class ModelService : Node
 			return;
 		}
 
-		_rootModel = new RootModel
+		_rootModel = new RootModelNode
 		{
 			Name = "RootModel"
 		};

@@ -1,34 +1,41 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
-/// AnyModel と Guid の双方向マッピングを管理する
+/// ModelNode のインスタンスを Guid で管理するシングルトン
 /// </summary>
-public class ModelGuidRegistry
+public sealed class ModelGuidRegistry
 {
     #region Fields
 
-    private readonly Dictionary<AnyModel, Guid> _modelToGuid = new();
-    private readonly Dictionary<Guid, AnyModel> _guidToModel = new();
-    private readonly Dictionary<AnyModel, Action> _modelTreeExitingHandlers = new();
+    private readonly Dictionary<ModelNode, Guid> _modelToGuidMap = new();
+    private readonly Dictionary<Guid, ModelNode> _guidToModelMap = new();
 
     #endregion
 
     #region Properties
 
-    public IReadOnlyDictionary<AnyModel, Guid> ModelToGuidMap => _modelToGuid;
+    public static ModelGuidRegistry Instance { get; } = new ModelGuidRegistry();
 
-    public IReadOnlyDictionary<Guid, AnyModel> GuidToModelMap => _guidToModel;
+    public IReadOnlyDictionary<ModelNode, Guid> ModelToGuidMap => _modelToGuidMap;
+
+    public IReadOnlyDictionary<Guid, ModelNode> GuidToModelMap => _guidToModelMap;
+
+    #endregion
+
+    #region Constructors
+
+    private ModelGuidRegistry()
+    {
+    }
 
     #endregion
 
     #region Public Methods
 
-    /// <summary>
-    /// モデルとその子孫を Guid マッピングへ再帰登録する
-    /// </summary>
-    public void RegisterRecursively(AnyModel model)
+    public void RegisterRecursively(ModelNode model)
     {
         if (model == null)
         {
@@ -37,88 +44,41 @@ public class ModelGuidRegistry
 
         Register(model);
 
-        foreach (AnyModel childModel in model.ChildModels)
+        foreach (ModelNode childModel in model.ChildModels)
         {
             RegisterRecursively(childModel);
         }
     }
 
-    /// <summary>
-    /// 1モデル分の Guid マッピングを登録する
-    /// </summary>
-    public void Register(AnyModel model)
-    {
-        if (model == null)
-        {
-            return;
-        }
-
-        if (_modelToGuid.ContainsKey(model))
-        {
-            return;
-        }
-
-        Guid guid = model.Guid;
-        if (_guidToModel.TryGetValue(guid, out AnyModel mappedModel) && mappedModel != model)
-        {
-            Application.Log.Warn($"ModelGuidRegistry: duplicate Guid detected. guid='{guid}', model='{model.Name}'");
-            return;
-        }
-
-        _modelToGuid[model] = guid;
-        _guidToModel[guid] = model;
-
-        Action handler = null;
-        handler = () =>
-        {
-            Unregister(model);
-        };
-        model.TreeExiting += handler;
-        _modelTreeExitingHandlers[model] = handler;
-    }
-
-    /// <summary>
-    /// 1モデル分の Guid マッピングを解除する
-    /// </summary>
-    public void Unregister(AnyModel model)
-    {
-        if (model == null)
-        {
-            return;
-        }
-
-        if (_modelTreeExitingHandlers.TryGetValue(model, out Action handler))
-        {
-            if (GodotObject.IsInstanceValid(model))
-            {
-                model.TreeExiting -= handler;
-            }
-            _modelTreeExitingHandlers.Remove(model);
-        }
-
-        if (_modelToGuid.TryGetValue(model, out Guid guid))
-        {
-            _modelToGuid.Remove(model);
-            _guidToModel.Remove(guid);
-        }
-    }
-
-    /// <summary>
-    /// 管理中の Guid マッピングをすべて解除する
-    /// </summary>
     public void Clear()
     {
-        foreach (var pair in _modelTreeExitingHandlers)
+        _modelToGuidMap.Clear();
+        _guidToModelMap.Clear();
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    private void Register(ModelNode model)
+    {
+        if (model == null || model.Data == null || model.Data.Id == Guid.Empty)
         {
-            if (GodotObject.IsInstanceValid(pair.Key))
-            {
-                pair.Key.TreeExiting -= pair.Value;
-            }
+            return;
         }
 
-        _modelTreeExitingHandlers.Clear();
-        _modelToGuid.Clear();
-        _guidToModel.Clear();
+        if (_modelToGuidMap.TryGetValue(model, out Guid existingGuid))
+        {
+            _guidToModelMap.Remove(existingGuid);
+        }
+
+        if (_guidToModelMap.TryGetValue(model.Data.Id, out ModelNode existingModel) && !ReferenceEquals(existingModel, model))
+        {
+            _modelToGuidMap.Remove(existingModel);
+        }
+
+        _modelToGuidMap[model] = model.Data.Id;
+        _guidToModelMap[model.Data.Id] = model;
     }
 
     #endregion

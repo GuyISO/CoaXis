@@ -2,13 +2,13 @@ using Godot;
 using System;
 
 /// <summary>
-/// AnyModel の表示状態を変更する Undo/Redo 対応コマンド、バッチで複数モデルの表示状態を変更することも可能
+/// ModelNode の表示状態を変更する Undo/Redo 対応コマンド、バッチで複数モデルの表示状態を変更することも可能
 /// </summary>
 public sealed partial class SetModelVisibilityCommand : CommandBase
 {
     #region Fields
 
-    private readonly AnyModel[] _models;
+    private readonly ModelNode[] _models;
     private readonly bool[] _previousVisibles;
     private readonly bool _nextVisible;
 
@@ -30,7 +30,7 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     /// </summary>
     /// <param name="models">表示状態を変更するモデルの配列</param>
     /// <param name="nextVisible">変更後の表示状態</param>
-    public SetModelVisibilityCommand(AnyModel[] models, bool nextVisible)
+    public SetModelVisibilityCommand(ModelNode[] models, bool nextVisible)
     {
         if (models == null)
         {

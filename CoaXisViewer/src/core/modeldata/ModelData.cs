@@ -2,11 +2,11 @@ using System;
 using Godot;
 using System.Collections.Generic;
 
-public class AnyModelData
+public class ModelData
 {
     #region Fields
 
-    private readonly Dictionary<string, AnyModelData> _children = new Dictionary<string, AnyModelData>();
+    private readonly Dictionary<string, ModelData> _children = new Dictionary<string, ModelData>();
 
     #endregion
 
@@ -21,21 +21,25 @@ public class AnyModelData
     public string IconPath { get; set; } = string.Empty;
     public string GlbPath { get; set; } = string.Empty;
     public string WrlPath { get; set; } = string.Empty;
-    public IReadOnlyCollection<AnyModelData> Children => _children.Values;
+    public IReadOnlyCollection<ModelData> Children => _children.Values;
+    
+    public ModelData Parent => ParentId != Guid.Empty ? ModelDataRegistry.Instance.GetModelData(ParentId) : null;
 
-    public AnyModelData Parent => ParentId != Guid.Empty ? ModelDataRegistry.Instance.GetModelData(ParentId) : null;
+
+    public ModelNode Node { get; set; } = null;
+    public bool IsNodeCreated => Node != null;
 
     #endregion
 
     #region Constructors
-    public AnyModelData(Guid id, Guid parentId, string type, string name)
+    public ModelData(Guid id, Guid parentId, string type, string name)
     {
         Id = id;
         ParentId = parentId;
         Type = type ?? string.Empty;
         Name = name ?? string.Empty;
     }
-    public AnyModelData(Guid id, Guid parentId, string name)
+    public ModelData(Guid id, Guid parentId, string name)
         : this(id, parentId, string.Empty, name)
     {
     }
@@ -43,7 +47,7 @@ public class AnyModelData
 
     #region Public Methods
 
-    internal void AttachChild(AnyModelData child)
+    internal void AttachChild(ModelData child)
     {
         if (child == null)
         {
@@ -58,7 +62,7 @@ public class AnyModelData
         _children.Add(child.Name, child);
     }
 
-    internal void DetachChild(AnyModelData child)
+    internal void DetachChild(ModelData child)
     {
         if (child == null)
         {

@@ -8,7 +8,7 @@ public partial class SelectionUi : PanelContainer
 {
     #region Fields
 
-    private readonly List<AnyModel> _selectedModels = new();
+    private readonly List<ModelNode> _selectedModels = new();
     private bool _isUpdatingTree = false;
 
     // 関連ノードのキャッシュ
@@ -154,7 +154,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     /// <param name="model">選択状態が変化したモデル</param>
     /// <param name="isSelected">選択状態</param>
-    private void OnModelStateNotified(AnyModel model, bool isSelected)
+    private void OnModelStateNotified(ModelNode model, bool isSelected)
     {
         if (model == null)
         {
@@ -208,7 +208,7 @@ public partial class SelectionUi : PanelContainer
         UpdateModeButtons(Application.Selection.Service.Mode);
 
         _selectedModels.Clear();
-        AnyModel[] selectedModels = Application.Selection.Service.GetModelArray();
+        ModelNode[] selectedModels = Application.Selection.Service.GetModelArray();
         if (selectedModels != null && selectedModels.Length > 0)
         {
             _selectedModels.AddRange(selectedModels);
@@ -253,7 +253,7 @@ public partial class SelectionUi : PanelContainer
 
         for (int i = 0; i < _selectedModels.Count; i++)
         {
-            AnyModel model = _selectedModels[i];
+            ModelNode model = _selectedModels[i];
             TreeItem item = _tree.CreateItem(root);
             item.SetText((int)SelectionTreeColumn.No, i.ToString());
             item.SetText((int)SelectionTreeColumn.Name, model.Name);

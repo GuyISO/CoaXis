@@ -40,13 +40,13 @@ public partial class SelectionEvent : EventBase<SelectionEvent>
         Emit(SignalName.ModeNotified, (int)mode);
     }
 
-    [Signal] public delegate void ModelStateNotifiedEventHandler(AnyModel model, bool isSelected);
+    [Signal] public delegate void ModelStateNotifiedEventHandler(ModelNode model, bool isSelected);
     /// <summary>
     /// モデルの選択状態の通知を行う
     /// </summary>
     /// <param name="model">選択状態が変化したモデル</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    internal void NotifyModelState(AnyModel model, bool isSelected)
+    internal void NotifyModelState(ModelNode model, bool isSelected)
     {
         Emit(SignalName.ModelStateNotified, model, isSelected);
     }

@@ -12,12 +12,12 @@ public static class ModelColliderBuilder
     /// 指定したモデル配下のメッシュから ConcavePolygonShape3D を構築する
     /// </summary>
     /// <param name="model">コライダーを追加する対象モデル</param>
-    public static void AddCollider(AnyModel model)
+    public static void AddCollider(ModelNode model)
     {
         Application.Log.Info($"Start adding collider for model: {model.Name}");
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        AnyComponents components = model.Components;
+        ModelComponents components = model.Components;
         if (components == null)
         {
             Application.Log.Warn($"Skipped adding collider for model: {model.Name}, components are not initialized.");

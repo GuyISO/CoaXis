@@ -4,14 +4,14 @@ using System;
 /// <summary>
 /// モデルのルートノードで、シーンルートに配置されるモデル
 /// </summary>
-public partial class RootModel : AnyModel
+public partial class RootModelNode : ModelNode
 {
     #region Properties
 
     /// <summary>
     /// RootModel は常に親モデルを持たない
     /// </summary>
-    public override AnyModel ParentModel => null;
+    public override ModelNode ParentModel => null;
 
     #endregion
 
@@ -59,7 +59,7 @@ public partial class RootModel : AnyModel
     {
         // TODO: 暫定的にこの直下に入れているのでドメインに合わせて洗練させる
 
-        AnyModel model = new SurfaceModel();
+        ModelNode model = new ModelNode();
         model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
         AddChild(model);
 
@@ -83,7 +83,7 @@ public partial class RootModel : AnyModel
 
     #region Internal Helpers
 
-    protected override AnyComponents CreateComponents()
+    protected override ModelComponents CreateComponents()
     {
         return new RootComponents();
     }

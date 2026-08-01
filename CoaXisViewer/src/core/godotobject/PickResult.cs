@@ -18,9 +18,9 @@ public partial class PickResult : RefCounted
     /// </summary>
     public Rid Rid { get; }
     /// <summary>
-    /// 取得したコライダーの親階層上にある AnyModel への参照で、本プロジェクトではコライダーを AnyComponents の子ノードとして配置するためその祖先を取得しやすくしている
+    /// 取得したコライダーの親階層上にある ModelNode への参照で、本プロジェクトではコライダーを ModelComponents の子ノードとして配置するためその祖先を取得しやすくしている
     /// </summary>
-    public AnyModel Model { get; }
+    public ModelNode Model { get; }
     /// <summary>
     /// 取得した位置のワールド座標で、レイキャスト時のみ有効で範囲選択では取得されない
     /// </summary>
@@ -52,7 +52,7 @@ public partial class PickResult : RefCounted
     /// <param name="position">ヒット位置</param>
     /// <param name="normal">ヒット法線</param>
     /// <param name="distance">ヒット距離</param>
-    internal PickResult(bool hasHit, Node3D collider, Rid rid, AnyModel model, Vector3 position, Vector3 normal, float distance)
+    internal PickResult(bool hasHit, Node3D collider, Rid rid, ModelNode model, Vector3 position, Vector3 normal, float distance)
     {
         HasHit = hasHit;
         Collider = collider;

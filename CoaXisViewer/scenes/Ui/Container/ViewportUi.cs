@@ -9,7 +9,7 @@ public partial class ViewportUi : PanelContainer
     #region Fields
 
     // デフォルトのフィット対象モデル
-    private RootModel _rootModel = null!;
+    private RootModelNode _rootModel = null!;
 
     private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
 
@@ -196,7 +196,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        AnyModel[] fitTargets = Application.Selection.Service.GetModelArray();
+        ModelNode[] fitTargets = Application.Selection.Service.GetModelArray();
         if (fitTargets.Length == 0)
         {
             Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
@@ -239,7 +239,7 @@ public partial class ViewportUi : PanelContainer
     /// RootModel が通知されたときに呼び出されるイベントハンドラ、キャッシュを更新する
     /// </summary>
     /// <param name="rootModel">通知されたルートモデル</param>
-    private void OnRootModelNotified(RootModel rootModel)
+    private void OnRootModelNotified(RootModelNode rootModel)
     {
         _rootModel = rootModel;
     }

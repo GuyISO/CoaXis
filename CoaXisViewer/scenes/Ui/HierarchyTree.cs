@@ -10,11 +10,11 @@ public partial class HierarchyTree : Tree
     #region Fields
 
     // 関連ノードのキャッシュ
-    private RootModel _rootModel = null; // 3Dモデル用ルートノードのキャッシュ
+    private RootModelNode _rootModel = null; // 3Dモデル用ルートノードのキャッシュ
     private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
     private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
-    private readonly ModelBinder _binder = new(); // このツリー専用のモデルバインダー
+    private readonly ModelTreeItemBinder _binder = new(); // このツリー専用のモデルバインダー
 
     private Color _selectedColor;
 
@@ -141,7 +141,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     /// <param name="model">選択状態が変更されたモデル</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    private void OnModelSelectionStateNotified(AnyModel model, bool isSelected)
+    private void OnModelSelectionStateNotified(ModelNode model, bool isSelected)
     {
         TreeItem treeItem = _binder.GetTreeItem(model);
         if (treeItem != null)
@@ -175,7 +175,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     /// <param name="child">追加する子モデル</param>
     /// <param name="parent">追加先の親モデル</param>
-    private void OnAddModelRequested(AnyModel child, AnyModel parent)
+    private void OnAddModelRequested(ModelNode child, ModelNode parent)
     {
         AddToTree(child, parent);
     }
@@ -185,7 +185,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     /// <param name="model">表示状態が変更されたモデル</param>
     /// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-    private void OnModelVisibilityStateNotified(AnyModel model, bool isVisible)
+    private void OnModelVisibilityStateNotified(ModelNode model, bool isVisible)
     {
         Application.Log.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
         TreeItem treeItem = _binder.GetTreeItem(model);
@@ -199,7 +199,7 @@ public partial class HierarchyTree : Tree
     /// ルートモデルが通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="rootModel">通知されたルートモデル</param>
-    private void OnRootModelNotified(RootModel rootModel)
+    private void OnRootModelNotified(RootModelNode rootModel)
     {
         if (_rootModel == null)
         {
@@ -227,7 +227,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void ReapplySelectedRowColors()
     {
-        AnyModel[] selectedModels = Application.Selection.Service.GetModelArray();
+        ModelNode[] selectedModels = Application.Selection.Service.GetModelArray();
         if (selectedModels == null || selectedModels.Length == 0)
         {
             return;
@@ -235,7 +235,7 @@ public partial class HierarchyTree : Tree
 
         for (int i = 0; i < selectedModels.Length; i++)
         {
-            AnyModel model = selectedModels[i];
+            ModelNode model = selectedModels[i];
             if (model == null)
             {
                 continue;
@@ -270,7 +270,7 @@ public partial class HierarchyTree : Tree
     /// <param name="item">選択された TreeItem</param>
     private void HandleSelected(TreeItem item)
     {
-        AnyModel model = _binder.GetModel(item);
+        ModelNode model = _binder.GetModel(item);
         if (model == null)
         {
             Application.Log.Warn("HierarchyTree: selected item has no associated model.");
@@ -287,7 +287,7 @@ public partial class HierarchyTree : Tree
         else
         {
             // Add/Removeモードでは範囲選択として扱い、複数モデルの選択を通知する
-            AnyModel[] models = GetAllModelsInRange(_lastSelectedItem, item);
+            ModelNode[] models = GetAllModelsInRange(_lastSelectedItem, item);
             Application.Pick.Event.NotifyResults(PickUtility.PickByModels(models));
         }
     }
@@ -319,21 +319,21 @@ public partial class HierarchyTree : Tree
     /// <param name="lastItem">範囲選択の起点</param>
     /// <param name="selectedItem">範囲選択の終点</param>
     /// <returns>選択対象となるモデル配列</returns>
-    private AnyModel[] GetAllModelsInRange(TreeItem lastItem, TreeItem selectedItem)
+    private ModelNode[] GetAllModelsInRange(TreeItem lastItem, TreeItem selectedItem)
     {
         if (lastItem == null || selectedItem == null)
         {
-            return Array.Empty<AnyModel>();
+            return Array.Empty<ModelNode>();
         }
 
-        List<AnyModel> modelsInRange = CollectModelsInForwardOrder(lastItem, selectedItem);
+        List<ModelNode> modelsInRange = CollectModelsInForwardOrder(lastItem, selectedItem);
         if (modelsInRange == null)
         {
             // 逆方向の範囲選択（下から上）にも対応する
             modelsInRange = CollectModelsInForwardOrder(selectedItem, lastItem);
         }
 
-        return modelsInRange?.ToArray() ?? Array.Empty<AnyModel>();
+        return modelsInRange?.ToArray() ?? Array.Empty<ModelNode>();
     }
 
     /// <summary>
@@ -342,14 +342,14 @@ public partial class HierarchyTree : Tree
     /// <param name="startItem">走査開始アイテム</param>
     /// <param name="endItem">走査終了アイテム</param>
     /// <returns>到達できた場合はモデル一覧、到達できない場合は null</returns>
-    private List<AnyModel> CollectModelsInForwardOrder(TreeItem startItem, TreeItem endItem)
+    private List<ModelNode> CollectModelsInForwardOrder(TreeItem startItem, TreeItem endItem)
     {
-        List<AnyModel> modelsInRange = new List<AnyModel>();
+        List<ModelNode> modelsInRange = new List<ModelNode>();
 
         TreeItem currentItem = startItem;
         while (currentItem != null)
         {
-            AnyModel model = _binder.GetModel(currentItem);
+            ModelNode model = _binder.GetModel(currentItem);
             if (model != null)
             {
                 modelsInRange.Add(model);
@@ -377,7 +377,7 @@ public partial class HierarchyTree : Tree
     /// <param name="item">クリックされた TreeItem</param>
     private void HandleVisibleButtonClicked(TreeItem item)
     {
-        AnyModel model = _binder.GetModel(item);
+        ModelNode model = _binder.GetModel(item);
         if (model == null)
         {
             Application.Log.Warn("HierarchyTree: clicked item has no associated model.");
@@ -389,11 +389,11 @@ public partial class HierarchyTree : Tree
     }
 
     /// <summary>
-    /// AnyModel を TreeItem に追加する
+    /// ModelNode を TreeItem に追加する
     /// </summary>
-    /// <param name="node">追加する AnyModel</param>
+    /// <param name="node">追加する ModelNode</param>
     /// <param name="parentTreeItem">親の TreeItem</param>
-    private void AddToTree(AnyModel model, TreeItem parentTreeItem = null)
+    private void AddToTree(ModelNode model, TreeItem parentTreeItem = null)
     {
         // ツリーにアイテムを追加、親が null の場合は初回のみルートアイテムとして追加される便利仕様
         TreeItem treeItem = CreateItem(parentTreeItem);
@@ -404,26 +404,26 @@ public partial class HierarchyTree : Tree
         treeItem.SetIcon((int)HierarchyTreeColumn.VisibleButton, model.Visible ? _visibleIcon : _invisibleIcon);
         //treeItem.SetEditable((int)HierarchyTreeColumn.VisibleButton, true); // アイコンをクリックして編集可能にする
 
-        // AnyModel と TreeItem の対応を登録
+        // ModelNode と TreeItem の対応を登録
         if (!_binder.Bind(model, treeItem))
         {
             Application.Log.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
         }
 
         // 子ノードを再帰的に追加
-        foreach (AnyModel childModel in model.ChildModels)
+        foreach (ModelNode childModel in model.ChildModels)
         {
-            // AnyModel のみをツリーに追加する
+            // ModelNode のみをツリーに追加する
             AddToTree(childModel, treeItem);
         }
     }
 
     /// <summary>
-    /// AnyModel を TreeItem に追加する（親モデルを指定して追加する）
+    /// ModelNode を TreeItem に追加する（親モデルを指定して追加する）
     /// </summary>
     /// <param name="childModel">追加する子モデル</param>
     /// <param name="parentModel">追加先の親モデル</param>
-    private void AddToTree(AnyModel childModel, AnyModel parentModel)
+    private void AddToTree(ModelNode childModel, ModelNode parentModel)
     {
         TreeItem parentTreeItem = _binder.GetTreeItem(parentModel);
         if (parentTreeItem != null)

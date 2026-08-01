@@ -15,13 +15,13 @@ public static class ModelLoadUtility
     /// <param name="model">メッシュを追加する親モデル</param>
     /// <param name="path">ロードするglTFモデルのパス</param>
     /// <returns>モデルロードに成功した場合はtrue、失敗した場合はfalseを返す</returns>
-    public static async Task<bool> LoadModelAsync(AnyModel model, string path)
+    public static async Task<bool> LoadModelAsync(ModelNode model, string path)
     {
         // 所要時間計測開始
         Application.Log.Info($"Start loading model: {path}");
         var sw = System.Diagnostics.Stopwatch.StartNew();
 
-        AnyComponents components = model.Components;
+        ModelComponents components = model.Components;
         if (components == null)
         {
             Application.Log.Error($"Failed to load model: {path}, components are not initialized.");

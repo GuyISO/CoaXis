@@ -1,9 +1,9 @@
 using Godot;
 
 /// <summary>
-/// AnyModel 配下の内部構造をまとめる抽象コンポーネントルート
+/// ModelNode 配下の内部構造をまとめる抽象コンポーネントルート
 /// </summary>
-public partial class AnyComponents : Node3D
+public partial class ModelComponents : Node3D
 {
     #region Properties
 

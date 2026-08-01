@@ -143,11 +143,11 @@ public static class PickUtility
     }
 
     /// <summary>
-    /// AnyModel のみがわかっている状態から PickResult を生成する
+    /// ModelNode のみがわかっている状態から PickResult を生成する
     /// </summary>
     /// <param name="model">選択対象のモデル</param>
     /// <returns>モデル情報を含む PickResult。位置・法線・距離は未設定のため Zero/0 を返す</returns>
-    public static PickResult PickByModel(AnyModel model)
+    public static PickResult PickByModel(ModelNode model)
     {
         if (model == null)
         {
@@ -157,7 +157,7 @@ public static class PickUtility
         Node3D collider = null;
         Rid rid = default;
 
-        AnyComponents components = model.Components;
+        ModelComponents components = model.Components;
         if (components != null && components.Collider != null && GodotObject.IsInstanceValid(components.Collider))
         {
             collider = components.Collider;
@@ -176,11 +176,11 @@ public static class PickUtility
     }
 
     /// <summary>
-    /// AnyModel 群のみがわかっている状態から PickResult 配列を生成する
+    /// ModelNode 群のみがわかっている状態から PickResult 配列を生成する
     /// </summary>
     /// <param name="models">選択対象のモデル配列</param>
     /// <returns>モデル情報を含む PickResult の配列</returns>
-    public static PickResult[] PickByModels(IReadOnlyList<AnyModel> models)
+    public static PickResult[] PickByModels(IReadOnlyList<ModelNode> models)
     {
         if (models == null || models.Count == 0)
         {
@@ -188,7 +188,7 @@ public static class PickUtility
         }
 
         var results = new List<PickResult>(models.Count);
-        foreach (AnyModel model in models)
+        foreach (ModelNode model in models)
         {
             if (model == null)
             {
@@ -206,15 +206,15 @@ public static class PickUtility
     #region Internal Helpers
 
     /// <summary>
-    /// コライダーの親階層から AnyModel を取得する
+    /// コライダーの親階層から ModelNode を取得する
     /// </summary>
-    private static AnyModel GetParentModel(Node node)
+    private static ModelNode GetParentModel(Node node)
     {
         Node current = node;
 
         while (current != null)
         {
-            if (current is AnyModel model)
+            if (current is ModelNode model)
             {
                 return model;
             }

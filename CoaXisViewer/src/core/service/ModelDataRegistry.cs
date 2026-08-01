@@ -2,12 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
+/// <summary>
+/// ModelData のインスタンスを Guid で管理するシングルトン
+/// </summary>
 public sealed class ModelDataRegistry
 {
     #region Fields
 
-    private readonly Dictionary<Guid, AnyModelData> _modelDataById = new();
-    private readonly Dictionary<Guid, List<AnyModelData>> _pendingChildrenByParentId = new();
+    private readonly Dictionary<Guid, ModelData> _data = new();
+
+    private readonly List<ModelData> _unresolved = new();
+
+    private readonly Dictionary<Guid, List<ModelData>> _pendingChildrenByParentId = new();
 
     #endregion
 
@@ -15,7 +21,7 @@ public sealed class ModelDataRegistry
 
     public static ModelDataRegistry Instance { get; } = new ModelDataRegistry();
 
-    public IReadOnlyDictionary<Guid, AnyModelData> ModelDataById => _modelDataById;
+    public IReadOnlyDictionary<Guid, ModelData> ModelDataById => _data;
 
     #endregion
 
@@ -29,7 +35,7 @@ public sealed class ModelDataRegistry
 
     #region Public Methods
 
-    public void Register(AnyModelData modelData)
+    public void Register(ModelData modelData)
     {
         if (modelData == null)
         {
@@ -41,44 +47,44 @@ public sealed class ModelDataRegistry
             throw new ArgumentException("ModelData id must not be empty.", nameof(modelData));
         }
 
-        if (_modelDataById.TryGetValue(modelData.Id, out AnyModelData existingModelData) && !ReferenceEquals(existingModelData, modelData))
+        if (_data.TryGetValue(modelData.Id, out ModelData existingModelData) && !ReferenceEquals(existingModelData, modelData))
         {
             Unregister(existingModelData.Id);
         }
 
-        _modelDataById[modelData.Id] = modelData;
+        _data[modelData.Id] = modelData;
 
         LinkToRegisteredParent(modelData);
         ResolveWaitingChildren(modelData.Id, modelData);
     }
 
-    public AnyModelData GetModelData(Guid id)
+    public ModelData GetModelData(Guid id)
     {
-        return _modelDataById.TryGetValue(id, out AnyModelData modelData) ? modelData : null;
+        return _data.TryGetValue(id, out ModelData modelData) ? modelData : null;
     }
 
-    public bool TryGetModelData(Guid id, out AnyModelData modelData)
+    public bool TryGetModelData(Guid id, out ModelData modelData)
     {
-        return _modelDataById.TryGetValue(id, out modelData);
+        return _data.TryGetValue(id, out modelData);
     }
 
     public bool Unregister(Guid id)
     {
-        if (!_modelDataById.TryGetValue(id, out AnyModelData modelData))
+        if (!_data.TryGetValue(id, out ModelData modelData))
         {
             return false;
         }
 
-        AnyModelData parent = GetModelData(modelData.ParentId);
+        ModelData parent = GetModelData(modelData.ParentId);
         parent?.DetachChild(modelData);
 
-        foreach (AnyModelData child in modelData.Children.ToList())
+        foreach (ModelData child in modelData.Children.ToList())
         {
             modelData.DetachChild(child);
             AddPendingChild(modelData.Id, child);
         }
 
-        _modelDataById.Remove(id);
+        _data.Remove(id);
         RemovePendingEntryForModel(modelData);
 
         return true;
@@ -86,14 +92,14 @@ public sealed class ModelDataRegistry
 
     public void ResolveAllReferences()
     {
-        foreach (AnyModelData modelData in _modelDataById.Values)
+        foreach (ModelData modelData in _data.Values)
         {
             modelData.ClearChildren();
         }
 
         _pendingChildrenByParentId.Clear();
 
-        foreach (AnyModelData modelData in _modelDataById.Values)
+        foreach (ModelData modelData in _data.Values)
         {
             LinkToRegisteredParent(modelData);
         }
@@ -101,22 +107,22 @@ public sealed class ModelDataRegistry
 
     public void Clear()
     {
-        _modelDataById.Clear();
-        _pendingChildrenByParentId.Clear();
+        _data.Clear();
+        _unresolved.Clear();
     }
 
     #endregion
 
     #region Private Methods
 
-    private void LinkToRegisteredParent(AnyModelData modelData)
+    private void LinkToRegisteredParent(ModelData modelData)
     {
         if (modelData.ParentId == Guid.Empty)
         {
             return;
         }
 
-        if (_modelDataById.TryGetValue(modelData.ParentId, out AnyModelData parent))
+        if (_data.TryGetValue(modelData.ParentId, out ModelData parent))
         {
             parent.AttachChild(modelData);
             return;
@@ -125,14 +131,14 @@ public sealed class ModelDataRegistry
         AddPendingChild(modelData.ParentId, modelData);
     }
 
-    private void ResolveWaitingChildren(Guid parentId, AnyModelData parent)
+    private void ResolveWaitingChildren(Guid parentId, ModelData parent)
     {
-        if (!_pendingChildrenByParentId.TryGetValue(parentId, out List<AnyModelData> pendingChildren))
+        if (!_pendingChildrenByParentId.TryGetValue(parentId, out List<ModelData> pendingChildren))
         {
             return;
         }
 
-        foreach (AnyModelData child in pendingChildren)
+        foreach (ModelData child in pendingChildren)
         {
             parent.AttachChild(child);
         }
@@ -140,11 +146,11 @@ public sealed class ModelDataRegistry
         _pendingChildrenByParentId.Remove(parentId);
     }
 
-    private void AddPendingChild(Guid parentId, AnyModelData child)
+    private void AddPendingChild(Guid parentId, ModelData child)
     {
-        if (!_pendingChildrenByParentId.TryGetValue(parentId, out List<AnyModelData> pendingChildren))
+        if (!_pendingChildrenByParentId.TryGetValue(parentId, out List<ModelData> pendingChildren))
         {
-            pendingChildren = new List<AnyModelData>();
+            pendingChildren = new List<ModelData>();
             _pendingChildrenByParentId[parentId] = pendingChildren;
         }
 
@@ -154,11 +160,11 @@ public sealed class ModelDataRegistry
         }
     }
 
-    private void RemovePendingEntryForModel(AnyModelData modelData)
+    private void RemovePendingEntryForModel(ModelData modelData)
     {
         List<Guid> emptyParentIds = null;
 
-        foreach (KeyValuePair<Guid, List<AnyModelData>> entry in _pendingChildrenByParentId)
+        foreach (KeyValuePair<Guid, List<ModelData>> entry in _pendingChildrenByParentId)
         {
             entry.Value.Remove(modelData);
 

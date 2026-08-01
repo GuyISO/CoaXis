@@ -32,7 +32,7 @@ payload:
 - names: string[]（複数）
 
 動作:
-- 一致する AnyModel を名前で探索し、選択要求を発行
+- 一致する ModelNode を名前で探索し、選択要求を発行
 
 ### 3.3 ClearHighlight
 動作:
