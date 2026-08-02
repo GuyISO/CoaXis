@@ -12,22 +12,24 @@ public class ModelData
 
     #region Properties
 
+    // DTOから受け取った情報
     public Guid Id { get; }
     public Guid ParentId { get; }
     public string Type { get; }
     public string Name { get; }
-    public Vector3 Position { get; set; } = Vector3.Zero;
-    public Quaternion Rotation { get; set; } = Quaternion.Identity;
-    public string IconPath { get; set; } = string.Empty;
-    public string GlbPath { get; set; } = string.Empty;
-    public string WrlPath { get; set; } = string.Empty;
-    public IReadOnlyCollection<ModelData> Children => _children.Values;
-    
-    public ModelData Parent => ParentId != Guid.Empty ? ModelDataRegistry.Instance.GetModelData(ParentId) : null;
+    public Vector3 Position { get; } = Vector3.Zero;
+    public Quaternion Rotation { get; } = Quaternion.Identity;
+    public string IconPath { get; } = string.Empty;
+    public string GlbPath { get; } = string.Empty;
+    public string WrlPath { get; } = string.Empty;
 
-
+    // ModelData の状態を表す情報
+    public ModelStatus Status { get; set; } = ModelStatus.Unloaded;
     public ModelNode Node { get; set; } = null;
-    public bool IsNodeCreated => Node != null;
+
+    // 外部から参照するための構造情報
+    public ModelData Parent => ParentId != Guid.Empty ? Application.Model.Registry.GetModelData(ParentId) : null;
+    public IReadOnlyCollection<ModelData> Children => _children.Values;
 
     #endregion
 

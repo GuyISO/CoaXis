@@ -123,3 +123,40 @@ public enum PickHandlingMode
     /// <summary>面に垂直操作モード</summary>
     NormalToFace,
 }
+
+/// <summary>
+/// モデルの状態を表す列挙型
+/// </summary>
+public enum ModelStatus
+{
+    /// <summary> モデルがまだロードされていない状態、初期値 </summary>
+    Unloaded,
+    /// <summary> モデルが初期化された状態 </summary>
+    Initialized,
+    /// <summary> モデルがレジストリに登録された状態 </summary>
+    Registered,
+    /// <summary> モデルの階層構造が解決された状態 </summary>
+    HierarchyResolved,
+    /// <summary> モデルのノードが作成処理中の状態 </summary>
+    NodeCreating,
+    /// <summary> モデルのノードが作成された状態 </summary>
+    NodeCreated,
+    /// <summary> モデルのGLBファイルがロード処理中の状態 </summary>
+    GlbLoading,
+    /// <summary> モデルのGLBファイルがロードされた状態 </summary>
+    GlbLoaded,
+    /// <summary> モデルのWRLファイルがロード処理中の状態 </summary>
+    WrlLoading,
+    /// <summary> モデルのWRLファイルがロードされた状態 </summary>
+    WrlLoaded,
+    /// <summary> モデルのコライダーが作成処理中の状態 </summary>
+    ColliderCreating,
+    /// <summary> モデルのコライダーが作成された状態 </summary>
+    ColliderCreated,
+    /// <summary> モデルのロードが完了した状態 </summary>
+    Loaded,
+    /// <summary> モデルのロードが失敗した状態 </summary>
+    LoadFailed,
+    /// <summary> モデルが破棄された状態 </summary>
+    Disposed,
+}

@@ -5,10 +5,12 @@ public partial class ModelFacade : FacadeBase
 {
     public ModelEvent Event { get; }
     public ModelService Service { get; }
+    public ModelRegistry Registry { get; }
 
     public ModelFacade()
     {
         Event = AddModule<ModelEvent>("ModelEvent");
         Service = AddModule<ModelService>("ModelService");
+        Registry = AddModule<ModelRegistry>("ModelRegistry");
     }
 }

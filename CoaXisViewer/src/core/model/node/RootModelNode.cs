@@ -59,23 +59,32 @@ public partial class RootModelNode : ModelNode
     {
         // TODO: 暫定的にこの直下に入れているのでドメインに合わせて洗練させる
 
-        ModelNode model = new ModelNode();
-        model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
-        AddChild(model);
+        // ModelNode model = new ModelNode();
+        // model.Name = System.IO.Path.GetFileNameWithoutExtension(path);
+        // AddChild(model);
 
-        bool loaded = await ModelLoadUtility.LoadModelAsync(model, path);
-        if (!loaded)
+        // bool loaded = await ModelLoadUtility.LoadModelAsync(model, path);
+        // if (!loaded)
+        // {
+        //     model.QueueFree();
+        //     return;
+        // }
+
+        // // モデルの衝突形状を設定するために、1フレーム待つ
+        // await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+
+        // ModelColliderBuilder.AddCollider(model);
+
+        // Application.Model.Event.AddModel(model, this);
+
+        var list = ModelCsvLoader.Load("res://sample//modeldata.csv");
+
+        GD.Print($"Loaded models: {list.Count}");
+
+        foreach (var m in list)
         {
-            model.QueueFree();
-            return;
+            GD.Print($"{m.Id} parent={m.ParentId}");
         }
-
-        // モデルの衝突形状を設定するために、1フレーム待つ
-        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-
-        ModelColliderBuilder.AddCollider(model);
-
-        Application.Model.Event.AddModel(model, this);
 
     }
 

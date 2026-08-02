@@ -9,7 +9,6 @@ public partial class ModelService : Node
 	#region Fields
 
 	private RootModelNode _rootModel;
-	private readonly ModelGuidRegistry _modelGuidRegistry = ModelGuidRegistry.Instance;
 
 	#endregion
 
@@ -31,16 +30,6 @@ public partial class ModelService : Node
 		}
 	}
 
-	/// <summary>
-	/// ModelNode から Guid へのマッピング
-	/// </summary>
-	internal IReadOnlyDictionary<ModelNode, System.Guid> ModelToGuidMap => _modelGuidRegistry.ModelToGuidMap;
-
-	/// <summary>
-	/// Guid から ModelNode へのマッピング
-	/// </summary>
-	internal IReadOnlyDictionary<System.Guid, ModelNode> GuidToModelMap => _modelGuidRegistry.GuidToModelMap;
-
 	#endregion
 
 	#region Lifecycle
@@ -55,7 +44,6 @@ public partial class ModelService : Node
 	public override void _ExitTree()
 	{
 		UnsubscribeApplicationEvents();
-		_modelGuidRegistry.Clear();
 
 		base._ExitTree();
 	}
@@ -70,7 +58,6 @@ public partial class ModelService : Node
 	private void SubscribeApplicationEvents()
 	{
 		Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
-		Application.Model.Event.AddModelRequested += OnAddModelRequested;
 		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
 		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
@@ -82,18 +69,9 @@ public partial class ModelService : Node
 	private void UnsubscribeApplicationEvents()
 	{
 		Application.Model.Event.AskRootModelRequested -= OnAskRootModelRequested;
-		Application.Model.Event.AddModelRequested -= OnAddModelRequested;
 		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
-	}
-
-	/// <summary>
-	/// モデル追加通知を受けたときに Guid マッピングへ登録する
-	/// </summary>
-	private void OnAddModelRequested(ModelNode childModel, ModelNode parentModel)
-	{
-		_modelGuidRegistry.RegisterRecursively(childModel);
 	}
 
 	/// <summary>
@@ -314,7 +292,6 @@ public partial class ModelService : Node
 		};
 
 		AddChild(_rootModel);
-		_modelGuidRegistry.RegisterRecursively(_rootModel);
 	}
 
 	#endregion
