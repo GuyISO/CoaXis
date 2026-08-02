@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 
 /// <summary>
@@ -8,7 +9,7 @@ public partial class SelectionUi : PanelContainer
 {
     #region Fields
 
-    private readonly List<ModelNode> _selectedModels = new();
+    private readonly List<Guid> _selectedModelIds = new();
     private bool _isUpdatingTree = false;
 
     // 関連ノードのキャッシュ
@@ -152,26 +153,26 @@ public partial class SelectionUi : PanelContainer
     /// <summary>
     /// モデル選択状態通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="model">選択状態が変化したモデル</param>
+    /// <param name="modelId">選択状態が変化したモデル識別子</param>
     /// <param name="isSelected">選択状態</param>
-    private void OnModelStateNotified(ModelNode model, bool isSelected)
+    private void OnModelStateNotified(string modelId, bool isSelected)
     {
-        if (model == null)
+        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
         {
             return;
         }
 
-        int index = _selectedModels.IndexOf(model);
+        int index = _selectedModelIds.IndexOf(parsedModelId);
         if (isSelected)
         {
             if (index < 0)
             {
-                _selectedModels.Add(model);
+                _selectedModelIds.Add(parsedModelId);
             }
         }
         else if (index >= 0)
         {
-            _selectedModels.RemoveAt(index);
+            _selectedModelIds.RemoveAt(index);
         }
 
         RebuildTree();
@@ -207,11 +208,11 @@ public partial class SelectionUi : PanelContainer
     {
         UpdateModeButtons(Application.Selection.Service.Mode);
 
-        _selectedModels.Clear();
-        ModelNode[] selectedModels = Application.Selection.Service.GetModelArray();
-        if (selectedModels != null && selectedModels.Length > 0)
+        _selectedModelIds.Clear();
+        Guid[] selectedModelIds = Application.Selection.Service.GetModelIdArray();
+        if (selectedModelIds != null && selectedModelIds.Length > 0)
         {
-            _selectedModels.AddRange(selectedModels);
+            _selectedModelIds.AddRange(selectedModelIds);
         }
 
         RebuildTree();
@@ -241,7 +242,7 @@ public partial class SelectionUi : PanelContainer
 
         _isUpdatingTree = true;
 
-        _selectedModels.RemoveAll(model => model == null || !GodotObject.IsInstanceValid(model) || !model.IsInsideTree());
+        _selectedModelIds.RemoveAll(modelId => modelId == Guid.Empty || Application.Model.Registry.GetModelData(modelId) == null);
 
         _tree.Clear();
         TreeItem root = _tree.CreateItem();
@@ -251,12 +252,13 @@ public partial class SelectionUi : PanelContainer
             return;
         }
 
-        for (int i = 0; i < _selectedModels.Count; i++)
+        for (int i = 0; i < _selectedModelIds.Count; i++)
         {
-            ModelNode model = _selectedModels[i];
+            Guid modelId = _selectedModelIds[i];
+            ModelData modelData = Application.Model.Registry.GetModelData(modelId);
             TreeItem item = _tree.CreateItem(root);
             item.SetText((int)SelectionTreeColumn.No, i.ToString());
-            item.SetText((int)SelectionTreeColumn.Name, model.Name);
+            item.SetText((int)SelectionTreeColumn.Name, modelData?.Name ?? modelId.ToString());
         }
 
         _isUpdatingTree = false;

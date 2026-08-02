@@ -12,8 +12,8 @@ public partial class SelectionService : Node
 
     private SelectionMode _mode = SelectionMode.Set;
 
-    // 選択状態の管理対象となるモデルのコレクション、HashSet を使用して重複を防ぐ
-    private HashSet<ModelNode> _models = new HashSet<ModelNode>();
+    // 選択状態の管理対象となるモデルIDのコレクション、HashSet を使用して重複を防ぐ
+    private readonly HashSet<Guid> _modelIds = new();
 
     #endregion
 
@@ -91,7 +91,7 @@ public partial class SelectionService : Node
         }
 
         // ピック結果が null またはモデルが null の場合、Setモードの場合は選択をクリアする、Hitしているかは選択においては関係ない
-        if (pickResult == null || pickResult.Model == null)
+        if (pickResult == null || pickResult.ModelId == Guid.Empty)
         {
             if (_mode == SelectionMode.Set)
             {
@@ -100,20 +100,20 @@ public partial class SelectionService : Node
             return;
         }
 
-        ModelNode model = pickResult.Model;
+        Guid modelId = pickResult.ModelId;
         switch (_mode)
         {
             case SelectionMode.Set:
-                Set(model);
+                Set(modelId);
                 break;
             case SelectionMode.Add:
-                Add(model);
+                Add(modelId);
                 break;
             case SelectionMode.Remove:
-                Remove(model);
+                Remove(modelId);
                 break;
             case SelectionMode.Toggle:
-                Toggle(model);
+                Toggle(modelId);
                 break;
             default:
                 Application.Log.Warn($"SelectionService: Unknown selection mode {_mode}.");
@@ -141,20 +141,34 @@ public partial class SelectionService : Node
             return;
         }
 
-        ModelNode[] models = pickResults.Select(result => result.Model).ToArray();
+        Guid[] modelIds = pickResults
+            .Select(result => result.ModelId)
+            .Where(modelId => modelId != Guid.Empty)
+            .Distinct()
+            .ToArray();
+
+        if (modelIds.Length == 0)
+        {
+            if (_mode == SelectionMode.Set)
+            {
+                Clear();
+            }
+            return;
+        }
+
         switch (_mode)
         {
             case SelectionMode.Set:
-                Set(models);
+                Set(modelIds);
                 break;
             case SelectionMode.Add:
-                Add(models);
+                Add(modelIds);
                 break;
             case SelectionMode.Remove:
-                Remove(models);
+                Remove(modelIds);
                 break;
             case SelectionMode.Toggle:
-                Toggle(models);
+                Toggle(modelIds);
                 break;
             default:
                 Application.Log.Warn($"SelectionService: Unknown selection mode {_mode}.");
@@ -172,21 +186,36 @@ public partial class SelectionService : Node
     internal SelectionMode Mode => _mode;
 
     /// <summary>
-    /// 現在の選択モデルのコレクションの複製を取得する
+    /// 現在の選択モデルIDのコレクションの複製を取得する
     /// </summary>
-    internal IReadOnlyCollection<ModelNode> GetModels => _models.ToList().AsReadOnly();
+    internal IReadOnlyCollection<Guid> GetModelIds => _modelIds.ToList().AsReadOnly();
 
     /// <summary>
     /// 現在の選択モデルの数を取得する
     /// </summary>
-    internal int Count => _models.Count;
+    internal int Count => _modelIds.Count;
+
+    /// <summary>
+    /// 指定したモデルIDが選択されているかどうかを確認する
+    /// </summary>
+    /// <param name="modelId">確認するモデルID</param>
+    /// <returns>モデルが選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
+    internal bool Contains(Guid modelId) => modelId != Guid.Empty && _modelIds.Contains(modelId);
 
     /// <summary>
     /// 指定したモデルが選択されているかどうかを確認する
     /// </summary>
-    /// <param name="model">確認するモデル</param>
-    /// <returns>モデルが選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
-    internal bool Contains(ModelNode model) => _models.Contains(model);
+    internal bool Contains(ModelNode modelNode) => modelNode != null && Contains(modelNode.ModelId);
+
+    /// <summary>
+    /// 選択モデルIDの配列を取得する
+    /// </summary>
+    internal Guid[] GetModelIdArray()
+    {
+        return _modelIds
+            .Where(modelId => modelId != Guid.Empty)
+            .ToArray();
+    }
 
     /// <summary>
     /// 選択モデルの配列を取得する
@@ -196,46 +225,53 @@ public partial class SelectionService : Node
     /// </remarks>
     internal ModelNode[] GetModelArray()
     {
-        return _models
-            .Where(model => model != null && GodotObject.IsInstanceValid(model) && model.IsInsideTree())
+        return _modelIds
+            .Select(ResolveModelNode)
+            .Where(modelNode => modelNode != null && GodotObject.IsInstanceValid(modelNode) && modelNode.IsInsideTree())
             .ToArray();
     }
 
     /// <summary>
     /// 指定したモデルのみの選択状態にする、既存の選択はすべて解除される
     /// </summary>
-    /// <param name="model">選択するモデル</param>
-    internal void Set(ModelNode model)
+    /// <param name="modelId">選択するモデルID</param>
+    internal void Set(Guid modelId)
     {
         Clear();
-        Add(model);
+        Add(modelId);
     }
 
     /// <summary>
     /// 指定したモデル群のみの選択状態にする、既存の選択はすべて解除される
     /// </summary>
-    /// <param name="models">選択するモデルの配列</param>
-    internal void Set(ModelNode[] models)
+    /// <param name="modelIds">選択するモデルIDの配列</param>
+    internal void Set(Guid[] modelIds)
     {
         Clear();
-        foreach (var model in models)
+        foreach (Guid modelId in modelIds)
         {
-            Add(model);
+            Add(modelId);
         }
     }
 
     /// <summary>
     /// 指定したモデルを選択対象に追加する
     /// </summary>
-    /// <param name="model">選択するモデル</param>
+    /// <param name="modelId">選択するモデルID</param>
     /// <returns>モデルが新たに選択された場合はtrue、それ以外の場合はfalseを返す</returns>
     /// <remarks>モデルがすでに選択されている場合は何も起こらない</remarks>
-    internal bool Add(ModelNode model)
+    internal bool Add(Guid modelId)
     {
-        if (_models.Add(model))
+        if (modelId == Guid.Empty)
         {
-            Application.Selection.Event.NotifyModelState(model, true);
-            Application.Log.Info($"Selected: {model.Name}");
+            return false;
+        }
+
+        if (_modelIds.Add(modelId))
+        {
+            Application.Selection.Event.NotifyModelState(modelId, true);
+            ModelNode modelNode = ResolveModelNode(modelId);
+            Application.Log.Info($"Selected: {modelNode?.Name ?? modelId.ToString()}");
             return true;
         }
         return false;
@@ -244,29 +280,35 @@ public partial class SelectionService : Node
     /// <summary>
     /// 指定したモデル群を選択対象に追加する
     /// </summary>
-    /// <param name="models">選択するモデルの配列</param>
-    internal void Add(ModelNode[] models)
+    /// <param name="modelIds">選択するモデルIDの配列</param>
+    internal void Add(Guid[] modelIds)
     {
-        foreach (var model in models)
+        foreach (Guid modelId in modelIds)
         {
-            Add(model);
+            Add(modelId);
         }
     }
 
     /// <summary>
     /// 指定したモデルを選択対象から外す
     /// </summary>
-    /// <param name="model">選択から外すモデル</param>
+    /// <param name="modelId">選択から外すモデルID</param>
     /// <returns>モデルが選択から外された場合はtrue、それ以外の場合はfalseを返す</returns>
     /// <remarks>モデルが選択されていない場合は何も起こらない</remarks>
-    internal bool Remove(ModelNode model)
+    internal bool Remove(Guid modelId)
     {
-        if (_models.Remove(model))
+        if (modelId == Guid.Empty)
         {
-            Application.Selection.Event.NotifyModelState(model, false);
-            Application.Log.Info($"Deselected: {model.Name}");
+            return false;
+        }
+
+        if (_modelIds.Remove(modelId))
+        {
+            Application.Selection.Event.NotifyModelState(modelId, false);
+            ModelNode modelNode = ResolveModelNode(modelId);
+            Application.Log.Info($"Deselected: {modelNode?.Name ?? modelId.ToString()}");
             // 選択状態のモデルがなくなった場合、クリア通知も行う
-            if (_models.Count == 0)
+            if (_modelIds.Count == 0)
             {
                 Application.Selection.Event.NotifyCleared();
             }
@@ -278,46 +320,46 @@ public partial class SelectionService : Node
     /// <summary>
     /// 指定したモデル群を選択対象から外す
     /// </summary>
-    /// <param name="models">選択対象から外すモデルの配列</param>
-    internal void Remove(ModelNode[] models)
+    /// <param name="modelIds">選択対象から外すモデルIDの配列</param>
+    internal void Remove(Guid[] modelIds)
     {
-        foreach (var model in models)
+        foreach (Guid modelId in modelIds)
         {
-            Remove(model);
+            Remove(modelId);
         }
     }
 
     /// <summary>
     /// 指定したモデルの選択状態を切り替える
     /// </summary>
-    /// <param name="model">切り替えるモデル</param>
-    internal void Toggle(ModelNode model)
+    /// <param name="modelId">切り替えるモデルID</param>
+    internal void Toggle(Guid modelId)
     {
-        if (_models.Contains(model))
+        if (_modelIds.Contains(modelId))
         {
-            Remove(model);
+            Remove(modelId);
         }
         else
         {
-            Add(model);
+            Add(modelId);
         }
     }
 
     /// <summary>
     /// 指定したモデル群の選択状態を切り替える
     /// </summary>
-    /// <param name="models">切り替えるモデルの列挙体</param>
-    internal void Toggle(ModelNode[] models)
+    /// <param name="modelIds">切り替えるモデルIDの列挙体</param>
+    internal void Toggle(Guid[] modelIds)
     {
         // 切り替えるモデルがない場合は何もしない
-        if (models == null || models.Length == 0)
+        if (modelIds == null || modelIds.Length == 0)
         {
             return;
         }
 
-        foreach (var model in models)
+        foreach (Guid modelId in modelIds)
         {
-            Toggle(model);
+            Toggle(modelId);
         }
     }
 
@@ -327,25 +369,72 @@ public partial class SelectionService : Node
     /// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返す</returns>
     internal bool Clear()
     {
-        if (_models.Count == 0)
+        if (_modelIds.Count == 0)
         {
             return false;
         }
 
-        var modelsToDeselect = _models.ToArray();
+        Guid[] modelIdsToDeselect = _modelIds.ToArray();
 
         // 先にクリアしてからシグナル発報することで、シグナルハンドラ内で選択状態確認した際の整合性を保つ
-        _models.Clear();
+        _modelIds.Clear();
 
         // モデルの選択解除シグナルとハイライト解除は個々に行う
-        foreach (var model in modelsToDeselect)
+        foreach (Guid modelId in modelIdsToDeselect)
         {
-            Application.Selection.Event.NotifyModelState(model, false);
-            Application.Log.Info($"Deselected: {model.Name}");
+            Application.Selection.Event.NotifyModelState(modelId, false);
+            ModelNode modelNode = ResolveModelNode(modelId);
+            Application.Log.Info($"Deselected: {modelNode?.Name ?? modelId.ToString()}");
         }
 
         Application.Selection.Event.NotifyCleared();
         return true;
+    }
+
+    private static ModelNode ResolveModelNode(Guid modelId)
+    {
+        if (modelId == Guid.Empty)
+        {
+            return null;
+        }
+
+        ModelService modelService = Application.Model.Service;
+        if (modelService == null)
+        {
+            return null;
+        }
+
+        RootModelNode rootModelNode = modelService.Root;
+        if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
+        {
+            return null;
+        }
+
+        return ResolveModelNodeRecursive(rootModelNode, modelId);
+    }
+
+    private static ModelNode ResolveModelNodeRecursive(ModelNode modelNode, Guid modelId)
+    {
+        if (modelNode == null)
+        {
+            return null;
+        }
+
+        if (modelNode.ModelId == modelId)
+        {
+            return modelNode;
+        }
+
+        foreach (ModelNode childModelNode in modelNode.ChildModels)
+        {
+            ModelNode found = ResolveModelNodeRecursive(childModelNode, modelId);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 
     #endregion

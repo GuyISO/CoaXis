@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 /// <summary>
 /// 選択関連のイベント集約ハブ
@@ -40,15 +41,15 @@ public partial class SelectionEvent : EventBase<SelectionEvent>
         Emit(SignalName.ModeNotified, (int)mode);
     }
 
-    [Signal] public delegate void ModelStateNotifiedEventHandler(ModelNode model, bool isSelected);
+    [Signal] public delegate void ModelStateNotifiedEventHandler(string modelId, bool isSelected);
     /// <summary>
     /// モデルの選択状態の通知を行う
     /// </summary>
-    /// <param name="model">選択状態が変化したモデル</param>
+    /// <param name="modelId">選択状態が変化したモデル識別子</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    internal void NotifyModelState(ModelNode model, bool isSelected)
+    internal void NotifyModelState(Guid modelId, bool isSelected)
     {
-        Emit(SignalName.ModelStateNotified, model, isSelected);
+        Emit(SignalName.ModelStateNotified, modelId.ToString(), isSelected);
     }
 
     [Signal] public delegate void ClearedNotifiedEventHandler();

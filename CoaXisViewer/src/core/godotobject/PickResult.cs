@@ -1,4 +1,5 @@
 ﻿using Godot;
+using System;
 
 /// <summary>
 /// レイキャストや範囲選択で空間上から取得した情報を表すオブジェクト
@@ -18,9 +19,9 @@ public partial class PickResult : RefCounted
     /// </summary>
     public Rid Rid { get; }
     /// <summary>
-    /// 取得したコライダーの親階層上にある ModelNode への参照で、本プロジェクトではコライダーを ModelComponents の子ノードとして配置するためその祖先を取得しやすくしている
+    /// 取得したコライダーの親階層上にある ModelData の識別子
     /// </summary>
-    public ModelNode Model { get; }
+    public Guid ModelId { get; }
     /// <summary>
     /// 取得した位置のワールド座標で、レイキャスト時のみ有効で範囲選択では取得されない
     /// </summary>
@@ -38,7 +39,7 @@ public partial class PickResult : RefCounted
     /// ヒットなし状態を表す PickResult を初期化する
     /// </summary>
     public PickResult()
-        : this(false, null, default, null, Vector3.Zero, Vector3.Zero, 0f)
+        : this(false, null, default, Guid.Empty, Vector3.Zero, Vector3.Zero, 0f)
     {
     }
 
@@ -48,16 +49,16 @@ public partial class PickResult : RefCounted
     /// <param name="hasHit">ヒットしたかどうか</param>
     /// <param name="collider">ヒットしたコライダー</param>
     /// <param name="rid">ヒットしたRID</param>
-    /// <param name="model">ヒットしたモデル</param>
+    /// <param name="modelId">ヒットしたモデルの識別子</param>
     /// <param name="position">ヒット位置</param>
     /// <param name="normal">ヒット法線</param>
     /// <param name="distance">ヒット距離</param>
-    internal PickResult(bool hasHit, Node3D collider, Rid rid, ModelNode model, Vector3 position, Vector3 normal, float distance)
+    internal PickResult(bool hasHit, Node3D collider, Rid rid, Guid modelId, Vector3 position, Vector3 normal, float distance)
     {
         HasHit = hasHit;
         Collider = collider;
         Rid = rid;
-        Model = model;
+        ModelId = modelId;
         Position = position;
         Normal = normal;
         Distance = distance;

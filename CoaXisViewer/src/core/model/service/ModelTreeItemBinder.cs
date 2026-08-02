@@ -14,107 +14,159 @@ public class ModelTreeItemBinder
 {
     #region Fields
 
-    // ModelNode ↔ TreeItem の対応辞書
-    private readonly Dictionary<ModelNode, TreeItem> _modelToTreeItem = new();
-    private readonly Dictionary<TreeItem, ModelNode> _treeItemToModel = new();
+    // ModelId ↔ TreeItem の対応辞書
+    private readonly Dictionary<Guid, TreeItem> _modelIdToTreeItem = new();
+    private readonly Dictionary<TreeItem, Guid> _treeItemToModelId = new();
 
     #endregion
 
     #region Public Methods
 
     /// <summary>
-    /// 指定した TreeItem に対応する ModelNode を取得する
+    /// 指定した TreeItem に対応する ModelId を取得する
     /// </summary>
     /// <param name="treeItem">対応を取得する TreeItem</param>
-    /// <returns>対応する ModelNode、対応がない場合は null</returns>
-    public ModelNode GetModel(TreeItem treeItem)
+    /// <returns>対応する ModelId、対応がない場合は Guid.Empty</returns>
+    public Guid GetModelId(TreeItem treeItem)
     {
         if (treeItem == null)
         {
-            Application.Log.Warn("ModelTreeItemBinder.GetModel called with null tree item.");
+            Application.Log.Warn("ModelTreeItemBinder.GetModelId called with null tree item.");
+            return Guid.Empty;
+        }
+
+        return _treeItemToModelId.TryGetValue(treeItem, out Guid modelId) ? modelId : Guid.Empty;
+    }
+
+    /// <summary>
+    /// 指定した TreeItem に対応する ModelNode を取得する
+    /// </summary>
+    public ModelNode GetModelNode(TreeItem treeItem)
+    {
+        Guid modelId = GetModelId(treeItem);
+        return ResolveModelNode(modelId);
+    }
+
+    /// <summary>
+    /// 指定した ModelId に対応する TreeItem を取得する
+    /// </summary>
+    /// <param name="modelId">対応を取得する ModelId</param>
+    /// <returns>対応する TreeItem、対応がない場合は null</returns>
+    public TreeItem GetTreeItem(Guid modelId)
+    {
+        if (modelId == Guid.Empty)
+        {
+            Application.Log.Warn("ModelTreeItemBinder.GetTreeItem called with empty modelId.");
             return null;
         }
 
-        return _treeItemToModel.TryGetValue(treeItem, out var model) ? model : null;
+        return _modelIdToTreeItem.TryGetValue(modelId, out TreeItem treeItem) ? treeItem : null;
     }
 
     /// <summary>
     /// 指定した ModelNode に対応する TreeItem を取得する
     /// </summary>
-    /// <param name="model">対応を取得する ModelNode</param>
+    /// <param name="modelNode">対応を取得する ModelNode</param>
     /// <returns>対応する TreeItem、対応がない場合は null</returns>
-    public TreeItem GetTreeItem(ModelNode model)
+    public TreeItem GetTreeItem(ModelNode modelNode)
     {
-        if (model == null)
+        if (modelNode == null)
         {
             Application.Log.Warn("ModelTreeItemBinder.GetTreeItem called with null model.");
             return null;
         }
 
-        return _modelToTreeItem.TryGetValue(model, out var treeItem) ? treeItem : null;
+        return GetTreeItem(modelNode.ModelId);
     }
 
     /// <summary>
-    /// ModelNode と TreeItem の対応を登録する
+    /// ModelId と TreeItem の対応を登録する
     /// </summary>
-    /// <param name="model">登録する ModelNode</param>
+    /// <param name="modelId">登録する ModelId</param>
     /// <param name="treeItem">対応する TreeItem</param>
     /// <returns>
     /// 登録に成功した場合は true
     /// いずれかが null、またはどちらかが既に別の対応で登録済みの場合は false
     /// </returns>
-    public bool Bind(ModelNode model, TreeItem treeItem)
+    public bool Bind(Guid modelId, TreeItem treeItem)
     {
-        if (model == null || treeItem == null)
+        if (modelId == Guid.Empty || treeItem == null)
         {
-            Application.Log.Warn("ModelTreeItemBinder.Bind skipped: model or tree item is null.");
+            Application.Log.Warn("ModelTreeItemBinder.Bind skipped: modelId is empty or tree item is null.");
             return false;
         }
 
-        if (_modelToTreeItem.ContainsKey(model))
+        if (_modelIdToTreeItem.ContainsKey(modelId))
         {
-            Application.Log.Warn($"ModelTreeItemBinder.Bind skipped: model '{model.Name}' is already bound.");
+            Application.Log.Warn($"ModelTreeItemBinder.Bind skipped: modelId '{modelId}' is already bound.");
             return false; // すでに登録されている
         }
 
-        if (_treeItemToModel.ContainsKey(treeItem))
+        if (_treeItemToModelId.ContainsKey(treeItem))
         {
             Application.Log.Warn("ModelTreeItemBinder.Bind skipped: tree item is already bound.");
             return false; // すでに登録されている
         }
 
-        _modelToTreeItem[model] = treeItem;
-        _treeItemToModel[treeItem] = model;
+        _modelIdToTreeItem[modelId] = treeItem;
+        _treeItemToModelId[treeItem] = modelId;
 
-        Application.Log.Debug($"ModelTreeItemBinder.Bind: model='{model.Name}', mappings={_modelToTreeItem.Count}");
+        Application.Log.Debug($"ModelTreeItemBinder.Bind: modelId='{modelId}', mappings={_modelIdToTreeItem.Count}");
 
         return true;
     }
 
     /// <summary>
-    /// 指定した ModelNode の対応を解除し、対応していた TreeItem を解放する
+    /// ModelNode と TreeItem の対応を登録する
     /// </summary>
-    /// <param name="model">登録解除する ModelNode</param>
-    public void Unbind(ModelNode model)
+    public bool Bind(ModelNode modelNode, TreeItem treeItem)
     {
-        if (model == null)
+        if (modelNode == null)
         {
-            Application.Log.Warn("ModelTreeItemBinder.Unbind(model) skipped: model is null.");
+            return false;
+        }
+
+        return Bind(modelNode.ModelId, treeItem);
+    }
+
+    /// <summary>
+    /// 指定した ModelId の対応を解除し、対応していた TreeItem を解放する
+    /// </summary>
+    /// <param name="modelId">登録解除する ModelId</param>
+    public void Unbind(Guid modelId)
+    {
+        if (modelId == Guid.Empty)
+        {
+            Application.Log.Warn("ModelTreeItemBinder.Unbind(modelId) skipped: modelId is empty.");
             return;
         }
 
-        if (!_modelToTreeItem.TryGetValue(model, out var treeItem))
+        if (!_modelIdToTreeItem.TryGetValue(modelId, out TreeItem treeItem))
         {
-            Application.Log.Debug($"ModelTreeItemBinder.Unbind(model) skipped: model '{model.Name}' is not bound.");
+            Application.Log.Debug($"ModelTreeItemBinder.Unbind(modelId) skipped: modelId '{modelId}' is not bound.");
             return;
         }
 
-        _treeItemToModel.Remove(treeItem);
-        _modelToTreeItem.Remove(model);
+        _treeItemToModelId.Remove(treeItem);
+        _modelIdToTreeItem.Remove(modelId);
 
-        Application.Log.Debug($"ModelTreeItemBinder.Unbind(model): model='{model.Name}', mappings={_modelToTreeItem.Count}");
+        Application.Log.Debug($"ModelTreeItemBinder.Unbind(modelId): modelId='{modelId}', mappings={_modelIdToTreeItem.Count}");
 
         treeItem.Free();
+    }
+
+    /// <summary>
+    /// 指定した ModelNode の対応を解除し、対応していた TreeItem を解放する
+    /// </summary>
+    public void Unbind(ModelNode modelNode)
+    {
+        if (modelNode == null)
+        {
+            Application.Log.Warn("ModelTreeItemBinder.Unbind(modelNode) skipped: modelNode is null.");
+            return;
+        }
+
+        Unbind(modelNode.ModelId);
     }
 
     /// <summary>
@@ -129,16 +181,16 @@ public class ModelTreeItemBinder
             return;
         }
 
-        if (!_treeItemToModel.TryGetValue(treeItem, out var model))
+        if (!_treeItemToModelId.TryGetValue(treeItem, out Guid modelId))
         {
             Application.Log.Debug("ModelTreeItemBinder.Unbind(treeItem) skipped: tree item is not bound.");
             return;
         }
 
-        _modelToTreeItem.Remove(model);
-        _treeItemToModel.Remove(treeItem);
+        _modelIdToTreeItem.Remove(modelId);
+        _treeItemToModelId.Remove(treeItem);
 
-        Application.Log.Debug($"ModelTreeItemBinder.Unbind(treeItem): model='{model.Name}', mappings={_modelToTreeItem.Count}");
+        Application.Log.Debug($"ModelTreeItemBinder.Unbind(treeItem): modelId='{modelId}', mappings={_modelIdToTreeItem.Count}");
 
         treeItem.Free();
     }
@@ -151,16 +203,56 @@ public class ModelTreeItemBinder
     {
         if (freeItems)
         {
-            foreach (TreeItem treeItem in _treeItemToModel.Keys)
+            foreach (TreeItem treeItem in _treeItemToModelId.Keys)
             {
                 treeItem?.Free();
             }
         }
 
-        _treeItemToModel.Clear();
-        _modelToTreeItem.Clear();
+        _treeItemToModelId.Clear();
+        _modelIdToTreeItem.Clear();
 
         Application.Log.Debug("ModelTreeItemBinder.Clear: mappings=0");
+    }
+
+    private static ModelNode ResolveModelNode(Guid modelId)
+    {
+        if (modelId == Guid.Empty)
+        {
+            return null;
+        }
+
+        RootModelNode rootModelNode = Application.Model.Service?.Root;
+        if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
+        {
+            return null;
+        }
+
+        return ResolveModelNodeRecursive(rootModelNode, modelId);
+    }
+
+    private static ModelNode ResolveModelNodeRecursive(ModelNode modelNode, Guid modelId)
+    {
+        if (modelNode == null)
+        {
+            return null;
+        }
+
+        if (modelNode.ModelId == modelId)
+        {
+            return modelNode;
+        }
+
+        foreach (ModelNode childModelNode in modelNode.ChildModels)
+        {
+            ModelNode found = ResolveModelNodeRecursive(childModelNode, modelId);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 
     #endregion

@@ -139,11 +139,16 @@ public partial class HierarchyTree : Tree
     /// <summary>
     /// モデルの選択状態が通知されたときのイベントハンドラ
     /// </summary>
-    /// <param name="model">選択状態が変更されたモデル</param>
+    /// <param name="modelId">選択状態が変更されたモデル識別子</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    private void OnModelSelectionStateNotified(ModelNode model, bool isSelected)
+    private void OnModelSelectionStateNotified(string modelId, bool isSelected)
     {
-        TreeItem treeItem = _binder.GetTreeItem(model);
+        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        {
+            return;
+        }
+
+        TreeItem treeItem = _binder.GetTreeItem(parsedModelId);
         if (treeItem != null)
         {
             if (isSelected)
@@ -173,22 +178,53 @@ public partial class HierarchyTree : Tree
     /// <summary>
     /// モデルの追加がリクエストされたときのイベントハンドラ
     /// </summary>
-    /// <param name="child">追加する子モデル</param>
-    /// <param name="parent">追加先の親モデル</param>
-    private void OnAddModelRequested(ModelNode child, ModelNode parent)
+    /// <param name="childModelId">追加する子モデルID</param>
+    /// <param name="parentModelId">追加先の親モデルID</param>
+    private void OnAddModelRequested(string childModelId, string parentModelId)
     {
-        AddToTree(child, parent);
+        if (!Guid.TryParse(childModelId, out Guid parsedChildModelId) || parsedChildModelId == Guid.Empty)
+        {
+            Application.Log.Warn($"HierarchyTree: failed to add model. invalid child modelId='{childModelId}'");
+            return;
+        }
+
+        Guid parsedParentModelId = Guid.Empty;
+        if (!string.IsNullOrWhiteSpace(parentModelId))
+        {
+            Guid.TryParse(parentModelId, out parsedParentModelId);
+        }
+
+        ModelNode childModelNode = FindModelNodeById(parsedChildModelId);
+        if (childModelNode == null)
+        {
+            Application.Log.Warn($"HierarchyTree: failed to add model. child model not found. modelId='{parsedChildModelId}'");
+            return;
+        }
+
+        if (parsedParentModelId == Guid.Empty)
+        {
+            AddToTree(childModelNode);
+            return;
+        }
+
+        ModelNode parentModelNode = FindModelNodeById(parsedParentModelId);
+        AddToTree(childModelNode, parentModelNode);
     }
 
     /// <summary>
     /// モデルの表示状態が通知されたときのイベントハンドラ
     /// </summary>
-    /// <param name="model">表示状態が変更されたモデル</param>
+    /// <param name="modelId">表示状態が変更されたモデル識別子</param>
     /// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-    private void OnModelVisibilityStateNotified(ModelNode model, bool isVisible)
+    private void OnModelVisibilityStateNotified(string modelId, bool isVisible)
     {
-        Application.Log.Debug($"HierarchyTree: visibility state notified. model='{model.Name}', isVisible={isVisible}");
-        TreeItem treeItem = _binder.GetTreeItem(model);
+        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        {
+            return;
+        }
+
+        Application.Log.Debug($"HierarchyTree: visibility state notified. modelId='{parsedModelId}', isVisible={isVisible}");
+        TreeItem treeItem = _binder.GetTreeItem(parsedModelId);
         if (treeItem != null)
         {
             treeItem.SetIcon((int)HierarchyTreeColumn.VisibleButton, isVisible ? _visibleIcon : _invisibleIcon);
@@ -227,21 +263,21 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void ReapplySelectedRowColors()
     {
-        ModelNode[] selectedModels = Application.Selection.Service.GetModelArray();
-        if (selectedModels == null || selectedModels.Length == 0)
+        Guid[] selectedModelIds = Application.Selection.Service.GetModelIdArray();
+        if (selectedModelIds == null || selectedModelIds.Length == 0)
         {
             return;
         }
 
-        for (int i = 0; i < selectedModels.Length; i++)
+        for (int i = 0; i < selectedModelIds.Length; i++)
         {
-            ModelNode model = selectedModels[i];
-            if (model == null)
+            Guid modelId = selectedModelIds[i];
+            if (modelId == Guid.Empty)
             {
                 continue;
             }
 
-            TreeItem item = _binder.GetTreeItem(model);
+            TreeItem item = _binder.GetTreeItem(modelId);
             if (item == null)
             {
                 continue;
@@ -270,8 +306,8 @@ public partial class HierarchyTree : Tree
     /// <param name="item">選択された TreeItem</param>
     private void HandleSelected(TreeItem item)
     {
-        ModelNode model = _binder.GetModel(item);
-        if (model == null)
+        Guid modelId = _binder.GetModelId(item);
+        if (modelId == Guid.Empty)
         {
             Application.Log.Warn("HierarchyTree: selected item has no associated model.");
             return;
@@ -282,13 +318,13 @@ public partial class HierarchyTree : Tree
 
         if (!shouldHandleAsRange)
         {
-            Application.Pick.Event.NotifyResult(PickUtility.PickByModel(model));
+            Application.Pick.Event.NotifyResult(PickUtility.PickByModelId(modelId));
         }
         else
         {
             // Add/Removeモードでは範囲選択として扱い、複数モデルの選択を通知する
-            ModelNode[] models = GetAllModelsInRange(_lastSelectedItem, item);
-            Application.Pick.Event.NotifyResults(PickUtility.PickByModels(models));
+            Guid[] modelIds = GetAllModelsInRange(_lastSelectedItem, item);
+            Application.Pick.Event.NotifyResults(PickUtility.PickByModelIds(modelIds));
         }
     }
 
@@ -318,22 +354,22 @@ public partial class HierarchyTree : Tree
     /// </summary>
     /// <param name="lastItem">範囲選択の起点</param>
     /// <param name="selectedItem">範囲選択の終点</param>
-    /// <returns>選択対象となるモデル配列</returns>
-    private ModelNode[] GetAllModelsInRange(TreeItem lastItem, TreeItem selectedItem)
+    /// <returns>選択対象となるモデルID配列</returns>
+    private Guid[] GetAllModelsInRange(TreeItem lastItem, TreeItem selectedItem)
     {
         if (lastItem == null || selectedItem == null)
         {
-            return Array.Empty<ModelNode>();
+            return Array.Empty<Guid>();
         }
 
-        List<ModelNode> modelsInRange = CollectModelsInForwardOrder(lastItem, selectedItem);
-        if (modelsInRange == null)
+        List<Guid> modelIdsInRange = CollectModelsInForwardOrder(lastItem, selectedItem);
+        if (modelIdsInRange == null)
         {
             // 逆方向の範囲選択（下から上）にも対応する
-            modelsInRange = CollectModelsInForwardOrder(selectedItem, lastItem);
+            modelIdsInRange = CollectModelsInForwardOrder(selectedItem, lastItem);
         }
 
-        return modelsInRange?.ToArray() ?? Array.Empty<ModelNode>();
+        return modelIdsInRange?.ToArray() ?? Array.Empty<Guid>();
     }
 
     /// <summary>
@@ -341,18 +377,18 @@ public partial class HierarchyTree : Tree
     /// </summary>
     /// <param name="startItem">走査開始アイテム</param>
     /// <param name="endItem">走査終了アイテム</param>
-    /// <returns>到達できた場合はモデル一覧、到達できない場合は null</returns>
-    private List<ModelNode> CollectModelsInForwardOrder(TreeItem startItem, TreeItem endItem)
+    /// <returns>到達できた場合はモデルID一覧、到達できない場合は null</returns>
+    private List<Guid> CollectModelsInForwardOrder(TreeItem startItem, TreeItem endItem)
     {
-        List<ModelNode> modelsInRange = new List<ModelNode>();
+        List<Guid> modelIdsInRange = new();
 
         TreeItem currentItem = startItem;
         while (currentItem != null)
         {
-            ModelNode model = _binder.GetModel(currentItem);
-            if (model != null)
+            Guid modelId = _binder.GetModelId(currentItem);
+            if (modelId != Guid.Empty)
             {
-                modelsInRange.Add(model);
+                modelIdsInRange.Add(modelId);
             }
 
             if (currentItem == endItem)
@@ -368,7 +404,7 @@ public partial class HierarchyTree : Tree
             return null;
         }
 
-        return modelsInRange;
+        return modelIdsInRange;
     }
 
     /// <summary>
@@ -377,15 +413,15 @@ public partial class HierarchyTree : Tree
     /// <param name="item">クリックされた TreeItem</param>
     private void HandleVisibleButtonClicked(TreeItem item)
     {
-        ModelNode model = _binder.GetModel(item);
-        if (model == null)
+        Guid modelId = _binder.GetModelId(item);
+        if (modelId == Guid.Empty)
         {
             Application.Log.Warn("HierarchyTree: clicked item has no associated model.");
             return;
         }
 
         // モデルの表示状態を切り替える
-        Application.Model.Event.ToggleModelVisibility(model);
+        Application.Model.Event.ToggleModelVisibility(modelId);
     }
 
     /// <summary>
@@ -393,28 +429,28 @@ public partial class HierarchyTree : Tree
     /// </summary>
     /// <param name="node">追加する ModelNode</param>
     /// <param name="parentTreeItem">親の TreeItem</param>
-    private void AddToTree(ModelNode model, TreeItem parentTreeItem = null)
+    private void AddToTree(ModelNode modelNode, TreeItem parentTreeItem = null)
     {
         // ツリーにアイテムを追加、親が null の場合は初回のみルートアイテムとして追加される便利仕様
         TreeItem treeItem = CreateItem(parentTreeItem);
-        treeItem.SetText((int)HierarchyTreeColumn.Name, model.Name);
+        treeItem.SetText((int)HierarchyTreeColumn.Name, modelNode.Name);
 
         // 非表示切り替えのためのアイコンを設定
         treeItem.SetCellMode((int)HierarchyTreeColumn.VisibleButton, TreeItem.TreeCellMode.Icon);
-        treeItem.SetIcon((int)HierarchyTreeColumn.VisibleButton, model.Visible ? _visibleIcon : _invisibleIcon);
+        treeItem.SetIcon((int)HierarchyTreeColumn.VisibleButton, modelNode.Visible ? _visibleIcon : _invisibleIcon);
         //treeItem.SetEditable((int)HierarchyTreeColumn.VisibleButton, true); // アイコンをクリックして編集可能にする
 
         // ModelNode と TreeItem の対応を登録
-        if (!_binder.Bind(model, treeItem))
+        if (!_binder.Bind(modelNode, treeItem))
         {
-            Application.Log.Warn($"HierarchyTree: failed to bind model '{model.Name}' to tree item.");
+            Application.Log.Warn($"HierarchyTree: failed to bind model '{modelNode.Name}' to tree item.");
         }
 
         // 子ノードを再帰的に追加
-        foreach (ModelNode childModel in model.ChildModels)
+        foreach (ModelNode childModelNode in modelNode.ChildModels)
         {
             // ModelNode のみをツリーに追加する
-            AddToTree(childModel, treeItem);
+            AddToTree(childModelNode, treeItem);
         }
     }
 
@@ -430,6 +466,40 @@ public partial class HierarchyTree : Tree
         {
             AddToTree(childModel, parentTreeItem);
         }
+    }
+
+    private ModelNode FindModelNodeById(Guid modelId)
+    {
+        if (modelId == Guid.Empty || _rootModel == null)
+        {
+            return null;
+        }
+
+        return FindModelNodeByIdRecursive(_rootModel, modelId);
+    }
+
+    private static ModelNode FindModelNodeByIdRecursive(ModelNode modelNode, Guid modelId)
+    {
+        if (modelNode == null)
+        {
+            return null;
+        }
+
+        if (modelNode.ModelId == modelId)
+        {
+            return modelNode;
+        }
+
+        foreach (ModelNode childModelNode in modelNode.ChildModels)
+        {
+            ModelNode found = FindModelNodeByIdRecursive(childModelNode, modelId);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
     
     #endregion

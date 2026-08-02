@@ -78,3 +78,14 @@
   - `.github/instructions/design-philosophy.instructions.md`
   - `.github/design-philosophy/registry.md`
 - Notes: 判定基準は「参照頻度」と「再描画が必要な見た目更新の有無」で決定する
+
+- Date: 2026-08-02
+- Trigger: ModelNode 直結ロジックから Guid 中心ロジックへの移行運用を恒久ルール化
+- Decision: モデル関連の Signal/Event/Pick/UI payload は ModelId を運び、ModelNode は軽量ビューとして扱う。Godot Signal 層は string modelId、受信直後に Guid.TryParse を必須化する
+- Scope: Model, Selection, Pick, UI ツリー連携を含む C# 実装全般
+- Artifacts Updated:
+  - `docs/MODEL_ID_OPERATION_GUIDE.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `.github/design-philosophy/index.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: Guid 変換失敗 payload は処理せず警告ログを残す

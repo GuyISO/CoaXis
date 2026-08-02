@@ -11,16 +11,16 @@ public static class ModelColliderBuilder
     /// <summary>
     /// 指定したモデル配下のメッシュから ConcavePolygonShape3D を構築する
     /// </summary>
-    /// <param name="model">コライダーを追加する対象モデル</param>
-    public static void AddCollider(ModelNode model)
+    /// <param name="modelNode">コライダーを追加する対象モデル</param>
+    public static void AddCollider(ModelNode modelNode)
     {
-        Application.Log.Info($"Start adding collider for model: {model.Name}");
+        Application.Log.Info($"Start adding collider for model: {modelNode.Name}");
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
-        ModelComponents components = model.Components;
+        ModelComponents components = modelNode.Components;
         if (components == null)
         {
-            Application.Log.Warn($"Skipped adding collider for model: {model.Name}, components are not initialized.");
+            Application.Log.Warn($"Skipped adding collider for model: {modelNode.Name}, components are not initialized.");
             return;
         }
 
@@ -52,7 +52,7 @@ public static class ModelColliderBuilder
 
         if (index == 0)
         {
-            Application.Log.Warn($"Skipped adding collider for model: {model.Name}, no mesh faces found.");
+            Application.Log.Warn($"Skipped adding collider for model: {modelNode.Name}, no mesh faces found.");
             return;
         }
 
@@ -66,7 +66,7 @@ public static class ModelColliderBuilder
         collisionShape.Shape = shape;
 
         stopwatch.Stop();
-        Application.Log.Info($"Finished adding collider for model: {model.Name} in {stopwatch.ElapsedMilliseconds} ms");
+        Application.Log.Info($"Finished adding collider for model: {modelNode.Name} in {stopwatch.ElapsedMilliseconds} ms");
     }
 
     // モデル階層の深さに依存せずコライダーを作るため、MeshInstance3D を再帰収集する

@@ -1,4 +1,5 @@
 ﻿using Godot;
+using System;
 
 /// <summary>
 /// モデル関連のイベント集約ハブ
@@ -16,25 +17,25 @@ public partial class ModelEvent : EventBase<ModelEvent>
 		Emit(SignalName.AskRootModelRequested);
 	}
 
-	[Signal] public delegate void ToggleModelVisibilityRequestedEventHandler(ModelNode model);
+	[Signal] public delegate void ToggleModelVisibilityRequestedEventHandler(string modelId);
 	/// <summary>
 	/// モデルの表示/非表示切替をリクエストする
 	/// </summary>
-	/// <param name="model">切替対象のモデル</param>
-	internal void ToggleModelVisibility(ModelNode model)
+	/// <param name="modelId">切替対象のモデル識別子</param>
+	internal void ToggleModelVisibility(Guid modelId)
 	{
-		Emit(SignalName.ToggleModelVisibilityRequested, model);
+		Emit(SignalName.ToggleModelVisibilityRequested, modelId.ToString());
 	}
 
-	[Signal] public delegate void AddModelRequestedEventHandler(ModelNode childModel, ModelNode parentModel);
+	[Signal] public delegate void AddModelRequestedEventHandler(string childModelId, string parentModelId);
 	/// <summary>
 	/// モデルの追加をリクエストする
 	/// </summary>
-	/// <param name="childModel">追加するモデル</param>
-	/// <param name="parentModel">追加先の親モデル、nullの場合はルートに追加される</param>
-	internal void AddModel(ModelNode childModel, ModelNode parentModel = null)
+	/// <param name="childModelId">追加するモデル識別子</param>
+	/// <param name="parentModelId">追加先の親モデル識別子。Guid.Empty の場合はルートに追加される</param>
+	internal void AddModel(Guid childModelId, Guid parentModelId = default)
 	{
-		Emit(SignalName.AddModelRequested, childModel, parentModel);
+		Emit(SignalName.AddModelRequested, childModelId.ToString(), parentModelId.ToString());
 	}
 
 	[Signal] public delegate void LoadModelRequestedEventHandler(string path);
@@ -61,15 +62,15 @@ public partial class ModelEvent : EventBase<ModelEvent>
 		Emit(SignalName.RootModelNotified, rootModel);
 	}
 
-	[Signal] public delegate void ModelVisibilityStateNotifiedEventHandler(ModelNode model, bool isVisible);
+	[Signal] public delegate void ModelVisibilityStateNotifiedEventHandler(string modelId, bool isVisible);
 	/// <summary>
 	/// モデルの表示状態の通知を行う
 	/// </summary>
-	/// <param name="model">表示状態が変化したモデル</param>
+	/// <param name="modelId">表示状態が変化したモデル識別子</param>
 	/// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-	internal void NotifyModelVisibilityState(ModelNode model, bool isVisible)
+	internal void NotifyModelVisibilityState(Guid modelId, bool isVisible)
 	{
-		Emit(SignalName.ModelVisibilityStateNotified, model, isVisible);
+		Emit(SignalName.ModelVisibilityStateNotified, modelId.ToString(), isVisible);
 	}
 
 	#endregion

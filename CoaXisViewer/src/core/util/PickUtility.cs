@@ -40,7 +40,7 @@ public static class PickUtility
             hasHit: true,
             collider: result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
             rid: result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-            model: result.ContainsKey("collider") ? GetParentModel((Node3D)result["collider"]) : null,
+            modelId: result.ContainsKey("collider") ? GetParentModelId((Node3D)result["collider"]) : Guid.Empty,
             position: (Vector3)result["position"],
             normal: result.ContainsKey("normal") ? (Vector3)result["normal"] : Vector3.Zero,
             distance: origin.DistanceTo((Vector3)result["position"])
@@ -125,7 +125,7 @@ public static class PickUtility
                     hasHit: true,
                     collider: result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
                     rid: result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-                    model: result.ContainsKey("collider") ? GetParentModel((Node3D)result["collider"]) : null,
+                    modelId: result.ContainsKey("collider") ? GetParentModelId((Node3D)result["collider"]) : Guid.Empty,
                     position: Vector3.Zero, // IntersectShape は position を返さない
                     normal: Vector3.Zero,
                     distance: 0f
@@ -145,11 +145,11 @@ public static class PickUtility
     /// <summary>
     /// ModelNode のみがわかっている状態から PickResult を生成する
     /// </summary>
-    /// <param name="model">選択対象のモデル</param>
+    /// <param name="modelNode">選択対象のモデル</param>
     /// <returns>モデル情報を含む PickResult。位置・法線・距離は未設定のため Zero/0 を返す</returns>
-    public static PickResult PickByModel(ModelNode model)
+    public static PickResult PickByModel(ModelNode modelNode)
     {
-        if (model == null)
+        if (modelNode == null)
         {
             return new PickResult();
         }
@@ -157,7 +157,7 @@ public static class PickUtility
         Node3D collider = null;
         Rid rid = default;
 
-        ModelComponents components = model.Components;
+        ModelComponents components = modelNode.Components;
         if (components != null && components.Collider != null && GodotObject.IsInstanceValid(components.Collider))
         {
             collider = components.Collider;
@@ -168,7 +168,7 @@ public static class PickUtility
             hasHit: false,
             collider: collider,
             rid: rid,
-            model: model,
+            modelId: modelNode.ModelId,
             position: Vector3.Zero,
             normal: Vector3.Zero,
             distance: 0f
@@ -176,26 +176,63 @@ public static class PickUtility
     }
 
     /// <summary>
+    /// ModelId のみがわかっている状態から PickResult を生成する
+    /// </summary>
+    /// <param name="modelId">選択対象のモデル識別子</param>
+    /// <returns>モデル情報を含む PickResult。対応する ModelNode が見つからない場合はヒットなしを返す</returns>
+    public static PickResult PickByModelId(Guid modelId)
+    {
+        ModelNode modelNode = FindModelNodeById(modelId);
+        return PickByModel(modelNode);
+    }
+
+    /// <summary>
     /// ModelNode 群のみがわかっている状態から PickResult 配列を生成する
     /// </summary>
-    /// <param name="models">選択対象のモデル配列</param>
+    /// <param name="modelNodes">選択対象のモデル配列</param>
     /// <returns>モデル情報を含む PickResult の配列</returns>
-    public static PickResult[] PickByModels(IReadOnlyList<ModelNode> models)
+    public static PickResult[] PickByModels(IReadOnlyList<ModelNode> modelNodes)
     {
-        if (models == null || models.Count == 0)
+        if (modelNodes == null || modelNodes.Count == 0)
         {
             return System.Array.Empty<PickResult>();
         }
 
-        var results = new List<PickResult>(models.Count);
-        foreach (ModelNode model in models)
+        var results = new List<PickResult>(modelNodes.Count);
+        foreach (ModelNode modelNode in modelNodes)
         {
-            if (model == null)
+            if (modelNode == null)
             {
                 continue;
             }
 
-            results.Add(PickByModel(model));
+            results.Add(PickByModel(modelNode));
+        }
+
+        return results.ToArray();
+    }
+
+    /// <summary>
+    /// ModelId 群のみがわかっている状態から PickResult 配列を生成する
+    /// </summary>
+    /// <param name="modelIds">選択対象のモデル識別子配列</param>
+    /// <returns>モデル情報を含む PickResult の配列</returns>
+    public static PickResult[] PickByModelIds(IReadOnlyList<Guid> modelIds)
+    {
+        if (modelIds == null || modelIds.Count == 0)
+        {
+            return System.Array.Empty<PickResult>();
+        }
+
+        var results = new List<PickResult>(modelIds.Count);
+        foreach (Guid modelId in modelIds)
+        {
+            if (modelId == Guid.Empty)
+            {
+                continue;
+            }
+
+            results.Add(PickByModelId(modelId));
         }
 
         return results.ToArray();
@@ -206,20 +243,69 @@ public static class PickUtility
     #region Internal Helpers
 
     /// <summary>
-    /// コライダーの親階層から ModelNode を取得する
+    /// コライダーの親階層から ModelId を取得する
     /// </summary>
-    private static ModelNode GetParentModel(Node node)
+    private static Guid GetParentModelId(Node node)
     {
         Node current = node;
 
         while (current != null)
         {
-            if (current is ModelNode model)
+            if (current is ModelNode modelNode)
             {
-                return model;
+                return modelNode.ModelId;
             }
 
             current = current.GetParent();
+        }
+
+        return Guid.Empty;
+    }
+
+    /// <summary>
+    /// ModelId から対応する ModelNode を探索する
+    /// </summary>
+    private static ModelNode FindModelNodeById(Guid modelId)
+    {
+        if (modelId == Guid.Empty)
+        {
+            return null;
+        }
+
+        ModelService modelService = Application.Model.Service;
+        if (modelService == null)
+        {
+            return null;
+        }
+
+        RootModelNode rootModelNode = modelService.Root;
+        if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
+        {
+            return null;
+        }
+
+        return FindModelNodeByIdRecursive(rootModelNode, modelId);
+    }
+
+    private static ModelNode FindModelNodeByIdRecursive(ModelNode modelNode, Guid modelId)
+    {
+        if (modelNode == null)
+        {
+            return null;
+        }
+
+        if (modelNode.ModelId == modelId)
+        {
+            return modelNode;
+        }
+
+        foreach (ModelNode childModelNode in modelNode.ChildModels)
+        {
+            ModelNode found = FindModelNodeByIdRecursive(childModelNode, modelId);
+            if (found != null)
+            {
+                return found;
+            }
         }
 
         return null;

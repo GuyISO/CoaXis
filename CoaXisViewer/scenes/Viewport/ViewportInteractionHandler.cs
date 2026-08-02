@@ -322,7 +322,7 @@ public partial class ViewportInteractionHandler : SubViewport
         if (pickResult.HasHit)
         {
             // ヒットしたら注視点を移動
-            Application.Log.Debug($"ViewportInteractionHandler: focus target hit. model='{pickResult.Model?.Name}', useTween={useTween}");
+            Application.Log.Debug($"ViewportInteractionHandler: focus target hit. modelId='{pickResult.ModelId}', useTween={useTween}");
             Application.Viewport.Event.MovePositionTo(pickResult.Position, useTween);
             return true;
         }

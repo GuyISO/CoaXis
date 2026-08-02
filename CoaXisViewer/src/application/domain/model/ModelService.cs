@@ -1,4 +1,5 @@
 using Godot;
+using System;
 using System.Collections.Generic;
 
 /// <summary>
@@ -90,31 +91,70 @@ public partial class ModelService : Node
 	/// <summary>
 	/// モデルの表示状態切替がリクエストされたときに呼び出されるイベントハンドラ
 	/// </summary>
-	/// <param name="model">表示状態を切り替えるモデル</param>
-	private void OnToggleModelVisibilityRequested(ModelNode model)
+	/// <param name="modelId">表示状態を切り替えるモデル識別子</param>
+	private void OnToggleModelVisibilityRequested(string modelId)
 	{
-		var command = new SetModelVisibilityCommand([model], !model.Visible);
+		if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+		{
+			Application.Log.Warn($"ModelService: invalid modelId for toggle request. modelId='{modelId}'");
+			return;
+		}
+
+		ModelNode modelNode = FindModelNodeById(parsedModelId);
+		if (modelNode == null)
+		{
+			Application.Log.Warn($"ModelService: toggle target not found. modelId='{parsedModelId}'");
+			return;
+		}
+
+		var command = new SetModelVisibilityCommand([parsedModelId], !modelNode.Visible);
 		Application.Command.Event.Execute(command);
 	}
 
 	/// <summary>
 	/// モデルの表示状態が変更されたときに呼び出されるイベントハンドラ
 	/// </summary>
-	/// <param name="model">表示状態が変更されたモデル</param>
+	/// <param name="modelId">表示状態が変更されたモデル識別子</param>
 	/// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-	private void OnModelVisibilityStateNotified(ModelNode model, bool isVisible)
+	private void OnModelVisibilityStateNotified(string modelId, bool isVisible)
 	{
-		model.Visible = isVisible;
+		if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+		{
+			Application.Log.Warn($"ModelService: invalid modelId for visibility notification. modelId='{modelId}'");
+			return;
+		}
+
+		ModelNode modelNode = FindModelNodeById(parsedModelId);
+		if (modelNode == null)
+		{
+			Application.Log.Warn($"ModelService: visibility target not found. modelId='{parsedModelId}'");
+			return;
+		}
+
+		modelNode.Visible = isVisible;
 	}
 
 	/// <summary>
 	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ
 	/// </summary>
-	/// <param name="model">選択状態が変更されたモデル</param>
+	/// <param name="modelId">選択状態が変更されたモデル識別子</param>
 	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-	private void OnModelSelectionStateNotified(ModelNode model, bool isSelected)
+	private void OnModelSelectionStateNotified(string modelId, bool isSelected)
 	{
-		HighLightModel(model, isSelected);
+		if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+		{
+			Application.Log.Warn($"ModelService: invalid modelId for selection notification. modelId='{modelId}'");
+			return;
+		}
+
+		ModelNode modelNode = FindModelNodeById(parsedModelId);
+		if (modelNode == null)
+		{
+			Application.Log.Warn($"ModelService: highlight target not found. modelId='{parsedModelId}'");
+			return;
+		}
+
+		HighLightModel(modelNode, isSelected);
 	}
 
 	#endregion
@@ -124,13 +164,13 @@ public partial class ModelService : Node
 	/// <summary>
 	/// 指定したモデルとその子孫のハイライト状態を切り替える
 	/// </summary>
-	/// <param name="model">切り替えるモデル</param>
+	/// <param name="modelNode">切り替えるモデル</param>
 	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalse</param>
-	private static void HighLightModel(ModelNode model, bool enable = true)
+	private static void HighLightModel(ModelNode modelNode, bool enable = true)
 	{
 		// 指定したモデルとその子孫のモデルすべてにハイライト状態を適用する
-		var models = GetModelsRecursively(model);
-		foreach (ModelNode targetModel in models)
+		var modelNodes = GetModelsRecursively(modelNode);
+		foreach (ModelNode targetModel in modelNodes)
 		{
 			HighlightMesh(targetModel, enable);
 		}
@@ -139,9 +179,9 @@ public partial class ModelService : Node
 	/// <summary>
 	/// 指定したモデルのハイライト状態を切り替える
 	/// </summary>
-	/// <param name="model">切り替えるモデル</param>
+	/// <param name="modelNode">切り替えるモデル</param>
 	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
-	private static void HighlightMesh(ModelNode model, bool enable = true)
+	private static void HighlightMesh(ModelNode modelNode, bool enable = true)
 	{
 		Material selectedMaterial = Application.Asset.Service.GetSelectedMaterial();
 
@@ -153,7 +193,7 @@ public partial class ModelService : Node
 			}
 
 			// モデル自身のメッシュにのみ適用し、子モデル分は HighLightModel の再帰で処理する
-			var meshInstances = GetMeshInstancesUnderModel(model);
+			var meshInstances = GetMeshInstancesUnderModel(modelNode);
 			foreach (var meshInstance in meshInstances)
 			{
 				meshInstance.MaterialOverride = selectedMaterial;
@@ -162,9 +202,9 @@ public partial class ModelService : Node
 		else
 		{
 			// 選択解除時は子モデルを巻き込まず、モデル自身のメッシュのみ解除対象とする
-			if (!HasSelectedAncestor(model))
+			if (!HasSelectedAncestor(modelNode))
 			{
-				var meshInstances = GetMeshInstancesUnderModel(model);
+				var meshInstances = GetMeshInstancesUnderModel(modelNode);
 				foreach (var meshInstance in meshInstances)
 				{
 					meshInstance.MaterialOverride = null;
@@ -176,23 +216,23 @@ public partial class ModelService : Node
 	/// <summary>
 	/// 指定したモデルからモデルを再帰的に取得する
 	/// </summary>
-	/// <param name="model">取得対象のモデル</param>
+	/// <param name="modelNode">取得対象のモデル</param>
 	/// <returns>取得したモデルのリスト</returns>
-	private static List<ModelNode> GetModelsRecursively(ModelNode model)
+	private static List<ModelNode> GetModelsRecursively(ModelNode modelNode)
 	{
-		var models = new List<ModelNode>();
+		var modelNodes = new List<ModelNode>();
 
-		if (model is ModelNode)
+		if (modelNode is ModelNode)
 		{
-			models.Add(model);
+			modelNodes.Add(modelNode);
 		}
 
-		foreach (ModelNode childModel in model.ChildModels)
+		foreach (ModelNode childModelNode in modelNode.ChildModels)
 		{
-			models.AddRange(GetModelsRecursively(childModel));
+			modelNodes.AddRange(GetModelsRecursively(childModelNode));
 		}
 
-		return models;
+		return modelNodes;
 	}
 
 	/// <summary>
@@ -219,11 +259,11 @@ public partial class ModelService : Node
 	/// <summary>
 	/// 指定モデル配下のうち、子モデル配下を除いた MeshInstance3D を再帰的に取得する
 	/// </summary>
-	/// <param name="model">取得対象のモデル</param>
-	private static List<MeshInstance3D> GetMeshInstancesUnderModel(ModelNode model)
+	/// <param name="modelNode">取得対象のモデル</param>
+	private static List<MeshInstance3D> GetMeshInstancesUnderModel(ModelNode modelNode)
 	{
 		var meshInstances = new List<MeshInstance3D>();
-		CollectMeshInstancesUnderModel(model, meshInstances, isRoot: true);
+		CollectMeshInstancesUnderModel(modelNode, meshInstances, isRoot: true);
 		return meshInstances;
 	}
 
@@ -254,26 +294,61 @@ public partial class ModelService : Node
 	/// <summary>
 	/// 指定したモデルの祖先に選択状態のモデルが存在するかどうかを判定する
 	/// </summary>
-	/// <param name="model">判定対象のモデル</param>
-	private static bool HasSelectedAncestor(ModelNode model)
+	/// <param name="modelNode">判定対象のモデル</param>
+	private static bool HasSelectedAncestor(ModelNode modelNode)
 	{
 		HashSet<ModelNode> visited = new HashSet<ModelNode>();
 
-		while (model != null)
+		while (modelNode != null)
 		{
-			if (!visited.Add(model))
+			if (!visited.Add(modelNode))
 			{
-				Application.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{model.Name}'.");
+				Application.Log.Warn($"HighlightService: detected cyclic ParentModel reference at '{modelNode.Name}'.");
 				return false;
 			}
 
-			if (Application.Selection.Service.Contains(model))
+			if (Application.Selection.Service.Contains(modelNode.ModelId))
 			{
 				return true;
 			}
-			model = model.ParentModel;
+			modelNode = modelNode.ParentModel;
 		}
 		return false;
+	}
+
+	private ModelNode FindModelNodeById(Guid modelId)
+	{
+		if (modelId == Guid.Empty)
+		{
+			return null;
+		}
+
+		RootModelNode rootModelNode = Root;
+		return FindModelNodeByIdRecursive(rootModelNode, modelId);
+	}
+
+	private static ModelNode FindModelNodeByIdRecursive(ModelNode modelNode, Guid modelId)
+	{
+		if (modelNode == null)
+		{
+			return null;
+		}
+
+		if (modelNode.ModelId == modelId)
+		{
+			return modelNode;
+		}
+
+		foreach (ModelNode childModelNode in modelNode.ChildModels)
+		{
+			ModelNode found = FindModelNodeByIdRecursive(childModelNode, modelId);
+			if (found != null)
+			{
+				return found;
+			}
+		}
+
+		return null;
 	}
 
 	/// <summary>

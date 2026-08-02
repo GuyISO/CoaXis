@@ -11,9 +11,15 @@ public partial class ModelNode : Node3D
     #region Properties
 
     /// <summary>
-    /// このモデルのデータを保持する ModelData
+    /// このモデルの識別子
     /// </summary>
-    public ModelData Data { get; private set; }
+    public Guid ModelId { get; private set; } = Guid.Empty;
+
+    /// <summary>
+    /// このモデルに対応する ModelData を取得する
+    /// </summary>
+    public ModelData ModelData =>
+        ModelId == Guid.Empty ? null : Application.Model.Registry.GetModelData(ModelId);
 
     /// <summary>
     /// このモデルの内部構造を保持するコンポーネントルート
@@ -39,14 +45,15 @@ public partial class ModelNode : Node3D
 
     public override void _Ready()
     {
+        if (ModelId == Guid.Empty)
+        {
+            // 移行期間中のフォールバック。ロードパイプライン側で明示設定される場合はその値を優先する。
+            ModelId = Guid.NewGuid();
+        }
+
         Components = CreateComponents();
         Components.Initialize();
         AddChild(Components);
-
-        if (Data != null)
-        {
-            Data.Node = this;
-        }
     }
 
     #endregion
@@ -60,6 +67,15 @@ public partial class ModelNode : Node3D
     protected virtual ModelComponents CreateComponents()
     {
         return new ModelComponents();
+    }
+
+    /// <summary>
+    /// このビューに紐づくモデル識別子を設定する
+    /// </summary>
+    /// <param name="modelId">紐づけるモデル識別子</param>
+    internal void SetModelId(Guid modelId)
+    {
+        ModelId = modelId;
     }
 
     #endregion

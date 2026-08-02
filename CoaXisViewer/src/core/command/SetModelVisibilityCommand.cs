@@ -8,7 +8,7 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
 {
     #region Fields
 
-    private readonly ModelNode[] _models;
+    private readonly Guid[] _modelIds;
     private readonly bool[] _previousVisibles;
     private readonly bool _nextVisible;
 
@@ -28,20 +28,21 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     /// <summary>
     /// コンストラクタ、指定されたモデルの表示状態を変更するコマンド
     /// </summary>
-    /// <param name="models">表示状態を変更するモデルの配列</param>
+    /// <param name="modelIds">表示状態を変更するモデルIDの配列</param>
     /// <param name="nextVisible">変更後の表示状態</param>
-    public SetModelVisibilityCommand(ModelNode[] models, bool nextVisible)
+    public SetModelVisibilityCommand(Guid[] modelIds, bool nextVisible)
     {
-        if (models == null)
+        if (modelIds == null)
         {
-            throw new ArgumentNullException(nameof(models));
+            throw new ArgumentNullException(nameof(modelIds));
         }
 
-        _models = models;
-        _previousVisibles = new bool[_models.Length];
-        for (int i = 0; i < _models.Length; i++)
+        _modelIds = modelIds;
+        _previousVisibles = new bool[_modelIds.Length];
+        for (int i = 0; i < _modelIds.Length; i++)
         {
-            _previousVisibles[i] = _models[i].Visible;
+            ModelNode modelNode = ResolveModelNode(_modelIds[i]);
+            _previousVisibles[i] = modelNode != null && modelNode.Visible;
         }
         _nextVisible = nextVisible;
     }
@@ -55,16 +56,17 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     /// </summary>
     public override void Do()
     {
-        for (int i = 0; i < _models.Length; i++)
+        for (int i = 0; i < _modelIds.Length; i++)
         {
-            if (!GodotObject.IsInstanceValid(_models[i]))
+            ModelNode modelNode = ResolveModelNode(_modelIds[i]);
+            if (modelNode == null || !GodotObject.IsInstanceValid(modelNode))
             {
                 LogSkip("Do", $"model at index {i} is not valid.");
                 continue;
             }
 
-            LogDo($"model='{_models[i].Name}', visible={_nextVisible}");
-            Application.Model.Event.NotifyModelVisibilityState(_models[i], _nextVisible);
+            LogDo($"model='{modelNode.Name}', visible={_nextVisible}");
+            Application.Model.Event.NotifyModelVisibilityState(_modelIds[i], _nextVisible);
         }
     }
 
@@ -73,17 +75,58 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     /// </summary>
     public override void Undo()
     {
-        for (int i = 0; i < _models.Length; i++)
+        for (int i = 0; i < _modelIds.Length; i++)
         {
-            if (!GodotObject.IsInstanceValid(_models[i]))
+            ModelNode modelNode = ResolveModelNode(_modelIds[i]);
+            if (modelNode == null || !GodotObject.IsInstanceValid(modelNode))
             {
                 LogSkip("Undo", $"model at index {i} is not valid.");
                 continue;
             }
 
-            LogUndo($"model='{_models[i].Name}', visible={_previousVisibles[i]}");
-            Application.Model.Event.NotifyModelVisibilityState(_models[i], _previousVisibles[i]);
+            LogUndo($"model='{modelNode.Name}', visible={_previousVisibles[i]}");
+            Application.Model.Event.NotifyModelVisibilityState(_modelIds[i], _previousVisibles[i]);
         }
+    }
+
+    private static ModelNode ResolveModelNode(Guid modelId)
+    {
+        if (modelId == Guid.Empty)
+        {
+            return null;
+        }
+
+        RootModelNode rootModelNode = Application.Model.Service?.Root;
+        if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
+        {
+            return null;
+        }
+
+        return ResolveModelNodeRecursive(rootModelNode, modelId);
+    }
+
+    private static ModelNode ResolveModelNodeRecursive(ModelNode modelNode, Guid modelId)
+    {
+        if (modelNode == null)
+        {
+            return null;
+        }
+
+        if (modelNode.ModelId == modelId)
+        {
+            return modelNode;
+        }
+
+        foreach (ModelNode childModelNode in modelNode.ChildModels)
+        {
+            ModelNode found = ResolveModelNodeRecursive(childModelNode, modelId);
+            if (found != null)
+            {
+                return found;
+            }
+        }
+
+        return null;
     }
 
     #endregion
