@@ -31,4 +31,9 @@ public static class Constant
 		public const string CommandDoColor = "#FFFFFFFF";
 		public const string CommandUndoColor = "#808080FF";
 	}
+
+	public static class Model
+	{
+		public const string RootModelId = "00000000-0000-0000-0000-000000000001";
+	}
 }

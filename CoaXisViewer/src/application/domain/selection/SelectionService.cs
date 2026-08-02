@@ -404,7 +404,7 @@ public partial class SelectionService : Node
             return null;
         }
 
-        RootModelNode rootModelNode = modelService.Root;
+        RootModelNode rootModelNode = (RootModelNode)Application.Model.Service?.Root.Node;
         if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
         {
             return null;

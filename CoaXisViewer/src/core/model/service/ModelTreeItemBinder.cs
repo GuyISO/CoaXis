@@ -222,7 +222,7 @@ public class ModelTreeItemBinder
             return null;
         }
 
-        RootModelNode rootModelNode = Application.Model.Service?.Root;
+        RootModelNode rootModelNode = (RootModelNode)Application.Model.Service?.Root.Node;
         if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
         {
             return null;

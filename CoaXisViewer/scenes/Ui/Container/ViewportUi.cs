@@ -8,9 +8,6 @@ public partial class ViewportUi : PanelContainer
 {
     #region Fields
 
-    // デフォルトのフィット対象モデル
-    private RootModelNode _rootModel = null!;
-
     private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
 
     // 関連ノードのキャッシュ
@@ -54,12 +51,6 @@ public partial class ViewportUi : PanelContainer
 
     public override void _Process(double delta)
     {
-        // Readyで初期化処理を行うと、ほかのノードがまだReadyを完了していない場合に、初期状態通知を受け取れない可能性があるため、Processで初回通知をリクエストする
-        if (_rootModel == null)
-        {
-            Application.Model.Event.AskRootModel();
-        }
-
         if (!_isInitialized)
         {
             Application.Viewport.Event.AskState();
@@ -130,7 +121,6 @@ public partial class ViewportUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Model.Event.RootModelNotified += OnRootModelNotified;
         Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
         Application.Viewport.Event.PositionNotified += OnPositionNotified;
         Application.Viewport.Event.RotationNotified += OnRotationNotified;
@@ -146,7 +136,6 @@ public partial class ViewportUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
         Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
         Application.Viewport.Event.PositionNotified -= OnPositionNotified;
         Application.Viewport.Event.RotationNotified -= OnRotationNotified;
@@ -180,15 +169,14 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitAllInPressed()
     {
-        if (_rootModel == null)
+        ModelNode rootModel = Application.Model.Service.Root.Node;
+        if (rootModel == null)
         {
-            GD.PushWarning("ViewportUi: fit target model is missing.");
-            Application.Log.Warn("ViewportUi: fit-all requested but default target is missing.");
+            Application.Log.Debug("ViewportUi: fit-all skipped (no root model).");
             return;
         }
-
-        Application.Log.Debug($"ViewportUi: fit-all requested. target='{_rootModel.Name}'");
-        Application.Viewport.Event.Fit(new[] { _rootModel }, true);
+        Application.Log.Debug($"ViewportUi: fit-all requested. target='{rootModel.Name}'");
+        Application.Viewport.Event.Fit(new[] { rootModel }, true);
     }
 
     /// <summary>
@@ -196,15 +184,15 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        ModelNode[] fitTargets = Application.Selection.Service.GetModelArray();
-        if (fitTargets.Length == 0)
+        ModelNode[] fitTargetModelNodes = Application.Selection.Service.GetModelArray();
+        if (fitTargetModelNodes.Length == 0)
         {
             Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
-        Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargets.Length}");
-        Application.Viewport.Event.Fit(fitTargets, true);
+        Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargetModelNodes.Length}");
+        Application.Viewport.Event.Fit(fitTargetModelNodes, true);
     }
 
     /// <summary>
@@ -233,15 +221,6 @@ public partial class ViewportUi : PanelContainer
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
         Application.Log.Debug("ViewportUi: roll-right requested.");
         Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
-    }
-
-    /// <summary>
-    /// RootModel が通知されたときに呼び出されるイベントハンドラ、キャッシュを更新する
-    /// </summary>
-    /// <param name="rootModel">通知されたルートモデル</param>
-    private void OnRootModelNotified(RootModelNode rootModel)
-    {
-        _rootModel = rootModel;
     }
 
     /// <summary>

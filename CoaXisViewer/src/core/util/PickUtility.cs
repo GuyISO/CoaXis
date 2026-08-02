@@ -278,7 +278,7 @@ public static class PickUtility
             return null;
         }
 
-        RootModelNode rootModelNode = modelService.Root;
+        RootModelNode rootModelNode = (RootModelNode)modelService.Root.Node;
         if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
         {
             return null;

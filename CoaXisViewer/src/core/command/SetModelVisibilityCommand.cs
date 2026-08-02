@@ -96,7 +96,7 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
             return null;
         }
 
-        RootModelNode rootModelNode = Application.Model.Service?.Root;
+        RootModelNode rootModelNode = (RootModelNode)Application.Model.Service?.Root.Node;
         if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
         {
             return null;

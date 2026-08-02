@@ -9,8 +9,8 @@ public partial class ModelService : Node
 {
 	#region Fields
 
-	private RootModelNode _rootModel;
-
+	private RootModelData _root = null!;
+	
 	#endregion
 
 	#region Properties
@@ -19,15 +19,15 @@ public partial class ModelService : Node
 	/// RootModel を取得する
 	/// </summary>
 	/// <remarks>RootModel が存在しない場合は動的に生成する</remarks>
-	internal RootModelNode Root
+	internal RootModelData Root
 	{
 		get
 		{
-			if (_rootModel == null || !GodotObject.IsInstanceValid(_rootModel))
+			if (_root == null)
 			{
 				EnsureRootModel();
 			}
-			return _rootModel;
+			return _root;
 		}
 	}
 
@@ -39,7 +39,6 @@ public partial class ModelService : Node
 	{
 		EnsureRootModel();
 		SubscribeApplicationEvents();
-		Application.Model.Event.NotifyRootModel(_rootModel);
 	}
 
 	public override void _ExitTree()
@@ -58,7 +57,6 @@ public partial class ModelService : Node
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Model.Event.AskRootModelRequested += OnAskRootModelRequested;
 		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
 		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
@@ -69,23 +67,9 @@ public partial class ModelService : Node
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Model.Event.AskRootModelRequested -= OnAskRootModelRequested;
 		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
 		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
-	}
-
-	/// <summary>
-	/// ルートモデル通知要求イベントのハンドラ
-	/// </summary>
-	private void OnAskRootModelRequested()
-	{
-		if (_rootModel == null || !GodotObject.IsInstanceValid(_rootModel))
-		{
-			EnsureRootModel();
-		}
-
-		Application.Model.Event.NotifyRootModel(_rootModel);
 	}
 
 	/// <summary>
@@ -162,6 +146,16 @@ public partial class ModelService : Node
 	#region Internal Helpers
 
 	/// <summary>
+	/// ModelService 直下に RootModel を動的生成する
+	/// </summary>
+	private void EnsureRootModel()
+	{
+		_root = new RootModelData();
+
+		AddChild(_root.Node);
+	}
+
+	/// <summary>
 	/// 指定したモデルとその子孫のハイライト状態を切り替える
 	/// </summary>
 	/// <param name="modelNode">切り替えるモデル</param>
@@ -170,9 +164,9 @@ public partial class ModelService : Node
 	{
 		// 指定したモデルとその子孫のモデルすべてにハイライト状態を適用する
 		var modelNodes = GetModelsRecursively(modelNode);
-		foreach (ModelNode targetModel in modelNodes)
+		foreach (ModelNode targetModelNode in modelNodes)
 		{
-			HighlightMesh(targetModel, enable);
+			HighlightMesh(targetModelNode, enable);
 		}
 	}
 
@@ -323,7 +317,7 @@ public partial class ModelService : Node
 			return null;
 		}
 
-		RootModelNode rootModelNode = Root;
+		RootModelNode rootModelNode = (RootModelNode)Root.Node;
 		return FindModelNodeByIdRecursive(rootModelNode, modelId);
 	}
 
@@ -349,24 +343,6 @@ public partial class ModelService : Node
 		}
 
 		return null;
-	}
-
-	/// <summary>
-	/// ModelService 直下に RootModel を動的生成する
-	/// </summary>
-	private void EnsureRootModel()
-	{
-		if (_rootModel != null && GodotObject.IsInstanceValid(_rootModel))
-		{
-			return;
-		}
-
-		_rootModel = new RootModelNode
-		{
-			Name = "RootModel"
-		};
-
-		AddChild(_rootModel);
 	}
 
 	#endregion

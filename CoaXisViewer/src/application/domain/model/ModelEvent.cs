@@ -8,15 +8,6 @@ public partial class ModelEvent : EventBase<ModelEvent>
 {
 	#region --------------------------------------- Action ---------------------------------------
 
-	[Signal] public delegate void AskRootModelRequestedEventHandler();
-	/// <summary>
-	/// ルートモデルに対して通知をリクエストする
-	/// </summary>
-	internal void AskRootModel()
-	{
-		Emit(SignalName.AskRootModelRequested);
-	}
-
 	[Signal] public delegate void ToggleModelVisibilityRequestedEventHandler(string modelId);
 	/// <summary>
 	/// モデルの表示/非表示切替をリクエストする
@@ -51,16 +42,6 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	#endregion
 
 	#region --------------------------------------- Notification ---------------------------------------
-
-	[Signal] public delegate void RootModelNotifiedEventHandler(RootModelNode rootModel);
-	/// <summary>
-	/// ルートモデルの通知を行う
-	/// </summary>
-	/// <param name="rootModel">通知するルートモデル</param>
-	internal void NotifyRootModel(RootModelNode rootModel)
-	{
-		Emit(SignalName.RootModelNotified, rootModel);
-	}
 
 	[Signal] public delegate void ModelVisibilityStateNotifiedEventHandler(string modelId, bool isVisible);
 	/// <summary>

@@ -10,11 +10,12 @@ public partial class HierarchyTree : Tree
     #region Fields
 
     // 関連ノードのキャッシュ
-    private RootModelNode _rootModel = null; // 3Dモデル用ルートノードのキャッシュ
     private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
     private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
     private readonly ModelTreeItemBinder _binder = new(); // このツリー専用のモデルバインダー
+
+    private ModelData _rootModelData; // ルートモデルのキャッシュ
 
     private Color _selectedColor;
 
@@ -39,15 +40,6 @@ public partial class HierarchyTree : Tree
         UnsubscribeApplicationEvents();
 
         base._ExitTree();
-    }
-
-    public override void _Process(double delta)
-    {
-        // ルートモデルがまだ取得できていない場合は、ModelEvent に通知をリクエストする、Ready段階ではノードの読み込み順序の都合などで取得できないことを想定し、毎フレームチェックする
-        if (_rootModel == null)
-        {
-            Application.Model.Event.AskRootModel();
-        }
     }
 
     #endregion
@@ -80,7 +72,6 @@ public partial class HierarchyTree : Tree
         Application.Selection.Event.ClearedNotified += OnClearedNotified;
         Application.Model.Event.AddModelRequested += OnAddModelRequested;
         Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
-        Application.Model.Event.RootModelNotified += OnRootModelNotified;
     }
 
     /// <summary>
@@ -93,7 +84,6 @@ public partial class HierarchyTree : Tree
         Application.Selection.Event.ClearedNotified -= OnClearedNotified;
         Application.Model.Event.AddModelRequested -= OnAddModelRequested;
         Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
-        Application.Model.Event.RootModelNotified -= OnRootModelNotified;
     }
 
     /// <summary>
@@ -153,7 +143,6 @@ public partial class HierarchyTree : Tree
         {
             if (isSelected)
             {
-                // TODO: 選択状態の色を設定する
                 treeItem.SetCustomBgColor((int)HierarchyTreeColumn.Name, _selectedColor);
             }
             else
@@ -231,18 +220,18 @@ public partial class HierarchyTree : Tree
         }
     }
 
-    /// <summary>
-    /// ルートモデルが通知されたときのイベントハンドラ
-    /// </summary>
-    /// <param name="rootModel">通知されたルートモデル</param>
-    private void OnRootModelNotified(RootModelNode rootModel)
+    #endregion
+
+    #region public Methods
+
+    internal void SetRootModelData(ModelData rootModelData)
     {
-        if (_rootModel == null)
+        if (_rootModelData != null)
         {
-            _rootModel = rootModel;
-            AddToTree(_rootModel);
-            Application.Log.Info("HierarchyTree: RootModel notified and added to tree.");
+            return;
         }
+
+        _rootModelData = rootModelData;
     }
 
     #endregion
@@ -457,25 +446,25 @@ public partial class HierarchyTree : Tree
     /// <summary>
     /// ModelNode を TreeItem に追加する（親モデルを指定して追加する）
     /// </summary>
-    /// <param name="childModel">追加する子モデル</param>
-    /// <param name="parentModel">追加先の親モデル</param>
-    private void AddToTree(ModelNode childModel, ModelNode parentModel)
+    /// <param name="childModelNode">追加する子モデル</param>
+    /// <param name="parentModelNode">追加先の親モデル</param>
+    private void AddToTree(ModelNode childModelNode, ModelNode parentModelNode)
     {
-        TreeItem parentTreeItem = _binder.GetTreeItem(parentModel);
+        TreeItem parentTreeItem = _binder.GetTreeItem(parentModelNode);
         if (parentTreeItem != null)
         {
-            AddToTree(childModel, parentTreeItem);
+            AddToTree(childModelNode, parentTreeItem);
         }
     }
 
     private ModelNode FindModelNodeById(Guid modelId)
     {
-        if (modelId == Guid.Empty || _rootModel == null)
+        if (modelId == Guid.Empty )
         {
             return null;
         }
 
-        return FindModelNodeByIdRecursive(_rootModel, modelId);
+        return FindModelNodeByIdRecursive(Application.Model.Service.Root.Node, modelId);
     }
 
     private static ModelNode FindModelNodeByIdRecursive(ModelNode modelNode, Guid modelId)
