@@ -7,10 +7,10 @@
 [ext_resource type="PackedScene" uid="uid://bpcl2jg87jpcu" path="res://scenes/ui/container/CommandUi.tscn" id="5_cki6e"]
 [ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/viewport/ViewportContainer.tscn" id="5_y2duu"]
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://scenes/ui/FpsUi.cs" id="6_5i13y"]
-[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://scenes/ui/HierarchyTree.cs" id="6_6a6xr"]
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/container/SelectionUi.tscn" id="6_npq5x"]
 [ext_resource type="PackedScene" uid="uid://bfdie23q7sox" path="res://scenes/ui/container/CameraStateUi.tscn" id="7_57r0r"]
 [ext_resource type="PackedScene" uid="uid://cgtr3vluexxxg" path="res://scenes/ui/container/PickUi.tscn" id="7_64vlc"]
+[ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://scenes/ui/RootHierarchyTree.cs" id="10_57r0r"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -127,7 +127,7 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 columns = 2
 allow_reselect = true
 hide_root = true
-script = ExtResource("6_6a6xr")
+script = ExtResource("10_57r0r")
 
 [node name="RightBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=617452991]
 custom_minimum_size = Vector2(48, 0)

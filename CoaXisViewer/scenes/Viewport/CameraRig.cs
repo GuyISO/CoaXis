@@ -221,7 +221,7 @@ public partial class CameraRig : Node3D
     private void OnFitRequested(Node3D[] targetNodes, bool useTween)
     {
         Fit(targetNodes, useTween);
-    }
+        }
 
     /// <summary>
     /// カメラの法線方向の整列がリクエストされたときに呼び出されるイベントハンドラ

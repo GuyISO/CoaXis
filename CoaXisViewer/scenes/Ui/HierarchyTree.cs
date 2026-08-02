@@ -9,13 +9,15 @@ public partial class HierarchyTree : Tree
 {
     #region Fields
 
+    private Dictionary<Guid, TreeItem> _modelIdToTreeItem = new(); // ModelId -> TreeItem の対応辞書、TreeItem -> ModelId はMetaDataで保持する
+
     // 関連ノードのキャッシュ
     private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
     private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
-    private readonly ModelTreeItemBinder _binder = new(); // このツリー専用のモデルバインダー
+    private readonly ModelTreeBinder _binder = new(); // このツリー専用のモデルバインダー
 
-    private ModelData _rootModelData; // ルートモデルのキャッシュ
+    private ModelData _rootModelData; // このツリーのルートモデルのキャッシュ、シーン全体のルートではないことに注意
 
     private Color _selectedColor;
 
@@ -252,15 +254,14 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void ReapplySelectedRowColors()
     {
-        Guid[] selectedModelIds = Application.Selection.Service.GetModelIdArray();
-        if (selectedModelIds == null || selectedModelIds.Length == 0)
+        IReadOnlyCollection<Guid> selectedModelIds = Application.Selection.Service.ModelIds;
+        if (selectedModelIds == null || selectedModelIds.Count == 0)
         {
             return;
         }
 
-        for (int i = 0; i < selectedModelIds.Length; i++)
+        foreach (Guid modelId in selectedModelIds)
         {
-            Guid modelId = selectedModelIds[i];
             if (modelId == Guid.Empty)
             {
                 continue;

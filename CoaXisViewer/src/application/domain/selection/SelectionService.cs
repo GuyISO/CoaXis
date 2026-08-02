@@ -17,6 +17,25 @@ public partial class SelectionService : Node
 
     #endregion
 
+    #region 
+
+    /// <summary>
+    /// 現在の選択モードを取得する
+    /// </summary>
+    internal SelectionMode Mode => _mode;
+
+    /// <summary>
+    /// 現在の選択モデルIDのコレクションの複製を取得する
+    /// </summary>
+    internal IReadOnlyCollection<Guid> ModelIds => _modelIds.ToList().AsReadOnly();
+
+    /// <summary>
+    /// 現在の選択モデルの数を取得する
+    /// </summary>
+    internal int Count => _modelIds.Count;
+
+    #endregion
+
     #region Lifecycle
 
     public override void _Ready()
@@ -181,19 +200,18 @@ public partial class SelectionService : Node
     #region Public Methods
 
     /// <summary>
-    /// 現在の選択モードを取得する
+    /// 現在選択中のモデルIDを元に、対応する Node3D 配列を取得する
     /// </summary>
-    internal SelectionMode Mode => _mode;
-
-    /// <summary>
-    /// 現在の選択モデルIDのコレクションの複製を取得する
-    /// </summary>
-    internal IReadOnlyCollection<Guid> GetModelIds => _modelIds.ToList().AsReadOnly();
-
-    /// <summary>
-    /// 現在の選択モデルの数を取得する
-    /// </summary>
-    internal int Count => _modelIds.Count;
+    /// <returns>選択中のモデルノード配列</returns>
+    /// <remarks>選択モデルへのFit処理などに利用</remarks>
+    internal Node3D[] GetModelNodeArray()
+    {
+        return ModelIds
+            .Select(modelId => Application.Model.Registry.GetModelData(modelId)?.Node)
+            .Where(node => node != null)
+            .Cast<Node3D>()
+            .ToArray();
+    }
 
     /// <summary>
     /// 指定したモデルIDが選択されているかどうかを確認する
@@ -201,35 +219,6 @@ public partial class SelectionService : Node
     /// <param name="modelId">確認するモデルID</param>
     /// <returns>モデルが選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
     internal bool Contains(Guid modelId) => modelId != Guid.Empty && _modelIds.Contains(modelId);
-
-    /// <summary>
-    /// 指定したモデルが選択されているかどうかを確認する
-    /// </summary>
-    internal bool Contains(ModelNode modelNode) => modelNode != null && Contains(modelNode.ModelId);
-
-    /// <summary>
-    /// 選択モデルIDの配列を取得する
-    /// </summary>
-    internal Guid[] GetModelIdArray()
-    {
-        return _modelIds
-            .Where(modelId => modelId != Guid.Empty)
-            .ToArray();
-    }
-
-    /// <summary>
-    /// 選択モデルの配列を取得する
-    /// </summary>
-    /// <remarks>
-    /// 解放済みモデルやツリー外モデルを除外したスナップショットを返す
-    /// </remarks>
-    internal ModelNode[] GetModelArray()
-    {
-        return _modelIds
-            .Select(ResolveModelNode)
-            .Where(modelNode => modelNode != null && GodotObject.IsInstanceValid(modelNode) && modelNode.IsInsideTree())
-            .ToArray();
-    }
 
     /// <summary>
     /// 指定したモデルのみの選択状態にする、既存の選択はすべて解除される
@@ -270,8 +259,7 @@ public partial class SelectionService : Node
         if (_modelIds.Add(modelId))
         {
             Application.Selection.Event.NotifyModelState(modelId, true);
-            ModelNode modelNode = ResolveModelNode(modelId);
-            Application.Log.Info($"Selected: {modelNode?.Name ?? modelId.ToString()}");
+            Application.Log.Info($"Selected: {modelId}");
             return true;
         }
         return false;
@@ -305,8 +293,7 @@ public partial class SelectionService : Node
         if (_modelIds.Remove(modelId))
         {
             Application.Selection.Event.NotifyModelState(modelId, false);
-            ModelNode modelNode = ResolveModelNode(modelId);
-            Application.Log.Info($"Deselected: {modelNode?.Name ?? modelId.ToString()}");
+            Application.Log.Info($"Deselected: {modelId}");
             // 選択状態のモデルがなくなった場合、クリア通知も行う
             if (_modelIds.Count == 0)
             {
@@ -383,58 +370,11 @@ public partial class SelectionService : Node
         foreach (Guid modelId in modelIdsToDeselect)
         {
             Application.Selection.Event.NotifyModelState(modelId, false);
-            ModelNode modelNode = ResolveModelNode(modelId);
-            Application.Log.Info($"Deselected: {modelNode?.Name ?? modelId.ToString()}");
+            Application.Log.Info($"Deselected: {modelId}");
         }
 
         Application.Selection.Event.NotifyCleared();
         return true;
-    }
-
-    private static ModelNode ResolveModelNode(Guid modelId)
-    {
-        if (modelId == Guid.Empty)
-        {
-            return null;
-        }
-
-        ModelService modelService = Application.Model.Service;
-        if (modelService == null)
-        {
-            return null;
-        }
-
-        RootModelNode rootModelNode = (RootModelNode)Application.Model.Service?.Root.Node;
-        if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
-        {
-            return null;
-        }
-
-        return ResolveModelNodeRecursive(rootModelNode, modelId);
-    }
-
-    private static ModelNode ResolveModelNodeRecursive(ModelNode modelNode, Guid modelId)
-    {
-        if (modelNode == null)
-        {
-            return null;
-        }
-
-        if (modelNode.ModelId == modelId)
-        {
-            return modelNode;
-        }
-
-        foreach (ModelNode childModelNode in modelNode.ChildModels)
-        {
-            ModelNode found = ResolveModelNodeRecursive(childModelNode, modelId);
-            if (found != null)
-            {
-                return found;
-            }
-        }
-
-        return null;
     }
 
     #endregion

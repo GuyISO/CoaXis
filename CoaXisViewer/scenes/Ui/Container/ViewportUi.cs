@@ -169,14 +169,14 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitAllInPressed()
     {
-        ModelNode rootModel = Application.Model.Service.Root.Node;
-        if (rootModel == null)
+        Node3D targetNode = Application.Model.Service.Root.Node;
+        if (targetNode == null)
         {
             Application.Log.Debug("ViewportUi: fit-all skipped (no root model).");
             return;
         }
-        Application.Log.Debug($"ViewportUi: fit-all requested. target='{rootModel.Name}'");
-        Application.Viewport.Event.Fit(new[] { rootModel }, true);
+        Application.Log.Debug($"ViewportUi: fit-all requested. target='{targetNode.Name}'");
+        Application.Viewport.Event.Fit(new[] { targetNode }, true);
     }
 
     /// <summary>
@@ -184,15 +184,15 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        ModelNode[] fitTargetModelNodes = Application.Selection.Service.GetModelArray();
-        if (fitTargetModelNodes.Length == 0)
+        Node3D[] fitTargetNodes = Application.Selection.Service.GetModelNodeArray();
+        if (fitTargetNodes.Length == 0)
         {
             Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
             return;
         }
 
-        Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargetModelNodes.Length}");
-        Application.Viewport.Event.Fit(fitTargetModelNodes, true);
+        Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargetNodes.Length}");
+        Application.Viewport.Event.Fit(fitTargetNodes, true);
     }
 
     /// <summary>

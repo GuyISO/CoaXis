@@ -17,6 +17,11 @@ public partial class RootModelNode : ModelNode
 
     #region Lifecycle
 
+    public RootModelNode(Guid modelId)
+        : base(modelId)
+    {
+    }
+
     public override void _Ready()
     {
         base._Ready();

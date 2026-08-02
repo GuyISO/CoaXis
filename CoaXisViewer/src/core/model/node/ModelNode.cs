@@ -43,6 +43,11 @@ public partial class ModelNode : Node3D
 
     #region Lifecycle
 
+    public ModelNode(Guid modelId)
+    {
+        ModelId = modelId;
+    }
+
     public override void _Ready()
     {
         if (ModelId == Guid.Empty)
@@ -67,15 +72,6 @@ public partial class ModelNode : Node3D
     protected virtual ModelComponents CreateComponents()
     {
         return new ModelComponents();
-    }
-
-    /// <summary>
-    /// このビューに紐づくモデル識別子を設定する
-    /// </summary>
-    /// <param name="modelId">紐づけるモデル識別子</param>
-    internal void SetModelId(Guid modelId)
-    {
-        ModelId = modelId;
     }
 
     #endregion

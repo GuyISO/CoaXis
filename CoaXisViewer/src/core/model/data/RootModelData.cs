@@ -13,5 +13,7 @@ public class RootModelData : ModelData
     {
         // Root は常にロード済み扱い
         Status = ModelStatus.Loaded;
+
+        Node = new RootModelNode(RootId);
     }
 }

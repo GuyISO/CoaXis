@@ -127,15 +127,15 @@ public partial class ViewportEvent : EventBase<ViewportEvent>
         Emit(SignalName.ToggleProjectionTypeRequested);
     }
 
-    [Signal] public delegate void FitRequestedEventHandler(ModelNode[] targetModelNodes, bool useTween);
+    [Signal] public delegate void FitRequestedEventHandler(Node3D[] targetNodes, bool useTween);
     /// <summary>
     /// カメラを指定モデル群全体にフィットさせる操作をリクエストする
     /// </summary>
-    /// <param name="targetModelNodes">フィットさせたいターゲットモデル群</param>
+    /// <param name="targetNodes">フィットさせたいターゲットノード群</param>
     /// <param name="useTween">フィット操作にトゥイーンを使用するかどうかのフラグ、デフォルトは false </param>
-    internal void Fit(ModelNode[] targetModelNodes, bool useTween = false)
+    internal void Fit(Node3D[] targetNodes, bool useTween = false)
     {
-        Emit(SignalName.FitRequested, targetModelNodes, useTween);
+        Emit(SignalName.FitRequested, targetNodes, useTween);
     }
 
     [Signal] public delegate void AlignNormalToRequestedEventHandler(Vector3 normal, bool useTween);
