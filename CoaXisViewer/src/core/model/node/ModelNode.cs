@@ -13,13 +13,12 @@ public partial class ModelNode : Node3D
     /// <summary>
     /// このモデルの識別子
     /// </summary>
-    public Guid ModelId { get; private set; } = Guid.Empty;
+    public Guid ModelId { get; } = Guid.Empty;
 
     /// <summary>
     /// このモデルに対応する ModelData を取得する
     /// </summary>
-    public ModelData ModelData =>
-        ModelId == Guid.Empty ? null : Application.Model.Registry.GetModelData(ModelId);
+    public ModelData Data => ModelId == Guid.Empty ? null : Application.Model.Registry.GetModelData(ModelId);
 
     /// <summary>
     /// このモデルの内部構造を保持するコンポーネントルート
@@ -45,17 +44,20 @@ public partial class ModelNode : Node3D
 
     public ModelNode(Guid modelId)
     {
+        // ModelData がRegistryに登録されていない場合はNodeの生成を許可しない
+        ModelData modelData = Application.Model.Registry.GetModelData(modelId);
+        if (modelData == null)
+        {
+            throw new ArgumentException($"ModelNode: ModelData not found for modelId='{modelId}'");
+        }
+
         ModelId = modelId;
+        Name = modelData.Name;
+
     }
 
     public override void _Ready()
     {
-        if (ModelId == Guid.Empty)
-        {
-            // 移行期間中のフォールバック。ロードパイプライン側で明示設定される場合はその値を優先する。
-            ModelId = Guid.NewGuid();
-        }
-
         Components = CreateComponents();
         Components.Initialize();
         AddChild(Components);

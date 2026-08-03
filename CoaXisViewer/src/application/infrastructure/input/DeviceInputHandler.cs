@@ -51,6 +51,12 @@ public partial class DeviceInputHandler : Node
     /// </summary>
     private void HandleButtonInput()
     {
+        
+        if (Input.IsActionJustPressed("load"))
+        {
+            SampleTest.Run();
+        }
+        
         if (Input.IsActionJustPressed("undo"))
         {
             Application.Log.Debug("DeviceInputHandler: Undo requested.");
@@ -63,11 +69,6 @@ public partial class DeviceInputHandler : Node
             Application.Command.Event.Redo();
         }
         
-        if (Input.IsActionJustPressed("load"))
-        {
-            Application.Model.Event.LoadModel("res://assets/models/car.glb");
-        }
-
         if (Input.IsActionJustPressed("escape"))
         {
             Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);

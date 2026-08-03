@@ -12,6 +12,11 @@ public class RootModelData : ModelData
         : base(RootId, Guid.Empty, "Root", "Root")
     {
         // Root は常にロード済み扱い
+        Status = ModelStatus.Initialized;
+
+        Application.Model.Registry.Register(this);
+
+        // Root は常にロード済み扱い
         Status = ModelStatus.Loaded;
 
         Node = new RootModelNode(RootId);

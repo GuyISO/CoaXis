@@ -29,16 +29,6 @@ public partial class ModelEvent : EventBase<ModelEvent>
 		Emit(SignalName.AddModelRequested, modelId.ToString(), parentModelId.ToString());
 	}
 
-	[Signal] public delegate void LoadModelRequestedEventHandler(string path);
-	/// <summary>
-	/// モデルのロードをリクエストする
-	/// </summary>
-	/// <param name="path">ロードするモデルのパス</param>
-	internal void LoadModel(string path)
-	{
-		Emit(SignalName.LoadModelRequested, path);
-	}
-
 	#endregion
 
 	#region --------------------------------------- Notification ---------------------------------------

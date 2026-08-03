@@ -1,11 +1,20 @@
 # Viewerに実装予定の機能
 
-## すぐやる
+## これからやる
 
-カメラ状態を外部ファイルかレジストリにも保存してアプリケーションを閉じても復元できるようにする
+ModelDataの生成方法確立
+生成したModelDataのRegistryへの追加方法確立
+Registryへ追加されたModelDataからModelNodeを生成する方法確立
+ModelNodeが生成されたらTreeに追加する方法確立
+非同期でMeshなど、Componentsをロードする方法確立
+ModelNode、ModelComponentsの種類増やす
 
-## なおす
+
+
+## なおす、というかまだ使っていない
 ModelLoadUtility
+ModelColliderBuilder
+ModelCsvLoader
 
 ## Applicationに追加
 infra

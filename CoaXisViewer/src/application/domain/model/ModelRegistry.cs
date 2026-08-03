@@ -17,9 +17,6 @@ public partial class ModelRegistry : Node
 
     #region Properties
 
-    // シングルトンインスタンス
-    public static ModelRegistry Instance { get; } = new ModelRegistry();
-
     // 登録されている ModelData の集合を取得する
     public IReadOnlyDictionary<Guid, ModelData> DataSet => _dataSet;
 
