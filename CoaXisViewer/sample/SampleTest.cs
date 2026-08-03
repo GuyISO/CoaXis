@@ -8,10 +8,20 @@ public static class SampleTest
     {
         GD.Print("SampleTest: Run");
 
-        // モデルの追加をテスト
-        var modelId = Guid.NewGuid();
-        var parentModelId = Guid.Empty; // ルートに追加
-        Application.Model.Event.AddModel(modelId, parentModelId);
+        string csvPath = "res://sample/modeldata.csv";
+        List<ModelDto> models = ModelCsvLoader.Load(csvPath);
 
+        if (models.Count == 0)
+        {
+            GD.Print("SampleTest: no DTOs were loaded from CSV.");
+            return;
+        }
+
+        foreach (ModelDto dto in models)
+        {
+            Application.Model.Factory.CreateFromDto(dto, dto.ParentId);
+        }
+
+        GD.Print($"SampleTest: created {models.Count} models from CSV.");
     }
 }

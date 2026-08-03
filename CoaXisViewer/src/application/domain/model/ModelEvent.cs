@@ -18,20 +18,20 @@ public partial class ModelEvent : EventBase<ModelEvent>
 		Emit(SignalName.ToggleModelVisibilityRequested, modelId.ToString());
 	}
 
-	[Signal] public delegate void AddModelRequestedEventHandler(string modelId, string parentModelId);
-	/// <summary>
-	/// モデルの追加をリクエストする
-	/// </summary>
-	/// <param name="modelId">追加するモデル識別子</param>
-	/// <param name="parentModelId">追加先の親モデル識別子。Guid.Empty の場合はルートに追加される</param>
-	internal void AddModel(Guid modelId, Guid parentModelId = default)
-	{
-		Emit(SignalName.AddModelRequested, modelId.ToString(), parentModelId.ToString());
-	}
-
 	#endregion
 
 	#region --------------------------------------- Notification ---------------------------------------
+
+	[Signal] public delegate void ModelAddedNotifiedEventHandler(string modelId, string parentModelId);
+	/// <summary>
+	/// モデルの追加を通知する
+	/// </summary>
+	/// <param name="modelId">追加するモデル識別子</param>
+	/// <param name="parentModelId">追加先の親モデル識別子。Guid.Empty の場合はルートに追加される</param>
+	internal void NotifyModelAdded(Guid modelId, Guid parentModelId = default)
+	{
+		Emit(SignalName.ModelAddedNotified, modelId.ToString(), parentModelId.ToString());
+	}
 
 	[Signal] public delegate void ModelVisibilityStateNotifiedEventHandler(string modelId, bool isVisible);
 	/// <summary>

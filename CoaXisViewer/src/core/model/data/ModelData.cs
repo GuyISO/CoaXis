@@ -17,11 +17,11 @@ public class ModelData
     public Guid ParentId { get; }
     public string Type { get; }
     public string Name { get; }
-    public Vector3 Position { get; } = Vector3.Zero;
-    public Quaternion Rotation { get; } = Quaternion.Identity;
-    public string IconPath { get; } = string.Empty;
-    public string GlbPath { get; } = string.Empty;
-    public string WrlPath { get; } = string.Empty;
+    public Vector3 Position { get; set; } = Vector3.Zero;
+    public Quaternion Rotation { get; set; } = Quaternion.Identity;
+    public string IconPath { get; set; } = string.Empty;
+    public string GlbPath { get; set; } = string.Empty;
+    public string WrlPath { get; set; } = string.Empty;
 
     // ModelData の状態を表す情報
     public ModelStatus Status { get; set; } = ModelStatus.Unloaded;

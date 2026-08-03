@@ -70,7 +70,7 @@ public partial class HierarchyTree : Tree
         Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified += OnClearedNotified;
-        Application.Model.Event.AddModelRequested += OnAddModelRequested;
+        Application.Model.Event.ModelAddedNotified += OnModelAddedNotified;
         Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
     }
 
@@ -82,7 +82,7 @@ public partial class HierarchyTree : Tree
         Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified -= OnClearedNotified;
-        Application.Model.Event.AddModelRequested -= OnAddModelRequested;
+        Application.Model.Event.ModelAddedNotified -= OnModelAddedNotified;
         Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
     }
 
@@ -169,7 +169,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     /// <param name="modelId">追加する子モデルID</param>
     /// <param name="parentModelId">追加先の親モデルID</param>
-    private void OnAddModelRequested(string modelId, string parentModelId)
+    private void OnModelAddedNotified(string modelId, string parentModelId)
     {
         if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
         {
