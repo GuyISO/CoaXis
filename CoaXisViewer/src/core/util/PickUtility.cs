@@ -182,7 +182,7 @@ public static class PickUtility
     /// <returns>モデル情報を含む PickResult。対応する ModelNode が見つからない場合はヒットなしを返す</returns>
     public static PickResult PickByModelId(Guid modelId)
     {
-        ModelNode modelNode = FindModelNodeById(modelId);
+        ModelNode modelNode = Application.Model.Registry.GetModelData(modelId).Node;
         return PickByModel(modelNode);
     }
 
@@ -260,55 +260,6 @@ public static class PickUtility
         }
 
         return Guid.Empty;
-    }
-
-    /// <summary>
-    /// ModelId から対応する ModelNode を探索する
-    /// </summary>
-    private static ModelNode FindModelNodeById(Guid modelId)
-    {
-        if (modelId == Guid.Empty)
-        {
-            return null;
-        }
-
-        ModelService modelService = Application.Model.Service;
-        if (modelService == null)
-        {
-            return null;
-        }
-
-        RootModelNode rootModelNode = (RootModelNode)modelService.Root.Node;
-        if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
-        {
-            return null;
-        }
-
-        return FindModelNodeByIdRecursive(rootModelNode, modelId);
-    }
-
-    private static ModelNode FindModelNodeByIdRecursive(ModelNode modelNode, Guid modelId)
-    {
-        if (modelNode == null)
-        {
-            return null;
-        }
-
-        if (modelNode.ModelId == modelId)
-        {
-            return modelNode;
-        }
-
-        foreach (ModelNode childModelNode in modelNode.ChildModels)
-        {
-            ModelNode found = FindModelNodeByIdRecursive(childModelNode, modelId);
-            if (found != null)
-            {
-                return found;
-            }
-        }
-
-        return null;
     }
 
     #endregion

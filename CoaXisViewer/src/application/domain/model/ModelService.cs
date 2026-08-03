@@ -84,7 +84,7 @@ public partial class ModelService : Node
 			return;
 		}
 
-		ModelNode modelNode = FindModelNodeById(parsedModelId);
+		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId).Node;
 		if (modelNode == null)
 		{
 			Application.Log.Warn($"ModelService: toggle target not found. modelId='{parsedModelId}'");
@@ -108,7 +108,7 @@ public partial class ModelService : Node
 			return;
 		}
 
-		ModelNode modelNode = FindModelNodeById(parsedModelId);
+		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId).Node;
 		if (modelNode == null)
 		{
 			Application.Log.Warn($"ModelService: visibility target not found. modelId='{parsedModelId}'");
@@ -131,7 +131,7 @@ public partial class ModelService : Node
 			return;
 		}
 
-		ModelNode modelNode = FindModelNodeById(parsedModelId);
+		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId).Node;
 		if (modelNode == null)
 		{
 			Application.Log.Warn($"ModelService: highlight target not found. modelId='{parsedModelId}'");
@@ -309,41 +309,6 @@ public partial class ModelService : Node
 		}
 		return false;
 	}
-
-	private ModelNode FindModelNodeById(Guid modelId)
-	{
-		if (modelId == Guid.Empty)
-		{
-			return null;
-		}
-
-		RootModelNode rootModelNode = (RootModelNode)Root.Node;
-		return FindModelNodeByIdRecursive(rootModelNode, modelId);
-	}
-
-	private static ModelNode FindModelNodeByIdRecursive(ModelNode modelNode, Guid modelId)
-	{
-		if (modelNode == null)
-		{
-			return null;
-		}
-
-		if (modelNode.ModelId == modelId)
-		{
-			return modelNode;
-		}
-
-		foreach (ModelNode childModelNode in modelNode.ChildModels)
-		{
-			ModelNode found = FindModelNodeByIdRecursive(childModelNode, modelId);
-			if (found != null)
-			{
-				return found;
-			}
-		}
-
-		return null;
-	}
-
+	
 	#endregion
 }

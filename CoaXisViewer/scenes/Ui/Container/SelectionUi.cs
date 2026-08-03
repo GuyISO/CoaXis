@@ -209,8 +209,8 @@ public partial class SelectionUi : PanelContainer
         UpdateModeButtons(Application.Selection.Service.Mode);
 
         _selectedModelIds.Clear();
-        Guid[] selectedModelIds = Application.Selection.Service.GetModelIdArray();
-        if (selectedModelIds != null && selectedModelIds.Length > 0)
+        IReadOnlyCollection<Guid> selectedModelIds = Application.Selection.Service.ModelIds;
+        if (selectedModelIds != null && selectedModelIds.Count > 0)
         {
             _selectedModelIds.AddRange(selectedModelIds);
         }
