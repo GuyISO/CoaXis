@@ -225,6 +225,8 @@ public partial class HierarchyTree : Tree
         }
 
         _rootModelData = rootModelData;
+
+        AddToTree(_rootModelData.Id, Guid.Empty);
     }
 
     #endregion

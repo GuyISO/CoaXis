@@ -27,6 +27,7 @@ public static class PickUtility
         var space = camera.GetWorld3D().DirectSpaceState;
         var query = PhysicsRayQueryParameters3D.Create(origin, end);
         query.CollisionMask = collisionMask ?? camera.CullMask; // カメラのカリングマスクを使用して衝突マスクを設定
+        query.HitBackFaces = true; // 背面のメッシュもヒットさせるために true に設定
         if (excludeRids != null)
         {
             query.Exclude = new Array<Rid>(excludeRids);
@@ -101,36 +102,66 @@ public static class PickUtility
     public static PickResult[] PickByShape(Camera3D camera, Shape3D shape, bool requireFullContainment, uint? collisionMask = null, List<Rid> excludeRids = null)
     {
         var space = camera.GetWorld3D().DirectSpaceState;
+        var exclude = excludeRids != null
+            ? new List<Rid>(excludeRids)
+            : new List<Rid>();
 
-        var query = new PhysicsShapeQueryParameters3D
-        {
-            Shape = shape,
-            Transform = Transform3D.Identity, // 形状のローカル原点をワールド空間のどこに配置するか、例えば、矩形選択の場合は、カメラの位置と向きに基づいて形状を配置するための Transform3D を使用する
-            CollisionMask = collisionMask ?? camera.CullMask
-        };
-
-        if (excludeRids != null)
-        {
-            query.Exclude = new Array<Rid>(excludeRids);
-        }
-        var results = space.IntersectShape(query);
+        var pickResults = new List<PickResult>();
 
         // Godot の IntersectShape はヒット位置や法線などの詳細情報を返さないため、ノード参照のみを PickResult に格納する
-        // 指定したShapeと交差したオブジェクトがすべて取得される
-        var pickResults = new List<PickResult>();
-        foreach (var result in results)
+        // 1件取得するたびにそのRIDを除外し、モデル単位で順次ヒットを回収する
+
+        while (true)
         {
+            var query = new PhysicsShapeQueryParameters3D
+            {
+                Shape = shape,
+                Transform = Transform3D.Identity, // 形状のローカル原点をワールド空間のどこに配置するか、例えば、矩形選択の場合は、カメラの位置と向きに基づいて形状を配置するための Transform3D を使用する
+                CollisionMask = collisionMask ?? camera.CullMask,
+                CollideWithBodies = true,
+                CollideWithAreas = true
+            };
+
+            if (exclude.Count > 0)
+            {
+                query.Exclude = new Array<Rid>(exclude);
+            }
+
+            // 1つでもヒットしたら、ヒットしたオブジェクトのRIDを除外して次のクエリを行うことで、すべてのヒットを収集する、一度にすべてのヒットを取得するには大量のメッシュに対してはパフォーマンスが悪くなるため、1件ずつ取得する方式を採用する
+            var results = space.IntersectShape(query, 1);
+            if (results.Count == 0)
+            {
+                break;
+            }
+
+            var result = results[0];
+            var collider = result.ContainsKey("collider") ? (Node3D)result["collider"] : null;
+            var rid = result.ContainsKey("rid") ? (Rid)result["rid"] : default;
+
+            if (!rid.IsValid && collider is CollisionObject3D collisionObject)
+            {
+                rid = collisionObject.GetRid();
+            }
+
             pickResults.Add(
                 new PickResult(
                     hasHit: true,
-                    collider: result.ContainsKey("collider") ? (Node3D)result["collider"] : null,
-                    rid: result.ContainsKey("rid") ? (Rid)result["rid"] : default,
-                    modelId: result.ContainsKey("collider") ? GetParentModelId((Node3D)result["collider"]) : Guid.Empty,
+                    collider: collider,
+                    rid: rid,
+                    modelId: collider != null ? GetParentModelId(collider) : Guid.Empty,
                     position: Vector3.Zero, // IntersectShape は position を返さない
                     normal: Vector3.Zero,
                     distance: 0f
                 )
             );
+
+            if (rid.IsValid)
+            {
+                exclude.Add(rid);
+                continue;
+            }
+
+            break;
         }
 
         // requireFullContainment が true の場合、さらにフィルタリングして完全に内包されているオブジェクトのみを残す

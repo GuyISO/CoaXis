@@ -1,0 +1,70 @@
+#VRML V2.0 utf8
+
+Transform {
+  translation 0 0 0
+  children [
+    Shape {
+      geometry IndexedLineSet {
+        coord Coordinate {
+          point [
+            # --- outer hexagon (radius ~ 1.0) ---
+            1.0 0.0 0.0,      # 0
+            0.5 0.866 0.0,    # 1
+            -0.5 0.866 0.0,   # 2
+            -1.0 0.0 0.0,     # 3
+            -0.5 -0.866 0.0,  # 4
+            0.5 -0.866 0.0,   # 5
+
+            # --- inner hexagon (radius ~ 0.6) ---
+            0.6 0.0 0.0,      # 6
+            0.3 0.5196 0.0,   # 7
+            -0.3 0.5196 0.0,  # 8
+            -0.6 0.0 0.0,     # 9
+            -0.3 -0.5196 0.0, # 10
+            0.3 -0.5196 0.0,  # 11
+
+            # --- center symbol (tree-like shape) ---
+            # vertical spine
+            0.0 -0.4 0.0,     # 12 bottom
+            0.0 0.4 0.0,      # 13 top
+
+            # lower branches
+            -0.2 -0.2 0.0,    # 14 left lower
+            0.2 -0.2 0.0,     # 15 right lower
+
+            # upper branches
+            -0.25 0.25 0.0,   # 16 left upper
+            0.0 0.3 0.0,      # 17 center upper
+            0.25 0.25 0.0     # 18 right upper
+          ]
+        }
+
+        coordIndex [
+          # --- outer hexagon loop ---
+          0, 1, 2, 3, 4, 5, 0, -1,
+
+          # --- inner hexagon loop ---
+          6, 7, 8, 9, 10, 11, 6, -1,
+
+          # --- center vertical spine ---
+          12, 13, -1,
+
+          # --- lower branches ---
+          12, 14, -1,
+          12, 15, -1,
+
+          # --- upper branches ---
+          13, 16, -1,
+          13, 17, -1,
+          13, 18, -1
+        ]
+      }
+
+      appearance Appearance {
+        material Material {
+          diffuseColor 0.8 0.9 0.2  # 黄緑っぽい色
+        }
+      }
+    }
+  ]
+}

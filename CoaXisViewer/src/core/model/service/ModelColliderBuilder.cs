@@ -63,6 +63,8 @@ public static class ModelColliderBuilder
 
         ConcavePolygonShape3D shape = new ConcavePolygonShape3D();
         shape.SetFaces(allFaces);
+        // Shape query has no HitBackFaces option, so enable two-sided collision on concave colliders.
+        shape.BackfaceCollision = true;
         collisionShape.Shape = shape;
 
         stopwatch.Stop();

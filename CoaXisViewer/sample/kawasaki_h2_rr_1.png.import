@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b7kiv4b8l7b4l"
-path.s3tc="res://.godot/imported/car_8.png-3a305abcfa433a42eaff420efc98d9a7.s3tc.ctex"
+uid="uid://doken6bn7d0dr"
+path.s3tc="res://.godot/imported/kawasaki_h2_rr_1.png-6f3fb96684959748765a1cd786f7fc37.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "71afac222198ce13dc2c5d3a7f303103"
+"md5": "1de63dcc63d0431bc1341d2b377cab87"
 }
 
 [deps]
 
-source_file="res://assets/models/car_8.png"
-dest_files=["res://.godot/imported/car_8.png-3a305abcfa433a42eaff420efc98d9a7.s3tc.ctex"]
+source_file="res://sample/kawasaki_h2_rr_1.png"
+dest_files=["res://.godot/imported/kawasaki_h2_rr_1.png-6f3fb96684959748765a1cd786f7fc37.s3tc.ctex"]
 
 [params]
 

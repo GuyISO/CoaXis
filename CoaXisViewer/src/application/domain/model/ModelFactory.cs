@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Threading.Tasks;
 
 /// <summary>
 /// ModelDto から ModelData と ModelNode を生成するファクトリ
@@ -45,7 +46,15 @@ public partial class ModelFactory : Node
         modelData.Node = node;
 
         Application.Model.Registry.ResolveHierarchy();
-        modelData.Status = ModelStatus.Loaded;
+        if (string.IsNullOrWhiteSpace(modelData.GlbPath))
+        {
+            modelData.Status = ModelStatus.Loaded;
+        }
+        else
+        {
+            modelData.Status = ModelStatus.GlbLoading;
+            _ = LoadGlbAsync(modelData);
+        }
 
         Application.Model.Event.NotifyModelAdded(modelData.Id, modelData.ParentId);
 
@@ -70,6 +79,9 @@ public partial class ModelFactory : Node
 
         var node = new ModelNode(modelData.Id);
         modelData.Node = node;
+
+        node.Position = modelData.Position;
+        node.Quaternion = modelData.Rotation;
 
         ModelNode parentNode = ResolveParentNode(modelData.ParentId);
         if (parentNode != null)
@@ -111,6 +123,35 @@ public partial class ModelFactory : Node
         }
 
         return EnsureNode(parentData);
+    }
+
+    private async Task LoadGlbAsync(ModelData modelData)
+    {
+        try
+        {
+            await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+
+            ModelNode modelNode = modelData.Node;
+            if (modelNode == null || !IsInstanceValid(modelNode))
+            {
+                return;
+            }
+
+            if (await ModelLoadUtility.LoadModelAsync(modelNode, modelData.GlbPath))
+            {
+                modelData.Status = ModelStatus.GlbLoaded;
+                modelData.Status = ModelStatus.Loaded;
+            }
+            else
+            {
+                modelData.Status = ModelStatus.LoadFailed;
+            }
+        }
+        catch (Exception exception)
+        {
+            modelData.Status = ModelStatus.LoadFailed;
+            Application.Log.Error($"ModelFactory: failed to load glb for modelId='{modelData.Id}', path='{modelData.GlbPath}'. {exception}");
+        }
     }
 
     private static Vector3 ConvertPosition(float[] position)
