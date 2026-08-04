@@ -3,13 +3,13 @@
 importer="scene"
 importer_version=1
 type="PackedScene"
-uid="uid://2xvs2tma15ku"
-path="res://.godot/imported/car.glb-f308e570422473ac3fa4ef143695b627.scn"
+uid="uid://bf44pp842ecao"
+path="res://.godot/imported/kawasaki_h2_rr.glb-622d16f588a32a621e7f6fa90c8043ad.scn"
 
 [deps]
 
-source_file="res://assets/models/car.glb"
-dest_files=["res://.godot/imported/car.glb-f308e570422473ac3fa4ef143695b627.scn"]
+source_file="res://sample/kawasaki_h2_rr.glb"
+dest_files=["res://.godot/imported/kawasaki_h2_rr.glb-622d16f588a32a621e7f6fa90c8043ad.scn"]
 
 [params]
 

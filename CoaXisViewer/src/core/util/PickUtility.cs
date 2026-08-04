@@ -27,6 +27,7 @@ public static class PickUtility
         var space = camera.GetWorld3D().DirectSpaceState;
         var query = PhysicsRayQueryParameters3D.Create(origin, end);
         query.CollisionMask = collisionMask ?? camera.CullMask; // カメラのカリングマスクを使用して衝突マスクを設定
+        query.HitBackFaces = true; // 背面のメッシュもヒットさせるために true に設定
         if (excludeRids != null)
         {
             query.Exclude = new Array<Rid>(excludeRids);

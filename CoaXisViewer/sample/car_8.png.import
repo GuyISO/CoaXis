@@ -2,20 +2,20 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://cjq64q18nxfr4"
-path.s3tc="res://.godot/imported/car_9.png-16d0b04581f9f5c837fb5041de094ece.s3tc.ctex"
+uid="uid://cj55rnt27438f"
+path.s3tc="res://.godot/imported/car_8.png-f1aac2de8055acdfa4e4952ab795e084.s3tc.ctex"
 metadata={
 "imported_formats": ["s3tc_bptc"],
 "vram_texture": true
 }
 generator_parameters={
-"md5": "967b730fcb98cf3f456ca219e7661e7e"
+"md5": "71afac222198ce13dc2c5d3a7f303103"
 }
 
 [deps]
 
-source_file="res://assets/models/car_9.png"
-dest_files=["res://.godot/imported/car_9.png-16d0b04581f9f5c837fb5041de094ece.s3tc.ctex"]
+source_file="res://sample/car_8.png"
+dest_files=["res://.godot/imported/car_8.png-f1aac2de8055acdfa4e4952ab795e084.s3tc.ctex"]
 
 [params]
 
@@ -29,8 +29,8 @@ compress/normal_map=0
 compress/channel_pack=0
 mipmaps/generate=true
 mipmaps/limit=-1
-roughness/mode=8
-roughness/src_normal="res://assets/models/car_11.png"
+roughness/mode=0
+roughness/src_normal=""
 process/channel_remap/red=0
 process/channel_remap/green=1
 process/channel_remap/blue=2
