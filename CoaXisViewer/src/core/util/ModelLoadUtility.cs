@@ -37,7 +37,6 @@ public static class ModelLoadUtility
         {
             var scene = (Node3D)doc.GenerateScene(state);
             components.Mesh.AddChild(scene);
-            ModelColliderBuilder.AddCollider(modelNode);
 
             sw.Stop();
             Application.Log.Info($"Finished loading model: {path} in {sw.ElapsedMilliseconds} ms");

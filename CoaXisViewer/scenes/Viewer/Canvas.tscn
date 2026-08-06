@@ -9,7 +9,6 @@
 [ext_resource type="Script" uid="uid://omno51y3idbw" path="res://scenes/ui/FpsUi.cs" id="6_5i13y"]
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/container/SelectionUi.tscn" id="6_npq5x"]
 [ext_resource type="PackedScene" uid="uid://bfdie23q7sox" path="res://scenes/ui/container/CameraStateUi.tscn" id="7_57r0r"]
-[ext_resource type="PackedScene" uid="uid://cgtr3vluexxxg" path="res://scenes/ui/container/PickUi.tscn" id="7_64vlc"]
 [ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://scenes/ui/RootHierarchyTree.cs" id="10_57r0r"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
@@ -68,12 +67,6 @@ layout_mode = 2
 tooltip_text = "カメラ状態パネルを表示します"
 text = "CameraState"
 _container = ExtResource("7_57r0r")
-
-[node name="ButtonShowPickUi" parent="VBoxContainer/TopBar" unique_id=559011128 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "モデル取得パネルを表示します"
-text = "Pick"
-_container = ExtResource("7_64vlc")
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
 layout_mode = 2

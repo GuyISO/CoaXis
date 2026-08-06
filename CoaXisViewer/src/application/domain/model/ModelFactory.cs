@@ -46,14 +46,15 @@ public partial class ModelFactory : Node
         modelData.Node = node;
 
         Application.Model.Registry.ResolveHierarchy();
-        if (string.IsNullOrWhiteSpace(modelData.GlbPath))
+        bool hasGlb = !string.IsNullOrWhiteSpace(modelData.GlbPath);
+        bool hasWrl = !string.IsNullOrWhiteSpace(modelData.WrlPath);
+        if (!hasGlb && !hasWrl)
         {
             modelData.Status = ModelStatus.Loaded;
         }
         else
         {
-            modelData.Status = ModelStatus.GlbLoading;
-            _ = LoadGlbAsync(modelData);
+            _ = LoadVisualAssetsAsync(modelData);
         }
 
         Application.Model.Event.NotifyModelAdded(modelData.Id, modelData.ParentId);
@@ -125,7 +126,7 @@ public partial class ModelFactory : Node
         return EnsureNode(parentData);
     }
 
-    private async Task LoadGlbAsync(ModelData modelData)
+    private async Task LoadVisualAssetsAsync(ModelData modelData)
     {
         try
         {
@@ -137,20 +138,43 @@ public partial class ModelFactory : Node
                 return;
             }
 
-            if (await ModelLoadUtility.LoadModelAsync(modelNode, modelData.GlbPath))
+            bool glbLoaded = true;
+            bool wrlLoaded = true;
+            bool hasLoadedVisual = false;
+
+            if (!string.IsNullOrWhiteSpace(modelData.GlbPath))
             {
-                modelData.Status = ModelStatus.GlbLoaded;
-                modelData.Status = ModelStatus.Loaded;
+                modelData.Status = ModelStatus.GlbLoading;
+                glbLoaded = await ModelLoadUtility.LoadModelAsync(modelNode, modelData.GlbPath);
+                if (glbLoaded)
+                {
+                    modelData.Status = ModelStatus.GlbLoaded;
+                    hasLoadedVisual = true;
+                }
             }
-            else
+
+            if (!string.IsNullOrWhiteSpace(modelData.WrlPath))
             {
-                modelData.Status = ModelStatus.LoadFailed;
+                modelData.Status = ModelStatus.WrlLoading;
+                wrlLoaded = WrlLineLoadUtility.LoadLines(modelNode, modelData.WrlPath);
+                if (wrlLoaded)
+                {
+                    modelData.Status = ModelStatus.WrlLoaded;
+                    hasLoadedVisual = true;
+                }
             }
+
+            if (hasLoadedVisual)
+            {
+                ModelColliderBuilder.AddCollider(modelNode);
+            }
+
+            modelData.Status = glbLoaded && wrlLoaded ? ModelStatus.Loaded : ModelStatus.LoadFailed;
         }
         catch (Exception exception)
         {
             modelData.Status = ModelStatus.LoadFailed;
-            Application.Log.Error($"ModelFactory: failed to load glb for modelId='{modelData.Id}', path='{modelData.GlbPath}'. {exception}");
+            Application.Log.Error($"ModelFactory: failed to load model assets for modelId='{modelData.Id}', glb='{modelData.GlbPath}', wrl='{modelData.WrlPath}'. {exception}");
         }
     }
 

@@ -13,9 +13,19 @@ public partial class ModelComponents : Node3D
     public Node3D Mesh { get; private set; }
 
     /// <summary>
+    /// 線分表示を保持する Node3D
+    /// </summary>
+    public Node3D Line { get; private set; }
+
+    /// <summary>
     /// メッシュが存在するかどうかを示す
     /// </summary>
     public bool HasMesh => Mesh != null && Mesh.GetChildCount() > 0;
+
+    /// <summary>
+    /// 線分表示が存在するかどうかを示す
+    /// </summary>
+    public bool HasLine => Line != null && Line.GetChildCount() > 0;
 
     /// <summary>
     /// 衝突形状を保持する StaticBody3D
@@ -63,6 +73,7 @@ public partial class ModelComponents : Node3D
         Name = GetType().Name;
 
         Mesh = CreateNode<Node3D>("Mesh");
+        Line = CreateNode<Node3D>("Line");
         Collider = CreateNode<StaticBody3D>("Collider");
         Effect = CreateNode<Node3D>("Effect");
 

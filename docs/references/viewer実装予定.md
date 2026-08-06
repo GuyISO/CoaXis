@@ -12,12 +12,6 @@ ModelNode、ModelComponentsの種類増やす
 選択セット・表示セットの保存・復元
     選択セット・表示セットを保存して、後で復元する機能を実装する、プランコピーしても引き継がれるように、ProductPlanの属性として保存する？
 
-
-## なおす、というかまだ使っていない
-ModelLoadUtility
-ModelColliderBuilder
-ModelCsvLoader
-
 ## Applicationに追加
 infra
     Save&Load機能
@@ -78,6 +72,8 @@ RootModel
     表示されるラベルと線を豪華にする、モデルに埋まっても見えるようにしたい
 Tree
     階層を跨いで複数選択するのができない
+wrlの読み込み
+    内容全然わかっていないので理解する
 ## Host側の機能
 号機/OperationでのVFXの切り替え
 

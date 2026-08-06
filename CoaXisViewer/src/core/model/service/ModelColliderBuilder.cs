@@ -24,11 +24,14 @@ public static class ModelColliderBuilder
             return;
         }
 
+        ClearColliderShapes(components.Collider);
+
         CollisionShape3D collisionShape = new CollisionShape3D();
         components.Collider.AddChild(collisionShape);
 
         List<MeshInstance3D> meshes = new List<MeshInstance3D>();
         CollectMeshes(components.Mesh, meshes);
+        CollectMeshes(components.Line, meshes);
 
         Vector3[] allFaces = new Vector3[meshes.Sum(meshInstance => meshInstance.Mesh?.GetFaces().Length ?? 0)];
         int index = 0;
@@ -74,6 +77,11 @@ public static class ModelColliderBuilder
     // モデル階層の深さに依存せずコライダーを作るため、MeshInstance3D を再帰収集する
     private static void CollectMeshes(Node node, List<MeshInstance3D> list)
     {
+        if (node == null)
+        {
+            return;
+        }
+
         if (node is MeshInstance3D meshInstance)
         {
             list.Add(meshInstance);
@@ -82,6 +90,19 @@ public static class ModelColliderBuilder
         foreach (Node child in node.GetChildren())
         {
             CollectMeshes(child, list);
+        }
+    }
+
+    private static void ClearColliderShapes(Node colliderRoot)
+    {
+        if (colliderRoot == null)
+        {
+            return;
+        }
+
+        foreach (Node child in colliderRoot.GetChildren())
+        {
+            child.QueueFree();
         }
     }
 }
