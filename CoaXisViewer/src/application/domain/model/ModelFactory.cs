@@ -46,15 +46,24 @@ public partial class ModelFactory : Node
         modelData.Node = node;
 
         Application.Model.Registry.ResolveHierarchy();
+<<<<<<< HEAD
         bool hasGlb = !string.IsNullOrWhiteSpace(modelData.GlbPath);
         bool hasWrl = !string.IsNullOrWhiteSpace(modelData.WrlPath);
         if (!hasGlb && !hasWrl)
+=======
+        if (string.IsNullOrWhiteSpace(modelData.GlbPath))
+>>>>>>> 1477e785665a63ff54a2111715825fd865a14fb5
         {
             modelData.Status = ModelStatus.Loaded;
         }
         else
         {
+<<<<<<< HEAD
             _ = LoadVisualAssetsAsync(modelData);
+=======
+            modelData.Status = ModelStatus.GlbLoading;
+            _ = LoadGlbAsync(modelData);
+>>>>>>> 1477e785665a63ff54a2111715825fd865a14fb5
         }
 
         Application.Model.Event.NotifyModelAdded(modelData.Id, modelData.ParentId);
@@ -82,7 +91,10 @@ public partial class ModelFactory : Node
         modelData.Node = node;
 
         node.Position = modelData.Position;
+<<<<<<< HEAD
         node.Quaternion = modelData.Rotation;
+=======
+>>>>>>> 1477e785665a63ff54a2111715825fd865a14fb5
 
         ModelNode parentNode = ResolveParentNode(modelData.ParentId);
         if (parentNode != null)
@@ -126,7 +138,11 @@ public partial class ModelFactory : Node
         return EnsureNode(parentData);
     }
 
+<<<<<<< HEAD
     private async Task LoadVisualAssetsAsync(ModelData modelData)
+=======
+    private async Task LoadGlbAsync(ModelData modelData)
+>>>>>>> 1477e785665a63ff54a2111715825fd865a14fb5
     {
         try
         {
@@ -138,6 +154,7 @@ public partial class ModelFactory : Node
                 return;
             }
 
+<<<<<<< HEAD
             bool glbLoaded = true;
             bool wrlLoaded = true;
             bool hasLoadedVisual = false;
@@ -170,11 +187,26 @@ public partial class ModelFactory : Node
             }
 
             modelData.Status = glbLoaded && wrlLoaded ? ModelStatus.Loaded : ModelStatus.LoadFailed;
+=======
+            if (await ModelLoadUtility.LoadModelAsync(modelNode, modelData.GlbPath))
+            {
+                modelData.Status = ModelStatus.GlbLoaded;
+                modelData.Status = ModelStatus.Loaded;
+            }
+            else
+            {
+                modelData.Status = ModelStatus.LoadFailed;
+            }
+>>>>>>> 1477e785665a63ff54a2111715825fd865a14fb5
         }
         catch (Exception exception)
         {
             modelData.Status = ModelStatus.LoadFailed;
+<<<<<<< HEAD
             Application.Log.Error($"ModelFactory: failed to load model assets for modelId='{modelData.Id}', glb='{modelData.GlbPath}', wrl='{modelData.WrlPath}'. {exception}");
+=======
+            Application.Log.Error($"ModelFactory: failed to load glb for modelId='{modelData.Id}', path='{modelData.GlbPath}'. {exception}");
+>>>>>>> 1477e785665a63ff54a2111715825fd865a14fb5
         }
     }
 
