@@ -79,12 +79,12 @@ public partial class ModelRegistry : Node
         // 子孫の ModelData から先に削除する
         foreach (ModelData child in modelData.Children.ToList())
         {
-            modelData.DetachChild(child);
+            modelData.Detach(child);
         }
 
         // 親からの参照に登録済みの場合は解除する
         ModelData parent = GetModelData(modelData.ParentId);
-        parent?.DetachChild(modelData);
+        parent?.Detach(modelData);
 
         // レジストリから削除する
         _dataSet.Remove(id);
@@ -129,7 +129,7 @@ public partial class ModelRegistry : Node
 
         if (_dataSet.TryGetValue(modelData.ParentId, out ModelData parent))
         {
-            parent.AttachChild(modelData);
+            parent.Attach(modelData);
             return;
         }
     }

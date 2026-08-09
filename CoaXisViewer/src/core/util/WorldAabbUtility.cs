@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// カメラフィット用の AABB 計算を担うヘルパー
 /// </summary>
-public static class CameraFitUtility
+public static class WorldAabbUtility
 {
     #region Public Methods
 

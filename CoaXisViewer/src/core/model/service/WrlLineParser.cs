@@ -8,7 +8,7 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Utility for loading line primitives from VRML(.wrl) files.
 /// </summary>
-public static class WrlLineLoadUtility
+public static class WrlLineParser
 {
     private const float TubeRadiusMeters = 0.010f;
     private const float JointRadiusMeters = 0.010f;
@@ -32,38 +32,38 @@ public static class WrlLineLoadUtility
 
         if (string.IsNullOrWhiteSpace(path))
         {
-            Application.Log.Warn($"WrlLineLoadUtility: empty wrl path. model='{modelNode.Name}'");
+            Application.Log.Warn($"WrlLineParser: empty wrl path. model='{modelNode.Name}'");
             return false;
         }
 
         ModelComponents components = modelNode.Components;
         if (components == null)
         {
-            Application.Log.Error($"WrlLineLoadUtility: components are not initialized. model='{modelNode.Name}'");
+            Application.Log.Error($"WrlLineParser: components are not initialized. model='{modelNode.Name}'");
             return false;
         }
 
         string content = ReadWrlText(path);
         if (string.IsNullOrWhiteSpace(content))
         {
-            Application.Log.Error($"WrlLineLoadUtility: failed to read wrl file. path='{path}'");
+            Application.Log.Error($"WrlLineParser: failed to read wrl file. path='{path}'");
             return false;
         }
 
         if (!TryParse(content, out List<Vector3> points, out List<int> coordIndex))
         {
-            Application.Log.Error($"WrlLineLoadUtility: failed to parse line data. path='{path}'");
+            Application.Log.Error($"WrlLineParser: failed to parse line data. path='{path}'");
             return false;
         }
 
         int segmentCount = AttachLineMesh(components, points, coordIndex);
         if (segmentCount <= 0)
         {
-            Application.Log.Warn($"WrlLineLoadUtility: no line segment found. path='{path}'");
+            Application.Log.Warn($"WrlLineParser: no line segment found. path='{path}'");
             return false;
         }
 
-        Application.Log.Info($"WrlLineLoadUtility: loaded {segmentCount} segments from '{path}'.");
+        Application.Log.Info($"WrlLineParser: loaded {segmentCount} segments from '{path}'.");
         return true;
     }
 

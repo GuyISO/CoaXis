@@ -44,7 +44,7 @@ public partial class ModelNode : Node3D
 
     public ModelNode(Guid modelId)
     {
-        // ModelData がRegistryに登録されていない場合はNodeの生成を許可しない
+        // Registry に先に ModelData が存在していることを前提にノードを作る
         ModelData modelData = Application.Model.Registry.GetModelData(modelId);
         if (modelData == null)
         {
@@ -56,6 +56,9 @@ public partial class ModelNode : Node3D
 
     }
 
+    /// <summary>
+    /// Godot のツリーに入った後で内部コンポーネントを初期化する
+    /// </summary>
     public override void _Ready()
     {
         Components = CreateComponents();

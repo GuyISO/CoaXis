@@ -9,15 +9,15 @@ public class ModelDto
 {
     #region Properties
 
-    public Guid Id { get; set; }
-    public Guid? ParentId { get; set; }
-    public string Type { get; set; } = string.Empty;
-    public string Name { get; set; } = string.Empty;
-    public float[] Position { get; set; } = new[] { 0f, 0f, 0f };
-    public float[] Rotation { get; set; } = new[] { 0f, 0f, 0f, 1f };
-    public string IconFilePath { get; set; } = string.Empty;
-    public string GlbFilePath { get; set; } = string.Empty;
-    public string WrlFilePath { get; set; } = string.Empty;
+    public Guid Id { get; init; }
+    public Guid? ParentId { get; init; }
+    public string Type { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public float[] Position { get; init; } = new[] { 0f, 0f, 0f };
+    public float[] Rotation { get; init; } = new[] { 0f, 0f, 0f, 1f };
+    public string IconFilePath { get; init; } = string.Empty;
+    public string GlbFilePath { get; init; } = string.Empty;
+    public string WrlFilePath { get; init; } = string.Empty;
 
     #endregion
 

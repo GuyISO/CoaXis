@@ -558,7 +558,7 @@ public partial class CameraRig : Node3D
         float fitPadding = settings.FitPadding;
         float minZoomValue = settings.MinZoomValue;
 
-        if (!CameraFitUtility.TryGetWorldAabb(targetRoots, out Aabb worldAabb))
+        if (!WorldAabbUtility.TryGetWorldAabb(targetRoots, out Aabb worldAabb))
         {
             return false;
         }
@@ -581,7 +581,7 @@ public partial class CameraRig : Node3D
             float tanHalfY = Mathf.Max(Mathf.Tan(halfVerticalFov), 1e-5f);
             float tanHalfX = Mathf.Max(tanHalfY * aspect, 1e-5f);
 
-            foreach (Vector3 corner in CameraFitUtility.GetAabbCorners(worldAabb))
+            foreach (Vector3 corner in WorldAabbUtility.GetAabbCorners(worldAabb))
             {
                 Vector3 local = inverseBasis * (corner - center);
                 requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.X) / tanHalfX);
@@ -596,7 +596,7 @@ public partial class CameraRig : Node3D
         }
         else
         {
-            foreach (Vector3 corner in CameraFitUtility.GetAabbCorners(worldAabb))
+            foreach (Vector3 corner in WorldAabbUtility.GetAabbCorners(worldAabb))
             {
                 Vector3 local = inverseBasis * (corner - center);
                 maxAbsX = Mathf.Max(maxAbsX, Mathf.Abs(local.X));

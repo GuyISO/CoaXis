@@ -2,54 +2,131 @@ using System;
 using Godot;
 using System.Collections.Generic;
 
+/// <summary>
+/// モデルのデータを表すクラス、ModelFactoryで生成され、ModelNodeに対応する
+/// </summary>
 public class ModelData
 {
     #region Fields
 
+    /// <summary>
+    /// 子モデルをNameで管理するための保持先
+    /// </summary>
     private readonly Dictionary<string, ModelData> _children = new Dictionary<string, ModelData>();
 
     #endregion
 
     #region Properties
 
-    // DTOから受け取った情報
+    /// <summary>
+    /// モデルの一意識別子
+    /// </summary>
     public Guid Id { get; }
+    /// <summary>
+    /// 親モデルの識別子。Root 配下の場合は Guid.Empty
+    /// </summary>
     public Guid ParentId { get; }
+    /// <summary>
+    /// CSV などから受け取ったモデル種別
+    /// </summary>
     public string Type { get; }
+    /// <summary>
+    /// 表示名
+    /// </summary>
     public string Name { get; }
-    public Vector3 Position { get; set; } = Vector3.Zero;
-    public Quaternion Rotation { get; set; } = Quaternion.Identity;
-    public string IconPath { get; set; } = string.Empty;
-    public string GlbPath { get; set; } = string.Empty;
-    public string WrlPath { get; set; } = string.Empty;
+    /// <summary>
+    /// 座標変換後の配置位置
+    /// </summary>
+    public Vector3 Position { get; }
+    /// <summary>
+    /// 座標変換後の回転
+    /// </summary>
+    public Quaternion Rotation { get; }
+    /// <summary>
+    /// アイコン画像のパス
+    /// </summary>
+    public string IconPath { get; }
+    /// <summary>
+    /// GLB モデルのパス
+    /// </summary>
+    public string GlbPath { get; }
+    /// <summary>
+    /// WRL モデルのパス
+    /// </summary>
+    public string WrlPath { get; }
 
-    // ModelData の状態を表す情報
-    public ModelStatus Status { get; set; } = ModelStatus.Unloaded;
-    public ModelNode Node { get; set; } = null;
+    /// <summary>
+    /// ModelData の現在状態
+    /// </summary>
+    public ModelStatus Status { get; internal set; } = ModelStatus.Unloaded;
+    /// <summary>
+    /// このデータに対応する実体ノード
+    /// </summary>
+    public ModelNode Node { get; internal set; } = null;
 
-    // 外部から参照するための構造情報
+    /// <summary>
+    /// 親データを参照するためのプロパティ
+    /// </summary>
     public ModelData Parent => ParentId != Guid.Empty ? Application.Model.Registry.GetModelData(ParentId) : null;
+    /// <summary>
+    /// 子データの一覧を返す
+    /// </summary>
     public IReadOnlyCollection<ModelData> Children => _children.Values;
 
     #endregion
 
     #region Constructors
-    public ModelData(Guid id, Guid parentId, string type, string name)
+
+    /// <summary>
+    /// モデルデータを生成する
+    /// </summary>
+    public ModelData(
+        Guid id,
+        Guid parentId,
+        string type,
+        string name,
+        Vector3 position,
+        Quaternion rotation,
+        string iconPath,
+        string glbPath,
+        string wrlPath)
     {
         Id = id;
         ParentId = parentId;
         Type = type ?? string.Empty;
         Name = name ?? string.Empty;
+        Position = position;
+        Rotation = rotation;
+        IconPath = iconPath ?? string.Empty;
+        GlbPath = glbPath ?? string.Empty;
+        WrlPath = wrlPath ?? string.Empty;
     }
+
+    /// <summary>
+    /// 最小情報からモデルデータを生成する
+    /// </summary>
     public ModelData(Guid id, Guid parentId, string name)
-        : this(id, parentId, string.Empty, name)
+        : this(
+            id,
+            parentId,
+            string.Empty,
+            name,
+            Vector3.Zero,
+            Quaternion.Identity,
+            string.Empty,
+            string.Empty,
+            string.Empty)
     {
     }
     #endregion
 
     #region Public Methods
 
-    internal void AttachChild(ModelData child)
+    /// <summary>
+    /// 子モデルを登録する。重複名は無視する。
+    /// </summary>
+    /// <param name="child">追加対象の子モデル</param>
+    internal void Attach(ModelData child)
     {
         if (child == null)
         {
@@ -64,7 +141,11 @@ public class ModelData
         _children.Add(child.Name, child);
     }
 
-    internal void DetachChild(ModelData child)
+    /// <summary>
+    /// 子モデルの登録を解除する
+    /// </summary>
+    /// <param name="child">解除対象の子モデル</param>
+    internal void Detach(ModelData child)
     {
         if (child == null)
         {
@@ -74,7 +155,10 @@ public class ModelData
         _children.Remove(child.Name);
     }
 
-    internal void ClearChildren()
+    /// <summary>
+    /// 子モデル一覧をクリアする
+    /// </summary>
+    internal void Clear()
     {
         _children.Clear();
     }
