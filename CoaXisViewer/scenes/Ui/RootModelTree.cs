@@ -1,7 +1,7 @@
 /// <summary>
 /// 自動的にRootModelからの階層ツリーの表示と操作を行うUIコンポーネント
 /// </summary>
-public partial class RootHierarchyTree : HierarchyTree
+public partial class RootModelTree : ModelTree
 {
     #region Lifecycle
 
@@ -12,6 +12,6 @@ public partial class RootHierarchyTree : HierarchyTree
         // 初期表示のためにRootModelを設定する
         SetRootModelData(Application.Model.Service.Root);
     }
-
+    
     #endregion
 }

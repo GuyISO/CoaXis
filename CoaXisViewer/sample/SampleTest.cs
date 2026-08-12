@@ -8,6 +8,8 @@ public static class SampleTest
     {
         GD.Print("SampleTest: Run");
 
+        Application.Model.Service.Clear();
+
         string csvPath = "res://sample/modeldata.csv";
         List<ModelDto> models = ModelCsvLoader.Load(csvPath);
 

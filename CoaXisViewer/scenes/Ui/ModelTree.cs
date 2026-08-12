@@ -3,24 +3,19 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// 階層ツリーの表示と操作を行うUIコンポーネント
+/// モデルの階層ツリー表示と操作を行うUIコンポーネント
 /// </summary>
-public partial class HierarchyTree : Tree
+public partial class ModelTree : Tree
 {
     #region Fields
 
-    private Dictionary<Guid, TreeItem> _modelIdToTreeItem = new(); // ModelId -> TreeItem の対応辞書、TreeItem -> ModelId はMetaDataで保持する
+    private Dictionary<Guid, TreeItem> _modelIdToTreeItem = new(); // ModelId -> TreeItem の対応辞書、TreeItem -> ModelId は各TreeItemにMetaDataで設定する
 
-    // 関連ノードのキャッシュ
-    private Texture2D _visibleIcon; // 表示アイコンのキャッシュ
-    private Texture2D _invisibleIcon; // 非表示アイコンのキャッシュ
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
 
     private ModelData _rootModelData; // このツリーのルートモデルのキャッシュ、シーン全体のルートではないことに注意
 
     private Color _selectedColor;
-
-    private bool _isInternalSelectionChange = false; // 内部的な選択状態の変更を通知するフラグ
 
     #endregion
 
@@ -28,7 +23,6 @@ public partial class HierarchyTree : Tree
 
     public override void _Ready()
     {
-        EnsureState();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
         ApplySettings();
@@ -52,6 +46,7 @@ public partial class HierarchyTree : Tree
     private void SubscribeUiEvents()
     {
         CellSelected += OnCellSelected;
+        ButtonClicked += OnTreeButtonClicked;
     }
 
     /// <summary>
@@ -60,6 +55,7 @@ public partial class HierarchyTree : Tree
     private void UnsubscribeUiEvents()
     {
         CellSelected -= OnCellSelected;
+        ButtonClicked -= OnTreeButtonClicked;
     }
     
     /// <summary>
@@ -70,8 +66,9 @@ public partial class HierarchyTree : Tree
         Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified += OnClearedNotified;
-        Application.Model.Event.ModelAddedNotified += OnModelAddedNotified;
+        Application.Model.Event.ModelAdded += OnModelAddedNotified;
         Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        Application.Model.Event.RegistryCleared += OnRegistryClearedNotified;
     }
 
     /// <summary>
@@ -82,8 +79,9 @@ public partial class HierarchyTree : Tree
         Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified -= OnClearedNotified;
-        Application.Model.Event.ModelAddedNotified -= OnModelAddedNotified;
+        Application.Model.Event.ModelAdded -= OnModelAddedNotified;
         Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        Application.Model.Event.RegistryCleared -= OnRegistryClearedNotified;
     }
 
     /// <summary>
@@ -91,39 +89,31 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void OnCellSelected()
     {
-        if (_isInternalSelectionChange)
-        {
-            // 内部的な選択状態の変更による通知は無視する
-            return;
-        }
-
         TreeItem item = GetSelected();
         if (item == null)
         {
             return;
         }
 
-        int column = GetSelectedColumn();
+        HandleSelected(item);        
+        _lastSelectedItem = item;
+    }
 
-        switch (column)
+    /// <summary>
+    /// TreeItem のボタンが押されたときのイベントハンドラ
+    /// </summary>
+    /// <param name="item">ボタンが押された TreeItem</param>
+    /// <param name="column">ボタンがある列</param>
+    /// <param name="buttonId">ボタンの識別 ID</param>
+    /// <param name="mouseButtonIndex">マウスボタンの識別子</param>
+    private void OnTreeButtonClicked(TreeItem item, long column, long buttonId, long mouseButtonIndex)
+    {
+        if (item == null || column != 0 || buttonId != 1)
         {
-            case (int)HierarchyTreeColumn.Name:
-                HandleSelected(item);        
-                _lastSelectedItem = item;
-                break;
-            case (int)HierarchyTreeColumn.VisibleButton:
-                HandleVisibleButtonClicked(item);
-                break;
-            default:
-                break;
+            return;
         }
 
-        if (_lastSelectedItem != null)
-        {
-            _isInternalSelectionChange = true; // 内部的な選択状態の変更を通知するフラグを立てる
-            _lastSelectedItem.Select((int)HierarchyTreeColumn.Name); // 最後に選択されたアイテムを保持する
-            _isInternalSelectionChange = false; // フラグをリセットする
-        }
+        HandleVisibleButtonClicked(item);
     }
 
     /// <summary>
@@ -143,11 +133,11 @@ public partial class HierarchyTree : Tree
         {
             if (isSelected)
             {
-                treeItem.SetCustomBgColor((int)HierarchyTreeColumn.Name, _selectedColor);
+                treeItem.SetCustomBgColor(0, _selectedColor);
             }
             else
             {
-                treeItem.ClearCustomBgColor((int)HierarchyTreeColumn.Name);
+                treeItem.ClearCustomBgColor(0);
             }
         }
     }
@@ -157,11 +147,7 @@ public partial class HierarchyTree : Tree
     /// </summary>
     private void OnClearedNotified()
     {
-        // 基本的にUI上に選択状態は残さないので選択状態でないはずだが、念のためすべての選択状態を解除する
-        _isInternalSelectionChange = true; // 内部的な選択状態の変更を通知するフラグを立てる
-        DeselectAll();
         _lastSelectedItem = null;
-        _isInternalSelectionChange = false; // フラグをリセットする
     }
 
     /// <summary>
@@ -173,7 +159,7 @@ public partial class HierarchyTree : Tree
     {
         if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
         {
-            Application.Log.Warn($"HierarchyTree: failed to add model. invalid child modelId='{modelId}'");
+            Application.Log.Warn($"ModelTree: failed to add model. invalid child modelId='{modelId}'");
             return;
         }
 
@@ -204,12 +190,25 @@ public partial class HierarchyTree : Tree
             return;
         }
 
-        Application.Log.Debug($"HierarchyTree: visibility state notified. modelId='{parsedModelId}', isVisible={isVisible}");
+        Application.Log.Debug($"ModelTree: visibility state notified. modelId='{parsedModelId}', isVisible={isVisible}");
         TreeItem treeItem = _modelIdToTreeItem.TryGetValue(parsedModelId, out TreeItem item) ? item : null;
         if (treeItem != null)
         {
-            treeItem.SetIcon((int)HierarchyTreeColumn.VisibleButton, isVisible ? _visibleIcon : _invisibleIcon);
+            Texture2D buttonIcon = Application.Asset.Service.GetVisibilityIcon(isVisible, Constant.Ui.Tree.HierarchyVisibleIconSize)
+                ?? Application.Asset.Service.GetVisibilityIcon(true, Constant.Ui.Tree.HierarchyVisibleIconSize);
+            treeItem.SetButton(0, 0, buttonIcon);
         }
+    }
+
+    /// <summary>
+    /// モデルレジストリがクリアされたことを通知されたときのイベントハンドラ
+    /// </summary>
+    private void OnRegistryClearedNotified()
+    {
+        Clear();
+        _modelIdToTreeItem.Clear();
+        _lastSelectedItem = null;
+        AddToTree(_rootModelData.Id, Guid.Empty);
     }
 
     #endregion
@@ -228,7 +227,7 @@ public partial class HierarchyTree : Tree
 
         AddToTree(_rootModelData.Id, Guid.Empty);
     }
-
+    
     #endregion
 
     #region Internal Helpers
@@ -245,11 +244,21 @@ public partial class HierarchyTree : Tree
 
         // ツリーにアイテムを追加、親が null の場合は初回のみルートアイテムとして追加される便利仕様
         TreeItem treeItem = CreateItem(parentTreeItem);
-        treeItem.SetText((int)HierarchyTreeColumn.Name, modelData.Name);
 
-        // 非表示切り替えのためのアイコンを設定
-        treeItem.SetCellMode((int)HierarchyTreeColumn.VisibleButton, TreeItem.TreeCellMode.Icon);
-        treeItem.SetIcon((int)HierarchyTreeColumn.VisibleButton, modelData.Node.Visible ? _visibleIcon : _invisibleIcon);
+        // --- テキスト（名前） ---
+        treeItem.SetText(0, modelData.Name);
+
+        // --- 左側アイコン（ModelData に紐づくモデルアイコン） ---
+        Texture2D defaultIcon = Application.Asset.Service.GetVisibilityIcon(true, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D icon = Application.Asset.Service.GetIcon(modelData.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
+            ?? defaultIcon;
+        treeItem.SetIcon(0, icon);
+
+        // --- 右側ボタン（表示/非表示トグル用） ---
+        // TODO: TreeItemのButton機能に移行する
+        Texture2D btnIcon = Application.Asset.Service.GetVisibilityIcon(modelData.Node.Visible, Constant.Ui.Tree.HierarchyVisibleIconSize)
+            ?? defaultIcon;
+        treeItem.AddButton(0, btnIcon, id: 1);
         
         // ModelId と TreeItem の対応を登録
         treeItem.SetMeta("ModelId", modelId.ToString());
@@ -301,21 +310,8 @@ public partial class HierarchyTree : Tree
                 continue;
             }
 
-            item.SetCustomBgColor((int)HierarchyTreeColumn.Name, _selectedColor);
+            item.SetCustomBgColor(0, _selectedColor);
         }
-    }
-
-    /// <summary>
-    /// ツリー表示に必要な初期状態を整える
-    /// </summary>
-    private void EnsureState()
-    {
-        _visibleIcon = Application.Asset.Service.GetVisibilityIcon(true, Constant.Ui.Tree.HierarchyVisibleIconSize);
-        _invisibleIcon = Application.Asset.Service.GetVisibilityIcon(false, Constant.Ui.Tree.HierarchyVisibleIconSize);
-
-        // アイコンサイズに合わせて VisibleButton 列を固定幅にする
-        SetColumnExpand((int)HierarchyTreeColumn.VisibleButton, false);
-        SetColumnCustomMinimumWidth((int)HierarchyTreeColumn.VisibleButton, Constant.Ui.Tree.HierarchyVisibleIconSize);
     }
 
     /// <summary>
@@ -327,7 +323,7 @@ public partial class HierarchyTree : Tree
         Guid modelId = Guid.TryParse(item.GetMeta("ModelId").ToString(), out Guid parsedModelId) ? parsedModelId : Guid.Empty;
         if (modelId == Guid.Empty)
         {
-            Application.Log.Warn("HierarchyTree: selected item has no associated model.");
+            Application.Log.Warn("ModelTree: selected item has no associated model.");
             return;
         }
 
@@ -380,49 +376,76 @@ public partial class HierarchyTree : Tree
             return Array.Empty<Guid>();
         }
 
-        List<Guid> modelIdsInRange = CollectModelsInForwardOrder(lastItem, selectedItem);
-        if (modelIdsInRange == null)
+        List<TreeItem> visibleItems = GetVisibleItemsInDisplayOrder();
+        int lastIndex = visibleItems.IndexOf(lastItem);
+        int selectedIndex = visibleItems.IndexOf(selectedItem);
+        if (lastIndex < 0 || selectedIndex < 0)
         {
-            // 逆方向の範囲選択（下から上）にも対応する
-            modelIdsInRange = CollectModelsInForwardOrder(selectedItem, lastItem);
+            return Array.Empty<Guid>();
         }
 
-        return modelIdsInRange?.ToArray() ?? Array.Empty<Guid>();
-    }
+        int startIndex = Math.Min(lastIndex, selectedIndex);
+        int endIndex = Math.Max(lastIndex, selectedIndex);
 
-    /// <summary>
-    /// startItem から endItem までを前方向にたどり、範囲内モデルを収集する
-    /// </summary>
-    /// <param name="startItem">走査開始アイテム</param>
-    /// <param name="endItem">走査終了アイテム</param>
-    /// <returns>到達できた場合はモデルID一覧、到達できない場合は null</returns>
-    private List<Guid> CollectModelsInForwardOrder(TreeItem startItem, TreeItem endItem)
-    {
         List<Guid> modelIdsInRange = new();
-
-        TreeItem currentItem = startItem;
-        while (currentItem != null)
+        for (int i = startIndex; i <= endIndex; i++)
         {
-            Guid modelId = Guid.TryParse(currentItem.GetMeta("ModelId").ToString(), out Guid parsedModelId) ? parsedModelId : Guid.Empty;
+            Guid modelId = TryGetModelId(visibleItems[i]);
             if (modelId != Guid.Empty)
             {
                 modelIdsInRange.Add(modelId);
             }
+        }
 
-            if (currentItem == endItem)
+        return modelIdsInRange.ToArray();
+    }
+
+    /// <summary>
+    /// 現在の見た目順（展開状態を考慮）で表示中の TreeItem 一覧を取得する
+    /// </summary>
+    private List<TreeItem> GetVisibleItemsInDisplayOrder()
+    {
+        List<TreeItem> visibleItems = new();
+        TreeItem rootItem = GetRoot();
+        if (rootItem == null)
+        {
+            return visibleItems;
+        }
+
+        CollectVisibleItemsDepthFirst(rootItem, visibleItems);
+        return visibleItems;
+    }
+
+    private static void CollectVisibleItemsDepthFirst(TreeItem item, List<TreeItem> visibleItems)
+    {
+        TreeItem currentItem = item;
+        while (currentItem != null)
+        {
+            visibleItems.Add(currentItem);
+
+            if (!currentItem.Collapsed)
             {
-                break;
+                TreeItem child = currentItem.GetFirstChild();
+                if (child != null)
+                {
+                    CollectVisibleItemsDepthFirst(child, visibleItems);
+                }
             }
 
             currentItem = currentItem.GetNext();
         }
+    }
 
-        if (currentItem == null)
+    private static Guid TryGetModelId(TreeItem item)
+    {
+        if (item == null)
         {
-            return null;
+            return Guid.Empty;
         }
 
-        return modelIdsInRange;
+        Variant modelIdVariant = item.GetMeta("ModelId", Variant.CreateFrom(string.Empty));
+        string modelIdText = modelIdVariant.AsString();
+        return Guid.TryParse(modelIdText, out Guid modelId) ? modelId : Guid.Empty;
     }
 
     /// <summary>
@@ -434,7 +457,7 @@ public partial class HierarchyTree : Tree
         Guid modelId = Guid.TryParse(item.GetMeta("ModelId").ToString(), out Guid parsedModelId) ? parsedModelId : Guid.Empty;
         if (modelId == Guid.Empty)
         {
-            Application.Log.Warn("HierarchyTree: clicked item has no associated model.");
+            Application.Log.Warn("ModelTree: clicked item has no associated model.");
             return;
         }
 

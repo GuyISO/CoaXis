@@ -30,7 +30,7 @@ public sealed class CameraSettings
     {
         if (ZoomBase <= 1.0f) ZoomBase = 1.005f;
         if (MinZoomValue <= 0f) MinZoomValue = 0.01f;
-        if (FitPadding < 1.0f) FitPadding = 1.1f;
+        if (FitPadding < 1.0f) FitPadding = 1.0f;
         if (TweenDuration < 0f) TweenDuration = 0.5f;
     }
 }

@@ -57,6 +57,11 @@ public partial class DeviceInputHandler : Node
             SampleTest.Run();
         }
         
+        if (Input.IsActionJustPressed("clear"))
+        {
+            Application.Model.Service.Clear();
+        }
+        
         if (Input.IsActionJustPressed("undo"))
         {
             Application.Log.Debug("DeviceInputHandler: Undo requested.");

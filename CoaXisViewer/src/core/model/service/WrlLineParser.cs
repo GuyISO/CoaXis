@@ -10,8 +10,8 @@ using System.Text.RegularExpressions;
 /// </summary>
 public static class WrlLineParser
 {
-    private const float TubeRadiusMeters = 0.010f;
-    private const float JointRadiusMeters = 0.010f;
+    private const float TubeRadiusMeters = 0.030f;
+    private const float JointRadiusMeters = 0.030f;
     private const float MinSegmentLengthMeters = 0.0001f;
     private const int TubeRadialSegments = 12;
 

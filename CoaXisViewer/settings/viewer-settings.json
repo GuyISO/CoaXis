@@ -2,7 +2,7 @@
   "Camera": {
     "ZoomBase": 1.005,
     "MinZoomValue": 0.01,
-    "FitPadding": 1.1,
+    "FitPadding": 1.0,
     "TweenDuration": 0.5
   },
   "Input": {

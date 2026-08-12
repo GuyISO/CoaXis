@@ -30,15 +30,6 @@ public enum SpaceMode
 }
 
 /// <summary>
-/// HierarchyTree の列を表す列挙型
-/// </summary>
-public enum HierarchyTreeColumn
-{
-    Name,
-    VisibleButton,
-}
-
-/// <summary>
 /// CommandUi の列を表す列挙型
 /// </summary>
 public enum CommandTreeColumn

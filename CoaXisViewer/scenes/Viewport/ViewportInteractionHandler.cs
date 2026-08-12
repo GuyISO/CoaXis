@@ -532,6 +532,14 @@ public partial class ViewportInteractionHandler : SubViewport
     /// <param name="bottomRight">矩形の右下座標</param>
     private void PickByRect(Vector2 topLeft, Vector2 bottomRight)
     {
+        // クリックとほぼ同じ位置で矩形が一点に縮退した場合、凸多面体の頂点が重なって Jolt で "area was too small" になり得る
+        // その場合は単一点のピックにフォールバックして、誤った ConvexPolygonShape3D を生成しないようにする
+        if ((bottomRight - topLeft).LengthSquared() <= 1.0f)
+        {
+            PickByPoint((topLeft + bottomRight) * 0.5f);
+            return;
+        }
+
         // 画面上の矩形領域をカメラの視錐台として、そこに含まれるオブジェクトを選択する
         var frustumShape = CreateFrustumShape(topLeft, bottomRight);
         var camera = GetCamera3D();

@@ -106,12 +106,7 @@ public partial class ModelRegistry : Node
             }
         }
     }
-
-    public void Clear()
-    {
-        _dataSet.Clear();
-    }
-
+    
     #endregion
 
     #region Private Methods

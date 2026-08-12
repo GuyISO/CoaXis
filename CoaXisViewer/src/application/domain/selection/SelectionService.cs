@@ -63,6 +63,7 @@ public partial class SelectionService : Node
         Application.Selection.Event.ClearRequested += OnClearRequested;
         Application.Pick.Event.ResultNotified += OnPickResultNotified;
         Application.Pick.Event.ResultsNotified += OnPickResultsNotified;
+        Application.Model.Event.RegistryCleared += OnModelRegistryCleared;
     }
 
     /// <summary>
@@ -74,6 +75,7 @@ public partial class SelectionService : Node
         Application.Selection.Event.ClearRequested -= OnClearRequested;
         Application.Pick.Event.ResultNotified -= OnPickResultNotified;
         Application.Pick.Event.ResultsNotified -= OnPickResultsNotified;
+        Application.Model.Event.RegistryCleared -= OnModelRegistryCleared;
     }
 
     /// <summary>
@@ -193,6 +195,14 @@ public partial class SelectionService : Node
                 Application.Log.Warn($"SelectionService: Unknown selection mode {_mode}.");
                 break;
         }
+    }
+
+    /// <summary>
+    /// モデルレジストリのクリア通知を受け取る
+    /// </summary>
+    private void OnModelRegistryCleared()
+    {
+        Clear(); // モデルレジストリがクリアされた場合、選択状態もクリアする
     }
 
     #endregion

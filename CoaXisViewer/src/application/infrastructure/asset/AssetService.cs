@@ -114,12 +114,33 @@ public partial class AssetService : Node
             return null;
         }
 
+        if (!IsValidIconPath(path))
+        {
+            return null;
+        }
+
         return GetOrCreateIcon(path, size);
     }
 
     #endregion
 
     #region Internal Helpers
+
+    private static bool IsValidIconPath(string path)
+    {
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return false;
+        }
+
+        // Godot の仮想ルートだけでは実リソースを指さないためロード不可
+        if (path == "res://")
+        {
+            return false;
+        }
+
+        return true;
+    }
 
     private Texture2D GetOrCreateIcon(string path, int size)
     {

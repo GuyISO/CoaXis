@@ -22,7 +22,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 
 	#region --------------------------------------- Notification ---------------------------------------
 
-	[Signal] public delegate void ModelAddedNotifiedEventHandler(string modelId, string parentModelId);
+	[Signal] public delegate void ModelAddedEventHandler(string modelId, string parentModelId);
 	/// <summary>
 	/// モデルの追加を通知する
 	/// </summary>
@@ -30,7 +30,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="parentModelId">追加先の親モデル識別子。Guid.Empty の場合はルートに追加される</param>
 	internal void NotifyModelAdded(Guid modelId, Guid parentModelId = default)
 	{
-		Emit(SignalName.ModelAddedNotified, modelId.ToString(), parentModelId.ToString());
+		Emit(SignalName.ModelAdded, modelId.ToString(), parentModelId.ToString());
 	}
 
 	[Signal] public delegate void ModelVisibilityStateNotifiedEventHandler(string modelId, bool isVisible);
@@ -42,6 +42,15 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	internal void NotifyModelVisibilityState(Guid modelId, bool isVisible)
 	{
 		Emit(SignalName.ModelVisibilityStateNotified, modelId.ToString(), isVisible);
+	}
+
+	[Signal] public delegate void RegistryClearedEventHandler();
+	/// <summary>
+	/// モデルレジストリがクリアされたことを通知する
+	/// </summary>
+	internal void NotifyRegistryCleared()
+	{
+		Emit(SignalName.RegistryCleared);
 	}
 
 	#endregion

@@ -143,6 +143,25 @@ public partial class ModelService : Node
 
 	#endregion
 
+	#region Public Methods
+
+	/// <summary>
+	/// モデルレジストリがクリアされたときに呼び出されるイベントハンドラ
+	/// </summary>
+	public void Clear()
+	{
+		// RootModel を破棄すると再生成が必要になるため、RootModel の破棄前に子ノードをすべて削除する
+		foreach (ModelData child in _root.Children)
+		{
+			child.Node.QueueFree();
+			Application.Model.Registry.Dispose(child.Id);
+		}
+
+		Application.Model.Event.NotifyRegistryCleared();
+	}
+
+	#endregion
+
 	#region Internal Helpers
 
 	/// <summary>
