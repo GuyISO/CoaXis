@@ -43,6 +43,8 @@ public partial class ModelRegistry : Node
     /// <exception cref="ArgumentException"></exception>
     public void Register(ModelData modelData)
     {
+        // レジストリは「新規に生成された未登録モデル」だけを受け入れる
+        // 既存データの再利用や終了済みデータを混ぜると、再読込時に状態が壊れるため、ここで明確に弾く
         if (modelData == null)
         {
             throw new ArgumentNullException(nameof(modelData));
@@ -71,6 +73,8 @@ public partial class ModelRegistry : Node
 
     public bool Dispose(Guid id)
     {
+        // 削除時は子孫から順に解除し、親参照も切ってから辞書から外す
+        // これを行わないと、親子関係やツリーの参照が残って、再読込後に古いノードが見える
         if (!_dataSet.TryGetValue(id, out ModelData modelData))
         {
             return false;

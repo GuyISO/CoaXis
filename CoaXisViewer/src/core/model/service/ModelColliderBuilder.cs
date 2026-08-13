@@ -14,8 +14,9 @@ public static class ModelColliderBuilder
     /// <param name="modelNode">コライダーを追加する対象モデル</param>
     public static void AddCollider(ModelNode modelNode)
     {
+        // Godot の Node 系 API はメインスレッドでのみ安全に呼べる
+        // ここでの処理は ModelFactory から ProcessFrame 経由で呼ばれるため、thread-affinity を満たす
         Application.Log.Info($"Start adding collider for model: {modelNode.Name}");
-        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
 
         ModelComponents components = modelNode.Components;
         if (components == null)
@@ -70,8 +71,7 @@ public static class ModelColliderBuilder
         shape.BackfaceCollision = true;
         collisionShape.Shape = shape;
 
-        stopwatch.Stop();
-        Application.Log.Info($"Finished adding collider for model: {modelNode.Name} in {stopwatch.ElapsedMilliseconds} ms");
+        Application.Log.Info($"Finished adding collider for model: {modelNode.Name}");
     }
 
     // モデル階層の深さに依存せずコライダーを作るため、MeshInstance3D を再帰収集する

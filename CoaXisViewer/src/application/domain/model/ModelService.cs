@@ -150,11 +150,31 @@ public partial class ModelService : Node
 	/// </summary>
 	public void Clear()
 	{
-		// RootModel を破棄すると再生成が必要になるため、RootModel の破棄前に子ノードをすべて削除する
-		foreach (ModelData child in _root.Children)
+		// 再読み込み時に古い非同期タスクが後からモデルを更新しないよう、
+		// まず待機中のロード/コライダー処理を止めてから実体を削除する。
+		Application.Model.Factory.ClearPendingLoads();
+
+		var modelIds = new List<Guid>(Application.Model.Registry.DataSet.Keys);
+		foreach (Guid modelId in modelIds)
 		{
-			child.Node.QueueFree();
-			Application.Model.Registry.Dispose(child.Id);
+			// RootModel は削除対象外とする
+			if (modelId == RootModelData.RootId)
+			{
+				continue;
+			}
+
+			ModelData modelData = Application.Model.Registry.GetModelData(modelId);
+			if (modelData?.Node != null && IsInstanceValid(modelData.Node))
+			{
+				modelData.Node.QueueFree();
+			}
+
+			Application.Model.Registry.Dispose(modelId);
+		}
+
+		if (_root != null)
+		{
+			_root.Clear();
 		}
 
 		Application.Model.Event.NotifyRegistryCleared();

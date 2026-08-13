@@ -5,6 +5,50 @@ using Godot;
 /// </summary>
 public partial class ViewportService : Node
 {
+	#region Lifecycle
+
+	public override void _Ready()
+	{
+		SubscribeApplicationEvents();
+	}
+
+	public override void _ExitTree()
+	{
+		UnsubscribeApplicationEvents();
+
+		base._ExitTree();
+	}
+
+	#endregion
+
+	#region Events
+
+	/// <summary>
+	/// Applicationイベントの購読を開始する
+	/// </summary>
+	private void SubscribeApplicationEvents()
+	{
+		Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
+	}
+
+	/// <summary>
+	/// Applicationイベントの購読を解除する
+	/// </summary>
+	private void UnsubscribeApplicationEvents()
+	{
+		Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
+	}
+
+	/// <summary>
+	/// ビューポート状態の通知要求を受け取ったときに現在の操作モードを返す
+	/// </summary>
+	private void OnAskStateRequested()
+	{
+		Application.Viewport.Event.NotifyInteractionMode(_interactionMode);
+	}
+
+	#endregion
+
 	#region Fields
 
 	// 現在のビューポート操作モードを保持する

@@ -68,6 +68,7 @@ public partial class ModelTree : Tree
         Application.Selection.Event.ClearedNotified += OnClearedNotified;
         Application.Model.Event.ModelAdded += OnModelAddedNotified;
         Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+        Application.Model.Event.ModelStatusNotified += OnModelStatusNotified;
         Application.Model.Event.RegistryCleared += OnRegistryClearedNotified;
     }
 
@@ -81,6 +82,7 @@ public partial class ModelTree : Tree
         Application.Selection.Event.ClearedNotified -= OnClearedNotified;
         Application.Model.Event.ModelAdded -= OnModelAddedNotified;
         Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+        Application.Model.Event.ModelStatusNotified -= OnModelStatusNotified;
         Application.Model.Event.RegistryCleared -= OnRegistryClearedNotified;
     }
 
@@ -129,16 +131,18 @@ public partial class ModelTree : Tree
         }
 
         TreeItem treeItem = _modelIdToTreeItem.TryGetValue(parsedModelId, out TreeItem item) ? item : null;
-        if (treeItem != null)
+        if (treeItem == null)
         {
-            if (isSelected)
-            {
-                treeItem.SetCustomBgColor(0, _selectedColor);
-            }
-            else
-            {
-                treeItem.ClearCustomBgColor(0);
-            }
+            return;
+        }
+
+        if (isSelected)
+        {
+            treeItem.SetCustomBgColor(0, _selectedColor);
+        }
+        else
+        {
+            treeItem.ClearCustomBgColor(0);
         }
     }
 
@@ -201,13 +205,48 @@ public partial class ModelTree : Tree
     }
 
     /// <summary>
+    /// モデルのステータスが更新されたときのイベントハンドラ
+    /// </summary>
+    /// <param name="modelId">ステータス更新対象のモデル識別子</param>
+    /// <param name="status">更新後のステータス</param>
+    private void OnModelStatusNotified(string modelId, int status)
+    {
+        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        {
+            return;
+        }
+
+        TreeItem treeItem = _modelIdToTreeItem.TryGetValue(parsedModelId, out TreeItem item) ? item : null;
+        if (treeItem == null)
+        {
+            return;
+        }
+
+        treeItem.SetCustomColor(0, ResolveTextColor((ModelStatus)status));
+    }
+
+    /// <summary>
     /// モデルレジストリがクリアされたことを通知されたときのイベントハンドラ
     /// </summary>
     private void OnRegistryClearedNotified()
     {
+        // レジストリがクリアされたあとにツリーだけ残ると、
+        // 古い TreeItem を参照したまま UI が壊れるので、先にツリーを空にして Root から再構築する。
         Clear();
         _modelIdToTreeItem.Clear();
         _lastSelectedItem = null;
+
+        _rootModelData = Application.Model.Service.Root;
+        if (_rootModelData == null)
+        {
+            return;
+        }
+
+        if (Application.Model.Registry.GetModelData(_rootModelData.Id) == null)
+        {
+            return;
+        }
+
         AddToTree(_rootModelData.Id, Guid.Empty);
     }
 
@@ -239,8 +278,19 @@ public partial class ModelTree : Tree
     /// <param name="parentModelId">親モデル</param>
     private void AddToTree(Guid modelId, Guid parentModelId)
     {
+        // Tree への再構築時に、レジストリから既に消えているモデルや root 直前の空 ID を拾わないように防ぐ。
+        // これがないと、Clear 中や既存モデルが破棄済みのタイミングで NullReference になりやすい。
+        if (modelId == Guid.Empty)
+        {
+            return;
+        }
+
         TreeItem parentTreeItem = _modelIdToTreeItem.TryGetValue(parentModelId, out TreeItem item) ? item : null;
         ModelData modelData = Application.Model.Registry.GetModelData(modelId);
+        if (modelData == null)
+        {
+            return;
+        }
 
         // ツリーにアイテムを追加、親が null の場合は初回のみルートアイテムとして追加される便利仕様
         TreeItem treeItem = CreateItem(parentTreeItem);
@@ -255,13 +305,13 @@ public partial class ModelTree : Tree
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（表示/非表示トグル用） ---
-        // TODO: TreeItemのButton機能に移行する
         Texture2D btnIcon = Application.Asset.Service.GetVisibilityIcon(modelData.Node.Visible, Constant.Ui.Tree.HierarchyVisibleIconSize)
             ?? defaultIcon;
         treeItem.AddButton(0, btnIcon, id: 1);
-        
+
         // ModelId と TreeItem の対応を登録
         treeItem.SetMeta("ModelId", modelId.ToString());
+        treeItem.SetCustomColor(0, ResolveTextColor(modelData.Status));
         _modelIdToTreeItem.Add(modelId, treeItem);
 
         // 子ノードを再帰的に追加
@@ -284,6 +334,19 @@ public partial class ModelTree : Tree
     {
         _selectedColor = Color.FromHtml(Application.Setting.Service.Current.Color.HierarchySelectedColor);
         ReapplySelectedRowColors();
+    }
+
+    private static Color ResolveTextColor(ModelStatus status)
+    {
+        return status switch
+        {
+            ModelStatus.Loading => new Color(0.5f, 0.5f, 1.0f),
+            ModelStatus.Loaded => Colors.White,
+            ModelStatus.LoadFailed => new Color(1.0f, 0.5f, 0.5f),
+            ModelStatus.Initialized => new Color(0.0f, 0.0f, 0.0f),
+            ModelStatus.Registered => new Color(0.5f, 0.5f, 0.5f),
+            _ => new Color(0.0f, 0.0f, 0.0f),
+        };
     }
 
     /// <summary>

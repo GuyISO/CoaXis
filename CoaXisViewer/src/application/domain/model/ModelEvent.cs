@@ -44,6 +44,17 @@ public partial class ModelEvent : EventBase<ModelEvent>
 		Emit(SignalName.ModelVisibilityStateNotified, modelId.ToString(), isVisible);
 	}
 
+	[Signal] public delegate void ModelStatusNotifiedEventHandler(string modelId, int status);
+	/// <summary>
+	/// モデルのロード状態が変化したことを通知する
+	/// </summary>
+	/// <param name="modelId">状態が変化したモデル識別子</param>
+	/// <param name="status">新しい状態</param>
+	internal void NotifyModelStatusChanged(Guid modelId, ModelStatus status)
+	{
+		Emit(SignalName.ModelStatusNotified, modelId.ToString(), (int)status);
+	}
+
 	[Signal] public delegate void RegistryClearedEventHandler();
 	/// <summary>
 	/// モデルレジストリがクリアされたことを通知する

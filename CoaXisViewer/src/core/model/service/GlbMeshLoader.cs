@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.IO;
 using System.Threading.Tasks;
 
 /// <summary>
@@ -17,9 +18,11 @@ public static class GlbMeshLoader
     /// <returns>モデルロードに成功した場合はtrue、失敗した場合はfalseを返す</returns>
     public static async Task<bool> LoadModelAsync(ModelNode modelNode, string path)
     {
-        // 所要時間計測開始
-        Application.Log.Info($"Start loading model: {path}");
-        var sw = System.Diagnostics.Stopwatch.StartNew();
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            Application.Log.Warn("GlbMeshLoader: empty glb path.");
+            return false;
+        }
 
         ModelComponents components = modelNode.Components;
         if (components == null)
@@ -28,18 +31,23 @@ public static class GlbMeshLoader
             return false;
         }
 
+        if (!TryResolveExistingFilePath(path, out string resolvedPath))
+        {
+            Application.Log.Warn($"GlbMeshLoader: file not found. path='{path}'");
+            return false;
+        }
+
         // 非同期でglTFモデルを読み込む
         var doc = new GltfDocument();
         var state = new GltfState();
-        var error = await Task.Run(() => doc.AppendFromFile(path, state));
+        var error = await Task.Run(() => doc.AppendFromFile(resolvedPath, state));
 
         if (error == Error.Ok)
         {
             var scene = (Node3D)doc.GenerateScene(state);
             components.Mesh.AddChild(scene);
 
-            sw.Stop();
-            Application.Log.Info($"Finished loading model: {path} in {sw.ElapsedMilliseconds} ms");
+            Application.Log.Info($"Finished loading model: {path}");
             return true;
         }
         else
@@ -47,6 +55,43 @@ public static class GlbMeshLoader
             Application.Log.Error($"Failed to load model: {path}, Error: {error}");
             return false;
         }
+    }
+
+    private static bool TryResolveExistingFilePath(string path, out string resolvedPath)
+    {
+        resolvedPath = path;
+
+        if (string.IsNullOrWhiteSpace(path))
+        {
+            return false;
+        }
+
+        if (path.StartsWith("res://", StringComparison.OrdinalIgnoreCase)
+            || path.StartsWith("user://", StringComparison.OrdinalIgnoreCase))
+        {
+            string globalizedPath = ProjectSettings.GlobalizePath(path);
+            if (File.Exists(globalizedPath))
+            {
+                resolvedPath = globalizedPath;
+                return true;
+            }
+
+            return false;
+        }
+
+        if (Path.IsPathRooted(path))
+        {
+            return File.Exists(path);
+        }
+
+        string relativePath = ProjectSettings.GlobalizePath(path);
+        if (File.Exists(relativePath))
+        {
+            resolvedPath = relativePath;
+            return true;
+        }
+
+        return false;
     }
 
     #endregion

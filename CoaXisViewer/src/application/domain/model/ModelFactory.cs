@@ -9,18 +9,39 @@ using System.Threading.Tasks;
 public partial class ModelFactory : Node
 {
     /// <summary>
-    /// 先に見た目だけを順次読み込むための待ち行列
+    /// 見た目のロードを順番に処理するためのキュー
+    /// GLB/WRL の読み込みは比較的重いため、ここで一件ずつ処理して UI と描画が詰まりにくくする
     /// </summary>
     private readonly Queue<ModelData> _visualAssetLoadQueue = new();
     private readonly object _visualAssetLoadQueueLock = new();
     private bool _isVisualAssetLoadQueueRunning;
 
     /// <summary>
-    /// 表示完了後にまとめてコライダーを作るための待ち行列
+    /// 見た目が揃ったモデルを集めて、後続のコライダー生成を順番に処理するキュー
+    /// コライダー生成は視覚ロード後にまとめて行うことで、重い処理を分散させる
     /// </summary>
     private readonly Queue<ModelData> _colliderBuildQueue = new();
     private readonly object _colliderBuildQueueLock = new();
     private bool _isColliderBuildQueueRunning;
+
+    /// <summary>
+    /// Clear や再読み込み時に、既にキューに残っている非同期処理が旧データを更新しないように待機キューを停止する
+    /// 旧モデルのロードが残ると、レジストリやツリーにゴミが残るため、ここで明示的に無効化する
+    /// </summary>
+    public void ClearPendingLoads()
+    {
+        lock (_visualAssetLoadQueueLock)
+        {
+            _visualAssetLoadQueue.Clear();
+            _isVisualAssetLoadQueueRunning = false;
+        }
+
+        lock (_colliderBuildQueueLock)
+        {
+            _colliderBuildQueue.Clear();
+            _isColliderBuildQueueRunning = false;
+        }
+    }
 
     #region Public API
 
@@ -58,7 +79,7 @@ public partial class ModelFactory : Node
             dto.GlbFilePath,
             dto.WrlFilePath);
 
-        modelData.Status = ModelStatus.Initialized;
+        UpdateModelStatus(modelData, ModelStatus.Initialized);
 
         Application.Model.Registry.Register(modelData);
 
@@ -70,7 +91,7 @@ public partial class ModelFactory : Node
         bool hasWrl = !string.IsNullOrWhiteSpace(modelData.WrlPath);
         if (!hasGlb && !hasWrl)
         {
-            modelData.Status = ModelStatus.Loaded;
+            UpdateModelStatus(modelData, ModelStatus.Loaded);
         }
         else
         {
@@ -92,6 +113,9 @@ public partial class ModelFactory : Node
         {
             throw new ArgumentNullException(nameof(modelData));
         }
+
+        // 既存ノードが有効なら再利用し、破棄済みのノードや未生成のノードだけを作る
+        // これにより CSV 再読み込み時にもノードが重複生成されにくくなる
 
         if (modelData.Node != null && IsInstanceValid(modelData.Node))
         {
@@ -153,6 +177,11 @@ public partial class ModelFactory : Node
             throw new ArgumentNullException(nameof(modelData));
         }
 
+        if (!Application.Model.Registry.IsRegistered(modelData.Id))
+        {
+            return;
+        }
+
         lock (_visualAssetLoadQueueLock)
         {
             _visualAssetLoadQueue.Enqueue(modelData);
@@ -171,6 +200,8 @@ public partial class ModelFactory : Node
     {
         try
         {
+            // 見た目のロード処理を順番に行う
+            // 1件ずつ ProcessFrame を挟むことで、Godot の描画スレッドに負荷を抑える
             while (true)
             {
                 ModelData nextModelData;
@@ -185,6 +216,11 @@ public partial class ModelFactory : Node
                     nextModelData = _visualAssetLoadQueue.Dequeue();
                 }
 
+                if (!IsActiveModel(nextModelData))
+                {
+                    continue;
+                }
+
                 await LoadVisualAssetsAsync(nextModelData);
                 await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             }
@@ -195,13 +231,10 @@ public partial class ModelFactory : Node
         }
         finally
         {
-            // 可視アセットの読み込みが完全に終わった段階でのみコライダー生成を開始する
             lock (_visualAssetLoadQueueLock)
             {
                 _isVisualAssetLoadQueueRunning = false;
             }
-
-            StartColliderBuildQueueIfNeeded();
         }
     }
 
@@ -212,7 +245,19 @@ public partial class ModelFactory : Node
     {
         try
         {
+            // クリア中や古いロードの残骸はスキップする
+            // ここで先に弾かないと、レジストリから外れたモデルが後続処理で再利用される
+            if (!IsActiveModel(modelData))
+            {
+                return;
+            }
+
             await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
+
+            if (!IsActiveModel(modelData))
+            {
+                return;
+            }
 
             ModelNode modelNode = modelData.Node;
             if (modelNode == null || !IsInstanceValid(modelNode))
@@ -226,37 +271,36 @@ public partial class ModelFactory : Node
 
             if (!string.IsNullOrWhiteSpace(modelData.GlbPath))
             {
-                modelData.Status = ModelStatus.GlbLoading;
+                UpdateModelStatus(modelData, ModelStatus.Loading);
                 glbLoaded = await GlbMeshLoader.LoadModelAsync(modelNode, modelData.GlbPath);
                 if (glbLoaded)
                 {
-                    modelData.Status = ModelStatus.GlbLoaded;
                     hasLoadedVisual = true;
                 }
             }
 
             if (!string.IsNullOrWhiteSpace(modelData.WrlPath))
             {
-                modelData.Status = ModelStatus.WrlLoading;
+                UpdateModelStatus(modelData, ModelStatus.Loading);
                 wrlLoaded = WrlLineParser.LoadLines(modelNode, modelData.WrlPath);
                 if (wrlLoaded)
                 {
-                    modelData.Status = ModelStatus.WrlLoaded;
                     hasLoadedVisual = true;
                 }
             }
 
             if (hasLoadedVisual)
             {
-                // 見た目が揃ったモデルだけを後続のコライダー生成対象に載せる
+                // メッシュロード完了後はまだコライダー生成前のため、Loading のまま維持する
                 QueueColliderBuild(modelData);
+                return;
             }
 
-            modelData.Status = glbLoaded && wrlLoaded ? ModelStatus.Loaded : ModelStatus.LoadFailed;
+            UpdateModelStatus(modelData, glbLoaded && wrlLoaded ? ModelStatus.Loaded : ModelStatus.LoadFailed);
         }
         catch (Exception exception)
         {
-            modelData.Status = ModelStatus.LoadFailed;
+            UpdateModelStatus(modelData, ModelStatus.LoadFailed);
             Application.Log.Error($"ModelFactory: failed to load model assets for modelId='{modelData.Id}', glb='{modelData.GlbPath}', wrl='{modelData.WrlPath}'. {exception}");
         }
     }
@@ -271,10 +315,20 @@ public partial class ModelFactory : Node
             throw new ArgumentNullException(nameof(modelData));
         }
 
+        // メッシュロードが完了したモデルから順次コライダー生成を開始する。
+        // 全件の見た目ロード完了を待つと、最初に終わったモデルが長く灰色のまま残るため、
+        // ここで即時にキューへ積んで、別スレッドの処理が待っている状態にする。
+        if (!Application.Model.Registry.IsRegistered(modelData.Id))
+        {
+            return;
+        }
+
         lock (_colliderBuildQueueLock)
         {
             _colliderBuildQueue.Enqueue(modelData);
         }
+
+        StartColliderBuildQueueIfNeeded();
     }
 
     /// <summary>
@@ -316,6 +370,11 @@ public partial class ModelFactory : Node
                     nextModelData = _colliderBuildQueue.Dequeue();
                 }
 
+                if (!IsActiveModel(nextModelData))
+                {
+                    continue;
+                }
+
                 await BuildColliderAsync(nextModelData);
                 await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
             }
@@ -336,23 +395,71 @@ public partial class ModelFactory : Node
     /// <summary>
     /// 1件分のコライダーを生成する
     /// </summary>
-    private static Task BuildColliderAsync(ModelData modelData)
+    private async Task BuildColliderAsync(ModelData modelData)
     {
         if (modelData == null)
         {
             throw new ArgumentNullException(nameof(modelData));
         }
 
+        if (!IsActiveModel(modelData))
+        {
+            return;
+        }
+
         ModelNode modelNode = modelData.Node;
         if (modelNode == null || !IsInstanceValid(modelNode))
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        modelData.Status = ModelStatus.ColliderCreating;
+        ModelComponents components = modelNode.Components;
+        if (components == null || (!components.HasMesh && !components.HasLine))
+        {
+            UpdateModelStatus(modelData, ModelStatus.Loaded);
+            return;
+        }
+
+        // Godot の Node / Mesh / CollisionShape はメインスレッド専用。
+        // ワーカースレッドから GetChildren() や Mesh.GetFaces() を呼ぶと thread-affinity で落ちるため、
+        // ここでは ProcessFrame 後にメインスレッドでコライダーを生成する。
+        UpdateModelStatus(modelData, ModelStatus.Loading);
+        await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         ModelColliderBuilder.AddCollider(modelNode);
-        modelData.Status = ModelStatus.ColliderCreated;
-        return Task.CompletedTask;
+        UpdateModelStatus(modelData, ModelStatus.Loaded);
+    }
+
+    private static bool IsActiveModel(ModelData modelData)
+    {
+        if (modelData == null)
+        {
+            return false;
+        }
+
+        if (modelData.Status == ModelStatus.Disposed)
+        {
+            return false;
+        }
+
+        return Application.Model.Registry.IsRegistered(modelData.Id)
+            && modelData.Node != null
+            && IsInstanceValid(modelData.Node);
+    }
+
+    private static void UpdateModelStatus(ModelData modelData, ModelStatus nextStatus)
+    {
+        if (modelData == null)
+        {
+            return;
+        }
+
+        if (modelData.Status == ModelStatus.Disposed && nextStatus != ModelStatus.Disposed)
+        {
+            return;
+        }
+
+        modelData.Status = nextStatus;
+        Application.Model.Event.NotifyModelStatusChanged(modelData.Id, nextStatus);
     }
 
     private static Vector3 ConvertPosition(float[] position)
