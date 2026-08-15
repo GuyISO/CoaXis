@@ -9,8 +9,8 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     #region Fields
 
     private readonly Guid[] _modelIds;
-    private readonly bool[] _previousVisibles;
-    private readonly bool _nextVisible;
+    private readonly ModelVisibility[] _previousVisibilities;
+    private readonly ModelVisibility _nextVisibility;
 
     #endregion
 
@@ -29,8 +29,8 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     /// コンストラクタ、指定されたモデルの表示状態を変更するコマンド
     /// </summary>
     /// <param name="modelIds">表示状態を変更するモデルIDの配列</param>
-    /// <param name="nextVisible">変更後の表示状態</param>
-    public SetModelVisibilityCommand(Guid[] modelIds, bool nextVisible)
+    /// <param name="nextVisibility">変更後の表示設定</param>
+    public SetModelVisibilityCommand(Guid[] modelIds, ModelVisibility nextVisibility)
     {
         if (modelIds == null)
         {
@@ -38,13 +38,13 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
         }
 
         _modelIds = modelIds;
-        _previousVisibles = new bool[_modelIds.Length];
+        _previousVisibilities = new ModelVisibility[_modelIds.Length];
         for (int i = 0; i < _modelIds.Length; i++)
         {
-            ModelNode modelNode = ResolveModelNode(_modelIds[i]);
-            _previousVisibles[i] = modelNode != null && modelNode.Visible;
+            ModelData modelData = ResolveModelData(_modelIds[i]);
+            _previousVisibilities[i] = modelData?.Visibility ?? ModelVisibility.Inherit;
         }
-        _nextVisible = nextVisible;
+        _nextVisibility = nextVisibility;
     }
 
     #endregion
@@ -58,16 +58,18 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     {
         for (int i = 0; i < _modelIds.Length; i++)
         {
-            ModelNode modelNode = ResolveModelNode(_modelIds[i]);
-            if (modelNode == null || !GodotObject.IsInstanceValid(modelNode))
+            ModelData modelData = ResolveModelData(_modelIds[i]);
+            if (modelData?.Node == null || !GodotObject.IsInstanceValid(modelData.Node))
             {
                 LogSkip("Do", $"model at index {i} is not valid.");
                 continue;
             }
 
-            LogDo($"model='{modelNode.Name}', visible={_nextVisible}");
-            Application.Model.Event.NotifyModelVisibilityState(_modelIds[i], _nextVisible);
+            modelData.Visibility = _nextVisibility;
+            LogDo($"model='{modelData.Node.Name}', visibility={_nextVisibility}");
         }
+
+        NotifyEffectiveVisibilityStates();
     }
 
     /// <summary>
@@ -77,56 +79,36 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
     {
         for (int i = 0; i < _modelIds.Length; i++)
         {
-            ModelNode modelNode = ResolveModelNode(_modelIds[i]);
-            if (modelNode == null || !GodotObject.IsInstanceValid(modelNode))
+            ModelData modelData = ResolveModelData(_modelIds[i]);
+            if (modelData?.Node == null || !GodotObject.IsInstanceValid(modelData.Node))
             {
                 LogSkip("Undo", $"model at index {i} is not valid.");
                 continue;
             }
 
-            LogUndo($"model='{modelNode.Name}', visible={_previousVisibles[i]}");
-            Application.Model.Event.NotifyModelVisibilityState(_modelIds[i], _previousVisibles[i]);
+            modelData.Visibility = _previousVisibilities[i];
+            LogUndo($"model='{modelData.Node.Name}', visibility={_previousVisibilities[i]}");
         }
+
+        NotifyEffectiveVisibilityStates();
     }
 
-    private static ModelNode ResolveModelNode(Guid modelId)
+    private static ModelData ResolveModelData(Guid modelId)
     {
-        if (modelId == Guid.Empty)
-        {
-            return null;
-        }
-
-        RootModelNode rootModelNode = (RootModelNode)Application.Model.Service?.Root.Node;
-        if (rootModelNode == null || !GodotObject.IsInstanceValid(rootModelNode))
-        {
-            return null;
-        }
-
-        return ResolveModelNodeRecursive(rootModelNode, modelId);
+        return modelId == Guid.Empty ? null : Application.Model.Registry.GetModelData(modelId);
     }
 
-    private static ModelNode ResolveModelNodeRecursive(ModelNode modelNode, Guid modelId)
+    private static void NotifyEffectiveVisibilityStates()
     {
-        if (modelNode == null)
+        foreach (ModelData modelData in Application.Model.Registry.DataSet.Values)
         {
-            return null;
-        }
-
-        if (modelNode.ModelId == modelId)
-        {
-            return modelNode;
-        }
-
-        foreach (ModelNode childModelNode in modelNode.ChildModels)
-        {
-            ModelNode found = ResolveModelNodeRecursive(childModelNode, modelId);
-            if (found != null)
+            if (modelData.Node != null && GodotObject.IsInstanceValid(modelData.Node))
             {
-                return found;
+                Application.Model.Event.NotifyModelVisibilityState(
+                    modelData.Id,
+                    ModelVisibilityResolver.IsVisible(modelData));
             }
         }
-
-        return null;
     }
 
     #endregion

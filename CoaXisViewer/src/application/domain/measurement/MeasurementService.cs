@@ -12,7 +12,7 @@ public partial class MeasurementService : Node
     private int _pointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
 
     // TODO: ファイルパスを参照するのやめる
-    private readonly PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/Part/PointerLabel.tscn")!;
+    private readonly PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/part/PointerLabel.tscn")!;
     private readonly PointerLabel[] _pointerLabelInstances = new PointerLabel[2];
     private readonly ImmediateMesh _lineMesh = new ImmediateMesh();
 

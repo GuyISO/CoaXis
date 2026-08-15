@@ -84,15 +84,27 @@ public partial class ModelService : Node
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId).Node;
-		if (modelNode == null)
+		ModelData modelData = Application.Model.Registry.GetModelData(parsedModelId);
+		if (modelData == null)
 		{
 			Application.Log.Warn($"ModelService: toggle target not found. modelId='{parsedModelId}'");
 			return;
 		}
 
-		var command = new SetModelVisibilityCommand([parsedModelId], !modelNode.Visible);
+		var command = new SetModelVisibilityCommand(
+			[parsedModelId],
+			GetNextVisibility(modelData.Visibility));
 		Application.Command.Event.Execute(command);
+	}
+
+	private static ModelVisibility GetNextVisibility(ModelVisibility visibility)
+	{
+		return visibility switch
+		{
+			ModelVisibility.Inherit => ModelVisibility.Visible,
+			ModelVisibility.Visible => ModelVisibility.Invisible,
+			_ => ModelVisibility.Inherit,
+		};
 	}
 
 	/// <summary>
@@ -108,14 +120,14 @@ public partial class ModelService : Node
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId).Node;
+		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId)?.Node;
 		if (modelNode == null)
 		{
 			Application.Log.Warn($"ModelService: visibility target not found. modelId='{parsedModelId}'");
 			return;
 		}
 
-		modelNode.Visible = isVisible;
+		modelNode.ApplyVisibilityLayer(isVisible);
 	}
 
 	/// <summary>
@@ -131,7 +143,7 @@ public partial class ModelService : Node
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId).Node;
+		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId)?.Node;
 		if (modelNode == null)
 		{
 			Application.Log.Warn($"ModelService: highlight target not found. modelId='{parsedModelId}'");

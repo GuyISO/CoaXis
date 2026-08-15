@@ -46,7 +46,8 @@ public partial class ModelTree : Tree
     private void SubscribeUiEvents()
     {
         CellSelected += OnCellSelected;
-        ButtonClicked += OnTreeButtonClicked;
+        ButtonClicked += OnButtonClicked;
+        ItemActivated += OnItemActivated;
     }
 
     /// <summary>
@@ -55,7 +56,8 @@ public partial class ModelTree : Tree
     private void UnsubscribeUiEvents()
     {
         CellSelected -= OnCellSelected;
-        ButtonClicked -= OnTreeButtonClicked;
+        ButtonClicked -= OnButtonClicked;
+        ItemActivated -= OnItemActivated;
     }
     
     /// <summary>
@@ -108,7 +110,7 @@ public partial class ModelTree : Tree
     /// <param name="column">ボタンがある列</param>
     /// <param name="buttonId">ボタンの識別 ID</param>
     /// <param name="mouseButtonIndex">マウスボタンの識別子</param>
-    private void OnTreeButtonClicked(TreeItem item, long column, long buttonId, long mouseButtonIndex)
+    private void OnButtonClicked(TreeItem item, long column, long buttonId, long mouseButtonIndex)
     {
         if (item == null || column != 0 || buttonId != 1)
         {
@@ -116,6 +118,41 @@ public partial class ModelTree : Tree
         }
 
         HandleVisibleButtonClicked(item);
+    }
+
+    /// <summary>
+    /// TreeItem がアクティブ化されたときのイベントハンドラ、主にダブルクリックやEnterキー押下時に呼び出される
+    /// </summary>
+    private void OnItemActivated()
+    {
+        // TODO: ダブルクリック時の挙動を実装する、とりあえずモデルへのフィット操作をする
+        TreeItem item = GetSelected();
+        if (item == null)
+        {
+            return;
+        }
+        
+        PickResult pickResult = PickUtility.PickByModelId(TryGetModelId(item));
+        if (pickResult == null || pickResult.ModelId == Guid.Empty)
+        {
+            return;
+        }
+
+        ModelData modelData = Application.Model.Registry.GetModelData(pickResult.ModelId);
+        if (modelData == null || modelData.Node == null)
+        {
+            return;
+        }
+
+        ModelNode modelNode = modelData.Node;
+        if (modelNode == null)
+        {
+            return;
+        }
+
+        Node3D[] fitTargetNodes = new Node3D[] { modelNode };
+        Application.Viewport.Event.Fit(fitTargetNodes, true);
+
     }
 
     /// <summary>
@@ -194,12 +231,23 @@ public partial class ModelTree : Tree
             return;
         }
 
-        Application.Log.Debug($"ModelTree: visibility state notified. modelId='{parsedModelId}', isVisible={isVisible}");
+        ModelData modelData = Application.Model.Registry.GetModelData(parsedModelId);
+        if (modelData == null)
+        {
+            return;
+        }
+
+        Application.Log.Debug($"ModelTree: visibility state notified. modelId='{parsedModelId}', visibility={modelData.Visibility}");
         TreeItem treeItem = _modelIdToTreeItem.TryGetValue(parsedModelId, out TreeItem item) ? item : null;
         if (treeItem != null)
         {
-            Texture2D buttonIcon = Application.Asset.Service.GetVisibilityIcon(isVisible, Constant.Ui.Tree.HierarchyVisibleIconSize)
-                ?? Application.Asset.Service.GetVisibilityIcon(true, Constant.Ui.Tree.HierarchyVisibleIconSize);
+            Texture2D buttonIcon = Application.Asset.Service.GetVisibilityIcon(
+                modelData.Visibility,
+                isVisible,
+                Constant.Ui.Tree.HierarchyVisibleIconSize)
+                ?? Application.Asset.Service.GetVisibilityIcon(
+                    ModelVisibility.Visible,
+                    Constant.Ui.Tree.HierarchyVisibleIconSize);
             treeItem.SetButton(0, 0, buttonIcon);
         }
     }
@@ -299,13 +347,18 @@ public partial class ModelTree : Tree
         treeItem.SetText(0, modelData.Name);
 
         // --- 左側アイコン（ModelData に紐づくモデルアイコン） ---
-        Texture2D defaultIcon = Application.Asset.Service.GetVisibilityIcon(true, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D defaultIcon = Application.Asset.Service.GetVisibilityIcon(
+            ModelVisibility.Visible,
+            Constant.Ui.Tree.HierarchyVisibleIconSize);
         Texture2D icon = Application.Asset.Service.GetIcon(modelData.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
             ?? defaultIcon;
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（表示/非表示トグル用） ---
-        Texture2D btnIcon = Application.Asset.Service.GetVisibilityIcon(modelData.Node.Visible, Constant.Ui.Tree.HierarchyVisibleIconSize)
+        Texture2D btnIcon = Application.Asset.Service.GetVisibilityIcon(
+            modelData.Visibility,
+            ModelVisibilityResolver.IsVisible(modelData),
+            Constant.Ui.Tree.HierarchyVisibleIconSize)
             ?? defaultIcon;
         treeItem.AddButton(0, btnIcon, id: 1);
 
@@ -340,11 +393,11 @@ public partial class ModelTree : Tree
     {
         return status switch
         {
-            ModelStatus.Loading => new Color(0.5f, 0.5f, 1.0f),
+            ModelStatus.Loading => new Color(0.5f, 0.5f, 0.5f),
             ModelStatus.Loaded => Colors.White,
             ModelStatus.LoadFailed => new Color(1.0f, 0.5f, 0.5f),
             ModelStatus.Initialized => new Color(0.0f, 0.0f, 0.0f),
-            ModelStatus.Registered => new Color(0.5f, 0.5f, 0.5f),
+            ModelStatus.Registered => new Color(0.25f, 0.25f, 0.25f),
             _ => new Color(0.0f, 0.0f, 0.0f),
         };
     }

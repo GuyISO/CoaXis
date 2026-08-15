@@ -71,6 +71,38 @@ public partial class ModelNode : Node3D
     #region Internal Helpers
 
     /// <summary>
+    /// モデル配下のメッシュとコライダーへ表示レイヤーを適用する
+    /// </summary>
+    internal void ApplyVisibilityLayer(bool isVisible)
+    {
+        uint layer = (uint)(isVisible ? ViewportLayer.Visible : ViewportLayer.Invisible);
+        ApplyVisibilityLayerRecursive(this, layer);
+    }
+
+    private static void ApplyVisibilityLayerRecursive(Node node, uint layer)
+    {
+        if (node is GeometryInstance3D geometryInstance)
+        {
+            geometryInstance.Layers = layer;
+        }
+
+        if (node is CollisionObject3D collisionObject)
+        {
+            collisionObject.CollisionLayer = layer;
+        }
+
+        foreach (Node child in node.GetChildren())
+        {
+            if (child is ModelNode)
+            {
+                continue;
+            }
+
+            ApplyVisibilityLayerRecursive(child, layer);
+        }
+    }
+
+    /// <summary>
     /// このモデルに追加する内部構造を生成する
     /// </summary>
     /// <returns>内部構造のルートコンポーネント</returns>

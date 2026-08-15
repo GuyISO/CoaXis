@@ -40,6 +40,7 @@ public partial class CameraRig : Node3D
     private void EnsureChildNodes()
     {
         _camera = GetNode<Camera3D>("Camera3D");
+        _camera.CullMask = (uint)ViewportLayer.Default | (uint)ViewportLayer.Invisible;
     }
 
     /// <summary>

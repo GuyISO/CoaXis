@@ -43,6 +43,10 @@ public class ModelData
     /// </summary>
     public Quaternion Rotation { get; }
     /// <summary>
+    /// 表示状態
+    /// </summary>
+    public virtual ModelVisibility Visibility { get; internal set; }
+    /// <summary>
     /// アイコン画像のパス
     /// </summary>
     public string IconPath { get; }
@@ -87,6 +91,7 @@ public class ModelData
         string name,
         Vector3 position,
         Quaternion rotation,
+        ModelVisibility visibility,
         string iconPath,
         string glbPath,
         string wrlPath)
@@ -97,6 +102,7 @@ public class ModelData
         Name = name ?? string.Empty;
         Position = position;
         Rotation = rotation;
+        Visibility = visibility;
         IconPath = iconPath ?? string.Empty;
         GlbPath = glbPath ?? string.Empty;
         WrlPath = wrlPath ?? string.Empty;
@@ -113,6 +119,7 @@ public class ModelData
             name,
             Vector3.Zero,
             Quaternion.Identity,
+            ModelVisibility.Inherit,
             string.Empty,
             string.Empty,
             string.Empty)

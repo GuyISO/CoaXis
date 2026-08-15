@@ -213,7 +213,7 @@ public static class PickUtility
     /// <returns>モデル情報を含む PickResult。対応する ModelNode が見つからない場合はヒットなしを返す</returns>
     public static PickResult PickByModelId(Guid modelId)
     {
-        ModelNode modelNode = Application.Model.Registry.GetModelData(modelId).Node;
+        ModelNode modelNode = Application.Model.Registry.GetModelData(modelId)?.Node;
         return PickByModel(modelNode);
     }
 

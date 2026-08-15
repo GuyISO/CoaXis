@@ -7,6 +7,15 @@ using Godot;
 public class RootModelData : ModelData
 {
     /// <summary>
+    /// ルートモデルは常に表示されるため、表示設定を Visible に固定する
+    /// </summary>
+    public override ModelVisibility Visibility
+    {
+        get => ModelVisibility.Visible;
+        internal set { }
+    }
+
+    /// <summary>
     /// ルートモデルに固定で割り当てる ID
     /// </summary>
     public static readonly Guid RootId = Guid.Parse(Constant.Model.RootModelId);
@@ -22,6 +31,7 @@ public class RootModelData : ModelData
             "Root",
             Vector3.Zero,
             Quaternion.Identity,
+            ModelVisibility.Visible,
             string.Empty,
             string.Empty,
             string.Empty)

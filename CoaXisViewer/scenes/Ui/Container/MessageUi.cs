@@ -67,8 +67,12 @@ public partial class MessageUi : PanelContainer
     /// ログ出力と同時に画面へログを表示する
     /// </summary>
     /// <param name="line">記録されたメッセージ</param>
-    private void OnLogNotified(string line)
+    private void OnLogNotified(int level, string line)
     {
+        if (level < (int)LogLevel.Info)
+        {
+            return;
+        }
         AddLine(line);
     }
 
@@ -94,7 +98,10 @@ public partial class MessageUi : PanelContainer
         if (_label == null)
             return;
 
-        _buffer.AppendLine(text);
+        if (_buffer.Length > 0)
+            _buffer.Append('\n');
+
+        _buffer.Append(text);
         TrimBufferToMaxLines();
         RefreshLabelText();
     }
@@ -112,12 +119,17 @@ public partial class MessageUi : PanelContainer
         }
 
         // 行数制限
-        var lines = _buffer.ToString().Split('\n');
+        var lines = _buffer.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries);
         if (lines.Length > maxLines)
         {
             _buffer.Clear();
             for (int i = lines.Length - maxLines; i < lines.Length; i++)
-                _buffer.AppendLine(lines[i]);
+            {
+                if (_buffer.Length > 0)
+                    _buffer.Append('\n');
+
+                _buffer.Append(lines[i]);
+            }
         }
     }
 

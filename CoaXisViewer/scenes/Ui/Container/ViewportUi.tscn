@@ -265,3 +265,19 @@ layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "右に90度回転します"
 text = "RollRight"
+
+[node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=211718471]
+layout_mode = 2
+alignment = 1
+
+[node name="ButtonRollRight" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1305464635]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "左に90度回転します"
+text = "RollLeft"
+
+[node name="ButtonRollLeft" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1341091895]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "右に90度回転します"
+text = "RollRight"

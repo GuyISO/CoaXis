@@ -13,7 +13,7 @@ public partial class LogHub : Node
     private string _logFilePath = string.Empty;
     private bool _enableFileLog = false;
 
-    [Signal] public delegate void NotifiedEventHandler(string message);
+    [Signal] public delegate void NotifiedEventHandler(int level, string message);
 
     #endregion
 
@@ -65,7 +65,7 @@ public partial class LogHub : Node
         }
 
         // Signalの発行
-        EmitSignal(SignalName.Notified, line);
+        EmitSignal(SignalName.Notified, (int)level, line);
     }
 
     /// <summary>

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c48iefv166wer"]
 
-[ext_resource type="PackedScene" uid="uid://codaipgimkvh2" path="res://assets/models/low_poly_boeing_787_dreamliner.glb" id="1_6lx0k"]
+[ext_resource type="PackedScene" uid="uid://codaipgimkvh2" path="res://assets/model/low_poly_boeing_787_dreamliner.glb" id="1_6lx0k"]
 
 [node name="Sketchfab_Scene" unique_id=1183461965 instance=ExtResource("1_6lx0k")]
 

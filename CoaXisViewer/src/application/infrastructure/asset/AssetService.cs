@@ -8,9 +8,12 @@ public partial class AssetService : Node
 {
     #region Fields
 
-    private const string VisibleIconPath = "res://assets/icon/visible.svg";
-    private const string InvisibleIconPath = "res://assets/icon/invisible.svg";
-    private const string SelectedMaterialPath = "res://assets/materials/selected.tres";
+    private const string InheritVisibleIconPath = "res://assets/icon/visibility/inherit_visible.svg";
+    private const string InheritInvisibleIconPath = "res://assets/icon/visibility/inherit_invisible.svg";
+    private const string VisibleIconPath = "res://assets/icon/visibility/visible.svg";
+    private const string InvisibleIconPath = "res://assets/icon/visibility/invisible.svg";
+
+    private const string SelectedMaterialPath = "res://assets/material/selected.tres";
 
     private readonly Dictionary<string, Texture2D> _iconCache = new Dictionary<string, Texture2D>();
     private Material _selectedMaterial;
@@ -73,7 +76,37 @@ public partial class AssetService : Node
     /// <returns>取得したアイコン、失敗時は null</returns>
     internal Texture2D GetVisibilityIcon(bool isVisible, int size = 24)
     {
-        string path = isVisible ? VisibleIconPath : InvisibleIconPath;
+        return GetVisibilityIcon(
+            isVisible ? ModelVisibility.Visible : ModelVisibility.Invisible,
+            size);
+    }
+
+    /// <summary>
+    /// モデルの表示設定に対応するアイコンを取得する
+    /// </summary>
+    /// <param name="visibility">モデルが持つ表示設定</param>
+    /// <param name="size">返却アイコンのサイズ</param>
+    /// <returns>取得したアイコン、失敗時は null</returns>
+    internal Texture2D GetVisibilityIcon(ModelVisibility visibility, int size = 24)
+    {
+        return GetVisibilityIcon(visibility, true, size);
+    }
+
+    /// <summary>
+    /// モデルの表示設定と実効表示状態に対応するアイコンを取得する
+    /// </summary>
+    /// <param name="visibility">モデルが持つ表示設定</param>
+    /// <param name="isVisible">実際にモデルが表示されている場合は true</param>
+    /// <param name="size">返却アイコンのサイズ</param>
+    /// <returns>取得したアイコン、失敗時は null</returns>
+    internal Texture2D GetVisibilityIcon(ModelVisibility visibility, bool isVisible, int size = 24)
+    {
+        string path = visibility switch
+        {
+            ModelVisibility.Visible => VisibleIconPath,
+            ModelVisibility.Invisible => InvisibleIconPath,
+            _ => isVisible ? InheritVisibleIconPath : InheritInvisibleIconPath,
+        };
         return GetIcon(path, size);
     }
 

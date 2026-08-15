@@ -260,8 +260,12 @@ public partial class CommandUi : PanelContainer
             _isUpdatingTree = false;
         }
 
-        // 最終行のアイテムまでスクロール
-        _tree.ScrollToItem(GetLastTreeItem());
+        // 履歴が空の状態ではスクロール対象が存在しない
+        TreeItem lastItem = GetLastTreeItem();
+        if (lastItem != null)
+        {
+            _tree.ScrollToItem(lastItem);
+        }
     }
 
     /// <summary>

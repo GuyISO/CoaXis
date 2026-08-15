@@ -2,12 +2,6 @@
 
 ## これからやる
 
-表示非表示のレイヤー化
-    表示、非表示、以外にも分けたいレイヤーある？
-
-JsonからのModelDtoの生成方法確立
-ModelNode、ModelComponentsの種類増やす？
-
 VFXをModelNodeに紐づける
     ModelNodeにVFXを紐づけて、ModelNodeの座標にVFXを表示する機能を実装する
 
@@ -16,8 +10,6 @@ ModelNode固有アクションの実行
 
 選択セット・表示セットの保存・復元
     選択セット・表示セットを保存して、後で復元する機能を実装する、プランコピーしても引き継がれるように、ProductPlanの属性として保存する？
-
-ビルドしてもちゃんと使えるようなパス構築
 
 ## Applicationに追加
 infra

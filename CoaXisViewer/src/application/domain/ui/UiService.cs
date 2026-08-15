@@ -10,7 +10,7 @@ public partial class UiService : Node
     #region Fields
 
     // TODO: UiWindowのシーンパスをうまく管理する
-    private PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/Ui/Window/UiWindow.tscn"); // UiWindowのシーンパス
+    private PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/ui/window/UiWindow.tscn"); // UiWindowのシーンパス
     private readonly Dictionary<string, UiWindow> _windowCache = new(); // UIのキャッシュ
 
     #endregion

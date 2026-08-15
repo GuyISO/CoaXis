@@ -15,6 +15,7 @@ public class ModelDto
     public string Name { get; init; } = string.Empty;
     public float[] Position { get; init; } = new[] { 0f, 0f, 0f };
     public float[] Rotation { get; init; } = new[] { 0f, 0f, 0f, 1f };
+    public string Visibility { get; init; } = "Inherit";
     public string IconFilePath { get; init; } = string.Empty;
     public string GlbFilePath { get; init; } = string.Empty;
     public string WrlFilePath { get; init; } = string.Empty;
@@ -35,6 +36,7 @@ public class ModelDto
         string name = "",
         float[] position = null,
         float[] rotation = null,
+        string visibility = "Inherit",
         string iconFilePath = "",
         string glbFilePath = "",
         string wrlFilePath = "")
@@ -45,6 +47,7 @@ public class ModelDto
         Name = name ?? string.Empty;
         Position = NormalizePosition(position);
         Rotation = NormalizeRotation(rotation);
+        Visibility = visibility ?? "Inherit";
         IconFilePath = iconFilePath ?? string.Empty;
         GlbFilePath = glbFilePath ?? string.Empty;
         WrlFilePath = wrlFilePath ?? string.Empty;

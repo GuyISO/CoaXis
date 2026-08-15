@@ -29,7 +29,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TopBar" type="HBoxContainer" parent="VBoxContainer" unique_id=338852457]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
 [node name="ButtonShowMessageUi" parent="VBoxContainer/TopBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
@@ -92,6 +92,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="LeftBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=1440387980]
+visible = false
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 
@@ -107,21 +108,33 @@ mouse_filter = 2
 [node name="ViewportContainer" parent="VBoxContainer/HBoxContainer/Screen" unique_id=999195544 instance=ExtResource("5_y2duu")]
 layout_mode = 1
 
-[node name="RootModelTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen" unique_id=119731503]
-custom_minimum_size = Vector2(500, 0)
+[node name="HSplitContainer" type="HSplitContainer" parent="VBoxContainer/HBoxContainer/Screen" unique_id=515588290]
 layout_mode = 1
-anchors_preset = 9
+anchors_preset = 15
+anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = 500.0
+grow_horizontal = 2
 grow_vertical = 2
-size_flags_horizontal = 2
+mouse_filter = 2
+split_offsets = PackedInt32Array(300)
+split_offset = 300
+
+[node name="RootModelTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=119731503]
+layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/v_separation = 2
 allow_reselect = true
 hide_root = true
 script = ExtResource("10_57r0r")
 
+[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=1196475229]
+layout_mode = 2
+size_flags_horizontal = 3
+mouse_filter = 2
+
 [node name="RightBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=617452991]
+visible = false
 custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 
@@ -131,7 +144,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
-custom_minimum_size = Vector2(0, 48)
+custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]

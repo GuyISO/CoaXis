@@ -75,6 +75,7 @@ public partial class ModelFactory : Node
             dto.Name,
             convertedPosition,
             convertedRotation,
+            ModelVisibilityResolver.Parse(dto.Visibility),
             dto.IconFilePath,
             dto.GlbFilePath,
             dto.WrlFilePath);
@@ -98,6 +99,9 @@ public partial class ModelFactory : Node
             QueueVisualAssetLoad(modelData);
         }
 
+        Application.Model.Event.NotifyModelVisibilityState(
+            modelData.Id,
+            ModelVisibilityResolver.IsVisible(modelData));
         Application.Model.Event.NotifyModelAdded(modelData.Id, modelData.ParentId);
 
         return modelData;
@@ -426,6 +430,7 @@ public partial class ModelFactory : Node
         UpdateModelStatus(modelData, ModelStatus.Loading);
         await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
         ModelColliderBuilder.AddCollider(modelNode);
+        modelNode.ApplyVisibilityLayer(ModelVisibilityResolver.IsVisible(modelData));
         UpdateModelStatus(modelData, ModelStatus.Loaded);
     }
 
