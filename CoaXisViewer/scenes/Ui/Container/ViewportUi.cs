@@ -19,6 +19,8 @@ public partial class ViewportUi : PanelContainer
     private Button _buttonAlignNormal = null!;
     private Button _buttonRollLeft = null!;
     private Button _buttonRollRight = null!;
+    private Button _buttonLayerVisible = null!;
+    private Button _buttonLayerInvisible = null!;
     private Label _labelPositionX = null!;
     private Label _labelPositionY = null!;
     private Label _labelPositionZ = null!;
@@ -75,6 +77,8 @@ public partial class ViewportUi : PanelContainer
         _buttonAlignNormal = (Button)FindChild("ButtonAlignNormal");
         _buttonRollLeft = (Button)FindChild("ButtonRollLeft");
         _buttonRollRight = (Button)FindChild("ButtonRollRight");
+        _buttonLayerVisible = (Button)FindChild("ButtonLayerVisible");
+        _buttonLayerInvisible = (Button)FindChild("ButtonLayerInvisible");
         _labelPositionX = (Label)FindChild("LabelValuePositionX");
         _labelPositionY = (Label)FindChild("LabelValuePositionY");
         _labelPositionZ = (Label)FindChild("LabelValuePositionZ");
@@ -98,6 +102,8 @@ public partial class ViewportUi : PanelContainer
         _buttonAlignNormal.Pressed += OnButtonAlignNormalPressed;
         _buttonRollLeft.Pressed += OnButtonRollLeftPressed;
         _buttonRollRight.Pressed += OnButtonRollRightPressed;
+        _buttonLayerVisible.Pressed += OnButtonLayerVisiblePressed;
+        _buttonLayerInvisible.Pressed += OnButtonLayerInvisiblePressed;
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
     }
 
@@ -112,6 +118,8 @@ public partial class ViewportUi : PanelContainer
         _buttonAlignNormal.Pressed -= OnButtonAlignNormalPressed;
         _buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
         _buttonRollRight.Pressed -= OnButtonRollRightPressed;
+        _buttonLayerVisible.Pressed -= OnButtonLayerVisiblePressed;
+        _buttonLayerInvisible.Pressed -= OnButtonLayerInvisiblePressed;
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
     }
 
@@ -128,6 +136,7 @@ public partial class ViewportUi : PanelContainer
         Application.Viewport.Event.SizeNotified += OnSizeNotified;
         Application.Viewport.Event.FovNotified += OnFovNotified;
         Application.Viewport.Event.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Viewport.Event.LayerNotified += OnLayerNotified;
     }
 
     /// <summary>
@@ -143,6 +152,7 @@ public partial class ViewportUi : PanelContainer
         Application.Viewport.Event.SizeNotified -= OnSizeNotified;
         Application.Viewport.Event.FovNotified -= OnFovNotified;
         Application.Viewport.Event.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Viewport.Event.LayerNotified -= OnLayerNotified;
     }
 
     /// <summary>
@@ -221,6 +231,26 @@ public partial class ViewportUi : PanelContainer
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
         Application.Log.Debug("ViewportUi: roll-right requested.");
         Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
+    }
+
+    /// <summary>
+    /// Visible レイヤーの表示切替をリクエストする
+    /// </summary>
+    private void OnButtonLayerVisiblePressed()
+    {
+        Application.Viewport.Event.NotifyLayer(
+            (uint)ViewportLayer.Visible,
+            _buttonLayerVisible.ButtonPressed);
+    }
+
+    /// <summary>
+    /// Invisible レイヤーの表示切替をリクエストする
+    /// </summary>
+    private void OnButtonLayerInvisiblePressed()
+    {
+        Application.Viewport.Event.NotifyLayer(
+            (uint)ViewportLayer.Invisible,
+            _buttonLayerInvisible.ButtonPressed);
     }
 
     /// <summary>
@@ -305,6 +335,23 @@ public partial class ViewportUi : PanelContainer
     private void OnProjectionTypeNotified(Camera3D.ProjectionType type)
     {
         _labelProjection.Text = type.ToString();
+    }
+
+    /// <summary>
+    /// ビューポートレイヤーの状態通知を受けてボタンの押下状態を更新する
+    /// </summary>
+    /// <param name="layer">状態が通知されたレイヤー</param>
+    /// <param name="isActive">レイヤーが有効な場合は true</param>
+    private void OnLayerNotified(uint layer, bool isActive)
+    {
+        if ((layer & (uint)ViewportLayer.Visible) != 0)
+        {
+            _buttonLayerVisible.ButtonPressed = isActive;
+        }
+        if ((layer & (uint)ViewportLayer.Invisible) != 0)
+        {
+            _buttonLayerInvisible.ButtonPressed = isActive;
+        }
     }
 
     #endregion

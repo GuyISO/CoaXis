@@ -16,6 +16,11 @@ public partial class ModelService : Node
 	#region Properties
 
 	/// <summary>
+	/// モデルメッシュの透明度
+	/// </summary>
+	public float ModelTransparency { get; set; } = 0.5f;
+
+	/// <summary>
 	/// RootModel を取得する
 	/// </summary>
 	/// <remarks>RootModel が存在しない場合は動的に生成する</remarks>
@@ -59,6 +64,7 @@ public partial class ModelService : Node
 	{
 		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
+		Application.Model.Event.ModelStatusNotified += OnModelStatusNotified;
 		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
 	}
 
@@ -69,6 +75,7 @@ public partial class ModelService : Node
 	{
 		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 		Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
+		Application.Model.Event.ModelStatusNotified -= OnModelStatusNotified;
 		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
 	}
 
@@ -151,6 +158,29 @@ public partial class ModelService : Node
 		}
 
 		HighLightModel(modelNode, isSelected);
+	}
+
+	/// <summary>
+	/// モデルのロード完了通知を受けたときに透明度を適用する
+	/// </summary>
+	/// <param name="modelId">ロード完了したモデルの識別子</param>
+	/// <param name="status">通知されたモデルの状態</param>
+	private void OnModelStatusNotified(string modelId, int status)
+	{
+		if ((ModelStatus)status != ModelStatus.Loaded
+			|| !Guid.TryParse(modelId, out Guid parsedModelId)
+			|| parsedModelId == Guid.Empty)
+		{
+			return;
+		}
+
+		ModelNode modelNode = Application.Model.Registry.GetModelData(parsedModelId)?.Node;
+		if (modelNode == null || !IsInstanceValid(modelNode))
+		{
+			return;
+		}
+
+		ApplyModelTransparency(modelNode);
 	}
 
 	#endregion
@@ -333,6 +363,19 @@ public partial class ModelService : Node
 		foreach (Node childNode in node.GetChildren())
 		{
 			CollectMeshInstancesUnderModel(childNode, results);
+		}
+	}
+
+	private void ApplyModelTransparency(Node node)
+	{
+		if (node is MeshInstance3D meshInstance)
+		{
+			meshInstance.Transparency = ModelTransparency;
+		}
+
+		foreach (Node childNode in node.GetChildren())
+		{
+			ApplyModelTransparency(childNode);
 		}
 	}
 

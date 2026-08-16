@@ -25,7 +25,7 @@ script = ExtResource("2_woemn")
 
 [node name="Camera3D" type="Camera3D" parent="Viewport/FocalPoint" unique_id=833457769]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 5)
-cull_mask = 1048573
+cull_mask = 1
 current = true
 fov = 35.0
 near = 0.001

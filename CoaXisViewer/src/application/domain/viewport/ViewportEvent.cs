@@ -275,5 +275,14 @@ public partial class ViewportEvent : EventBase<ViewportEvent>
         Emit(SignalName.PickResultNotified, pickResult);
     }
 
+    [Signal] public delegate void LayerNotifiedEventHandler(uint layer, bool isActive);
+    /// <summary>
+    /// ビューポートのレイヤー状態を通知するシグナル
+    /// </summary>
+    internal void NotifyLayer(uint layer, bool isActive)
+    {
+        Emit(SignalName.LayerNotified, layer, isActive);
+    }
+
     #endregion
 }

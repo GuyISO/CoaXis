@@ -11,7 +11,6 @@ using System.Text.RegularExpressions;
 public static class WrlLineParser
 {
     private const float TubeRadiusMeters = 0.030f;
-    private const float JointRadiusMeters = 0.030f;
     private const float MinSegmentLengthMeters = 0.0001f;
     private const int TubeRadialSegments = 12;
 
@@ -156,27 +155,9 @@ public static class WrlLineParser
         components.Line.AddChild(lineRoot);
 
         BaseMaterial3D material = CreateLineMaterial();
-        var cylinderMesh = new CylinderMesh
-        {
-            TopRadius = TubeRadiusMeters,
-            BottomRadius = TubeRadiusMeters,
-            Height = 1.0f,
-            RadialSegments = TubeRadialSegments,
-            Material = material
-        };
-
-        var jointMesh = new SphereMesh
-        {
-            Radius = JointRadiusMeters,
-            Height = JointRadiusMeters * 2.0f,
-            RadialSegments = TubeRadialSegments,
-            Rings = 8,
-            Material = material
-        };
 
         int segmentCount = 0;
         int previousIndex = -1;
-        var jointIndices = new HashSet<int>();
 
         foreach (int index in coordIndex)
         {
@@ -194,10 +175,8 @@ public static class WrlLineParser
 
             if (previousIndex >= 0 && previousIndex < points.Count)
             {
-                if (AddTubeSegment(lineRoot, cylinderMesh, points[previousIndex], points[index]))
+                if (AddTubeSegment(lineRoot, material, points[previousIndex], points[index]))
                 {
-                    jointIndices.Add(previousIndex);
-                    jointIndices.Add(index);
                     segmentCount++;
                 }
             }
@@ -211,15 +190,10 @@ public static class WrlLineParser
             return 0;
         }
 
-        foreach (int jointIndex in jointIndices)
-        {
-            AddJointSphere(lineRoot, jointMesh, points[jointIndex]);
-        }
-
         return segmentCount;
     }
 
-    private static bool AddTubeSegment(Node3D parent, Mesh tubeMesh, Vector3 start, Vector3 end)
+    private static bool AddTubeSegment(Node3D parent, Material tubeMaterial, Vector3 start, Vector3 end)
     {
         Vector3 delta = end - start;
         float length = delta.Length();
@@ -229,29 +203,26 @@ public static class WrlLineParser
         }
 
         Vector3 direction = delta / length;
+        float capsuleHeight = Mathf.Max(length + TubeRadiusMeters * 2.0f, MinSegmentLengthMeters);
+        var capsuleMesh = new CapsuleMesh
+        {
+            Radius = TubeRadiusMeters,
+            Height = capsuleHeight,
+            RadialSegments = TubeRadialSegments,
+            Rings = 8,
+            Material = tubeMaterial
+        };
+
         var segment = new MeshInstance3D
         {
-            Name = "WrlTube",
-            Mesh = tubeMesh,
+            Name = "WrlCapsule",
+            Mesh = capsuleMesh,
             Position = (start + end) * 0.5f,
-            Quaternion = CreateRotationFromUp(direction),
-            Scale = new Vector3(1.0f, length, 1.0f)
+            Quaternion = CreateRotationFromUp(direction)
         };
 
         parent.AddChild(segment);
         return true;
-    }
-
-    private static void AddJointSphere(Node3D parent, Mesh sphereMesh, Vector3 position)
-    {
-        var joint = new MeshInstance3D
-        {
-            Name = "WrlJoint",
-            Mesh = sphereMesh,
-            Position = position
-        };
-
-        parent.AddChild(joint);
     }
 
     private static Quaternion CreateRotationFromUp(Vector3 direction)

@@ -40,7 +40,6 @@ public partial class CameraRig : Node3D
     private void EnsureChildNodes()
     {
         _camera = GetNode<Camera3D>("Camera3D");
-        _camera.CullMask = (uint)ViewportLayer.Default | (uint)ViewportLayer.Invisible;
     }
 
     /// <summary>
@@ -62,6 +61,7 @@ public partial class CameraRig : Node3D
         Application.Viewport.Event.ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
         Application.Viewport.Event.FitRequested += OnFitRequested;
         Application.Viewport.Event.AlignNormalToRequested += OnAlignNormalToRequested;
+        Application.Viewport.Event.LayerNotified += OnLayerNotified;
     }
 
     /// <summary>
@@ -83,6 +83,7 @@ public partial class CameraRig : Node3D
         Application.Viewport.Event.ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
         Application.Viewport.Event.FitRequested -= OnFitRequested;
         Application.Viewport.Event.AlignNormalToRequested -= OnAlignNormalToRequested;
+        Application.Viewport.Event.LayerNotified -= OnLayerNotified;
     }
 
     /// <summary>
@@ -232,6 +233,23 @@ public partial class CameraRig : Node3D
     private void OnAlignNormalToRequested(Vector3 normal, bool useTween)
     {
         AlignNormalTo(normal, useTween);
+    }
+
+    /// <summary>
+    /// ビューポートレイヤーの有効状態が通知されたときにカリングマスクを更新する
+    /// </summary>
+    /// <param name="layer">状態を変更するレイヤー</param>
+    /// <param name="isActive">レイヤーを有効にする場合は true</param>
+    private void OnLayerNotified(uint layer, bool isActive)
+    {
+        if (isActive)
+        {
+            _camera.CullMask |= layer;
+        }
+        else
+        {
+            _camera.CullMask &= ~layer;
+        }
     }
 
     #endregion

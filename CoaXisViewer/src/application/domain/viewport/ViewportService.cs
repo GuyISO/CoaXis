@@ -5,6 +5,12 @@ using Godot;
 /// </summary>
 public partial class ViewportService : Node
 {
+	#region Fields
+
+	private uint _activeLayers = (uint)ViewportLayer.Default | (uint)ViewportLayer.Visible;
+
+	#endregion
+
 	#region Lifecycle
 
 	public override void _Ready()
@@ -45,6 +51,7 @@ public partial class ViewportService : Node
 	private void OnAskStateRequested()
 	{
 		Application.Viewport.Event.NotifyInteractionMode(_interactionMode);
+		Application.Viewport.Event.NotifyLayer(_activeLayers, true);
 	}
 
 	#endregion
@@ -80,6 +87,20 @@ public partial class ViewportService : Node
 
 		_interactionMode = mode;
 		Application.Viewport.Event.NotifyInteractionMode(mode);
+	}
+
+	internal void SetLayerActive(uint layer, bool isActive)
+	{
+		if (isActive)
+		{
+			_activeLayers |= layer;
+		}
+		else
+		{
+			_activeLayers &= ~layer;
+		}
+
+		Application.Viewport.Event.NotifyLayer(layer, isActive);
 	}
 
 	#endregion

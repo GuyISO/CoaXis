@@ -44,7 +44,6 @@ RootModel
             ProductPlan(Assembly)
                 ComponentPlans
                     ComponentPlan
-            ProductPlan(Part)
                 PointPlans
                     PointPlan
                 LinePlans
@@ -55,8 +54,6 @@ RootModel
                     AnnotationPlan
                 ParameterPlans
                     ParameterPlan
-                ResourcePlans
-                    ResourcePlan
         ViewPoints
             ViewPoint
 
