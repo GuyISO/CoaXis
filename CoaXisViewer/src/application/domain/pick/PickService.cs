@@ -87,8 +87,9 @@ public partial class PickService : Node
         if (_handlingMode != mode)
         {
             _handlingMode = mode;
-            Application.Pick.Event.NotifyHandlingMode(mode);
         }
+
+        Application.Pick.Event.NotifyHandlingMode(_handlingMode);
     }
 
     #endregion

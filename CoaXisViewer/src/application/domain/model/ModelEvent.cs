@@ -55,6 +55,16 @@ public partial class ModelEvent : EventBase<ModelEvent>
 		Emit(SignalName.ModelStatusNotified, modelId.ToString(), (int)status);
 	}
 
+	[Signal] public delegate void TransparencyNotifiedEventHandler(float transparency);
+	/// <summary>
+	/// モデルの透明度を通知する
+	/// </summary>
+	/// <param name="transparency">新しい透明度</param>
+	internal void NotifyTransparency(float transparency)
+	{
+		Emit(SignalName.TransparencyNotified, transparency);
+	}
+
 	[Signal] public delegate void RegistryClearedEventHandler();
 	/// <summary>
 	/// モデルレジストリがクリアされたことを通知する

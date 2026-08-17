@@ -543,7 +543,7 @@ public partial class ViewportInteractionHandler : SubViewport
         // 画面上の矩形領域をカメラの視錐台として、そこに含まれるオブジェクトを選択する
         var frustumShape = CreateFrustumShape(topLeft, bottomRight);
         var camera = GetCamera3D();
-        var pickResults = PickUtility.PickByShape(camera, frustumShape, true);
+        var pickResults = PickUtility.PickByShape(camera, frustumShape);
         Application.Pick.Event.NotifyResults(pickResults);
     }
 

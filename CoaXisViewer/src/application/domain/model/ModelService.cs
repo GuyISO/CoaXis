@@ -10,15 +10,10 @@ public partial class ModelService : Node
 	#region Fields
 
 	private RootModelData _root = null!;
-	
+
 	#endregion
 
 	#region Properties
-
-	/// <summary>
-	/// モデルメッシュの透明度
-	/// </summary>
-	public float ModelTransparency { get; set; } = 0.5f;
 
 	/// <summary>
 	/// RootModel を取得する
@@ -35,6 +30,11 @@ public partial class ModelService : Node
 			return _root;
 		}
 	}
+
+	/// <summary>
+	/// モデルの透明度を取得する
+	/// </summary>
+	internal float Transparency { get; private set; } = 0.0f;
 
 	#endregion
 
@@ -222,6 +222,23 @@ public partial class ModelService : Node
 		Application.Model.Event.NotifyRegistryCleared();
 	}
 
+	/// <summary>
+	/// モデルメッシュの透明度を設定し、全ロード済みモデルに反映する
+	/// </summary>
+	/// <param name="value">設定する透明度値 (0.0 - 1.0)</param>
+	public void SetTransparency(float value)
+	{
+		Transparency = value;
+
+		// RootModel 配下のすべてのノードに透明度を適用
+		if (_root?.Node != null && IsInstanceValid(_root.Node))
+		{
+			ApplyModelTransparency(_root.Node);
+		}
+
+		Application.Model.Event.NotifyTransparency(value);
+	}
+
 	#endregion
 
 	#region Internal Helpers
@@ -370,7 +387,7 @@ public partial class ModelService : Node
 	{
 		if (node is MeshInstance3D meshInstance)
 		{
-			meshInstance.Transparency = ModelTransparency;
+			meshInstance.Transparency = Transparency;
 		}
 
 		foreach (Node childNode in node.GetChildren())

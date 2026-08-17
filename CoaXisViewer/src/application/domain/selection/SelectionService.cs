@@ -88,8 +88,9 @@ public partial class SelectionService : Node
         {
             _mode = mode;
             Application.Log.Debug($"SelectionService: Selection mode changed to {_mode}.");
-            Application.Selection.Event.NotifyMode(_mode);
-        }   
+        }
+
+        Application.Selection.Event.NotifyMode(_mode);
     }
 
     /// <summary>

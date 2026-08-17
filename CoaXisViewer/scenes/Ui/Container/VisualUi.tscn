@@ -1,0 +1,82 @@
+[gd_scene format=3 uid="uid://djb751h7aic7h"]
+
+[ext_resource type="Script" uid="uid://be4k6ss162bpe" path="res://scenes/ui/container/VisualUi.cs" id="1_05sew"]
+
+[node name="Visual" type="PanelContainer" unique_id=1128003110]
+custom_minimum_size = Vector2(280, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_05sew")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1489839012]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=62594949]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=1530737968]
+layout_mode = 2
+columns = 3
+
+[node name="LabelTitileTransparency" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1228991874]
+layout_mode = 2
+text = "Transparency"
+vertical_alignment = 1
+
+[node name="LabelValueTransparency" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1975594622]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitTransparency" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=159504227]
+layout_mode = 2
+text = "%"
+vertical_alignment = 1
+
+[node name="HSliderTransparency" type="HSlider" parent="MarginContainer/VBoxContainer" unique_id=962493079]
+layout_mode = 2
+max_value = 1.0
+step = 0.1
+value = 0.5
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=1976179354]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="LabelApplyVisibilityToSelection" type="Label" parent="MarginContainer/VBoxContainer" unique_id=776223544]
+layout_mode = 2
+text = "ApplyVisibilityToSelection"
+vertical_alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1330858884]
+layout_mode = 2
+alignment = 1
+
+[node name="ButtonInherit" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=74740004]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Inherit"
+
+[node name="ButtonVisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=502803084]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Visible"
+
+[node name="ButtonInvisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=389004104]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Invisible"

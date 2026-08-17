@@ -95,11 +95,10 @@ public static class PickUtility
     /// </summary>
     /// <param name="camera">形状クエリを行うカメラ</param>
     /// <param name="shape">使用する形状、ワールド座標系での配置を想定</param>
-    /// <param name="requireFullContainment">形状に完全内包されたオブジェクトのみを取得するかどうか、true の場合は完全内包のみをヒットとみなし false の場合は形状と交差していればヒットとみなす</param>
     /// <param name="collisionMask">クエリの衝突マスク、デフォルトはカメラのカリングマスク</param>
     /// <param name="excludeRids">クエリから除外するオブジェクトのRIDリスト</param>
     /// <returns>クエリのヒット情報を含む PickResult の配列</returns>
-    public static PickResult[] PickByShape(Camera3D camera, Shape3D shape, bool requireFullContainment, uint? collisionMask = null, List<Rid> excludeRids = null)
+    public static PickResult[] PickByShape(Camera3D camera, Shape3D shape, uint? collisionMask = null, List<Rid> excludeRids = null)
     {
         var space = camera.GetWorld3D().DirectSpaceState;
         var exclude = excludeRids != null
@@ -162,12 +161,6 @@ public static class PickUtility
             }
 
             break;
-        }
-
-        // requireFullContainment が true の場合、さらにフィルタリングして完全に内包されているオブジェクトのみを残す
-        if (requireFullContainment)
-        {
-            // TODO: なんか難しくて未実装なので、いつか実装したい
         }
 
         return pickResults.ToArray();

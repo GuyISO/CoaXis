@@ -31,6 +31,7 @@ public partial class SelectionUi : PanelContainer
         SubscribeUiEvents();
         SubscribeApplicationEvents();
         SyncInitialState();
+        Application.Pick.Event.AskHandlingMode();
     }
 
     public override void _ExitTree()
@@ -88,6 +89,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
+        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
         Application.Selection.Event.ModeNotified += OnModeNotified;
         Application.Selection.Event.ModelStateNotified += OnModelStateNotified;
     }
@@ -97,8 +99,24 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
+        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Selection.Event.ModeNotified -= OnModeNotified;
         Application.Selection.Event.ModelStateNotified -= OnModelStateNotified;
+    }
+
+    /// <summary>
+    /// ピック操作モードの通知を受け取り、Selection以外ではモードボタンを解除する
+    /// </summary>
+    /// <param name="mode">通知されたピック操作モード</param>
+    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    {
+        if (mode == PickHandlingMode.Selection)
+        {
+            UpdateModeButtons(Application.Selection.Service.Mode);
+            return;
+        }
+
+        UpdateModeButtons(null);
     }
 
     /// <summary>
@@ -106,6 +124,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonSetPressed()
     {
+        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
         Application.Selection.Event.SetMode(SelectionMode.Set);
     }
 
@@ -114,6 +133,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonAddPressed()
     {
+        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
         Application.Selection.Event.SetMode(SelectionMode.Add);
     }
 
@@ -122,6 +142,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonRemovePressed()
     {
+        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
         Application.Selection.Event.SetMode(SelectionMode.Remove);
     }
 
@@ -130,6 +151,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonTogglePressed()
     {
+        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
         Application.Selection.Event.SetMode(SelectionMode.Toggle);
     }
 
@@ -222,7 +244,7 @@ public partial class SelectionUi : PanelContainer
     /// モード切替ボタンの押下状態を更新する
     /// </summary>
     /// <param name="mode">選択モード</param>
-    private void UpdateModeButtons(SelectionMode mode)
+    private void UpdateModeButtons(SelectionMode? mode)
     {
         _buttonSet.ButtonPressed = mode == SelectionMode.Set;
         _buttonAdd.ButtonPressed = mode == SelectionMode.Add;
