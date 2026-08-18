@@ -11,6 +11,7 @@ public partial class Application : FacadeBase
     private LogHub _logHub;
     private SettingFacade _settingFacade;
     private AssetFacade _assetFacade;
+    private IpcFacade _ipcFacade;
     private DeviceInputHandler _deviceInputHandler;
 
     // domain
@@ -32,6 +33,7 @@ public partial class Application : FacadeBase
     public static LogHub Log => Instance._logHub;
     public static SettingFacade Setting => Instance._settingFacade;
     public static AssetFacade Asset => Instance._assetFacade;
+    public static IpcFacade Ipc => Instance._ipcFacade;
     public static DeviceInputHandler DeviceInputHandlerNode => Instance._deviceInputHandler;
 
     // domain
@@ -74,6 +76,7 @@ public partial class Application : FacadeBase
         _logHub = AddModule<LogHub>("LogHub");
         _settingFacade = AddModule<SettingFacade>("SettingFacade");
         _assetFacade = AddModule<AssetFacade>("AssetFacade");
+        _ipcFacade = AddModule<IpcFacade>("IpcFacade");
         _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");
     }
 

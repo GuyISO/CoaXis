@@ -3,13 +3,11 @@
 importer="csv_translation"
 type="Translation"
 uid="uid://dlxul3fo6k4c0"
+valid=false
 
 [deps]
 
-files=["res://sample/modeldata.ParentId.translation", "res://sample/modeldata.Type.translation", "res://sample/modeldata.Name.translation", "res://sample/modeldata.PositionX.translation", "res://sample/modeldata.PositionY.translation", "res://sample/modeldata.PositionZ.translation", "res://sample/modeldata.RotationW.translation", "res://sample/modeldata.RotationX.translation", "res://sample/modeldata.RotationY.translation", "res://sample/modeldata.RotationZ.translation", "res://sample/modeldata.IconFilePath.translation", "res://sample/modeldata.GlbFilePath.translation", "res://sample/modeldata.WrlFilePath.translation"]
-
 source_file="res://sample/modeldata.csv"
-dest_files=["res://sample/modeldata.ParentId.translation", "res://sample/modeldata.Type.translation", "res://sample/modeldata.Name.translation", "res://sample/modeldata.PositionX.translation", "res://sample/modeldata.PositionY.translation", "res://sample/modeldata.PositionZ.translation", "res://sample/modeldata.RotationW.translation", "res://sample/modeldata.RotationX.translation", "res://sample/modeldata.RotationY.translation", "res://sample/modeldata.RotationZ.translation", "res://sample/modeldata.IconFilePath.translation", "res://sample/modeldata.GlbFilePath.translation", "res://sample/modeldata.WrlFilePath.translation"]
 
 [params]
 
