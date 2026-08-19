@@ -1,3 +1,4 @@
+using CoaXis.Protocol.Viewer;
 using System;
 using System.Collections.Generic;
 using System.Text.Json;

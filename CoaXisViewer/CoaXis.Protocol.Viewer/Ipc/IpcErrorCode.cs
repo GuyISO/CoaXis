@@ -1,3 +1,5 @@
+namespace CoaXis.Protocol.Viewer;
+
 /// <summary>
 /// IPC Result 応答で使う標準化エラーコード
 /// </summary>

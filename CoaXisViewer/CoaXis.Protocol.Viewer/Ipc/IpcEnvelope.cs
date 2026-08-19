@@ -2,6 +2,8 @@ using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
+namespace CoaXis.Protocol.Viewer;
+
 /// <summary>
 /// Godot(Viewer) と外部クライアント間でやり取りする IPC メッセージの共通エンベロープ
 /// </summary>

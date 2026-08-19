@@ -1,5 +1,7 @@
 using System.Text.Json.Serialization;
 
+namespace CoaXis.Protocol.Viewer;
+
 /// <summary>
 /// Result エンベロープの payload に格納する処理結果
 /// </summary>
