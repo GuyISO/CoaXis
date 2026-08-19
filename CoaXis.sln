@@ -5,7 +5,7 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXisViewer", "CoaXisViewer\CoaXisViewer.csproj", "{46C6C668-B12F-4842-B877-05083FA3EA6C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXisViewerProtocol", "CoaXisProtocol\Viewer\CoaXis.Protocol.Viewer.csproj", "{54116508-7F01-4555-89C4-A093F001B970}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXisProtocolViewer", "CoaXisProtocol\Viewer\CoaXis.Protocol.Viewer.csproj", "{54116508-7F01-4555-89C4-A093F001B970}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
