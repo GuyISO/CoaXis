@@ -32,6 +32,19 @@
                 "build"
             ],
             "problemMatcher": []
+        },
+        {
+            "label": "viewer: verify-utf8",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                ".\\CoaXisViewer\\scripts\\verify-utf8.ps1"
+            ],
+            "problemMatcher": []
         }
     ]
 }

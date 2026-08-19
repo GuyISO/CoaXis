@@ -10,6 +10,16 @@
             "args": [],
             "cwd": "${workspaceFolder}",
             "stopAtEntry": false,
+        },
+        {
+            "name": "Play (CoaXisViewer)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "C:\\Development\\Godot\\Godot_v4.6.3-stable_mono_win64.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}\\CoaXisViewer",
+            "stopAtEntry": false,
         }
     ]
 }

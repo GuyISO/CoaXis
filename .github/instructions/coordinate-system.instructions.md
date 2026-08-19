@@ -1,6 +1,6 @@
 ---
 description: "Use when: 座標系をまたぐデータ（UI表示・DB/IPC/ファイルI/O・内部計算）を実装または変更するとき"
-applyTo: "src/**/*.cs"
+applyTo: "CoaXisViewer/src/**/*.cs"
 ---
 
 # Coordinate System Policy

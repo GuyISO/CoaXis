@@ -1,5 +1,8 @@
 {
   "files.exclude": {
-    "**/*.uid": true
-  }
+    "**/*.uid": true,
+    "**/*.tscn": true
+  },
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": false
 }
