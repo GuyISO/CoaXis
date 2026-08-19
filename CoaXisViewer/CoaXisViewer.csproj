@@ -5,10 +5,9 @@
     <EnableDynamicLoading>true</EnableDynamicLoading>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="CoaXis.Protocol.Viewer\CoaXis.Protocol.Viewer.csproj" />
+    <ProjectReference Include="..\CoaXisProtocol\Viewer\CoaXis.Protocol.Viewer.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Remove="CoaXis.Protocol.Viewer\**\*.cs" />
     <Compile Remove=".godot\**\*.cs" />
   </ItemGroup>
 </Project>

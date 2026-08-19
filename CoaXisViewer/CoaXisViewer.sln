@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXisViewer", "CoaXisViewer.csproj", "{89A26B61-A8B5-4219-975E-477C32137F2B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXis.Protocol.Viewer", "CoaXis.Protocol.Viewer\CoaXis.Protocol.Viewer.csproj", "{54116508-7F01-4555-89C4-A093F001B970}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXis.Protocol.Viewer", "..\CoaXisProtocol\Viewer\CoaXis.Protocol.Viewer.csproj", "{54116508-7F01-4555-89C4-A093F001B970}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
