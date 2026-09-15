@@ -1,7 +1,7 @@
 /// <summary>
 /// 自動的にRootModelからの階層ツリーの表示と操作を行うUIコンポーネント
 /// </summary>
-public partial class RootModelTree : ModelTree
+public partial class RootModelEntityTree : ModelEntityTree
 {
     #region Lifecycle
 

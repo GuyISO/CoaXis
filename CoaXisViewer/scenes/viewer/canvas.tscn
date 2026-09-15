@@ -10,8 +10,9 @@
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/selection_ui.tscn" id="6_npq5x"]
 [ext_resource type="PackedScene" uid="uid://bfdie23q7sox" path="res://scenes/ui/camera_state_ui.tscn" id="7_57r0r"]
 [ext_resource type="PackedScene" uid="uid://djb751h7aic7h" path="res://scenes/ui/visual_ui.tscn" id="7_xrtxh"]
-[ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/RootModelTree.cs" id="10_57r0r"]
+[ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/RootModelEntityTree.cs" id="10_57r0r"]
 [ext_resource type="Script" uid="uid://crvr3vcpmbqny" path="res://src/ui/menu/ModelTreeMenu.cs" id="11_xrtxh"]
+[ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/EmbededModelPropertyTree.cs" id="12_bn6oc"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -127,7 +128,12 @@ mouse_filter = 2
 split_offsets = PackedInt32Array(400)
 split_offset = 400
 
-[node name="RootModelTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=119731503]
+[node name="VSplitContainer" type="VSplitContainer" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=112150469]
+layout_mode = 2
+split_offsets = PackedInt32Array(-200)
+split_offset = -200
+
+[node name="RootModelEntityTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=119731503]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -137,11 +143,21 @@ allow_search = false
 hide_root = true
 script = ExtResource("10_57r0r")
 
-[node name="PopupMenu" type="PopupMenu" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/RootModelTree" unique_id=1964189061]
+[node name="PopupMenu" type="PopupMenu" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer/RootModelEntityTree" unique_id=1964189061]
 oversampling_override = 1.0
 script = ExtResource("11_xrtxh")
 
-[node name="Control" type="Control" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=1196475229]
+[node name="EmbededModelPropertyTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=316986411]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_constants/v_separation = 2
+allow_reselect = true
+allow_search = false
+script = ExtResource("12_bn6oc")
+theme_override_constants/v_separation = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+
+[node name="Blank" type="Control" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=1196475229]
 layout_mode = 2
 size_flags_horizontal = 3
 mouse_filter = 2

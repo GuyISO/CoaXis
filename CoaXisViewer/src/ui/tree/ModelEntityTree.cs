@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデルの階層ツリー表示と操作を行うUIコンポーネント
 /// </summary>
-public partial class ModelTree : Tree
+public partial class ModelEntityTree : Tree
 {
     #region Fields
 
