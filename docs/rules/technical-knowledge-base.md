@@ -42,6 +42,21 @@
 
 ---
 
+### [2026-09-15] ModelEntity Tree の兄弟順を入力順で固定
+
+- 背景: CSV/JSONから読み込んだModelEntityのリスト順を、ViewerのTree表示でも維持する必要がある。
+- 問題: ModelRegistryが未リンクModelEntityのIDを`HashSet<Guid>`で管理していたため、親子リンクの処理順が入力順にならず、Tree再構築時に兄弟ノードの上下が入れ替わることがあった。
+- 判断: ModelEntityの未リンクIDを登録順を保持する`List<Guid>`で管理し、`ResolveEntityHierarchy`がその順序で親子リンクを作成する。
+- 判断理由: Treeは`ModelEntity.Children`の列挙順で表示するため、階層解決時のAttach順を入力順にすれば、UI側に追加のソート責務を持たせずに再読み込み後も同じ順序を維持できる。
+- 採用しなかった代替案: Tree側で名前順・GUID順に再ソートする案は、入力リスト順という契約を失い、UIにモデル順序の責務を移すため不採用。
+- 影響範囲: `CoaXisViewer/src/model/service/ModelRegistry.cs`のModelEntity階層解決と、同階層を表示するModelEntityTree。
+- 実装/運用手順: ローダーが返すDTOリストの順序を表示順の正とし、同じデータを再読み込みしても入力順が維持されることを確認する。
+- 検証方法: `check: mojibake`、`dotnet build .\\CoaXis.sln`を実行し、ViewerでCSV/JSONを複数回ロードして兄弟順を比較する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/model/service/ModelRegistry.cs`、`CoaXisViewer/src/ui/tree/ModelEntityTree.cs`、`CoaXisViewer/src/SampleTest.cs`
+- 備考: ModelPropertyの並び順やModelAddedイベントの契約は今回の変更対象外とする。
+
+---
+
 ### [2026-09-09] ModelFactory の DTO 一括生成へ統一
 
 - 背景: モデルをDTOごとに生成すると、Registryの階層解決、SceneTree反映、シーンロードqueue投入の制御が各モデル単位で分散していた。

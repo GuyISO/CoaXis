@@ -13,8 +13,8 @@ public partial class ModelRegistry : Node
     // Guid をキーにして ModelEntity を管理する辞書
     private readonly Dictionary<Guid, ModelEntity> _entities = new();
 
-    // 親へまだリンクできていない ModelEntity の Id 集合。ResolveHierarchy の走査対象をこれだけに絞ることで、登録済み全件の再走査(O(n²))を避ける
-    private readonly HashSet<Guid> _unlinkedIds = new();
+    // 親へまだリンクできていない ModelEntity の Id 一覧。入力順を保持し、Treeの兄弟順を安定させる。
+    private readonly List<Guid> _unlinkedIds = new();
 
     // Guid をキーにして ModelProperty を管理する辞書
     private readonly Dictionary<Guid, ModelProperty> _properties = new();
