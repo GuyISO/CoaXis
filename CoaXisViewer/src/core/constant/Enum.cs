@@ -1,0 +1,149 @@
+using Godot;
+using System;
+
+/// <summary>
+/// ログレベルを表す列挙型
+/// </summary>
+public enum LogLevel
+{
+    /// <summary>開発中のデバッグ用</summary>
+    Debug,
+    /// <summary>ユーザーに通知する必要がある情報</summary>
+    Info,
+    /// <summary>警告を表す</summary>
+    Warn,
+    /// <summary>エラーを表す</summary>
+    Error,
+}
+
+/// <summary>
+/// 座標系の基準を表す列挙型
+/// </summary>
+public enum SpaceMode
+{
+    /// <summary>ワールド座標系</summary>
+    World,
+    /// <summary>注視点基準の座標系</summary>
+    FocalPoint,
+    /// <summary>カメラ基準の座標系</summary>
+    Camera,
+}
+
+/// <summary>
+/// CommandUi の列を表す列挙型
+/// </summary>
+public enum CommandTreeColumn
+{
+    No,
+    Name,
+    Description,
+    State,
+}
+
+/// <summary>
+/// SelectionUi の列を表す列挙型
+/// </summary>
+public enum SelectionTreeColumn
+{
+    No,
+    Name,
+}
+
+/// <summary>
+/// コマンド履歴の実行状態を表す列挙型
+/// </summary>
+public enum CommandExecutionState
+{
+    Do,
+    Undo,
+}
+
+/// <summary>
+/// Viewportのレイヤーを表す列挙型、Raycast用のビットマスクとしても使用される
+/// </summary>
+public enum ViewportLayer
+{
+    None = 0b_0000_0000_0000_0000_0000,
+    Default = 0b_0000_0000_0000_0000_0001,
+    AxisNavigator = 0b_0000_0000_0000_0000_0010,
+    Visible = 0b_0000_0000_0000_0000_0100,
+    Invisible = 0b_0000_0000_0000_0000_1000,
+}
+
+/// <summary>
+/// モデルの選択モードを表す列挙型
+/// </summary>
+public enum SelectionMode
+{
+    /// <summary>対象のみを選択するデフォルトの選択モード</summary>
+    Set,
+    /// <summary>追加選択モード</summary>
+    Add,
+    /// <summary>削除選択モード</summary>
+    Remove,
+    /// <summary>トグル選択モード</summary>
+    Toggle,
+}
+
+/// <summary>
+/// Viewportの操作モードを表す列挙型
+/// </summary>
+public enum ViewportInteractionMode
+{
+    /// <summary>操作待機状態</summary>
+    None,
+    /// <summary>カメラの注視点の平行移動操作</summary>
+    CameraPan,
+    /// <summary>カメラの注視点中心のオービット回転操作</summary>
+    CameraOrbit,
+    /// <summary>カメラの視線方向を軸としたロール回転操作</summary>
+    CameraRoll,
+    /// <summary>カメラのズーム操作</summary>
+    CameraZoom,
+    /// <summary>選択矩形操作</summary>
+    PickRect,
+}
+
+/// <summary>
+/// 選択されたモデルの操作モードを表す列挙型
+/// </summary>
+public enum PickHandlingMode
+{
+    /// <summary>選択操作モード</summary>
+    Selection,
+    /// <summary>測定操作モード</summary>
+    Measurement,
+    /// <summary>面に垂直操作モード</summary>
+    NormalToFace,
+}
+
+/// <summary>
+/// モデルの状態を表す列挙型
+/// </summary>
+public enum ModelStatus
+{
+    /// <summary> モデルがまだロードされていない状態、初期値 </summary>
+    Unloaded,
+    /// <summary> モデルが初期化された状態 </summary>
+    Initialized,
+    /// <summary> モデルがレジストリに登録された状態 </summary>
+    Registered,
+    /// <summary> モデルの読み込み処理中の状態 </summary>
+    Loading,
+    /// <summary> モデルのロードが完了した状態 </summary>
+    Loaded,
+    /// <summary> モデルのロードが失敗した状態 </summary>
+    LoadFailed,
+    /// <summary> モデルが破棄された状態 </summary>
+    Disposed,
+}
+
+public enum ModelVisibility
+{
+    /// <summary> 上位モデルを継承、初期値 </summary>
+    Inherit,
+    /// <summary> モデルが表示 </summary>
+    Visible,
+    /// <summary> モデルが非表示 </summary>
+    Invisible,
+}

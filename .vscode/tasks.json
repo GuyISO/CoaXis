@@ -1,0 +1,50 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "build",
+            "command": "dotnet",
+            "type": "process",
+            "args": [
+                "build",
+                ".\\CoaXis.sln"
+            ],
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "check: mojibake",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                ".\\scripts\\quality\\check-mojibake.ps1"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "verify: build + encoding",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "check: mojibake",
+                "build"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "viewer: verify-utf8",
+            "type": "process",
+            "command": "powershell",
+            "args": [
+                "-NoProfile",
+                "-ExecutionPolicy",
+                "Bypass",
+                "-File",
+                ".\\scripts\\verify-utf8.ps1"
+            ],
+            "problemMatcher": []
+        }
+    ]
+}

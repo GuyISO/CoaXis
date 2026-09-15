@@ -1,0 +1,10 @@
+[gd_scene format=3 uid="uid://bxm8vaxeatrjn"]
+
+[ext_resource type="Script" uid="uid://bh4l3dj0hyrp7" path="res://src/SceneBuilder.cs" id="1_itxqv"]
+[ext_resource type="Script" uid="uid://gx2lm0g6n48q" path="res://src/SceneBuildCommandLineRunner.cs" id="2_command_line_runner"]
+
+[node name="Main" type="Node" unique_id=1910797407]
+script = ExtResource("2_command_line_runner")
+
+[node name="SceneBuilder" type="Node" parent="." unique_id=287227502]
+script = ExtResource("1_itxqv")

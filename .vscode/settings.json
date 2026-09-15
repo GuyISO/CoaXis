@@ -1,0 +1,7 @@
+{
+  "files.exclude": {
+    "**/*.uid": true
+  },
+  "files.encoding": "utf8",
+  "files.autoGuessEncoding": false
+}

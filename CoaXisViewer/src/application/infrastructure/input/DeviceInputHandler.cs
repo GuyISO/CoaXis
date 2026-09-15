@@ -1,0 +1,155 @@
+using Godot;
+using System;
+
+/// <summary>
+/// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
+/// </summary>
+public partial class DeviceInputHandler : Node
+{
+    #region Lifecycle
+
+    public override void _Ready()
+    {
+    }
+
+    public override void _ExitTree()
+    {
+        base._ExitTree();
+    }
+
+    public override void _Process(double delta)
+    {
+        HandleSelectModeInput("switch_selection_mode_add", SelectionMode.Add);
+        HandleSelectModeInput("switch_selection_mode_remove", SelectionMode.Remove);
+        HandleSelectModeInput("switch_selection_mode_toggle", SelectionMode.Toggle);
+        HandleButtonInput();
+        HandleTranslationInput((float)delta);
+        HandleRotationInput((float)delta);
+    }
+
+    #endregion
+
+    #region Internal Helpers
+
+    /// <summary>
+    /// 選択モードの切り替えを処理する
+    /// </summary>
+    private void HandleSelectModeInput(string actionName, SelectionMode assignMode)
+    { 
+        if (Input.IsActionJustPressed(actionName))
+        {
+            Application.Selection.Event.SetMode(assignMode);
+        }
+        else if (Input.IsActionJustReleased(actionName) && Application.Selection.Service.Mode == assignMode)
+        {
+            Application.Selection.Event.SetMode(SelectionMode.Set);
+        }
+    }
+
+    /// <summary>
+    /// Undo/Redo 入力に応じてコマンド履歴を操作する
+    /// </summary>
+    private void HandleButtonInput()
+    {
+        
+        if (Input.IsActionJustPressed("load_csv"))
+        {
+            SampleTest.RunLoadCsv();
+        }
+        
+        if (Input.IsActionJustPressed("load_json"))
+        {
+            SampleTest.RunLoadJson();
+        }
+        
+        if (Input.IsActionJustPressed("clear"))
+        {
+            Application.Model.Service.Clear();
+        }
+        
+        if (Input.IsActionJustPressed("undo"))
+        {
+            Application.Log.Debug("DeviceInputHandler: Undo requested.");
+            Application.Command.Event.Undo();
+        }
+
+        if (Input.IsActionJustPressed("redo"))
+        {
+            Application.Log.Debug("DeviceInputHandler: Redo requested.");
+            Application.Command.Event.Redo();
+        }
+        
+        if (Input.IsActionJustPressed("escape"))
+        {
+            Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
+            Application.Selection.Event.SetMode(SelectionMode.Set);
+            Application.Selection.Event.Clear();
+        }
+    }
+
+    /// <summary>
+    /// ユーザーの入力に基づき、カメラの平行移動をリクエストする
+    /// </summary>
+    /// <param name="delta">前フレームからの経過時間（秒）</param>
+    private void HandleTranslationInput(float delta)
+    {
+        InputSettings settings = Application.Setting.Service.Current.Input;
+        float x = GetAxis("translate_camera_left", "translate_camera_right");
+        float y = GetAxis("translate_camera_down", "translate_camera_up");
+        float z = GetAxis("translate_camera_forward", "translate_camera_backward");
+
+        Vector3 translationDirection = new Vector3(x, y, z);
+        if (translationDirection.LengthSquared() <= Mathf.Epsilon)
+        {
+            return;
+        }
+
+        if (translationDirection.LengthSquared() > 1.0f)
+        {
+            translationDirection = translationDirection.Normalized();
+        }
+
+        Vector3 translation = translationDirection * (settings.TranslateSpeed * delta);
+        Application.Viewport.Event.Translate(translation, SpaceMode.Camera);
+    }
+
+    /// <summary>
+    /// ユーザーの入力に基づき、カメラの回転をリクエストする
+    /// </summary>
+    /// <param name="delta">前フレームからの経過時間（秒）</param>
+    private void HandleRotationInput(float delta)
+    {
+        InputSettings settings = Application.Setting.Service.Current.Input;
+        float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
+        float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
+        float rollInput = GetAxis("rotate_camera_clockwise", "rotate_camera_counterclockwise");
+
+        if (Mathf.IsZeroApprox(yawInput) && Mathf.IsZeroApprox(pitchInput) && Mathf.IsZeroApprox(rollInput))
+        {
+            return;
+        }
+
+        float yawAngle = Mathf.DegToRad(yawInput * settings.RotateSpeedDeg * delta);
+        float pitchAngle = Mathf.DegToRad(pitchInput * settings.RotateSpeedDeg * delta);
+        float rollAngle = Mathf.DegToRad(rollInput * settings.RollSpeedDeg * delta);
+        Quaternion yaw = new Quaternion(Vector3.Up, yawAngle);
+        Quaternion pitch = new Quaternion(Vector3.Right, pitchAngle);
+        Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
+        Quaternion rotation = yaw * pitch * roll;
+
+        Application.Viewport.Event.Rotate(rotation, SpaceMode.Camera);
+    }
+
+    /// <summary>
+    /// 指定されたアクションに基づき、軸の値を取得する
+    /// </summary>
+    /// <param name="negativeAction">負の方向のアクション名</param>
+    /// <param name="positiveAction">正の方向のアクション名</param>
+    /// <returns>軸の値（-1.0 から 1.0）</returns>
+    private float GetAxis(string negativeAction, string positiveAction)
+    {
+        return Input.GetActionStrength(positiveAction) - Input.GetActionStrength(negativeAction);
+    }
+
+    #endregion
+}

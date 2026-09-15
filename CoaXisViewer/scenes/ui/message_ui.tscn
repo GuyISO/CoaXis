@@ -1,0 +1,21 @@
+[gd_scene format=3 uid="uid://cfpvvau2incc4"]
+
+[ext_resource type="Script" uid="uid://stjlfvm4o4dh" path="res://src/ui/panel/MessageUi.cs" id="1_ox1gj"]
+
+[node name="Message" type="PanelContainer" unique_id=115086409]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ox1gj")
+
+[node name="RichTextLabel" type="RichTextLabel" parent="." unique_id=1291662502]
+custom_minimum_size = Vector2(500, 500)
+layout_mode = 2
+focus_mode = 2
+theme_override_font_sizes/normal_font_size = 11
+scroll_following = true
+scroll_following_visible_characters = true
+autowrap_mode = 2
+selection_enabled = true

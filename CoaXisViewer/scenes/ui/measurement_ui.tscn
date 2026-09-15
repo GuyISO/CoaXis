@@ -1,0 +1,364 @@
+[gd_scene format=3 uid="uid://cmde2bylb3cu1"]
+
+[ext_resource type="Script" uid="uid://b3fjt6iecg5gv" path="res://src/ui/panel/MeasurementUi.cs" id="1_1r4nc"]
+
+[node name="Measurement" type="PanelContainer" unique_id=1128003110]
+custom_minimum_size = Vector2(280, 0)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("1_1r4nc")
+
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=1489839012]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=62594949]
+layout_mode = 2
+theme_override_constants/separation = 4
+alignment = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1678572172]
+layout_mode = 2
+size_flags_vertical = 3
+alignment = 1
+
+[node name="VBoxContainerPickResult1" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=249382470]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=893661275]
+layout_mode = 2
+text = "Point1"
+vertical_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=892245789]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=715505824]
+layout_mode = 2
+columns = 3
+
+[node name="LabelTitilePositionX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=193938479]
+layout_mode = 2
+text = "PositionX"
+vertical_alignment = 1
+
+[node name="LabelValuePositionX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=531972640]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=1410897923]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitilePositionY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=601697515]
+layout_mode = 2
+text = "PositionY"
+vertical_alignment = 1
+
+[node name="LabelValuePositionY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=1962964311]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=790974500]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitilePositionZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=168573788]
+layout_mode = 2
+text = "PositionZ"
+vertical_alignment = 1
+
+[node name="LabelValuePositionZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=1369718850]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=506167030]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileNormalX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=345530487]
+layout_mode = 2
+text = "NormalX"
+vertical_alignment = 1
+
+[node name="LabelValueNormalX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=1205904092]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitNormalX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=553133163]
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="LabelTitileNormalY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=871194874]
+layout_mode = 2
+text = "NormalY"
+vertical_alignment = 1
+
+[node name="LabelValueNormalY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=238503358]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitNormalY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=1313580299]
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="LabelTitileNormalZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=1152194182]
+layout_mode = 2
+text = "NormalZ"
+vertical_alignment = 1
+
+[node name="LabelValueNormalZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=348974051]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitNormalZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1/GridContainer" unique_id=1082097276]
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=1566134602]
+layout_mode = 2
+tooltip_text = "測定点を取得します"
+toggle_mode = true
+text = "Pick"
+
+[node name="ButtonClear" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=1785677978]
+layout_mode = 2
+tooltip_text = "測定点を消去します"
+text = "Clear"
+
+[node name="VBoxContainerPickResult2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1674100131]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Label" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=1919456890]
+layout_mode = 2
+text = "Point2"
+vertical_alignment = 1
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=1672983332]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="GridContainer" type="GridContainer" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=1530737968]
+layout_mode = 2
+columns = 3
+
+[node name="LabelTitilePositionX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=692472016]
+layout_mode = 2
+text = "PositionX"
+vertical_alignment = 1
+
+[node name="LabelValuePositionX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1218626444]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1472295856]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitilePositionY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1409710916]
+layout_mode = 2
+text = "PositionY"
+vertical_alignment = 1
+
+[node name="LabelValuePositionY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1485899035]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1945926933]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitilePositionZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1645184853]
+layout_mode = 2
+text = "PositionZ"
+vertical_alignment = 1
+
+[node name="LabelValuePositionZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1732065166]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitPositionZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1904585818]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileNormalX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=2013419153]
+layout_mode = 2
+text = "NormalX"
+vertical_alignment = 1
+
+[node name="LabelValueNormalX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1257139175]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitNormalX" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1292158702]
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="LabelTitileNormalY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1221168574]
+layout_mode = 2
+text = "NormalY"
+vertical_alignment = 1
+
+[node name="LabelValueNormalY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=185894188]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitNormalY" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=310528807]
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="LabelTitileNormalZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1228991874]
+layout_mode = 2
+text = "NormalZ"
+vertical_alignment = 1
+
+[node name="LabelValueNormalZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=1975594622]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitNormalZ" type="Label" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2/GridContainer" unique_id=159504227]
+layout_mode = 2
+vertical_alignment = 1
+
+[node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=845942979]
+layout_mode = 2
+tooltip_text = "測定点を取得します"
+toggle_mode = true
+text = "Pick"
+
+[node name="ButtonClear" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=772489631]
+layout_mode = 2
+tooltip_text = "測定点を消去します"
+text = "Clear"
+
+[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=406113100]
+custom_minimum_size = Vector2(0, 1)
+layout_mode = 2
+
+[node name="GridContainer3" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=38217696]
+layout_mode = 2
+size_flags_vertical = 3
+columns = 3
+
+[node name="LabelTitileDistance" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1723884915]
+layout_mode = 2
+text = "Distance"
+vertical_alignment = 1
+
+[node name="LabelValueDistance" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=270701788]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitDistance" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=384150743]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileAngle" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=790441461]
+layout_mode = 2
+text = "Angle"
+vertical_alignment = 1
+
+[node name="LabelValueAngle" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=648600448]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitAngle" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=528921528]
+layout_mode = 2
+text = "deg"
+vertical_alignment = 1
+
+[node name="LabelTitileDeltaX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1054462616]
+layout_mode = 2
+text = "DeltaX"
+vertical_alignment = 1
+
+[node name="LabelValueDeltaX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1800135239]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitDeltaX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1291207868]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileDeltaY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1415066339]
+layout_mode = 2
+text = "DeltaY"
+vertical_alignment = 1
+
+[node name="LabelValueDeltaY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1417478666]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitDeltaY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=551690197]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1
+
+[node name="LabelTitileDeltaZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=820048307]
+layout_mode = 2
+text = "DeltaZ"
+vertical_alignment = 1
+
+[node name="LabelValueDeltaZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1255627249]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+vertical_alignment = 1
+
+[node name="LabelUnitDeltaZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1719085518]
+layout_mode = 2
+text = "mm"
+vertical_alignment = 1

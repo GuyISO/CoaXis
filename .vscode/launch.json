@@ -1,0 +1,28 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Play (CoaXisSceneBuilder)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "C:\\Development\\Godot\\Godot_v4.6.3-stable_mono_win64.exe",
+                "args": [
+                    "--",
+                    "${workspaceFolder}\\samples\\input.json"
+                ],
+            "cwd": "${workspaceFolder}\\CoaXisSceneBuilder",
+            "stopAtEntry": false,
+        },
+        {
+            "name": "Play (CoaXisViewer)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "C:\\Development\\Godot\\Godot_v4.6.3-stable_mono_win64.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}\\CoaXisViewer",
+            "stopAtEntry": false,
+        }
+    ]
+}
