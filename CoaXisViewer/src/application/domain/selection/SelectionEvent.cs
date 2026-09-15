@@ -41,15 +41,15 @@ public partial class SelectionEvent : EventBase<SelectionEvent>
         Emit(SignalName.ModeNotified, (int)mode);
     }
 
-    [Signal] public delegate void ModelStateNotifiedEventHandler(string modelId, bool isSelected);
+    [Signal] public delegate void ModelStateNotifiedEventHandler(string entityId, bool isSelected);
     /// <summary>
     /// モデルの選択状態の通知を行う
     /// </summary>
-    /// <param name="modelId">選択状態が変化したモデル識別子</param>
+    /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    internal void NotifyModelState(Guid modelId, bool isSelected)
+    internal void NotifyModelState(Guid entityId, bool isSelected)
     {
-        Emit(SignalName.ModelStateNotified, modelId.ToString(), isSelected);
+        Emit(SignalName.ModelStateNotified, entityId.ToString(), isSelected);
     }
 
     [Signal] public delegate void ClearedNotifiedEventHandler();

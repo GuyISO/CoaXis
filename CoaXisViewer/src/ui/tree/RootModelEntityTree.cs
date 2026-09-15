@@ -1,5 +1,5 @@
 /// <summary>
-/// 自動的にRootModelからの階層ツリーの表示と操作を行うUIコンポーネント
+/// 自動的にルート ModelEntity からの階層ツリーの表示と操作を行う UI コンポーネント
 /// </summary>
 public partial class RootModelEntityTree : ModelEntityTree
 {
@@ -9,8 +9,8 @@ public partial class RootModelEntityTree : ModelEntityTree
     {
         base._Ready();
 
-        // 初期表示のためにRootModelを設定する
-        SetRootModelEntity(Application.Model.Service.Root);
+        // 初期表示のためにルート ModelEntity を設定する
+        SetRootModelEntity(Application.Model.Service.RootEntity);
     }
     
     #endregion

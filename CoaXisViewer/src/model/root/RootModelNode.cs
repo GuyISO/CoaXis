@@ -9,7 +9,7 @@ public partial class RootModelNode : ModelNode
     #region Properties
 
     /// <summary>
-    /// RootModel は常に親モデルを持たない
+    /// ルート ModelEntity に対応するノードは常に親モデルを持たない
     /// </summary>
     public override ModelNode ParentModel => null;
 
@@ -17,8 +17,8 @@ public partial class RootModelNode : ModelNode
 
     #region Lifecycle
 
-    public RootModelNode(Guid modelId)
-        : base(modelId)
+    public RootModelNode(Guid entityId)
+        : base(entityId)
     {
     }
 

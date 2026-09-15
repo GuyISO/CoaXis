@@ -9,12 +9,12 @@ public class RootModelEntity : ModelEntity
     #region Constants
 
     /// <summary>
-    /// RootModel の固定識別子
+    /// ルート ModelEntity の固定識別子
     /// </summary>
-    public static readonly Guid RootId = Guid.Parse(Constant.Model.RootModelId);
+        public static readonly Guid RootEntityId = Guid.Parse(Constant.Model.RootEntityId);
 
     /// <summary>
-    /// RootModel の固定名
+    /// ルート ModelEntity の固定名
     /// </summary>
     public const string RootName = "Root";
 
@@ -49,7 +49,7 @@ public class RootModelEntity : ModelEntity
     /// </summary>
     public RootModelEntity()
         : base(
-            RootId,
+            RootEntityId,
             Guid.Empty,
             string.Empty,
             RootName,
@@ -69,7 +69,7 @@ public class RootModelEntity : ModelEntity
         // 登録後に最終状態へ更新する
         Status = ModelStatus.Loaded;
 
-        Node = new RootModelNode(RootId);
+        Node = new RootModelNode(RootEntityId);
     }
 
     #endregion

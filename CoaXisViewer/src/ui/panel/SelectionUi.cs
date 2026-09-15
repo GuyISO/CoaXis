@@ -9,7 +9,7 @@ public partial class SelectionUi : PanelContainer
 {
     #region Fields
 
-    private readonly List<Guid> _selectedModelIds = new();
+    private readonly List<Guid> _selectedEntityIds = new();
     private bool _isUpdatingTree = false;
 
     // 関連ノードのキャッシュ
@@ -175,26 +175,26 @@ public partial class SelectionUi : PanelContainer
     /// <summary>
     /// モデル選択状態通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="modelId">選択状態が変化したモデル識別子</param>
+    /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
     /// <param name="isSelected">選択状態</param>
-    private void OnModelStateNotified(string modelId, bool isSelected)
+    private void OnModelStateNotified(string entityId, bool isSelected)
     {
-        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
             return;
         }
 
-        int index = _selectedModelIds.IndexOf(parsedModelId);
+        int index = _selectedEntityIds.IndexOf(parsedEntityId);
         if (isSelected)
         {
             if (index < 0)
             {
-                _selectedModelIds.Add(parsedModelId);
+                _selectedEntityIds.Add(parsedEntityId);
             }
         }
         else if (index >= 0)
         {
-            _selectedModelIds.RemoveAt(index);
+            _selectedEntityIds.RemoveAt(index);
         }
 
         RebuildTree();
@@ -230,11 +230,11 @@ public partial class SelectionUi : PanelContainer
     {
         UpdateModeButtons(Application.Selection.Service.Mode);
 
-        _selectedModelIds.Clear();
+        _selectedEntityIds.Clear();
         IReadOnlyCollection<Guid> selectedEntityIds = Application.Selection.Service.EntityIds;
         if (selectedEntityIds != null && selectedEntityIds.Count > 0)
         {
-            _selectedModelIds.AddRange(selectedEntityIds);
+            _selectedEntityIds.AddRange(selectedEntityIds);
         }
 
         RebuildTree();
@@ -264,7 +264,7 @@ public partial class SelectionUi : PanelContainer
 
         _isUpdatingTree = true;
 
-        _selectedModelIds.RemoveAll(modelId => modelId == Guid.Empty || Application.Model.Registry.GetEntity(modelId) == null);
+        _selectedEntityIds.RemoveAll(entityId => entityId == Guid.Empty || Application.Model.Registry.GetEntity(entityId) == null);
 
         _tree.Clear();
         TreeItem root = _tree.CreateItem();
@@ -274,13 +274,13 @@ public partial class SelectionUi : PanelContainer
             return;
         }
 
-        for (int i = 0; i < _selectedModelIds.Count; i++)
+        for (int i = 0; i < _selectedEntityIds.Count; i++)
         {
-            Guid modelId = _selectedModelIds[i];
-            ModelEntity modelEntity = Application.Model.Registry.GetEntity(modelId);
+            Guid entityId = _selectedEntityIds[i];
+            ModelEntity modelEntity = Application.Model.Registry.GetEntity(entityId);
             TreeItem item = _tree.CreateItem(root);
             item.SetText((int)SelectionTreeColumn.No, i.ToString());
-            item.SetText((int)SelectionTreeColumn.Name, modelEntity?.Name ?? modelId.ToString());
+            item.SetText((int)SelectionTreeColumn.Name, modelEntity?.Name ?? entityId.ToString());
         }
 
         _isUpdatingTree = false;

@@ -39,6 +39,6 @@ public static class Constant
 
 	public static class Model
 	{
-		public const string RootModelId = "00000000-0000-0000-0000-000000000001";
+		public const string RootEntityId = "00000000-0000-0000-0000-000000000001";
 	}
 }

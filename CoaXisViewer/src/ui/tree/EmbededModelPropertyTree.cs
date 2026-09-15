@@ -9,7 +9,8 @@ public partial class EmbededModelPropertyTree : ModelPropertyTree
     {
         base._Ready();
 
-        // 初期表示のためにRootModelを設定する
+        // Serviceが参照するために自身を設定する
+        Application.Model.Service.SetEmbededModelPropertyTree(this);
     }
     
     #endregion

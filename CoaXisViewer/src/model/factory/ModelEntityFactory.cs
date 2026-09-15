@@ -218,14 +218,14 @@ public partial class ModelEntityFactory : Node
         }
         else
         {
-            var rootNode = Application.Model.Service.Root?.Node;
+            var rootNode = Application.Model.Service.RootEntity?.Node;
             if (rootNode != null)
             {
                 rootNode.AddChild(node);
             }
             else
             {
-                Application.Log.Warn($"ModelEntityFactory: parent node not found for modelId='{modelEntity.Id}'.");
+                Application.Log.Warn($"ModelEntityFactory: parent node not found for entityId='{modelEntity.Id}'.");
             }
         }
 
@@ -415,7 +415,7 @@ public partial class ModelEntityFactory : Node
         catch (Exception exception)
         {
             UpdateModelStatus(modelEntity, ModelStatus.LoadFailed);
-            Application.Log.Error($"ModelEntityFactory: failed to load model assets for modelId='{modelEntity.Id}', scene='{modelEntity.ScenePath}'. {exception}");
+            Application.Log.Error($"ModelEntityFactory: failed to load model assets for entityId='{modelEntity.Id}', scene='{modelEntity.ScenePath}'. {exception}");
             return true;
         }
     }

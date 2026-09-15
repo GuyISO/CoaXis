@@ -12,7 +12,7 @@
 [ext_resource type="PackedScene" uid="uid://djb751h7aic7h" path="res://scenes/ui/visual_ui.tscn" id="7_xrtxh"]
 [ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/RootModelEntityTree.cs" id="10_57r0r"]
 [ext_resource type="Script" uid="uid://crvr3vcpmbqny" path="res://src/ui/menu/ModelTreeMenu.cs" id="11_xrtxh"]
-[ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/EmbededModelPropertyTree.cs" id="12_bn6oc"]
+[ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbededModelPropertyTree.cs" id="12_bn6oc"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -81,20 +81,11 @@ _container = ExtResource("7_57r0r")
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="ButtonLoad" type="Button" parent="VBoxContainer/TopBar" unique_id=860568986]
-visible = false
+[node name="LabelFps" type="Label" parent="VBoxContainer/TopBar" unique_id=886535964]
 layout_mode = 2
-tooltip_text = "指定したパスからモデルをロードします"
 theme_override_font_sizes/font_size = 24
-text = "LoadModel"
-
-[node name="TextGlbPath" type="TextEdit" parent="VBoxContainer/TopBar" unique_id=1295229687]
-visible = false
-custom_minimum_size = Vector2(600, 0)
-layout_mode = 2
-tooltip_text = "glbファイルのパスを指定してください"
-theme_override_font_sizes/font_size = 24
-text = "res://assets/models/car.glb"
+vertical_alignment = 2
+script = ExtResource("6_5i13y")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=536581596]
 layout_mode = 2
@@ -154,8 +145,6 @@ theme_override_constants/v_separation = 2
 allow_reselect = true
 allow_search = false
 script = ExtResource("12_bn6oc")
-theme_override_constants/v_separation = 2
-theme_override_colors/font_color = Color(1, 1, 1, 1)
 
 [node name="Blank" type="Control" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=1196475229]
 layout_mode = 2
@@ -173,15 +162,10 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
+visible = false
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="LabelFps" type="Label" parent="VBoxContainer/BottomBar" unique_id=886535964]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-vertical_alignment = 2
-script = ExtResource("6_5i13y")

@@ -13,7 +13,7 @@ public static class SampleTest
 
         // 意図: サンプルデータはGodotプロジェクト外のsamplesへ移設済みのため、res://からの相対脱出で実パスへ解決する。
         string csvPath = ProjectSettings.GlobalizePath("res://../samples/modelentity.csv");
-        List<ModelEntityDto> dtos = ModelCsvLoader.Load(csvPath);
+        List<ModelEntityDto> dtos = ModelEntityCsvLoader.Load(csvPath);
 
         if (dtos.Count == 0)
         {
@@ -34,7 +34,7 @@ public static class SampleTest
 
         // 意図: サンプルデータはGodotプロジェクト外のsamplesへ移設済みのため、res://からの相対脱出で実パスへ解決する。
         string jsonPath = ProjectSettings.GlobalizePath("res://../samples/modelentity.json");
-        List<ModelEntityDto> dtos = ModelJsonLoader.Load(jsonPath);
+        List<ModelEntityDto> dtos = ModelEntityJsonLoader.Load(jsonPath);
 
         if (dtos.Count == 0)
         {

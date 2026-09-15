@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-public static class ModelCsvLoader
+public static class ModelEntityCsvLoader
 {
     /// <summary>
     /// CSV ファイルからモデル情報を読み込み、ModelEntityDto のリストとして返す

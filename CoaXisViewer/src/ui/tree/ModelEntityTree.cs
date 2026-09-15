@@ -9,7 +9,7 @@ public partial class ModelEntityTree : Tree
 {
     #region Fields
 
-    private Dictionary<Guid, TreeItem> _modelIdToTreeItem = new(); // ModelId -> TreeItem の対応辞書、TreeItem -> ModelId は各TreeItemにMetaDataで設定する
+    private Dictionary<Guid, TreeItem> _entityIdToTreeItem = new(); // ModelEntity の Id -> TreeItem の対応辞書
 
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
 
@@ -171,16 +171,16 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// モデルの選択状態が通知されたときのイベントハンドラ
     /// </summary>
-    /// <param name="modelId">選択状態が変更されたモデル識別子</param>
+    /// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    private void OnModelSelectionStateNotified(string modelId, bool isSelected)
+    private void OnModelSelectionStateNotified(string entityId, bool isSelected)
     {
-        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
             return;
         }
 
-        TreeItem treeItem = _modelIdToTreeItem.TryGetValue(parsedModelId, out TreeItem item) ? item : null;
+        TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
         if (treeItem == null)
         {
             return;
@@ -207,51 +207,51 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// モデルの追加がリクエストされたときのイベントハンドラ
     /// </summary>
-    /// <param name="modelId">追加する子モデルID</param>
-    /// <param name="parentModelId">追加先の親モデルID</param>
-    private void OnModelAddedNotified(string modelId, string parentModelId)
+    /// <param name="entityId">追加する子 ModelEntity の識別子</param>
+    /// <param name="parentEntityId">追加先の親 ModelEntity の識別子</param>
+    private void OnModelAddedNotified(string entityId, string parentEntityId)
     {
-        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
-            Application.Log.Warn($"ModelTree: failed to add model. invalid child modelId='{modelId}'");
+            Application.Log.Warn($"ModelTree: failed to add entity. invalid child entityId='{entityId}'");
             return;
         }
 
-        Guid parsedParentModelId = Guid.Empty;
-        if (!string.IsNullOrWhiteSpace(parentModelId))
+        Guid parsedParentEntityId = Guid.Empty;
+        if (!string.IsNullOrWhiteSpace(parentEntityId))
         {
-            Guid.TryParse(parentModelId, out parsedParentModelId);
+            Guid.TryParse(parentEntityId, out parsedParentEntityId);
         }
 
-        if (parsedParentModelId == Guid.Empty)
+        if (parsedParentEntityId == Guid.Empty)
         {
-            AddToTree(parsedModelId, Guid.Empty);
+            AddToTree(parsedEntityId, Guid.Empty);
             return;
         }
         
-        AddToTree(parsedModelId, parsedParentModelId);
+        AddToTree(parsedEntityId, parsedParentEntityId);
     }
 
     /// <summary>
     /// モデルの表示状態が通知されたときのイベントハンドラ
     /// </summary>
-    /// <param name="modelId">表示状態が変更されたモデル識別子</param>
+    /// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
     /// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-    private void OnModelVisibilityStateNotified(string modelId, bool isVisible)
+    private void OnModelVisibilityStateNotified(string entityId, bool isVisible)
     {
-        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
             return;
         }
 
-        ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedModelId);
+        ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
         if (modelEntity == null)
         {
             return;
         }
 
-        Application.Log.Debug($"ModelTree: visibility state notified. modelId='{parsedModelId}', visibility={modelEntity.Visibility}");
-        TreeItem treeItem = _modelIdToTreeItem.TryGetValue(parsedModelId, out TreeItem item) ? item : null;
+        Application.Log.Debug($"ModelTree: visibility state notified. entityId='{parsedEntityId}', visibility={modelEntity.Visibility}");
+        TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
         if (treeItem != null)
         {
             Texture2D buttonIcon = Application.Asset.Service.GetVisibilityIcon(
@@ -268,16 +268,16 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// モデルのステータスが更新されたときのイベントハンドラ
     /// </summary>
-    /// <param name="modelId">ステータス更新対象のモデル識別子</param>
+    /// <param name="entityId">ステータス更新対象の ModelEntity の識別子</param>
     /// <param name="status">更新後のステータス</param>
-    private void OnModelStatusNotified(string modelId, int status)
+    private void OnModelStatusNotified(string entityId, int status)
     {
-        if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
             return;
         }
 
-        TreeItem treeItem = _modelIdToTreeItem.TryGetValue(parsedModelId, out TreeItem item) ? item : null;
+        TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
         if (treeItem == null)
         {
             return;
@@ -294,10 +294,10 @@ public partial class ModelEntityTree : Tree
         // レジストリがクリアされたあとにツリーだけ残ると、
         // 古い TreeItem を参照したまま UI が壊れるので、先にツリーを空にして Root から再構築する。
         Clear();
-        _modelIdToTreeItem.Clear();
+        _entityIdToTreeItem.Clear();
         _lastSelectedItem = null;
 
-        _rootModelEntity = Application.Model.Service.Root;
+        _rootModelEntity = Application.Model.Service.RootEntity;
         if (_rootModelEntity == null)
         {
             return;
@@ -335,25 +335,25 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// 指定したモデルをツリーに追加する
     /// </summary>
-    /// <param name="modelId">追加する子モデル</param>
-    /// <param name="parentModelId">親モデル</param>
-    private void AddToTree(Guid modelId, Guid parentModelId)
+    /// <param name="entityId">追加する子 ModelEntity の識別子</param>
+    /// <param name="parentEntityId">親 ModelEntity の識別子</param>
+    private void AddToTree(Guid entityId, Guid parentEntityId)
     {
         // Tree への再構築時に、レジストリから既に消えているモデルや root 直前の空 ID を拾わないように防ぐ。
         // これがないと、Clear 中や既存モデルが破棄済みのタイミングで NullReference になりやすい。
-        if (modelId == Guid.Empty)
+        if (entityId == Guid.Empty)
         {
             return;
         }
 
         // 親追加時の子孫再帰と個別のModelAdded通知が重なるため、同じモデルのTreeItemは一度だけ作る。
-        if (_modelIdToTreeItem.ContainsKey(modelId))
+        if (_entityIdToTreeItem.ContainsKey(entityId))
         {
             return;
         }
 
-        TreeItem parentTreeItem = _modelIdToTreeItem.TryGetValue(parentModelId, out TreeItem item) ? item : null;
-        ModelEntity modelEntity = Application.Model.Registry.GetEntity(modelId);
+        TreeItem parentTreeItem = _entityIdToTreeItem.TryGetValue(parentEntityId, out TreeItem item) ? item : null;
+        ModelEntity modelEntity = Application.Model.Registry.GetEntity(entityId);
         if (modelEntity == null)
         {
             return;
@@ -389,10 +389,10 @@ public partial class ModelEntityTree : Tree
         treeItem.AddButton(0, spinAppealIcon, id: SpinAppealButtonId);
 
         // EntityId と TreeItem の対応を登録
-        treeItem.SetMeta("EntityId", modelId.ToString());
+        treeItem.SetMeta("EntityId", entityId.ToString());
         treeItem.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
          treeItem.Collapsed = modelEntity.IsCollapsed;
-        _modelIdToTreeItem.Add(modelId, treeItem);
+        _entityIdToTreeItem.Add(entityId, treeItem);
 
         // 子ノードを再帰的に追加
         foreach (ModelEntity childModelEntity in modelEntity.Children)
@@ -403,7 +403,7 @@ public partial class ModelEntityTree : Tree
             }
 
             // ModelNode のみをツリーに追加する
-            AddToTree(childModelEntity.Id, modelId);
+            AddToTree(childModelEntity.Id, entityId);
         }
     }
 
@@ -447,7 +447,7 @@ public partial class ModelEntityTree : Tree
                 continue;
             }
 
-            TreeItem item = _modelIdToTreeItem.TryGetValue(entityId, out TreeItem treeItem) ? treeItem : null;
+            TreeItem item = _entityIdToTreeItem.TryGetValue(entityId, out TreeItem treeItem) ? treeItem : null;
             if (item == null)
             {
                 continue;
@@ -530,17 +530,17 @@ public partial class ModelEntityTree : Tree
         int startIndex = Math.Min(lastIndex, selectedIndex);
         int endIndex = Math.Max(lastIndex, selectedIndex);
 
-        List<Guid> modelIdsInRange = new();
+        List<Guid> entityIdsInRange = new();
         for (int i = startIndex; i <= endIndex; i++)
         {
-            Guid modelId = TryGetModelId(visibleItems[i]);
-            if (modelId != Guid.Empty)
+            Guid entityId = TryGetEntityId(visibleItems[i]);
+            if (entityId != Guid.Empty)
             {
-                modelIdsInRange.Add(modelId);
+                entityIdsInRange.Add(entityId);
             }
         }
 
-        return modelIdsInRange.ToArray();
+        return entityIdsInRange.ToArray();
     }
 
     /// <summary>
@@ -590,8 +590,6 @@ public partial class ModelEntityTree : Tree
         string entityIdText = entityIdVariant.AsString();
         return Guid.TryParse(entityIdText, out Guid entityId) ? entityId : Guid.Empty;
     }
-
-    private static Guid TryGetModelId(TreeItem item) => TryGetEntityId(item);
 
     /// <summary>
     /// TreeItem の VisibleButton がクリックされたときの処理を行う

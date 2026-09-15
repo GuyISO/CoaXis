@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json;
 
-public static class ModelJsonLoader
+public static class ModelEntityJsonLoader
 {
     /// <summary>
     /// JSON ファイルからモデル情報を読み込み、ModelEntityDto のリストとして返す。

@@ -9,25 +9,26 @@ public partial class ModelService : Node
 {
 	#region Fields
 
-	private RootModelEntity _root = null!;
+	private RootModelEntity _rootEntity = null!;
+	private EmbededModelPropertyTree _embededModelPropertyTree = null!;
 
 	#endregion
 
 	#region Properties
 
 	/// <summary>
-	/// RootModel を取得する
+	/// ルート ModelEntity を取得する
 	/// </summary>
-	/// <remarks>RootModel が存在しない場合は動的に生成する</remarks>
-	internal RootModelEntity Root
+	/// <remarks>ルート ModelEntity が存在しない場合は動的に生成する</remarks>
+	internal RootModelEntity RootEntity
 	{
 		get
 		{
-			if (_root == null)
+			if (_rootEntity == null)
 			{
-				EnsureRootModel();
+				EnsureRootEntity();
 			}
-			return _root;
+			return _rootEntity;
 		}
 	}
 
@@ -42,7 +43,7 @@ public partial class ModelService : Node
 
 	public override void _Ready()
 	{
-		EnsureRootModel();
+		EnsureRootEntity();
 		SubscribeApplicationEvents();
 	}
 
@@ -82,24 +83,24 @@ public partial class ModelService : Node
 	/// <summary>
 	/// モデルの表示状態切替がリクエストされたときに呼び出されるイベントハンドラ
 	/// </summary>
-	/// <param name="modelId">表示状態を切り替えるモデル識別子</param>
-	private void OnToggleModelVisibilityRequested(string modelId)
+	/// <param name="entityId">表示状態を切り替える ModelEntity の識別子</param>
+	private void OnToggleModelVisibilityRequested(string entityId)
 	{
-		if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelService: invalid modelId for toggle request. modelId='{modelId}'");
+			Application.Log.Warn($"ModelService: invalid entityId for toggle request. entityId='{entityId}'");
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedModelId);
+		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelService: toggle target not found. modelId='{parsedModelId}'");
+			Application.Log.Warn($"ModelService: toggle target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
 		var command = new SetModelVisibilityCommand(
-			[parsedModelId],
+			[parsedEntityId],
 			GetNextVisibility(modelEntity.Visibility));
 		Application.Command.Event.Execute(command);
 	}
@@ -117,20 +118,20 @@ public partial class ModelService : Node
 	/// <summary>
 	/// モデルの表示状態が変更されたときに呼び出されるイベントハンドラ
 	/// </summary>
-	/// <param name="modelId">表示状態が変更されたモデル識別子</param>
+	/// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
 	/// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-	private void OnModelVisibilityStateNotified(string modelId, bool isVisible)
+	private void OnModelVisibilityStateNotified(string entityId, bool isVisible)
 	{
-		if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelService: invalid modelId for visibility notification. modelId='{modelId}'");
+			Application.Log.Warn($"ModelService: invalid entityId for visibility notification. entityId='{entityId}'");
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedModelId)?.Node;
+		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedEntityId)?.Node;
 		if (modelNode == null)
 		{
-			Application.Log.Warn($"ModelService: visibility target not found. modelId='{parsedModelId}'");
+			Application.Log.Warn($"ModelService: visibility target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -140,20 +141,20 @@ public partial class ModelService : Node
 	/// <summary>
 	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ
 	/// </summary>
-	/// <param name="modelId">選択状態が変更されたモデル識別子</param>
+	/// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
 	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-	private void OnModelSelectionStateNotified(string modelId, bool isSelected)
+	private void OnModelSelectionStateNotified(string entityId, bool isSelected)
 	{
-		if (!Guid.TryParse(modelId, out Guid parsedModelId) || parsedModelId == Guid.Empty)
+		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelService: invalid modelId for selection notification. modelId='{modelId}'");
+			Application.Log.Warn($"ModelService: invalid entityId for selection notification. entityId='{entityId}'");
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedModelId)?.Node;
+		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedEntityId)?.Node;
 		if (modelNode == null)
 		{
-			Application.Log.Warn($"ModelService: highlight target not found. modelId='{parsedModelId}'");
+			Application.Log.Warn($"ModelService: highlight target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -163,18 +164,18 @@ public partial class ModelService : Node
 	/// <summary>
 	/// モデルのロード完了通知を受けたときに透明度を適用する
 	/// </summary>
-	/// <param name="modelId">ロード完了したモデルの識別子</param>
+	/// <param name="entityId">ロード完了した ModelEntity の識別子</param>
 	/// <param name="status">通知されたモデルの状態</param>
-	private void OnModelStatusNotified(string modelId, int status)
+	private void OnModelStatusNotified(string entityId, int status)
 	{
 		if ((ModelStatus)status != ModelStatus.Loaded
-			|| !Guid.TryParse(modelId, out Guid parsedModelId)
-			|| parsedModelId == Guid.Empty)
+			|| !Guid.TryParse(entityId, out Guid parsedEntityId)
+			|| parsedEntityId == Guid.Empty)
 		{
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedModelId)?.Node;
+		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedEntityId)?.Node;
 		if (modelNode == null || !IsInstanceValid(modelNode))
 		{
 			return;
@@ -199,8 +200,8 @@ public partial class ModelService : Node
 		var entityIds = new List<Guid>(Application.Model.Registry.Entities.Keys);
 		foreach (Guid entityId in entityIds)
 		{
-			// RootModel は削除対象外とする
-			if (entityId == RootModelEntity.RootId)
+			// ルート ModelEntity は削除対象外とする
+			if (entityId == RootModelEntity.RootEntityId)
 			{
 				continue;
 			}
@@ -214,9 +215,9 @@ public partial class ModelService : Node
 			Application.Model.Registry.DisposeEntity(entityId);
 		}
 
-		if (_root != null)
+		if (_rootEntity != null)
 		{
-			_root.Clear();
+			_rootEntity.Clear();
 		}
 
 		Application.Model.Event.NotifyRegistryCleared();
@@ -230,13 +231,22 @@ public partial class ModelService : Node
 	{
 		Transparency = value;
 
-		// RootModel 配下のすべてのノードに透明度を適用
-		if (_root?.Node != null && IsInstanceValid(_root.Node))
+		// ルート ModelEntity 配下のすべてのノードに透明度を適用
+		if (_rootEntity?.Node != null && IsInstanceValid(_rootEntity.Node))
 		{
-			ApplyModelTransparency(_root.Node);
+			ApplyModelTransparency(_rootEntity.Node);
 		}
 
 		Application.Model.Event.NotifyTransparency(value);
+	}
+
+	/// <summary>
+	/// 埋め込みモデルプロパティツリーを設定する
+	/// </summary>
+	/// <param name="embededModelPropertyTree">設定する埋め込みモデルプロパティツリー</param>
+	public void SetEmbededModelPropertyTree(EmbededModelPropertyTree embededModelPropertyTree)
+	{
+		_embededModelPropertyTree = embededModelPropertyTree;
 	}
 
 	#endregion
@@ -244,13 +254,13 @@ public partial class ModelService : Node
 	#region Internal Helpers
 
 	/// <summary>
-	/// ModelService 直下に RootModel を動的生成する
+	/// ModelService 直下にルート ModelEntity を動的生成する
 	/// </summary>
-	private void EnsureRootModel()
+	private void EnsureRootEntity()
 	{
-		_root = new RootModelEntity();
+		_rootEntity = new RootModelEntity();
 
-		AddChild(_root.Node);
+		AddChild(_rootEntity.Node);
 	}
 
 	/// <summary>

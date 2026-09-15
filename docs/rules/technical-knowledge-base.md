@@ -166,11 +166,11 @@
 
 - 背景: モデル数が増えると範囲選択が遅くなっていた。
 - 問題: `PickByShape` が `IntersectShape` を1件取得するたびに再実行し、ヒット数に比例して物理クエリと除外配列の再構築が増えていた。
-- 判断: 1回の `IntersectShape` で最大32件を取得し、取得したRIDを次のクエリの除外対象へ追加する方式へ変更した。同一 `ModelId` の複数Colliderは、範囲選択の契約に合わせて最初の1件へ集約する。
+- 判断: 1回の `IntersectShape` で最大32件を取得し、取得したRIDを次のクエリの除外対象へ追加する方式へ変更した。同一 `ModelEntity` の複数Colliderは、範囲選択の契約に合わせて最初の1件へ集約する。
 - 判断理由: 物理クエリの呼び出し回数を減らしつつ、バッチ上限に達した場合は次のクエリを継続することで、結果欠落を避けられるため。
 - 採用しなかった代替案: 全ヒット数を推定して巨大な `maxResults` を一度だけ指定する方法は、Godot/Jolt側の上限や負荷が不明で、結果欠落と一括計算コストのリスクがあるため採用しなかった。
 - 影響範囲: `PickUtility.PickByShape` の返却結果は同一モデルにつき1件となる。形状クエリで位置・法線・距離が取得できない制約は変更しない。
-- 実装/運用手順: バッチサイズは現在32。大量モデルの実シーンで処理時間、クエリ回数、取得したModelId集合を計測し、必要に応じてサイズを調整する。無効RIDを含む結果は無限ループ防止のため、そのバッチで処理を終了する。
+- 実装/運用手順: バッチサイズは現在32。大量モデルの実シーンで処理時間、クエリ回数、取得した entityId 集合を計測し、必要に応じてサイズを調整する。無効RIDを含む結果は無限ループ防止のため、そのバッチで処理を終了する。
 - 検証方法: 複数モデル、同一モデルの複数Collider、バッチ上限超過、初期除外RID、ヒットなし、至近距離の矩形選択を確認し、`check: mojibake` と `dotnet build .\\CoaXis.sln` を実行する。
 - 関連ファイル/関連仕様: `CoaXisViewer/src/core/util/PickUtility.cs`, `CoaXisViewer/scenes/viewport/ViewportInteractionHandler.cs`, `CoaXisViewer/src/application/domain/selection/SelectionService.cs`, `TODO.md`
 - 備考: `SelectionService` の既存 `Distinct` は防御的処理として残す。
