@@ -164,8 +164,13 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        // 現在はターゲットボタンと同じフィット処理を行い、将来はここで専用の操作へ拡張できるようにする。
-        HandleFitButtonClicked(item);
+        ModelEntity modelEntity = Application.Model.Registry.GetEntity(TryGetEntityId(item));
+        if (modelEntity == null)
+        {
+            return;
+        }
+
+        Application.Model.Service.EmbededModelPropertyTree.Show(modelEntity);
     }
 
     /// <summary>

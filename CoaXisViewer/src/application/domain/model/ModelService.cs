@@ -20,6 +20,8 @@ public partial class ModelService : Node
 	/// </summary>
 	internal float Transparency { get; private set; } = 0.0f;
 
+	public EmbededModelPropertyTree EmbededModelPropertyTree { get => _embededModelPropertyTree; }
+
 	#endregion
 
 	#region Lifecycle
