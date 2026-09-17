@@ -9,28 +9,11 @@ public partial class ModelService : Node
 {
 	#region Fields
 
-	private RootModelEntity _rootEntity = null!;
 	private EmbededModelPropertyTree _embededModelPropertyTree = null!;
 
 	#endregion
 
 	#region Properties
-
-	/// <summary>
-	/// ルート ModelEntity を取得する
-	/// </summary>
-	/// <remarks>ルート ModelEntity が存在しない場合は動的に生成する</remarks>
-	internal RootModelEntity RootEntity
-	{
-		get
-		{
-			if (_rootEntity == null)
-			{
-				EnsureRootEntity();
-			}
-			return _rootEntity;
-		}
-	}
 
 	/// <summary>
 	/// モデルの透明度を取得する
@@ -43,7 +26,6 @@ public partial class ModelService : Node
 
 	public override void _Ready()
 	{
-		EnsureRootEntity();
 		SubscribeApplicationEvents();
 	}
 
@@ -189,41 +171,6 @@ public partial class ModelService : Node
 	#region Public Methods
 
 	/// <summary>
-	/// モデルレジストリがクリアされたときに呼び出されるイベントハンドラ
-	/// </summary>
-	public void Clear()
-	{
-		// 再読み込み時に古い非同期タスクが後からモデルを更新しないよう、
-		// まず待機中のロード/コライダー処理を止めてから実体を削除する。
-		Application.Model.EntityFactory.ClearPendingLoads();
-
-		var entityIds = new List<Guid>(Application.Model.Registry.Entities.Keys);
-		foreach (Guid entityId in entityIds)
-		{
-			// ルート ModelEntity は削除対象外とする
-			if (entityId == RootModelEntity.RootEntityId)
-			{
-				continue;
-			}
-
-			ModelEntity modelEntity = Application.Model.Registry.GetEntity(entityId);
-			if (modelEntity?.Node != null && IsInstanceValid(modelEntity.Node))
-			{
-				modelEntity.Node.QueueFree();
-			}
-
-			Application.Model.Registry.DisposeEntity(entityId);
-		}
-
-		if (_rootEntity != null)
-		{
-			_rootEntity.Clear();
-		}
-
-		Application.Model.Event.NotifyRegistryCleared();
-	}
-
-	/// <summary>
 	/// モデルメッシュの透明度を設定し、全ロード済みモデルに反映する
 	/// </summary>
 	/// <param name="value">設定する透明度値 (0.0 - 1.0)</param>
@@ -232,9 +179,10 @@ public partial class ModelService : Node
 		Transparency = value;
 
 		// ルート ModelEntity 配下のすべてのノードに透明度を適用
-		if (_rootEntity?.Node != null && IsInstanceValid(_rootEntity.Node))
+		RootModelEntity rootEntity = Application.Model.Registry.RootEntity;
+		if (rootEntity?.Node != null && IsInstanceValid(rootEntity.Node))
 		{
-			ApplyModelTransparency(_rootEntity.Node);
+			ApplyModelTransparency(rootEntity.Node);
 		}
 
 		Application.Model.Event.NotifyTransparency(value);
@@ -254,27 +202,27 @@ public partial class ModelService : Node
 	#region Internal Helpers
 
 	/// <summary>
-	/// ModelService 直下にルート ModelEntity を動的生成する
-	/// </summary>
-	private void EnsureRootEntity()
-	{
-		_rootEntity = new RootModelEntity();
-
-		AddChild(_rootEntity.Node);
-	}
-
-	/// <summary>
 	/// 指定したモデルとその子孫のハイライト状態を切り替える
 	/// </summary>
 	/// <param name="modelNode">切り替えるモデル</param>
 	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalse</param>
 	private static void HighLightModel(ModelNode modelNode, bool enable = true)
 	{
-		// 指定したモデルとその子孫のモデルすべてにハイライト状態を適用する
-		var modelNodes = GetModelsRecursively(modelNode);
-		foreach (ModelNode targetModelNode in modelNodes)
+		ModelEntity modelEntity = Application.Model.Registry.GetEntity(modelNode.EntityId);
+		if (modelEntity == null)
 		{
-			HighlightMesh(targetModelNode, enable);
+			return;
+		}
+
+		// 論理階層は Registry で解決し、描画ノードへの反映だけを ModelService が担当する。
+		var modelEntities = new List<ModelEntity> { modelEntity };
+		modelEntities.AddRange(Application.Model.Registry.GetDescendantEntities(modelEntity.Id));
+		foreach (ModelEntity targetModelEntity in modelEntities)
+		{
+			if (targetModelEntity.Node != null && IsInstanceValid(targetModelEntity.Node))
+			{
+				HighlightMesh(targetModelEntity.Node, enable);
+			}
 		}
 	}
 
@@ -313,28 +261,6 @@ public partial class ModelService : Node
 				}
 			}
 		}
-	}
-
-	/// <summary>
-	/// 指定したモデルからモデルを再帰的に取得する
-	/// </summary>
-	/// <param name="modelNode">取得対象のモデル</param>
-	/// <returns>取得したモデルのリスト</returns>
-	private static List<ModelNode> GetModelsRecursively(ModelNode modelNode)
-	{
-		var modelNodes = new List<ModelNode>();
-
-		if (modelNode is ModelNode)
-		{
-			modelNodes.Add(modelNode);
-		}
-
-		foreach (ModelNode childModelNode in modelNode.ChildModels)
-		{
-			modelNodes.AddRange(GetModelsRecursively(childModelNode));
-		}
-
-		return modelNodes;
 	}
 
 	/// <summary>

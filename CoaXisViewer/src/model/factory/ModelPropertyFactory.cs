@@ -49,7 +49,7 @@ public partial class ModelPropertyFactory : Node
         {
             Application.Model.Registry.RegisterProperty(property);
         }
-        Application.Model.Registry.ResolvePropertyHierarchy();
+        Application.Model.Registry.ResolveHierarchy();
 
         return properties;
     }

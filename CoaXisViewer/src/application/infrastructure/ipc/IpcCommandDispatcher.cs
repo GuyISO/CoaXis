@@ -58,8 +58,8 @@ public static class IpcCommandDispatcher
         {
             return IpcResultPayload.Failure("LoadModel", IpcErrorCode.InvalidPayload, "payload.path must not be empty.");
         }
-        Application.Model.Service.Clear();
-        List<ModelEntityDto> dtos = ModelEntityJsonLoader.Load(path);
+        Application.Model.Registry.Clear();
+        List<ModelEntityDto> dtos = JsonDtoLoader.Load<ModelEntityDto>(path);
         if (dtos.Count == 0)
         {
             return IpcResultPayload.Failure("LoadModel", IpcErrorCode.TargetNotFound, $"No models loaded from '{path}'.");

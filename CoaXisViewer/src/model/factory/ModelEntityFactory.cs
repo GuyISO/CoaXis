@@ -61,6 +61,7 @@ public partial class ModelEntityFactory : Node
             entities.Add(CreateModelEntity(dto));
         }
 
+        // 親子関係の通知順序を親優先に並べ替える
         IReadOnlyList<ModelEntity> notificationOrder = OrderParentFirst(entities);
 
         // 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
@@ -69,7 +70,7 @@ public partial class ModelEntityFactory : Node
             UpdateModelStatus(modelEntity, ModelStatus.Initialized);
             Application.Model.Registry.RegisterEntity(modelEntity);
         }
-        Application.Model.Registry.ResolveEntityHierarchy();
+        Application.Model.Registry.ResolveHierarchy();
 
         foreach (ModelEntity modelEntity in entities)
         {
@@ -218,7 +219,7 @@ public partial class ModelEntityFactory : Node
         }
         else
         {
-            var rootNode = Application.Model.Service.RootEntity?.Node;
+            var rootNode = Application.Model.Registry.RootEntity?.Node;
             if (rootNode != null)
             {
                 rootNode.AddChild(node);

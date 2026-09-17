@@ -297,18 +297,17 @@ public partial class ModelEntityTree : Tree
         _entityIdToTreeItem.Clear();
         _lastSelectedItem = null;
 
-        _rootModelEntity = Application.Model.Service.RootEntity;
-        if (_rootModelEntity == null)
+        if (Application.Model.Registry.RootEntity == null)
         {
             return;
         }
 
-        if (Application.Model.Registry.GetEntity(_rootModelEntity.Id) == null)
+        if (Application.Model.Registry.GetEntity(Application.Model.Registry.RootEntity.Id) == null)
         {
             return;
         }
 
-        AddToTree(_rootModelEntity.Id, Guid.Empty);
+        AddToTree(Application.Model.Registry.RootEntity.Id, Guid.Empty);
     }
 
     #endregion

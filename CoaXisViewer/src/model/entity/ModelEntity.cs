@@ -163,33 +163,33 @@ public class ModelEntity
     /// 子モデル実体を登録する。同一 Id の重複登録は無視する。
     /// </summary>
     /// <param name="child">追加対象の子モデル実体</param>
-    internal void Attach(ModelEntity child)
+    internal void AttachEntity(ModelEntity childEntity)
     {
-        if (child == null)
+        if (childEntity == null)
         {
             return;
         }
 
-        if (_children.ContainsKey(child.Id))
+        if (_children.ContainsKey(childEntity.Id))
         {
             return;
         }
 
-        _children.Add(child.Id, child);
+        _children.Add(childEntity.Id, childEntity);
     }
 
     /// <summary>
     /// 子モデル実体の登録を解除する
     /// </summary>
-    /// <param name="child">解除対象の子モデル実体</param>
-    internal void Detach(ModelEntity child)
+        /// <param name="childEntity">解除対象の子モデル実体</param>
+    internal void DetachEntity(ModelEntity childEntity)
     {
-        if (child == null)
+        if (childEntity == null)
         {
             return;
         }
 
-        _children.Remove(child.Id);
+        _children.Remove(childEntity.Id);
     }
 
     /// <summary>
@@ -230,6 +230,7 @@ public class ModelEntity
     /// </summary>
     internal void Clear()
     {
+        // TODO: 子モデルおよびプロパティの参照などを解除する処理が必要な場合はここに追加する
         _children.Clear();
         _properties.Clear();
     }

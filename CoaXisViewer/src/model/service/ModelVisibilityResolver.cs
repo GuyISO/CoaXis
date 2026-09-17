@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// モデル階層から実効表示状態を解決するヘルパー。
@@ -19,26 +18,36 @@ public static class ModelVisibilityResolver
     /// <summary>
     /// 親の設定をたどってモデルの実効表示状態を返す。
     /// </summary>
-    public static bool IsVisible(ModelEntity modelEntity)
+    public static bool IsVisible(ModelEntity entity)
     {
-        return IsVisible(modelEntity, new HashSet<Guid>());
-    }
-
-    private static bool IsVisible(ModelEntity modelEntity, HashSet<Guid> visitedEntityIds)
-    {
-        if (modelEntity == null || !visitedEntityIds.Add(modelEntity.Id))
+        if (entity == null)
         {
             return true;
         }
 
-        switch (modelEntity.Visibility)
+        if (entity.Visibility == ModelVisibility.Visible)
         {
-            case ModelVisibility.Visible:
-                return true;
-            case ModelVisibility.Invisible:
-                return false;
-            default:
-                return IsVisible(modelEntity.Parent, visitedEntityIds);
+            return true;
         }
+
+        if (entity.Visibility == ModelVisibility.Invisible)
+        {
+            return false;
+        }
+
+        foreach (ModelEntity ancestor in Application.Model.Registry.GetAncestorEntities(entity.Id))
+        {
+            if (ancestor.Visibility == ModelVisibility.Visible)
+            {
+                return true;
+            }
+
+            if (ancestor.Visibility == ModelVisibility.Invisible)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 }

@@ -99,19 +99,14 @@ public class ModelProperty
     #region Public Methods
 
     /// <summary>
-    /// 最上位に所属する ModelEntity を再帰的に探索して取得する。
+    /// このプロパティが所属する ModelEntity を再帰的に探索して取得する。
     /// </summary>
     /// <returns>所属する ModelEntity。見つからない場合は null</returns>
-    public ModelEntity GetRootEntity()
+    public ModelEntity GetEntity()
     {
-        if (ParentEntity != null)
-        {
-            return ParentEntity;
-        }
-
-        return ParentProperty?.GetRootEntity();
+        return Application.Model.Registry.GetOwningEntity(Id);
     }
-
+    
     /// <summary>
     /// 値を更新する
     /// </summary>
