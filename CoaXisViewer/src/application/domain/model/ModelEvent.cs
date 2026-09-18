@@ -18,6 +18,16 @@ public partial class ModelEvent : EventBase<ModelEvent>
 		Emit(SignalName.ToggleModelVisibilityRequested, entityId.ToString());
 	}
 
+	[Signal] public delegate void TreeCenteringRequestedEventHandler(string entityId);
+	/// <summary>
+	/// 指定したモデルをツリーの中央へ表示する操作をリクエストする
+	/// </summary>
+	/// <param name="entityId">ツリーの中央へ表示するモデル実体の識別子</param>
+	internal void TreeCentering(Guid entityId)
+	{
+		Emit(SignalName.TreeCenteringRequested, entityId.ToString());
+	}
+
 	#endregion
 
 	#region --------------------------------------- Notification ---------------------------------------

@@ -181,10 +181,14 @@ public partial class ViewportInteractionHandler : SubViewport
             Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.PickRect);
             Application.Viewport.Event.NotifyPickRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
         }
-        // 右クリックはメニュー表示
+        // 右クリックされたモデルをツリーの中央へ表示する
         else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
         {
-            // TODO: 右クリックの操作は未定義、将来的にメニュー表示予定
+            PickResult pickResult = PickUtility.PickByRay(GetCamera3D(), button.Position);
+            if (pickResult.HasHit && pickResult.EntityId != Guid.Empty)
+            {
+                Application.Model.Event.TreeCentering(pickResult.EntityId);
+            }
         }
     }
 

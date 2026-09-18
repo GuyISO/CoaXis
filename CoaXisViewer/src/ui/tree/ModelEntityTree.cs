@@ -98,6 +98,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
         Application.Model.Event.ModelStatusNotified += OnModelStatusNotified;
         Application.Model.Event.RegistryCleared += OnRegistryClearedNotified;
+        Application.Model.Event.TreeCenteringRequested += OnTreeCenteringRequested;
     }
 
     /// <summary>
@@ -112,6 +113,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
         Application.Model.Event.ModelStatusNotified -= OnModelStatusNotified;
         Application.Model.Event.RegistryCleared -= OnRegistryClearedNotified;
+        Application.Model.Event.TreeCenteringRequested -= OnTreeCenteringRequested;
     }
 
     /// <summary>
@@ -331,6 +333,27 @@ public partial class ModelEntityTree : Tree
         }
 
         AddToTree(Application.Model.Registry.RootEntity.Id, Guid.Empty);
+    }
+
+    /// <summary>
+    /// ツリーのセンタリング要求を受け取ったとき、対象モデルを中央へ表示する
+    /// </summary>
+    /// <param name="entityId">中央へ表示するモデル実体の識別子</param>
+    private void OnTreeCenteringRequested(string entityId)
+    {
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
+        {
+            return;
+        }
+
+        if (!_entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem treeItem))
+        {
+            return;
+        }
+
+        // 対象行を画面中央へ出すため、先に祖先を展開してからスクロールする。
+        ExpandAncestors(treeItem);
+        ScrollToItem(treeItem, true);
     }
 
     #endregion
@@ -732,6 +755,18 @@ public partial class ModelEntityTree : Tree
         Variant entityIdVariant = item.GetMeta("EntityId", Variant.CreateFrom(string.Empty));
         string entityIdText = entityIdVariant.AsString();
         return Guid.TryParse(entityIdText, out Guid entityId) ? entityId : Guid.Empty;
+    }
+
+    /// <summary>
+    /// 指定したツリー項目までの祖先をすべて展開する
+    /// </summary>
+    /// <param name="treeItem">展開対象の TreeItem</param>
+    private static void ExpandAncestors(TreeItem treeItem)
+    {
+        for (TreeItem ancestor = treeItem.GetParent(); ancestor != null; ancestor = ancestor.GetParent())
+        {
+            ancestor.Collapsed = false;
+        }
     }
 
     /// <summary>
