@@ -13,6 +13,8 @@ public partial class ModelEntityTree : Tree
 
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
 
+    private readonly Dictionary<TreeItem, int> _substituteHighlightRefCounts = new(); // 折り畳みで隠れた実体の代わりにハイライトしている祖先 TreeItem の参照カウント
+
     private ModelEntity _rootModelEntity; // このツリーのルートモデル実体のキャッシュ、シーン全体のルートではないことに注意
 
     private Color _selectedColor;
@@ -70,6 +72,7 @@ public partial class ModelEntityTree : Tree
         CellSelected += OnCellSelected;
         ButtonClicked += OnButtonClicked;
         ItemActivated += OnItemActivated;
+        ItemCollapsed += OnItemCollapsed;
     }
 
     /// <summary>
@@ -80,6 +83,7 @@ public partial class ModelEntityTree : Tree
         CellSelected -= OnCellSelected;
         ButtonClicked -= OnButtonClicked;
         ItemActivated -= OnItemActivated;
+        ItemCollapsed -= OnItemCollapsed;
     }
     
     /// <summary>
@@ -194,11 +198,24 @@ public partial class ModelEntityTree : Tree
         if (isSelected)
         {
             treeItem.SetCustomBgColor(0, _selectedColor);
+            // 対象が畳まれた祖先の下に隠れている場合、CATIA同様に表示中の祖先までハイライトを遡らせる
+            HighlightNearestVisibleAncestor(treeItem, scrollToItem: true);
         }
         else
         {
             treeItem.ClearCustomBgColor(0);
+            ReleaseAncestorHighlight(treeItem);
         }
+    }
+
+    /// <summary>
+    /// TreeItem の折り畳み状態が変化したときのイベントハンドラ
+    /// </summary>
+    /// <param name="item">折り畳み状態が変化した TreeItem</param>
+    private void OnItemCollapsed(TreeItem item)
+    {
+        // 折り畳み/展開により「表示中の代替祖先」が変わりうるため、選択中モデル分のハイライトを再計算する
+        RefreshSubstituteHighlights();
     }
 
     /// <summary>
@@ -300,6 +317,7 @@ public partial class ModelEntityTree : Tree
         // 古い TreeItem を参照したまま UI が壊れるので、先にツリーを空にして Root から再構築する。
         Clear();
         _entityIdToTreeItem.Clear();
+        _substituteHighlightRefCounts.Clear();
         _lastSelectedItem = null;
 
         if (Application.Model.Registry.RootEntity == null)
@@ -458,6 +476,127 @@ public partial class ModelEntityTree : Tree
             }
 
             item.SetCustomBgColor(0, _selectedColor);
+        }
+
+        RefreshSubstituteHighlights();
+    }
+
+    /// <summary>
+    /// 祖先の折り畳みで隠れている場合に、実際に画面へ表示される最も近い祖先アイテムを取得する
+    /// </summary>
+    /// <param name="item">起点となる TreeItem</param>
+    /// <returns>表示中の TreeItem、隠れていなければ item 自身</returns>
+    private static TreeItem FindNearestVisibleAncestor(TreeItem item)
+    {
+        List<TreeItem> pathToRoot = new();
+        for (TreeItem current = item; current != null; current = current.GetParent())
+        {
+            pathToRoot.Add(current);
+        }
+
+        // ルート側から辿り、最初に畳まれている祖先が実際の表示上の代替アイテムとなる
+        for (int i = pathToRoot.Count - 1; i >= 1; i--)
+        {
+            if (pathToRoot[i].Collapsed)
+            {
+                return pathToRoot[i];
+            }
+        }
+
+        return item;
+    }
+
+    /// <summary>
+    /// 対象アイテムが隠れている場合、表示中の祖先アイテムをハイライトし参照カウントを加算する
+    /// </summary>
+    /// <param name="treeItem">選択された実体に対応する TreeItem</param>
+    /// <param name="scrollToItem">表示中アイテムまでスクロールする場合はtrue</param>
+    private void HighlightNearestVisibleAncestor(TreeItem treeItem, bool scrollToItem)
+    {
+        TreeItem visibleAncestor = FindNearestVisibleAncestor(treeItem);
+        if (scrollToItem)
+        {
+            ScrollToItem(visibleAncestor);
+        }
+
+        if (visibleAncestor == treeItem)
+        {
+            return;
+        }
+
+        if (!_substituteHighlightRefCounts.TryGetValue(visibleAncestor, out int count))
+        {
+            visibleAncestor.SetCustomBgColor(0, _selectedColor);
+        }
+        _substituteHighlightRefCounts[visibleAncestor] = count + 1;
+    }
+
+    /// <summary>
+    /// 対象アイテムの選択解除に伴い、代替ハイライトの参照カウントを減算し不要なら色を解除する
+    /// </summary>
+    /// <param name="treeItem">選択解除された実体に対応する TreeItem</param>
+    private void ReleaseAncestorHighlight(TreeItem treeItem)
+    {
+        TreeItem visibleAncestor = FindNearestVisibleAncestor(treeItem);
+        if (visibleAncestor == treeItem)
+        {
+            return;
+        }
+
+        if (!_substituteHighlightRefCounts.TryGetValue(visibleAncestor, out int count))
+        {
+            return;
+        }
+
+        count--;
+        if (count > 0)
+        {
+            _substituteHighlightRefCounts[visibleAncestor] = count;
+            return;
+        }
+
+        _substituteHighlightRefCounts.Remove(visibleAncestor);
+
+        // 祖先自体が独立して選択中の実体でもある場合は色を残す
+        Guid ancestorEntityId = TryGetEntityId(visibleAncestor);
+        bool ancestorSelected = ancestorEntityId != Guid.Empty && Application.Selection.Service.Contains(ancestorEntityId);
+        if (!ancestorSelected)
+        {
+            visibleAncestor.ClearCustomBgColor(0);
+        }
+    }
+
+    /// <summary>
+    /// 現在選択中の全モデルについて、代替ハイライト（畳まれた祖先へのハイライト）を再計算する
+    /// </summary>
+    private void RefreshSubstituteHighlights()
+    {
+        // 既存の代替ハイライトを一旦クリアする（祖先自身が選択中実体である場合は色を残す）
+        foreach (TreeItem ancestor in _substituteHighlightRefCounts.Keys)
+        {
+            Guid ancestorEntityId = TryGetEntityId(ancestor);
+            bool ancestorSelected = ancestorEntityId != Guid.Empty && Application.Selection.Service.Contains(ancestorEntityId);
+            if (!ancestorSelected)
+            {
+                ancestor.ClearCustomBgColor(0);
+            }
+        }
+        _substituteHighlightRefCounts.Clear();
+
+        foreach (Guid entityId in Application.Selection.Service.EntityIds)
+        {
+            if (entityId == Guid.Empty)
+            {
+                continue;
+            }
+
+            TreeItem treeItem = _entityIdToTreeItem.TryGetValue(entityId, out TreeItem item) ? item : null;
+            if (treeItem == null)
+            {
+                continue;
+            }
+
+            HighlightNearestVisibleAncestor(treeItem, scrollToItem: false);
         }
     }
 

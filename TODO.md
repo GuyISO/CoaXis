@@ -2,7 +2,6 @@
 
 なによりまずはコード一通り読んで整える
 
-ModelPropertyを表示可能にする！！！！！
 ModelFactoryはApplicationから外したい、生成経路見直してから
 
 ## 3D表示関係

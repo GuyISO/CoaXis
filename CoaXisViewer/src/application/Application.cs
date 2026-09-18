@@ -34,7 +34,7 @@ public partial class Application : FacadeBase
     public static SettingFacade Setting => Instance._settingFacade;
     public static AssetFacade Asset => Instance._assetFacade;
     public static IpcFacade Ipc => Instance._ipcFacade;
-    public static DeviceInputHandler DeviceInputHandlerNode => Instance._deviceInputHandler;
+    public static DeviceInputHandler DeviceInputHandler => Instance._deviceInputHandler;
 
     // domain
     public static CommandFacade Command => Instance._commandFacade;
