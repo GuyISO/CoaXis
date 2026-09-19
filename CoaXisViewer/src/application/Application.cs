@@ -17,6 +17,7 @@ public partial class Application : FacadeBase
     // domain
     private CommandFacade _commandFacade;
     private MeasurementFacade _measurementFacade;
+    private MenuFacade _menuFacade;
     private ModelFacade _modelFacade;
     private PickFacade _pickFacade;
     private SelectionFacade _selectionFacade;
@@ -39,6 +40,7 @@ public partial class Application : FacadeBase
     // domain
     public static CommandFacade Command => Instance._commandFacade;
     public static MeasurementFacade Measurement => Instance._measurementFacade;
+    public static MenuFacade Menu => Instance._menuFacade;
     public static ModelFacade Model => Instance._modelFacade;
     public static PickFacade Pick => Instance._pickFacade;
     public static SelectionFacade Selection => Instance._selectionFacade;
@@ -87,6 +89,7 @@ public partial class Application : FacadeBase
     {
         _commandFacade = AddModule<CommandFacade>("CommandFacade");
         _measurementFacade = AddModule<MeasurementFacade>("MeasurementFacade");
+        _menuFacade = AddModule<MenuFacade>("MenuFacade");
         _modelFacade = AddModule<ModelFacade>("ModelFacade");
         _pickFacade = AddModule<PickFacade>("PickFacade");
         _selectionFacade = AddModule<SelectionFacade>("SelectionFacade");

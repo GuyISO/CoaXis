@@ -58,6 +58,34 @@
 - Artifacts Updated:
   - `.github/instructions/coordinate-system.instructions.md`
   - `.github/design-philosophy/index.md`
+
+- Date: 2026-09-19
+- Trigger: ModelEntityTree用・Viewport用に個別のPopupMenu(ModelEntityMenu/ViewportMenu)を作る方針から、操作対象オブジェクト単位でMenuを作る方針へ変更
+- Decision: PopupMenuは表示元UI単位ではなく操作対象オブジェクト（ModelEntity等）単位で作成する。ModelEntityMenuをTreeItem専用から `ShowForEntity(Guid entityId, Vector2I screenPosition)` によるGuid(ModelEntity)ベースのAPIへ変更し、ModelEntityTreeとViewportInteractionHandlerの両方から共用する形にした。重複実装だったViewportMenuは廃止。あわせて、Measurementのコピーで作られ未使用のまま壊れていた `application/domain/menu`（MenuService/MenuEvent/MenuFacade）配下も削除した
+- Scope: Godot C# の PopupMenu 系 UI コンポーネント全般
+- Artifacts Updated:
+  - `CoaXisViewer/src/ui/menu/ModelEntityMenu.cs`
+  - `CoaXisViewer/src/ui/tree/ModelEntityTree.cs`
+  - `CoaXisViewer/src/application/domain/viewport/ViewportInteractionHandler.cs`
+  - `CoaXisViewer/scenes/viewport/viewport_container.tscn`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `.github/design-philosophy/index.md`
+- Notes: 今後、別対象（例: Viewport全体の背景クリックなど対象なしのケース）向けメニューを追加する場合も同じ「対象オブジェクト単位」の方針を踏襲すること
+
+- Date: 2026-09-19
+- Trigger: コンテキストメニュー（PopupMenu）を呼び出し元Node（ModelEntityTree/ViewportInteractionHandler）の子として.tscnに直接配置する方針を廃止し、Application.Menu.Service経由で呼び出せるように変更
+- Decision: `MenuFacade`/`MenuService` を新設し、MenuService が ModelEntityMenu の実体をコード上で保持・生成する（.tscnにPopupMenuノードを並べない）。呼び出し側は `Application.Menu.Service.ShowModelEntityMenu(Guid entityId, Vector2I screenPosition)` を呼ぶだけでよく、GetNodeでの参照保持や各UIでのメニューノード配置は不要になった
+- Scope: Godot C# の PopupMenu 系 UI コンポーネント全般
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/menu/MenuFacade.cs`
+  - `CoaXisViewer/src/application/domain/menu/MenuService.cs`
+  - `CoaXisViewer/src/application/Application.cs`
+  - `CoaXisViewer/src/ui/tree/ModelEntityTree.cs`
+  - `CoaXisViewer/src/application/domain/viewport/ViewportInteractionHandler.cs`
+  - `CoaXisViewer/scenes/viewer/canvas.tscn`
+  - `CoaXisViewer/scenes/viewport/viewport_container.tscn`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: 以前のMeasurementコピー由来で壊れていた旧 `application/domain/menu` 配下は今回作り直して再利用
   - `.github/design-philosophy/registry.md`
 - Notes: 境界変換は CoordinateSystemUtility を必須とする
 

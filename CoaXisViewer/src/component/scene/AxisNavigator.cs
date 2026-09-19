@@ -51,20 +51,32 @@ public partial class AxisNavigator : Control
     /// <param name="@event">未処理入力イベント</param>
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event is InputEventMouseButton mb && mb.Pressed && mb.ButtonIndex == MouseButton.Left)
+        if (@event is not InputEventMouseButton mb || !mb.Pressed)
         {
-            var localMouse = mb.Position - _subViewportContainer.GlobalPosition;
-            if (!new Rect2(Vector2.Zero, _subViewportContainer.Size).HasPoint(localMouse))
-            {
-                return;
-            }
+            return;
+        }
 
+        var localMouse = mb.Position - _subViewportContainer.GlobalPosition;
+        if (!new Rect2(Vector2.Zero, _subViewportContainer.Size).HasPoint(localMouse))
+        {
+            return;
+        }
+
+        if (mb.ButtonIndex == MouseButton.Left)
+        {
             PickResult pickResult = PickUtility.PickByRay(_camera, localMouse, (uint)ViewportLayer.AxisNavigator);
             if (pickResult.HasHit)
             {
                 ViewLookAt(pickResult.Collider);
                 _subViewport.SetInputAsHandled(); // 入力イベントを消費する
             }
+        }
+        else if (mb.ButtonIndex == MouseButton.Right)
+        {
+            // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標ではなくDisplayServerの実マウス座標を使う
+            Vector2I mousePosition = DisplayServer.MouseGetPosition();
+            Application.Menu.Service.ShowAxisNavigatorMenu(mousePosition);
+            _subViewport.SetInputAsHandled(); // 入力イベントを消費する
         }
     }
 

@@ -19,7 +19,8 @@ public partial class ModelEntityTree : Tree
 
     private Color _selectedColor;
 
-    private ModelTreeMenu _menu;
+    // ユーザー操作による選択か、内部的なプログラムによる選択かを判定するフラグ
+    private bool _isInternalSelection = false;
 
     private const int VisibilityButtonId = 1;
     private const int FitButtonId = 2;
@@ -31,8 +32,6 @@ public partial class ModelEntityTree : Tree
 
     public override void _Ready()
     {
-        _menu = GetNode<ModelTreeMenu>("PopupMenu");
-
         SubscribeUiEvents();
         SubscribeApplicationEvents();
         ApplySettings();
@@ -49,14 +48,13 @@ public partial class ModelEntityTree : Tree
     public override void _GuiInput(InputEvent @event)
     {
         // 右クリックによるコンテキストメニュー表示の処理
-        if (@event is InputEventMouseButton mb &&
-            mb.ButtonIndex == MouseButton.Right &&
-            mb.Pressed)
+        if (@event is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Right && mb.Pressed)
         {
             // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標のGetGlobalMousePositionではなくDisplayServerの実マウス座標を使う
             Vector2I mousePosition = DisplayServer.MouseGetPosition();
             TreeItem targetItem = GetItemAtPosition(GetLocalMousePosition());
-            _menu.ShowForItem(targetItem, mousePosition);
+            // メニューはTreeItemではなくModelEntity単位で対象を扱う設計のため、ここでGuidへ変換してから渡す
+            Application.Menu.Service.ShowModelEntityMenu(TryGetEntityId(targetItem), mousePosition);
         }
     }
 
@@ -121,11 +119,21 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void OnCellSelected()
     {
+        if (_isInternalSelection)
+        {
+            return;
+        }
+
         TreeItem item = GetSelected();
         if (item == null)
         {
             return;
         }
+
+        // 選択状態はBackGroundColorのハイライト色と内部変数で管理しているため、UI上の選択状態は解除する
+        _isInternalSelection = true;
+        DeselectAll();
+        _isInternalSelection = false;
 
         HandleSelected(item);        
         _lastSelectedItem = item;
@@ -354,6 +362,11 @@ public partial class ModelEntityTree : Tree
         // 対象行を画面中央へ出すため、先に祖先を展開してからスクロールする。
         ExpandAncestors(treeItem);
         ScrollToItem(treeItem, true);
+        
+        // 選択イベントを発火させず、ツリー選択状態ハイライトでユーザーに視覚的なフィードバックを与える
+        _isInternalSelection = true;
+        treeItem.Select(0);
+        _isInternalSelection = false;
     }
 
     #endregion

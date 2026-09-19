@@ -181,14 +181,13 @@ public partial class ViewportInteractionHandler : SubViewport
             Application.Viewport.Service.SetInteractionMode(ViewportInteractionMode.PickRect);
             Application.Viewport.Event.NotifyPickRect(_startPosition, _startPosition); // 選択矩形の初期位置を通知して表示する
         }
-        // 右クリックされたモデルをツリーの中央へ表示する
+        // 右クリックされた位置のモデルをピックし、コンテキストメニューへ渡して表示する
         else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
         {
             PickResult pickResult = PickUtility.PickByRay(GetCamera3D(), button.Position);
-            if (pickResult.HasHit && pickResult.EntityId != Guid.Empty)
-            {
-                Application.Model.Event.TreeCentering(pickResult.EntityId);
-            }
+            // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標ではなくDisplayServerの実マウス座標を使う
+            Vector2I mousePosition = DisplayServer.MouseGetPosition();
+            Application.Menu.Service.ShowPickResultMenu(pickResult, mousePosition);
         }
     }
 

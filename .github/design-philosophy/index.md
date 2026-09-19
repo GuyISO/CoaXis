@@ -12,6 +12,7 @@
 | 座標系境界規約 | `.github/instructions/coordinate-system.instructions.md` | 内部計算は Godot、UI/DB/IPC/ファイルI/O は CATIA |
 | モデル識別子運用規約 | `docs/guides/viewer/MODEL_ID_OPERATION_GUIDE.md` | モデル本体中心の Guid 運搬ルール |
 | 実装共通規約 | `.github/instructions/design-philosophy.instructions.md` | 全体的に効かせたい判断基準 |
+| コンテキストメニュー設計規約 | `.github/instructions/design-philosophy.instructions.md` | UI単位ではなく対象オブジェクト単位でMenuを作る方針 |
 | 意思決定履歴 | `.github/design-philosophy/registry.md` | 日付付きで履歴を蓄積 |
 | 追加ワークフロー | `.github/skills/capture-design-philosophy/SKILL.md` | 依頼を資産化する手順 |
 
