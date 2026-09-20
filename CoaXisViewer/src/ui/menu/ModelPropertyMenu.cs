@@ -22,11 +22,10 @@ public partial class ModelPropertyMenu : BaseMenu
 	/// 指定した値を対象にネイティブコンテキストメニューを表示する
 	/// </summary>
 	/// <param name="value">操作対象とするプロパティ値</param>
-	/// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-	public void ShowForValue(string value, Vector2I screenPosition)
+	public void ShowForValue(string value)
 	{
 		_targetValue = value ?? string.Empty;
-		PopupNativeMenu(screenPosition);
+		PopupNativeMenu();
 	}
 
 	#endregion

@@ -4,8 +4,7 @@ using Godot;
 /// OSネイティブメニュー(NativeMenu)を用いたコンテキストメニューの基底クラス
 /// </summary>
 /// <remarks>
-/// ネイティブメニュー Rid の生成・解放、表示可否判定、Popup 呼び出しといった
-/// ModelEntityMenu/PickResultMenu/AxisNavigatorMenu に共通する処理をここへ集約する。
+/// ネイティブメニュー Rid の生成・解放、表示可否判定、Popup 呼び出しといった各Menuに共通する処理をここへ集約する。
 /// 派生クラスは <see cref="BuildMenuItems(Rid)"/> でメニュー項目の定義のみを行えばよい。
 /// </remarks>
 public abstract partial class BaseMenu : Node
@@ -48,17 +47,17 @@ public abstract partial class BaseMenu : Node
 	protected abstract void BuildMenuItems(Rid nativeMenu);
 
 	/// <summary>
-	/// 指定した OS 画面座標にネイティブメニューを表示する
+	/// 現在のマウス位置にネイティブメニューを表示する
 	/// </summary>
-	/// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-	protected void PopupNativeMenu(Vector2I screenPosition)
+	protected void PopupNativeMenu()
 	{
 		if (!EnsureNativeMenu())
 		{
 			return;
 		}
 
-		NativeMenu.Singleton.Popup(_nativeMenu, screenPosition);
+		// NativeMenu.PopupはOS画面座標を要求するため、メイン/フローティングウィンドウを問わず実マウス座標を使う。
+		NativeMenu.Singleton.Popup(_nativeMenu, DisplayServer.MouseGetPosition());
 	}
 
 	#endregion

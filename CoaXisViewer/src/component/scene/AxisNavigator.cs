@@ -73,9 +73,7 @@ public partial class AxisNavigator : Control
         }
         else if (mb.ButtonIndex == MouseButton.Right)
         {
-            // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標ではなくDisplayServerの実マウス座標を使う
-            Vector2I mousePosition = DisplayServer.MouseGetPosition();
-            Application.Menu.Service.ShowAxisNavigatorMenu(mousePosition);
+            Application.Menu.Service.ShowAxisNavigatorMenu();
             _subViewport.SetInputAsHandled(); // 入力イベントを消費する
         }
     }

@@ -39,8 +39,7 @@ public partial class PickResultMenu : BaseMenu
 	/// 指定した PickResult を対象にネイティブコンテキストメニューを表示する
 	/// </summary>
 	/// <param name="pickResult">右クリック位置で PickByRay したピック結果</param>
-	/// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-	public void ShowForPickResult(PickResult pickResult, Vector2I screenPosition)
+	public void ShowForPickResult(PickResult pickResult)
 	{
 		if (!TryGetNativeMenu(out Rid nativeMenu))
 		{
@@ -53,7 +52,7 @@ public partial class PickResultMenu : BaseMenu
 		// ヒット結果に依存する項目は、無効な対象へ操作を実行できないよう表示のたびに状態を更新する。
 		NativeMenu.Singleton.SetItemDisabled(nativeMenu, _modelEntitySubmenuItemIndex, pickResult == null || pickResult.EntityId == Guid.Empty);
 		NativeMenu.Singleton.SetItemDisabled(nativeMenu, _alignNormalMenuItemIndex, pickResult == null || !pickResult.HasHit);
-		PopupNativeMenu(screenPosition);
+		PopupNativeMenu();
 	}
 
 	#endregion

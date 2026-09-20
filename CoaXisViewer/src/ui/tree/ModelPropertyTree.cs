@@ -34,9 +34,6 @@ public partial class ModelPropertyTree : Tree
 				return;
 			}
 
-			// Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標のGetGlobalMousePositionではなくDisplayServerの実マウス座標を使う
-			Vector2I mousePosition = DisplayServer.MouseGetPosition();
-
 			// Root(ModelEntity)行はModelEntityMenu、下階層(ModelProperty)行はModelPropertyMenuを表示する
 			if (targetItem == _rootItem)
 			{
@@ -45,11 +42,11 @@ public partial class ModelPropertyTree : Tree
 					return;
 				}
 
-				Application.Menu.Service.ShowModelEntityMenu(_entityId, mousePosition);
+				Application.Menu.Service.ShowModelEntityMenu(_entityId);
 			}
 			else
 			{
-				Application.Menu.Service.ShowModelPropertyMenu(TryGetPropertyValue(targetItem), mousePosition);
+				Application.Menu.Service.ShowModelPropertyMenu(TryGetPropertyValue(targetItem));
 			}
 		}
 	}

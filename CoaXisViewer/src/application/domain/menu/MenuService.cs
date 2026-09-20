@@ -38,43 +38,39 @@ public partial class MenuService : Node
     /// 指定した ModelEntity を対象にコンテキストメニューを表示する
     /// </summary>
     /// <param name="entityId">操作対象とする ModelEntity の識別子</param>
-    /// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-    internal void ShowModelEntityMenu(Guid entityId, Vector2I screenPosition)
+    internal void ShowModelEntityMenu(Guid entityId)
     {
         _modelEntityMenu = EnsureMenu(_modelEntityMenu, "ModelEntityMenu");
-        _modelEntityMenu.ShowForEntity(entityId, screenPosition);
+        _modelEntityMenu.ShowForEntity(entityId);
     }
 
     /// <summary>
     /// 指定した ModelProperty の値を対象にコンテキストメニューを表示する
     /// </summary>
     /// <param name="value">操作対象とするプロパティ値</param>
-    /// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-    internal void ShowModelPropertyMenu(string value, Vector2I screenPosition)
+    internal void ShowModelPropertyMenu(string value)
     {
         _modelPropertyMenu = EnsureMenu(_modelPropertyMenu, "ModelPropertyMenu");
-        _modelPropertyMenu.ShowForValue(value, screenPosition);
+        _modelPropertyMenu.ShowForValue(value);
     }
 
     /// <summary>
     /// 指定した PickResult を対象にコンテキストメニューを表示する
     /// </summary>
     /// <param name="pickResult">操作対象とする PickResult</param>
-    /// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-    internal void ShowPickResultMenu(PickResult pickResult, Vector2I screenPosition)
+    internal void ShowPickResultMenu(PickResult pickResult)
     {
         _pickResultMenu = EnsureMenu(_pickResultMenu, "PickResultMenu");
-        _pickResultMenu.ShowForPickResult(pickResult, screenPosition);
+        _pickResultMenu.ShowForPickResult(pickResult);
     }
 
     /// <summary>
     /// AxisNavigator を対象にコンテキストメニューを表示する
     /// </summary>
-    /// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-    internal void ShowAxisNavigatorMenu(Vector2I screenPosition)
+    internal void ShowAxisNavigatorMenu()
     {
         _axisNavigatorMenu = EnsureMenu(_axisNavigatorMenu, "AxisNavigatorMenu");
-        _axisNavigatorMenu.ShowAtPosition(screenPosition);
+        _axisNavigatorMenu.ShowAtPosition();
     }
 
     #endregion

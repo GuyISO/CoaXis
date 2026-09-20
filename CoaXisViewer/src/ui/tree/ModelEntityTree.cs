@@ -65,9 +65,7 @@ public partial class ModelEntityTree : Tree
                 return;
             }
 
-            // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標のGetGlobalMousePositionではなくDisplayServerの実マウス座標を使う
-            Vector2I mousePosition = DisplayServer.MouseGetPosition();
-            Application.Menu.Service.ShowModelEntityMenu(entityId, mousePosition);
+            Application.Menu.Service.ShowModelEntityMenu(entityId);
         }
     }
 

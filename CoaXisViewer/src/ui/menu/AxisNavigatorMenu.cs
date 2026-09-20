@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// </summary>
 /// <remarks>
 /// 上下左右前後の6方向への視点切替、ロール回転、投影方式の切替を扱う。
-/// AxisNavigator は特定の ModelEntity/PickResult を対象にしないため、ShowAtPosition のみを公開する。
+	/// AxisNavigator は特定の ModelEntity/PickResult を対象にしないため、表示メソッドのみを公開する。
 /// ネイティブメニュー Rid の生成・解放は基底クラスの <see cref="BaseMenu"/> が担う。
 /// </remarks>
 public partial class AxisNavigatorMenu : BaseMenu
@@ -41,12 +41,11 @@ public partial class AxisNavigatorMenu : BaseMenu
 	#region Public Methods
 
 	/// <summary>
-	/// 指定した OS 画面座標にネイティブコンテキストメニューを表示する
+	/// 現在のマウス位置にネイティブコンテキストメニューを表示する
 	/// </summary>
-	/// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-	public void ShowAtPosition(Vector2I screenPosition)
+	public void ShowAtPosition()
 	{
-		PopupNativeMenu(screenPosition);
+		PopupNativeMenu();
 	}
 
 	#endregion

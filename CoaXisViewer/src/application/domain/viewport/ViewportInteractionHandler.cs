@@ -191,9 +191,7 @@ public partial class ViewportInteractionHandler : SubViewport
                 return;
             }
 
-            // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標ではなくDisplayServerの実マウス座標を使う
-            Vector2I mousePosition = DisplayServer.MouseGetPosition();
-            Application.Menu.Service.ShowPickResultMenu(pickResult, mousePosition);
+            Application.Menu.Service.ShowPickResultMenu(pickResult);
         }
     }
 

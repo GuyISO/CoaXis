@@ -24,11 +24,10 @@ public partial class ModelEntityMenu : BaseMenu
 	/// 指定した ModelEntity を対象にネイティブコンテキストメニューを表示する
 	/// </summary>
 	/// <param name="entityId">操作対象とする ModelEntity の識別子</param>
-	/// <param name="screenPosition">メニューを表示する OS 画面座標</param>
-	public void ShowForEntity(Guid entityId, Vector2I screenPosition)
+	public void ShowForEntity(Guid entityId)
 	{
 		SetTargetEntity(entityId);
-		PopupNativeMenu(screenPosition);
+		PopupNativeMenu();
 	}
 
 	/// <summary>
