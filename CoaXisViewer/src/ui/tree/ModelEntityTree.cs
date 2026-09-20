@@ -143,11 +143,6 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        // 選択状態はBackGroundColorのハイライト色と内部変数で管理しているため、UI上の選択状態は解除する
-        _isInternalSelection = true;
-        DeselectAll();
-        _isInternalSelection = false;
-
         HandleSelected(item);        
         _lastSelectedItem = item;
     }
@@ -191,13 +186,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        ModelEntity modelEntity = Application.Model.Registry.GetEntity(TryGetEntityId(item));
-        if (modelEntity == null)
-        {
-            return;
-        }
-
-        Application.Model.Service.EmbededModelPropertyTree.Show(modelEntity);
+        Application.Model.Service.EmbededModelPropertyTree.Show(TryGetEntityId(item));
     }
 
     /// <summary>
@@ -594,6 +583,9 @@ public partial class ModelEntityTree : Tree
         if (!shouldHandleAsRange)
         {
             Application.Pick.Event.NotifyResult(PickUtility.PickByEntityId(entityId));
+
+            // 単一選択の場合のみプロパティツリーを更新する
+            Application.Model.Service.EmbededModelPropertyTree.Show(entityId);
         }
         else
         {

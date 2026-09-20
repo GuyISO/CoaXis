@@ -14,6 +14,7 @@ public partial class MenuService : Node
     #region Fields
 
     private ModelEntityMenu _modelEntityMenu;
+    private ModelPropertyMenu _modelPropertyMenu;
     private PickResultMenu _pickResultMenu;
     private AxisNavigatorMenu _axisNavigatorMenu;
 
@@ -24,6 +25,7 @@ public partial class MenuService : Node
     public override void _Ready()
     {
         _modelEntityMenu = EnsureMenu(_modelEntityMenu, "ModelEntityMenu");
+        _modelPropertyMenu = EnsureMenu(_modelPropertyMenu, "ModelPropertyMenu");
         _pickResultMenu = EnsureMenu(_pickResultMenu, "PickResultMenu");
         _axisNavigatorMenu = EnsureMenu(_axisNavigatorMenu, "AxisNavigatorMenu");
     }
@@ -41,6 +43,17 @@ public partial class MenuService : Node
     {
         _modelEntityMenu = EnsureMenu(_modelEntityMenu, "ModelEntityMenu");
         _modelEntityMenu.ShowForEntity(entityId, screenPosition);
+    }
+
+    /// <summary>
+    /// 指定した ModelProperty の値を対象にコンテキストメニューを表示する
+    /// </summary>
+    /// <param name="value">操作対象とするプロパティ値</param>
+    /// <param name="screenPosition">メニューを表示する OS 画面座標</param>
+    internal void ShowModelPropertyMenu(string value, Vector2I screenPosition)
+    {
+        _modelPropertyMenu = EnsureMenu(_modelPropertyMenu, "ModelPropertyMenu");
+        _modelPropertyMenu.ShowForValue(value, screenPosition);
     }
 
     /// <summary>

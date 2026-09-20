@@ -131,14 +131,17 @@ theme_override_constants/v_separation = 2
 allow_reselect = true
 allow_search = false
 hide_root = true
+auto_tooltip = false
 script = ExtResource("10_57r0r")
 
 [node name="EmbededModelPropertyTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=316986411]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/v_separation = 2
+columns = 2
 allow_reselect = true
 allow_search = false
+auto_tooltip = false
 script = ExtResource("12_bn6oc")
 
 [node name="Blank" type="Control" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=1196475229]
