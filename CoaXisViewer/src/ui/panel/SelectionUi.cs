@@ -70,6 +70,7 @@ public partial class SelectionUi : PanelContainer
         _buttonRemove.Pressed += OnButtonRemovePressed;
         _buttonToggle.Pressed += OnButtonTogglePressed;
         _buttonClear.Pressed += OnButtonClearPressed;
+        _tree.GuiInput += OnTreeGuiInput;
     }
 
     /// <summary>
@@ -82,6 +83,7 @@ public partial class SelectionUi : PanelContainer
         _buttonRemove.Pressed -= OnButtonRemovePressed;
         _buttonToggle.Pressed -= OnButtonTogglePressed;
         _buttonClear.Pressed -= OnButtonClearPressed;
+        _tree.GuiInput -= OnTreeGuiInput;
     }
 
     /// <summary>
@@ -161,6 +163,34 @@ public partial class SelectionUi : PanelContainer
     private void OnButtonClearPressed()
     {
         Application.Selection.Event.Clear();
+    }
+
+    /// <summary>
+    /// Tree の入力イベントを受け取り、右クリック時にModelEntityメニューを表示する
+    /// </summary>
+    /// <param name="event">入力イベント</param>
+    private void OnTreeGuiInput(InputEvent @event)
+    {
+        if (@event is not InputEventMouseButton mb || mb.ButtonIndex != MouseButton.Right || !mb.Pressed)
+        {
+            return;
+        }
+        
+        TreeItem targetItem = _tree.GetItemAtPosition(mb.Position);
+        if (targetItem == null)
+        {
+            return;
+        }
+        
+        Variant entityIdVariant = targetItem.GetMeta("EntityId", Variant.CreateFrom(string.Empty));
+        if (!Guid.TryParse(entityIdVariant.AsString(), out Guid entityId) || entityId == Guid.Empty)
+        {
+            return;
+        }
+
+        // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標ではなくDisplayServerの実マウス座標を使う
+        Vector2I mousePosition = DisplayServer.MouseGetPosition();
+        Application.Menu.Service.ShowModelEntityMenu(entityId, mousePosition);
     }
 
     /// <summary>
@@ -281,6 +311,7 @@ public partial class SelectionUi : PanelContainer
             TreeItem item = _tree.CreateItem(root);
             item.SetText((int)SelectionTreeColumn.No, i.ToString());
             item.SetText((int)SelectionTreeColumn.Name, modelEntity?.Name ?? entityId.ToString());
+            item.SetMeta("EntityId", entityId.ToString());
         }
 
         _isUpdatingTree = false;

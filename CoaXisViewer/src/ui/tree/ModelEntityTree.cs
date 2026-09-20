@@ -53,6 +53,12 @@ public partial class ModelEntityTree : Tree
             // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標のGetGlobalMousePositionではなくDisplayServerの実マウス座標を使う
             Vector2I mousePosition = DisplayServer.MouseGetPosition();
             TreeItem targetItem = GetItemAtPosition(GetLocalMousePosition());
+            // 空白領域での右クリックは対象不明のメニュー表示になり紛らわしいため、TreeItem上のみメニューを出す
+            if (targetItem == null)
+            {
+                return;
+            }
+
             // メニューはTreeItemではなくModelEntity単位で対象を扱う設計のため、ここでGuidへ変換してから渡す
             Application.Menu.Service.ShowModelEntityMenu(TryGetEntityId(targetItem), mousePosition);
         }
