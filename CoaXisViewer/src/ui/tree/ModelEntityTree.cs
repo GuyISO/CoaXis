@@ -50,8 +50,6 @@ public partial class ModelEntityTree : Tree
         // 右クリックによるコンテキストメニュー表示の処理
         if (@event is InputEventMouseButton mb && mb.ButtonIndex == MouseButton.Right && mb.Pressed)
         {
-            // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標のGetGlobalMousePositionではなくDisplayServerの実マウス座標を使う
-            Vector2I mousePosition = DisplayServer.MouseGetPosition();
             TreeItem targetItem = GetItemAtPosition(GetLocalMousePosition());
             // 空白領域での右クリックは対象不明のメニュー表示になり紛らわしいため、TreeItem上のみメニューを出す
             if (targetItem == null)
@@ -60,7 +58,16 @@ public partial class ModelEntityTree : Tree
             }
 
             // メニューはTreeItemではなくModelEntity単位で対象を扱う設計のため、ここでGuidへ変換してから渡す
-            Application.Menu.Service.ShowModelEntityMenu(TryGetEntityId(targetItem), mousePosition);
+            Guid entityId = TryGetEntityId(targetItem);
+            // 対象が無い空振りクリックではメニューを表示しない
+            if (entityId == Guid.Empty)
+            {
+                return;
+            }
+
+            // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標のGetGlobalMousePositionではなくDisplayServerの実マウス座標を使う
+            Vector2I mousePosition = DisplayServer.MouseGetPosition();
+            Application.Menu.Service.ShowModelEntityMenu(entityId, mousePosition);
         }
     }
 
