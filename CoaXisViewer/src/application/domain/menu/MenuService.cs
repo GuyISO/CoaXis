@@ -69,9 +69,9 @@ public partial class MenuService : Node
     #region Internal Helpers
 
     /// <summary>
-    /// 指定したメニューのインスタンスを確保する、シーンに依存せずコードから直接生成する
+    /// 指定したメニューノードのインスタンスを確保する、シーンに依存せずコードから直接生成する
     /// </summary>
-    /// <typeparam name="TMenu">確保する PopupMenu の型</typeparam>
+    /// <typeparam name="TMenu">確保するメニューノードの型</typeparam>
     /// <param name="menu">既存のインスタンス、未生成またはツリーから外れている場合は再生成する</param>
     /// <param name="nodeName">生成時に設定するノード名</param>
     /// <returns>有効な状態が保証されたメニューのインスタンス</returns>

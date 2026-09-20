@@ -42,6 +42,36 @@
 
 ---
 
+### [2026-09-20] コンテキストメニュー（ModelEntity/PickResult/AxisNavigator）の NativeMenu 検証
+
+- 背景: ModelEntity の右クリックメニューを OS ネイティブの外観・操作感で表示できるか検証する必要がある。
+- 問題: `PopupMenu` の子ノードを使う既存のサブメニュー構成は、`NativeMenu` の `Rid` ベースのサブメニュー API と互換性がない。`PickResultMenu` は `ModelEntityMenu` をサブメニューとして利用しているため、ModelEntity メニューだけを NativeMenu 化するとビューポート操作経路が壊れる。
+- 判断: `ModelEntityMenu` と、それをサブメニューとして保持する `PickResultMenu` をともに `Node` が所有する `NativeMenu` の `Rid` ベースへ移行する。`MenuService` によるノード生成・所有は維持し、メニュー表示直前に PickResult 由来の無効状態を更新する。
+- 判断理由: `NativeMenu.AddSubmenuItem` に ModelEntity メニューの `Rid` を渡すことで、Tree と Viewport の両方から同一の ModelEntity 操作を OS ネイティブメニューとして実行できる。メニュー `Rid` は Node のライフサイクルに紐付け、`_ExitTree()` で `FreeMenu` を呼ぶため、表示経路をサービスへ集約した既存方針も維持できる。
+- 採用しなかった代替案: `PopupMenu.PreferNativeMenu` を設定する案は、Godot が可能な場合にネイティブ表示を選択するだけで、低レベルの `NativeMenu` API を直接検証する目的を満たさないため不採用。ModelEntity メニューだけを移行して PickResult メニュー内では旧 PopupMenu を残す案は、異なるメニュー実装をサブメニューとして接続できないため不採用。
+- 影響範囲: Tree からの ModelEntity 操作、Viewport の PickResult メニュー、AxisNavigator の視点切替メニュー、ModelEntity の Fit・Emphasize・Spin・TreeCentering 操作、PickResult の AlignNormal 操作、AxisNavigator の視点切替・ロール回転・投影方式切替操作。
+- 実装/運用手順: `NativeMenu.Feature.PopupMenu` が利用できる表示サーバーでのみメニューを生成する。非対応の場合は `GD.PushError` を出力して表示を中止する。各 NativeMenu は生成元 Node の `_ExitTree()` で必ず `FreeMenu` し、親の PickResult メニューを先に解放する。`NativeMenu.AddItem`/`AddCheckItem` 等の `callback`/`keyCallback` は「`Variant` 型の引数を厳密に1つ受け取るCallable」である契約のため、ハンドラーは引数なしメソッドではなく `Variant tag` を受け取るメソッドで定義し、`Callable.From<Variant>(...)` で渡す。違反すると実行時に `System.ArgumentException: Invalid argument count for invoking callable.` が発生し、メニュー自体は表示できても項目選択時にのみ例外になる。パラメータ付き呼び出し（AxisNavigatorMenu の ViewTop 等、同一ハンドラーに異なる引数を渡すケース）はラムダ `_ => Handle(...)` で `Variant` 引数を受け取りつつ固定引数を渡す。
+- 検証方法: `dotnet build .\CoaXis.sln` を実行し、Windows 実行時に Tree・Viewport・AxisNavigator のいずれからも右クリックメニュー、ModelEntity サブメニュー、無効項目、各操作（例外が出ないこと）を確認する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/ui/menu/ModelEntityMenu.cs`、`CoaXisViewer/src/ui/menu/PickResultMenu.cs`、`CoaXisViewer/src/ui/menu/AxisNavigatorMenu.cs`、`CoaXisViewer/src/application/domain/menu/MenuService.cs`
+- 備考: Native popup は `NativeMenu.Feature.PopupMenu` をサポートするプラットフォームが前提であり、現時点では Windows 上での実行確認を検証対象とする。
+
+---
+
+### [2026-09-20] NativeMenu 系メニュー3種の共通処理を BaseMenu へ抽出
+
+- 背景: ModelEntityMenu/PickResultMenu/AxisNavigatorMenu の3クラスが、ネイティブメニュー Rid の生成・解放・表示可否判定・Popup 呼び出しという同じ処理をそれぞれ個別に実装していた。
+- 問題: `_hasNativeMenu`/`EnsureNativeMenu`/`_ExitTree` での `FreeMenu` などが3箇所に重複しており、NativeMenu の契約（`Feature.PopupMenu` チェック、Rid ライフサイクル管理）を変更する際に修正漏れが発生しやすい。
+- 判断: 共通処理を抽象基底クラス `BaseMenu`（`Node` 継承）へ集約し、3クラスはこれを継承する。`BaseMenu` が Rid の生成・解放・`Popup` 呼び出しを担い、派生クラスは `BuildMenuItems(Rid nativeMenu)` をオーバーライドして項目定義のみ行う。
+- 判断理由: `_Ready`/`_ExitTree` のライフサイクルと `EnsureNativeMenu` の判定ロジックは3クラスで完全に同一であり、基底クラスに寄せても各メニュー固有のハンドラー実装には影響しない。`PickResultMenu` のようにサブメニューの Rid を必要とするケースは `internal TryGetNativeMenu` を基底に残すことで踏襲できる。
+- 採用しなかった代替案: 共通処理を static ユーティリティクラスとして切り出す案は、各メニューが `_hasNativeMenu`/`_nativeMenu` フィールドをそれぞれ保持し続ける必要があり、重複そのものは解消できないため不採用。
+- 影響範囲: `ModelEntityMenu`/`PickResultMenu`/`AxisNavigatorMenu` の実装構造。`MenuService` からの呼び出し方法（`ShowForEntity`/`ShowForPickResult`/`ShowAtPosition`）や外部から見た振る舞いに変更はない。
+- 実装/運用手順: 新しいコンテキストメニューを追加する場合も `BaseMenu` を継承し、`BuildMenuItems(Rid nativeMenu)` でのみ項目追加を行う。表示は基底の `PopupNativeMenu(Vector2I)` を呼び出す。`PickResultMenu` のように子メニューを持つ場合は、`_Ready` をオーバーライドして子メニューを `AddChild` した後に `base._Ready()` を呼び、`BuildMenuItems` 内で子メニューの `TryGetNativeMenu` を参照する順序を守る。
+- 検証方法: `dotnet build .\CoaXis.sln` を実行し、Windows 実行時に Tree・Viewport・AxisNavigator の右クリックメニュー・サブメニュー・各操作が従来どおり動作することを確認する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/ui/menu/BaseMenu.cs`、`CoaXisViewer/src/ui/menu/ModelEntityMenu.cs`、`CoaXisViewer/src/ui/menu/PickResultMenu.cs`、`CoaXisViewer/src/ui/menu/AxisNavigatorMenu.cs`
+- 備考: なし
+
+---
+
 ### [2026-09-15] ModelEntity Tree の兄弟順を入力順で固定
 
 - 背景: CSV/JSONから読み込んだModelEntityのリスト順を、ViewerのTree表示でも維持する必要がある。

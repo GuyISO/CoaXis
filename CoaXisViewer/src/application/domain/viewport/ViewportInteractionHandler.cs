@@ -185,6 +185,12 @@ public partial class ViewportInteractionHandler : SubViewport
         else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
         {
             PickResult pickResult = PickUtility.PickByRay(GetCamera3D(), button.Position);
+            // 何もヒットしなかった空振りクリックではメニューを表示しない
+            if (pickResult == null || !pickResult.HasHit)
+            {
+                return;
+            }
+
             // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標ではなくDisplayServerの実マウス座標を使う
             Vector2I mousePosition = DisplayServer.MouseGetPosition();
             Application.Menu.Service.ShowPickResultMenu(pickResult, mousePosition);

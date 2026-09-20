@@ -70,6 +70,7 @@ public partial class SelectionUi : PanelContainer
         _buttonRemove.Pressed += OnButtonRemovePressed;
         _buttonToggle.Pressed += OnButtonTogglePressed;
         _buttonClear.Pressed += OnButtonClearPressed;
+        _tree.GuiInput += OnTreeGuiInput;
     }
 
     /// <summary>
@@ -82,6 +83,7 @@ public partial class SelectionUi : PanelContainer
         _buttonRemove.Pressed -= OnButtonRemovePressed;
         _buttonToggle.Pressed -= OnButtonTogglePressed;
         _buttonClear.Pressed -= OnButtonClearPressed;
+        _tree.GuiInput -= OnTreeGuiInput;
     }
 
     /// <summary>
@@ -161,6 +163,31 @@ public partial class SelectionUi : PanelContainer
     private void OnButtonClearPressed()
     {
         Application.Selection.Event.Clear();
+    }
+
+    /// <summary>
+    /// Tree の GUI 入力を受け取ったときのイベントハンドラ
+    /// </summary>
+    /// <param name="event">発生した入力イベント</param>
+    /// <remarks>右クリックによるコンテキストメニュー表示のみを扱う。ModelEntityTree と同じくTreeItem単位ではなくModelEntity単位で対象を扱う。</remarks>
+    private void OnTreeGuiInput(InputEvent @event)
+    {
+        if (@event is not InputEventMouseButton mb || mb.ButtonIndex != MouseButton.Right || !mb.Pressed)
+        {
+            return;
+        }
+
+        TreeItem targetItem = _tree.GetItemAtPosition(_tree.GetLocalMousePosition());
+        Guid entityId = TryGetEntityId(targetItem);
+        // 対象が無い空振りクリックではメニューを表示しない
+        if (entityId == Guid.Empty)
+        {
+            return;
+        }
+
+        // Popup(Window)のPositionはOS画面座標系のため、ビューポート内座標のGetGlobalMousePositionではなくDisplayServerの実マウス座標を使う
+        Vector2I mousePosition = DisplayServer.MouseGetPosition();
+        Application.Menu.Service.ShowModelEntityMenu(entityId, mousePosition);
     }
 
     /// <summary>
@@ -281,9 +308,28 @@ public partial class SelectionUi : PanelContainer
             TreeItem item = _tree.CreateItem(root);
             item.SetText((int)SelectionTreeColumn.No, i.ToString());
             item.SetText((int)SelectionTreeColumn.Name, modelEntity?.Name ?? entityId.ToString());
+            // 右クリックメニューはModelEntity単位で対象を扱う設計のため、TreeItemにEntityIdをmeta保持しておく
+            item.SetMeta("EntityId", entityId.ToString());
         }
 
         _isUpdatingTree = false;
+    }
+
+    /// <summary>
+    /// TreeItem に紐づく ModelEntity の識別子を取得する
+    /// </summary>
+    /// <param name="item">対象の TreeItem</param>
+    /// <returns>解決できた場合は ModelEntity の識別子、解決できない場合は <see cref="Guid.Empty"/></returns>
+    private static Guid TryGetEntityId(TreeItem item)
+    {
+        if (item == null)
+        {
+            return Guid.Empty;
+        }
+
+        Variant entityIdVariant = item.GetMeta("EntityId", Variant.CreateFrom(string.Empty));
+        string entityIdText = entityIdVariant.AsString();
+        return Guid.TryParse(entityIdText, out Guid entityId) ? entityId : Guid.Empty;
     }
 
     #endregion
