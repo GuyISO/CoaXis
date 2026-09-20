@@ -581,9 +581,6 @@ public partial class ModelEntityTree : Tree
         if (!shouldHandleAsRange)
         {
             Application.Pick.Event.NotifyResult(PickUtility.PickByEntityId(entityId));
-
-            // 単一選択の場合のみプロパティツリーを更新する
-            Application.Model.Service.EmbededModelPropertyTree.Show(entityId);
         }
         else
         {
