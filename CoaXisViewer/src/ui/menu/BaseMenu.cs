@@ -56,8 +56,13 @@ public abstract partial class BaseMenu : Node
 			return;
 		}
 
-		// NativeMenu.PopupはOS画面座標を要求するため、メイン/フローティングウィンドウを問わず実マウス座標を使う。
-		NativeMenu.Singleton.Popup(_nativeMenu, DisplayServer.MouseGetPosition());
+		// NativeMenu.Popup(Windows)はプライマリスクリーン左上を原点とした座標を期待するが、
+		// DisplayServer.MouseGetPosition()は仮想デスクトップ全体の左上を原点とした座標を返す。
+		// マルチモニターでプライマリスクリーンが仮想デスクトップ原点と一致しない配置の場合、
+		// 両者の差分だけメニュー表示位置がズレるため、プライマリスクリーンのオフセットを差し引く。
+		Vector2I mousePosition = DisplayServer.MouseGetPosition();
+		Vector2I primaryScreenOrigin = DisplayServer.ScreenGetPosition(DisplayServer.GetPrimaryScreen());
+		NativeMenu.Singleton.Popup(_nativeMenu, mousePosition - primaryScreenOrigin);
 	}
 
 	#endregion
