@@ -24,7 +24,6 @@ public partial class ModelEntityTree : Tree
 
     private const int VisibilityButtonId = 1;
     private const int FitButtonId = 2;
-    private const int SpinAppealButtonId = 3;
 
     #endregion
 
@@ -166,9 +165,6 @@ public partial class ModelEntityTree : Tree
                 break;
             case FitButtonId:
                 HandleFitButtonClicked(item);
-                break;
-            case SpinAppealButtonId:
-                HandleSpinAppealButtonClicked(item);
                 break;
         }
     }
@@ -436,12 +432,8 @@ public partial class ModelEntityTree : Tree
         Texture2D fitIcon = Application.Asset.Service.GetIcon(
             "res://assets/icon/mono/target.svg",
             Constant.Ui.Tree.HierarchyVisibleIconSize);
-        Texture2D spinAppealIcon = Application.Asset.Service.GetIcon(
-            "res://assets/icon/oop/360.svg",
-            Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.AddButton(0, btnIcon, id: VisibilityButtonId);
         treeItem.AddButton(0, fitIcon, id: FitButtonId);
-        treeItem.AddButton(0, spinAppealIcon, id: SpinAppealButtonId);
 
         // EntityId と TreeItem の対応を登録
         treeItem.SetMeta("EntityId", entityId.ToString());
@@ -739,17 +731,6 @@ public partial class ModelEntityTree : Tree
 
         Node3D[] fitTargetNodes = new Node3D[] { modelNode };
         Application.Viewport.Event.Fit(fitTargetNodes, true);
-    }
-
-    /// <summary>
-    /// TreeItem の回転アピールボタンがクリックされたとき、対応するモデルを回転させる
-    /// </summary>
-    /// <param name="item">クリックされた TreeItem</param>
-    private void HandleSpinAppealButtonClicked(TreeItem item)
-    {
-        ModelNode modelNode = GetModelNode(item);
-        modelNode?.Emphasize();
-        modelNode?.SpinAppeal();
     }
 
     /// <summary>
