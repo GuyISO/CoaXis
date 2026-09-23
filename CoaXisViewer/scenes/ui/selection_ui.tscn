@@ -30,7 +30,7 @@ alignment = 1
 [node name="Tree" type="Tree" parent="MarginContainer/VBoxContainer" unique_id=639312814]
 layout_mode = 2
 size_flags_vertical = 3
-column_titles_visible = true
+theme_override_colors/font_color = Color(1, 1, 1, 1)
 hide_folding = true
 hide_root = true
 auto_tooltip = false

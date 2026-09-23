@@ -41,15 +41,6 @@ public enum CommandTreeColumn
 }
 
 /// <summary>
-/// SelectionUi の列を表す列挙型
-/// </summary>
-public enum SelectionTreeColumn
-{
-    No,
-    Name,
-}
-
-/// <summary>
 /// コマンド履歴の実行状態を表す列挙型
 /// </summary>
 public enum CommandExecutionState

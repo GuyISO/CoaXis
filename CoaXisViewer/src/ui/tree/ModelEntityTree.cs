@@ -102,9 +102,10 @@ public partial class ModelEntityTree : Tree
         Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified += OnClearedNotified;
-        Application.Model.Event.ModelAdded += OnModelAddedNotified;
-        Application.Model.Event.ModelVisibilityStateNotified += OnModelVisibilityStateNotified;
-        Application.Model.Event.ModelStatusNotified += OnModelStatusNotified;
+        Application.Model.Event.Added += OnModelAddedNotified;
+        Application.Model.Event.VisibilityNotified += OnModelVisibilityNotified;
+        Application.Model.Event.Collapsed += OnModelCollapsed;
+        Application.Model.Event.StatusNotified += OnModelStatusNotified;
         Application.Model.Event.RegistryCleared += OnRegistryClearedNotified;
         Application.Model.Event.TreeCenteringRequested += OnTreeCenteringRequested;
     }
@@ -117,9 +118,10 @@ public partial class ModelEntityTree : Tree
         Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified -= OnClearedNotified;
-        Application.Model.Event.ModelAdded -= OnModelAddedNotified;
-        Application.Model.Event.ModelVisibilityStateNotified -= OnModelVisibilityStateNotified;
-        Application.Model.Event.ModelStatusNotified -= OnModelStatusNotified;
+        Application.Model.Event.Added -= OnModelAddedNotified;
+        Application.Model.Event.VisibilityNotified -= OnModelVisibilityNotified;
+        Application.Model.Event.StatusNotified -= OnModelStatusNotified;
+        Application.Model.Event.Collapsed -= OnModelCollapsed;
         Application.Model.Event.RegistryCleared -= OnRegistryClearedNotified;
         Application.Model.Event.TreeCenteringRequested -= OnTreeCenteringRequested;
     }
@@ -184,6 +186,19 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
+    /// TreeItem の折り畳み状態が変化したときのイベントハンドラ
+    /// </summary>
+    /// <param name="item">折り畳み状態が変化した TreeItem</param>
+    private void OnItemCollapsed(TreeItem item)
+    {
+        // 折り畳み/展開により「表示中の代替祖先」が変わりうるため、選択中モデル分のハイライトを全件見直して再描画する
+        RefreshAllHighlights();
+
+        // モデルの折り畳み状態が変更されたことを通知
+        Application.Model.Event.NotifyCollapsed(TryGetEntityId(item), item.IsCollapsed());
+    }
+
+    /// <summary>
     /// モデルの選択状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
@@ -209,16 +224,6 @@ public partial class ModelEntityTree : Tree
             // 対象が畳まれた祖先の下に隠れている場合、CATIA同様に表示中の祖先までスクロールする
             ScrollToItem(FindNearestVisibleAncestor(treeItem));
         }
-    }
-
-    /// <summary>
-    /// TreeItem の折り畳み状態が変化したときのイベントハンドラ
-    /// </summary>
-    /// <param name="item">折り畳み状態が変化した TreeItem</param>
-    private void OnItemCollapsed(TreeItem item)
-    {
-        // 折り畳み/展開により「表示中の代替祖先」が変わりうるため、選択中モデル分のハイライトを全件見直して再描画する
-        RefreshAllHighlights();
     }
 
     /// <summary>
@@ -261,8 +266,8 @@ public partial class ModelEntityTree : Tree
     /// モデルの表示状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
-    /// <param name="isVisible">モデルが表示されている場合はtrue、非表示の場合はfalse</param>
-    private void OnModelVisibilityStateNotified(string entityId, bool isVisible)
+    /// <param name="visibility">変更後のモデル表示設定</param>
+    private void OnModelVisibilityNotified(string entityId, ModelVisibility visibility)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -280,14 +285,34 @@ public partial class ModelEntityTree : Tree
         if (treeItem != null)
         {
             Texture2D buttonIcon = Application.Asset.Service.GetVisibilityIcon(
-                modelEntity.Visibility,
-                isVisible,
+                visibility,
+                ModelVisibilityResolver.IsVisible(modelEntity),
                 Constant.Ui.Tree.HierarchyVisibleIconSize)
                 ?? Application.Asset.Service.GetVisibilityIcon(
                     ModelVisibility.Visible,
                     Constant.Ui.Tree.HierarchyVisibleIconSize);
             treeItem.SetButton(0, 0, buttonIcon);
         }
+    }
+
+    /// <summary>
+    /// モデルの折り畳み状態が通知されたときのイベントハンドラ
+    /// </summary>
+    /// <param name="entityId">折り畳み状態が変更された ModelEntity の識別子</param>
+    /// <param name="isCollapsed">モデルが折り畳まれている場合はtrue、展開されている場合はfalse</param>
+    private void OnModelCollapsed(string entityId, bool isCollapsed)
+    {
+        TreeItem item = _entityIdToTreeItem.TryGetValue(Guid.Parse(entityId), out TreeItem foundItem) ? foundItem : null;
+        if (item == null)
+        {
+            return;
+        }
+        // すでに折り畳み状態が一致している場合は自分が発した通知による変更の可能性があり何もしない
+        if (item.IsCollapsed() == isCollapsed)
+        {
+            return;
+        }
+        item.SetCollapsed(isCollapsed);
     }
 
     /// <summary>

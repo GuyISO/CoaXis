@@ -92,10 +92,8 @@ public partial class ModelEntityFactory : Node
         // TreeItem は親の通知時点で親が存在する必要があるため、通知だけ親先行にする。
         foreach (ModelEntity modelEntity in notificationOrder)
         {
-            Application.Model.Event.NotifyModelVisibilityState(
-                modelEntity.Id,
-                ModelVisibilityResolver.IsVisible(modelEntity));
-            Application.Model.Event.NotifyModelAdded(modelEntity.Id, modelEntity.ParentId);
+            Application.Model.Event.NotifyVisibility(modelEntity.Id, modelEntity.Visibility);
+            Application.Model.Event.NotifyAdded(modelEntity.Id, modelEntity.ParentId);
         }
 
         StartSceneLoadQueue();
@@ -464,7 +462,7 @@ public partial class ModelEntityFactory : Node
         }
 
         modelEntity.Status = nextStatus;
-        Application.Model.Event.NotifyModelStatusChanged(modelEntity.Id, nextStatus);
+        Application.Model.Event.NotifyStatus(modelEntity.Id, nextStatus);
     }
 
     private static Vector3 ConvertPosition(float[] position)

@@ -27,7 +27,6 @@ public partial class SelectionUi : PanelContainer
     public override void _Ready()
     {
         EnsureChildNodes();
-        EnsureTreeColumns();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
         SyncInitialState();
@@ -230,25 +229,6 @@ public partial class SelectionUi : PanelContainer
     #region Internal Helpers
 
     /// <summary>
-    /// Tree列の初期設定を行う
-    /// </summary>
-    private void EnsureTreeColumns()
-    {
-        SelectionTreeColumn[] columns = System.Enum.GetValues<SelectionTreeColumn>();
-        _tree.Columns = columns.Length;
-
-        foreach (SelectionTreeColumn column in columns)
-        {
-            int columnIndex = (int)column;
-            _tree.SetColumnTitle(columnIndex, column.ToString());
-            _tree.SetColumnExpand(columnIndex, column != SelectionTreeColumn.No);
-        }
-
-        // 固定幅にして運用する列の幅を指定する
-        _tree.SetColumnCustomMinimumWidth((int)SelectionTreeColumn.No, Constant.Ui.Tree.SelectionNoColumnMinWidth);
-    }
-
-    /// <summary>
     /// 初期状態を SelectionService から同期する
     /// </summary>
     private void SyncInitialState()
@@ -304,8 +284,13 @@ public partial class SelectionUi : PanelContainer
             Guid entityId = _selectedEntityIds[i];
             ModelEntity modelEntity = Application.Model.Registry.GetEntity(entityId);
             TreeItem item = _tree.CreateItem(root);
-            item.SetText((int)SelectionTreeColumn.No, i.ToString());
-            item.SetText((int)SelectionTreeColumn.Name, modelEntity?.Name ?? entityId.ToString());
+            item.SetText(0, modelEntity?.Name ?? entityId.ToString());
+
+            // ModelEntityに紐づくアイコンを表示し、不在時は既定アイコンで代替する
+            Texture2D icon = Application.Asset.Service.GetIcon(modelEntity?.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
+                ?? Application.Asset.Service.GetDefaultIcon(Constant.Ui.Tree.HierarchyVisibleIconSize);
+            item.SetIcon(0, icon);
+
             // 右クリックメニューはModelEntity単位で対象を扱う設計のため、TreeItemにEntityIdをmeta保持しておく
             item.SetMeta("EntityId", entityId.ToString());
         }

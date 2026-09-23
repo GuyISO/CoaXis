@@ -46,12 +46,12 @@ public class ModelEntity
     /// <summary>
     /// 座標変換後の配置位置
     /// </summary>
-    public Vector3 Position { get; }
+    public Vector3 Position { get; internal set; }
 
     /// <summary>
     /// 座標変換後の回転
     /// </summary>
-    public Quaternion Rotation { get; }
+    public Quaternion Rotation { get; internal set; }
 
     /// <summary>
     /// 表示状態
