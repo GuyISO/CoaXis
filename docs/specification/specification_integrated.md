@@ -82,7 +82,7 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 ### 3.1 構成要素
 - CoaXisExtractor（CATIA VBA）
 - CoaXisModelConverter（Blender × Python）
-- CoaXisSceneBuilder（Godot C#）
+- 外部SceneBuilder（管理対象外、Godot C#）
 - CoaXisDatabase（単一DB）
 - CoaXisApi（業務API）
 - CoaXisCore（共通ドメイン）
@@ -100,8 +100,8 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 
 ### 3.3 論理データフロー
 1. ExtractorがCATIAからDocumentMaster情報と3D中間データを抽出する
-2. ModelConverterが3D中間データを最適化し、SceneBuilder入力用GLBを生成する
-3. SceneBuilderがGLBおよびラインセット情報からViewer用シーン（.scn）を構築する
+2. ModelConverterが3D中間データを最適化し、外部SceneBuilder入力用GLBを生成する
+3. 外部SceneBuilderがGLBおよびラインセット情報からViewer用シーン（.scn）を構築する
 4. Plannerが計画を作成し、Viewerへ可視化指示を送る
 5. AnalyzerがEUC向けデータを定期生成する
 6. ModelerがCATIAへ工程情報を書き戻す
@@ -144,7 +144,7 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 
 ### 4.2 CoaXisModelConverter
 目的:
-- CoaXisExtractorが出力した3D中間データを、CoaXisSceneBuilderで利用可能なGLBへ変換・最適化する
+- CoaXisExtractorが出力した3D中間データを、外部SceneBuilderで利用可能なGLBへ変換・最適化する
 
 実装:
 - BlenderおよびPythonを使用
@@ -162,7 +162,7 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 出力:
 - 視覚用GLB（`visualGlb`）
 - 衝突判定用GLB（`colliderGlb`）
-- SceneBuilderが参照するラインセット情報（`lineSetJson`）
+- 外部SceneBuilderが参照するラインセット情報（`lineSetJson`）
 - 変換ログ
 
 制約:
@@ -268,31 +268,20 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - JSON出力
 - RPA連携前提の出力規約維持
 
-### 4.11 CoaXisSceneBuilder
-目的:
-- CATIAから出力された中間データ群を読み込み、CoaXisViewer用最適化3Dシーン（.scn）を事前構築・保存する
+### 4.11 外部SceneBuilderとの境界
+CoaXisSceneBuilderは本プロジェクトの管理対象外とする。実装、ビルド、起動設定、仕様変更はこのリポジトリでは管理しない。
 
-背景・理由:
-- 将来的には CoaXisViewer 側から 3D アセット構築（GLBパース・コライダー生成・ラインセット解析）の責務を完全に分離し、Viewer は生成済み `.scn` の高速描画のみに専念させる
-- テキスト形式の `.tscn` はファイルサイズが肥大化するため、バイナリ形式の `.scn` として保存しデータ容量削減とロード高速化を図る
+Viewerが受け取る外部成果物の契約は次のとおり。
 
-入力:
-- 本番運用時は CLI 経由で入力パラメータ JSON (配列形式) を受領
-  - `visualGlb` (`.glb`): 視覚用 3D メッシュデータ
-  - `colliderGlb` (`.glb`): 衝突判定用 3D メッシュデータ
-  - `lineSetJson` (`.json`): 線分・パイプ等のラインセット情報
-  - `outputScn` (`.scn`): 出力先バイナリシーンファイル
-  - `visualUnshaded` (`boolean`): Unshaded マテリアル変換フラグ
+入力成果物:
+- 視覚用GLB（`visualGlb`）
+- 衝突判定用GLB（`colliderGlb`）
+- ラインセット情報（`lineSetJson`）
 
-出力:
-- Godot 3Dシーンファイル (`.scn`: バイナリ PackedScene)
-- 正常処理完了時の終了ステータス (リターンコード `0`)
+出力成果物:
+- Godot 3Dシーンファイル（`.scn`: バイナリPackedScene）
 
-主要機能:
-- 視覚用GLBのロードおよびマテリアル調整（Unshaded設定など）
-- コライダー用GLBおよびラインセットのチューブメッシュからの面収集と、単一の ConcavePolygonShape3D（StaticBody3D）構築
-- ラインセットJSONの解析と、表示および衝突判定に共用するチューブメッシュ（ArrayMesh）生成
-- 単一PackedSceneへの焼き込みと `.scn` 保存
+Viewerは生成済み`.scn`の読み込みと描画を担当し、外部SceneBuilderの内部実装には依存しない。
 
 ---
 
