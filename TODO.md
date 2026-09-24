@@ -1,9 +1,5 @@
 # Viewer
 
-なによりまずはコード一通り読んで整える
-
-ModelFactoryはApplicationから外したい、生成経路見直してから
-
 ## 3D表示関係
 点群座標へのVFX配置
     GodotのVFX Graphを使用して、点群座標にエフェクトを配置する機能を実装する

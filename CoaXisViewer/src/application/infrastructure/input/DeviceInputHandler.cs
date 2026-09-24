@@ -64,7 +64,7 @@ public partial class DeviceInputHandler : Node
         
         if (Input.IsActionJustPressed("clear"))
         {
-            Application.Model.Registry.Clear();
+            Application.Model.LoadService.ClearModels();
         }
         
         if (Input.IsActionJustPressed("undo"))

@@ -8,10 +8,6 @@ public partial class EmbededModelPropertyTree : ModelPropertyTree
     public override void _Ready()
     {
         base._Ready();
-
-        // Serviceが参照するために自身を設定する
-        Application.Model.Service.SetEmbededModelPropertyTree(this);
-
         SubscribeEvents();
     }
 

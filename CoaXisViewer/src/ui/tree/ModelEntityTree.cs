@@ -79,7 +79,6 @@ public partial class ModelEntityTree : Tree
     {
         CellSelected += OnCellSelected;
         ButtonClicked += OnButtonClicked;
-        ItemActivated += OnItemActivated;
         ItemCollapsed += OnItemCollapsed;
     }
 
@@ -90,7 +89,6 @@ public partial class ModelEntityTree : Tree
     {
         CellSelected -= OnCellSelected;
         ButtonClicked -= OnButtonClicked;
-        ItemActivated -= OnItemActivated;
         ItemCollapsed -= OnItemCollapsed;
     }
     
@@ -169,20 +167,6 @@ public partial class ModelEntityTree : Tree
                 HandleFitButtonClicked(item);
                 break;
         }
-    }
-
-    /// <summary>
-    /// TreeItem がアクティブ化されたときのイベントハンドラ、主にダブルクリックやEnterキー押下時に呼び出される
-    /// </summary>
-    private void OnItemActivated()
-    {
-        TreeItem item = GetSelected();
-        if (item == null)
-        {
-            return;
-        }
-
-        Application.Model.Service.EmbededModelPropertyTree.Show(TryGetEntityId(item));
     }
 
     /// <summary>

@@ -3,24 +3,16 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルのロードや状態操作を管理する Autoload ノード
+/// モデルの表示状態をModelNodeへ反映するAutoloadノード
 /// </summary>
-public partial class ModelService : Node
+public partial class ModelPresentationService : Node
 {
-	#region Fields
-
-	private EmbededModelPropertyTree _embededModelPropertyTree = null!;
-
-	#endregion
-
 	#region Properties
 
 	/// <summary>
 	/// モデルの透明度を取得する
 	/// </summary>
 	internal float Transparency { get; private set; } = 0.0f;
-
-	public EmbededModelPropertyTree EmbededModelPropertyTree { get => _embededModelPropertyTree; }
 
 	#endregion
 
@@ -47,11 +39,9 @@ public partial class ModelService : Node
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Model.Event.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
 		Application.Model.Event.PositionNotified += OnModelPositionNotified;
 		Application.Model.Event.RotationNotified += OnModelRotationNotified;
 		Application.Model.Event.VisibilityNotified += OnModelVisibilityNotified;
-		Application.Model.Event.Collapsed += OnModelCollapsed;
 		Application.Model.Event.StatusNotified += OnModelStatusNotified;
 		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
 	}
@@ -61,48 +51,11 @@ public partial class ModelService : Node
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Model.Event.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
 		Application.Model.Event.PositionNotified -= OnModelPositionNotified;
 		Application.Model.Event.RotationNotified -= OnModelRotationNotified;
 		Application.Model.Event.VisibilityNotified -= OnModelVisibilityNotified;
-		Application.Model.Event.Collapsed -= OnModelCollapsed;
 		Application.Model.Event.StatusNotified -= OnModelStatusNotified;
 		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
-	}
-
-	/// <summary>
-	/// モデルの表示状態切替がリクエストされたときに呼び出されるイベントハンドラ
-	/// </summary>
-	/// <param name="entityId">表示状態を切り替える ModelEntity の識別子</param>
-	private void OnToggleModelVisibilityRequested(string entityId)
-	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-		{
-			Application.Log.Warn($"ModelService: invalid entityId for toggle request. entityId='{entityId}'");
-			return;
-		}
-
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelService: toggle target not found. entityId='{parsedEntityId}'");
-			return;
-		}
-
-		var command = new SetModelVisibilityCommand(
-			[parsedEntityId],
-			GetNextVisibility(modelEntity.Visibility));
-		Application.Command.Event.Execute(command);
-	}
-
-	private static ModelVisibility GetNextVisibility(ModelVisibility visibility)
-	{
-		return visibility switch
-		{
-			ModelVisibility.Inherit => ModelVisibility.Visible,
-			ModelVisibility.Visible => ModelVisibility.Invisible,
-			_ => ModelVisibility.Inherit,
-		};
 	}
 
 	/// <summary>
@@ -114,14 +67,14 @@ public partial class ModelService : Node
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelService: invalid entityId for position notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelPresentationService: invalid entityId for position notification. entityId='{entityId}'");
 			return;
 		}
 
 		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelService: position target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelPresentationService: position target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -142,14 +95,14 @@ public partial class ModelService : Node
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelService: invalid entityId for rotation notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelPresentationService: invalid entityId for rotation notification. entityId='{entityId}'");
 			return;
 		}
 
 		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelService: rotation target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelPresentationService: rotation target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -170,7 +123,7 @@ public partial class ModelService : Node
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelService: invalid entityId for visibility notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelPresentationService: invalid entityId for visibility notification. entityId='{entityId}'");
 			return;
 		}
 
@@ -184,7 +137,7 @@ public partial class ModelService : Node
 		ModelNode modelNode = modelEntity?.Node;
 		if (modelNode == null)
 		{
-			Application.Log.Warn($"ModelService: visibility target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -197,30 +150,6 @@ public partial class ModelService : Node
 		};
 		modelNode.ApplyVisibilityLayer(isVisible);
 		
-	}
-
-	/// <summary>
-	/// モデルの折り畳み状態が通知されたときに呼び出されるイベントハンドラ
-	/// </summary>
-	/// <param name="entityId">折り畳み状態が変更された ModelEntity の識別子</param>
-	/// <param name="isCollapsed">モデルが折り畳まれている場合はtrue、展開されている場合はfalse</param>
-	private void OnModelCollapsed(string entityId, bool isCollapsed)
-	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-		{
-			Application.Log.Warn($"ModelService: invalid entityId for collapse notification. entityId='{entityId}'");
-			return;
-		}
-
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelService: collapse target not found. entityId='{parsedEntityId}'");
-			return;
-		}
-
-		// ModelEntity の内部的な折り畳み状態を更新
-		modelEntity.IsCollapsed = isCollapsed;
 	}
 
 	/// <summary>
@@ -255,14 +184,14 @@ public partial class ModelService : Node
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelService: invalid entityId for selection notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelPresentationService: invalid entityId for selection notification. entityId='{entityId}'");
 			return;
 		}
 
 		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedEntityId)?.Node;
 		if (modelNode == null)
 		{
-			Application.Log.Warn($"ModelService: highlight target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelPresentationService: highlight target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -291,15 +220,6 @@ public partial class ModelService : Node
 		Application.Model.Event.NotifyTransparency(value);
 	}
 
-	/// <summary>
-	/// 埋め込みモデルプロパティツリーを設定する
-	/// </summary>
-	/// <param name="embededModelPropertyTree">設定する埋め込みモデルプロパティツリー</param>
-	public void SetEmbededModelPropertyTree(EmbededModelPropertyTree embededModelPropertyTree)
-	{
-		_embededModelPropertyTree = embededModelPropertyTree;
-	}
-
 	#endregion
 
 	#region Internal Helpers
@@ -317,7 +237,7 @@ public partial class ModelService : Node
 			return;
 		}
 
-		// 論理階層は Registry で解決し、描画ノードへの反映だけを ModelService が担当する。
+		// 論理階層はRegistryで解決し、描画ノードへの反映だけをModelPresentationServiceが担当する。
 		var modelEntities = new List<ModelEntity> { modelEntity };
 		modelEntities.AddRange(Application.Model.Registry.GetDescendantEntities(modelEntity.Id));
 		foreach (ModelEntity targetModelEntity in modelEntities)

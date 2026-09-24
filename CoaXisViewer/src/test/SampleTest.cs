@@ -9,7 +9,7 @@ public static class SampleTest
     {
         GD.Print("SampleTest: RunLoadCsv");
 
-        Application.Model.Registry.Clear();
+        Application.Model.LoadService.ClearModels();
 
         // 意図: サンプルデータはGodotプロジェクト外のsamplesへ移設済みのため、res://からの相対脱出で実パスへ解決する。
         string entityCsvPath = ProjectSettings.GlobalizePath("res://../samples/modelentity.csv");
@@ -44,7 +44,7 @@ public static class SampleTest
     {
         GD.Print("SampleTest: RunLoadJson");
 
-        Application.Model.Registry.Clear();
+        Application.Model.LoadService.ClearModels();
 
         // 意図: サンプルデータはGodotプロジェクト外のsamplesへ移設済みのため、res://からの相対脱出で実パスへ解決する。
         string jsonPath = ProjectSettings.GlobalizePath("res://../samples/modelentity.json");

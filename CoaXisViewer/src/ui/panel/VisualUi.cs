@@ -92,7 +92,7 @@ public partial class VisualUi : PanelContainer
         }
 
         float transparencyValue = (float)value;
-        Application.Model.Service.SetTransparency(transparencyValue);
+        Application.Model.Presentation.SetTransparency(transparencyValue);
     }
 
     /// <summary>
@@ -153,8 +153,8 @@ public partial class VisualUi : PanelContainer
     private void SyncInitialState()
     {
         _isUpdating = true;
-        _sliderTransparency.Value = Application.Model.Service.Transparency;
-        UpdateTransparencyLabel(Application.Model.Service.Transparency);
+        _sliderTransparency.Value = Application.Model.Presentation.Transparency;
+        UpdateTransparencyLabel(Application.Model.Presentation.Transparency);
         _isUpdating = false;
     }
 

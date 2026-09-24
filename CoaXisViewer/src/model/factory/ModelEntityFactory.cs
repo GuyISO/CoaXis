@@ -2,28 +2,12 @@ using CoaXis.Protocol.Viewer;
 using Godot;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading.Tasks;
 
 /// <summary>
 /// ModelEntityDto から ModelEntity と ModelNode を生成し、シーン読み込みキューを制御するファクトリ
 /// </summary>
 public partial class ModelEntityFactory : Node
 {
-    /// <summary>
-    /// シーンロードを順番に処理するためのキュー
-    /// シーン(scn/tscn) の読み込みは比較的重いため、ここで一件ずつ処理して UI と描画が詰まりにくくする
-    /// </summary>
-    private readonly Queue<SceneLoadQueueItem> _sceneLoadQueue = new();
-    private readonly object _sceneLoadQueueLock = new();
-    private bool _isSceneLoadQueueRunning;
-    private long _sceneLoadGeneration;
-
-    /// <summary>
-    /// 1フレームあたりでキュー処理に割り当てる時間予算(ms)。超過分は次フレームへ回して描画を詰まらせない
-    /// </summary>
-    private const long SceneLoadFrameBudgetMs = 4;
-
     #region Public API
 
     /// <summary>
@@ -58,7 +42,7 @@ public partial class ModelEntityFactory : Node
                 throw new ArgumentException($"Duplicate ModelEntityDto.Id '{dto.Id}'.", nameof(entityDtos));
             }
 
-            entities.Add(CreateModelEntity(dto));
+            entities.Add(ModelEntityMapper.Map(dto));
         }
 
         // 親子関係の通知順序を親優先に並べ替える
@@ -67,7 +51,7 @@ public partial class ModelEntityFactory : Node
         // 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
         foreach (ModelEntity modelEntity in entities)
         {
-            UpdateModelStatus(modelEntity, ModelStatus.Initialized);
+            Application.Model.SceneLoader.MarkInitialized(modelEntity);
             Application.Model.Registry.RegisterEntity(modelEntity);
         }
         Application.Model.Registry.ResolveHierarchy();
@@ -77,17 +61,7 @@ public partial class ModelEntityFactory : Node
             modelEntity.Node = EnsureNode(modelEntity);
         }
 
-        foreach (ModelEntity modelEntity in entities)
-        {
-            if (!string.IsNullOrWhiteSpace(modelEntity.ScenePath))
-            {
-                QueueSceneLoad(modelEntity, false);
-            }
-            else
-            {
-                UpdateModelStatus(modelEntity, ModelStatus.Loaded);
-            }
-        }
+        Application.Model.SceneLoader.PrepareLoads(entities);
 
         // TreeItem は親の通知時点で親が存在する必要があるため、通知だけ親先行にする。
         foreach (ModelEntity modelEntity in notificationOrder)
@@ -96,49 +70,13 @@ public partial class ModelEntityFactory : Node
             Application.Model.Event.NotifyAdded(modelEntity.Id, modelEntity.ParentId);
         }
 
-        StartSceneLoadQueue();
+        Application.Model.SceneLoader.StartPendingLoads();
         return entities;
-    }
-
-    /// <summary>
-    /// Clear や再読み込み時に、既にキューに残っている非同期処理が旧データを更新しないように待機キューを停止する
-    /// 旧モデルのロードが残ると、レジストリやツリーにゴミが残るため、ここで明示的に無効化する
-    /// </summary>
-    public void ClearPendingLoads()
-    {
-        lock (_sceneLoadQueueLock)
-        {
-            _sceneLoadQueue.Clear();
-            _isSceneLoadQueueRunning = false;
-            _sceneLoadGeneration++;
-        }
-
-        SceneAssetLoader.ClearCompletedCache();
     }
 
     #endregion
 
     #region Internal Helpers
-
-    private static ModelEntity CreateModelEntity(ModelEntityDto dto)
-    {
-        Guid resolvedParentId = dto.ParentId ?? Guid.Empty;
-        Vector3 convertedPosition = ConvertPosition(dto.Position);
-        Quaternion convertedRotation = ConvertRotation(dto.Rotation);
-
-        return new ModelEntity(
-            dto.Id,
-            resolvedParentId,
-            dto.Type,
-            dto.Name,
-            convertedPosition,
-            convertedRotation,
-            ModelVisibilityResolver.Parse(dto.Visibility),
-            dto.IsCollapsed,
-            dto.IconPath,
-            dto.ScenePath,
-            dto.AlignToAabbCenter);
-    }
 
     private static IReadOnlyList<ModelEntity> OrderParentFirst(IReadOnlyList<ModelEntity> entities)
     {
@@ -250,243 +188,6 @@ public partial class ModelEntityFactory : Node
         }
 
         return EnsureNode(parentEntity);
-    }
-
-    private void QueueSceneLoad(ModelEntity modelEntity, bool startProcessing = true)
-    {
-        if (modelEntity == null)
-        {
-            throw new ArgumentNullException(nameof(modelEntity));
-        }
-
-        if (!Application.Model.Registry.IsEntityRegistered(modelEntity.Id))
-        {
-            return;
-        }
-
-        // 実ファイルI/O・パースはここで即バックグラウンドへ投入し、他モデルの完了待ちで遅延させない
-        SceneAssetLoader.RequestLoad(modelEntity.ScenePath);
-
-        lock (_sceneLoadQueueLock)
-        {
-            long generation = _sceneLoadGeneration;
-            _sceneLoadQueue.Enqueue(new SceneLoadQueueItem(modelEntity, generation));
-            if (startProcessing)
-            {
-                StartSceneLoadQueue();
-            }
-        }
-    }
-
-    private void StartSceneLoadQueue()
-    {
-        lock (_sceneLoadQueueLock)
-        {
-            if (_isSceneLoadQueueRunning || _sceneLoadQueue.Count == 0)
-            {
-                return;
-            }
-
-            _isSceneLoadQueueRunning = true;
-            _ = ProcessSceneLoadQueueAsync(_sceneLoadGeneration);
-        }
-    }
-
-    private async Task ProcessSceneLoadQueueAsync(long generation)
-    {
-        try
-        {
-            // フレーム予算を使い切った時だけ ProcessFrame を挟む（未完了分は末尾に戻して次回ポーリングする）
-            var stopwatch = Stopwatch.StartNew();
-            while (true)
-            {
-                SceneLoadQueueItem nextItem;
-                lock (_sceneLoadQueueLock)
-                {
-                    if (generation != _sceneLoadGeneration)
-                    {
-                        return;
-                    }
-
-                    if (_sceneLoadQueue.Count == 0)
-                    {
-                        _isSceneLoadQueueRunning = false;
-                        return;
-                    }
-
-                    nextItem = _sceneLoadQueue.Dequeue();
-                }
-
-                if (nextItem.Generation != generation)
-                {
-                    continue;
-                }
-
-                if (IsActiveEntity(nextItem.ModelEntity) && !TryFinishSceneLoad(nextItem.ModelEntity))
-                {
-                    lock (_sceneLoadQueueLock)
-                    {
-                        if (generation == _sceneLoadGeneration)
-                        {
-                            _sceneLoadQueue.Enqueue(nextItem);
-                        }
-                    }
-                }
-
-                if (stopwatch.ElapsedMilliseconds >= SceneLoadFrameBudgetMs)
-                {
-                    await ToSignal(GetTree(), SceneTree.SignalName.ProcessFrame);
-                    stopwatch.Restart();
-                }
-            }
-        }
-        catch (Exception exception)
-        {
-            Application.Log.Error($"ModelEntityFactory: scene load queue processing failed. {exception}");
-        }
-        finally
-        {
-            lock (_sceneLoadQueueLock)
-            {
-                // 旧世代ランナーが新世代ランナーの実行状態を上書きしないようにする
-                if (generation == _sceneLoadGeneration)
-                {
-                    _isSceneLoadQueueRunning = false;
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// SceneBuilderで作成されたシーン(ScenePath)のバックグラウンド読み込み完了を確認し、完了していれば反映する
-    /// </summary>
-    /// <returns>読み込みが完了（成功/失敗いずれか）した場合は true、まだ進行中の場合は false</returns>
-    private bool TryFinishSceneLoad(ModelEntity modelEntity)
-    {
-        try
-        {
-            // クリア中や古いロードの残骸はスキップする
-            // ここで先に弾かないと、レジストリから外れたモデルが後続処理で再利用される
-            if (!IsActiveEntity(modelEntity))
-            {
-                return true;
-            }
-
-            ModelNode modelNode = modelEntity.Node;
-            if (modelNode == null || !IsInstanceValid(modelNode))
-            {
-                return true;
-            }
-
-            if (string.IsNullOrWhiteSpace(modelEntity.ScenePath))
-            {
-                UpdateModelStatus(modelEntity, ModelStatus.Loaded);
-                return true;
-            }
-
-            if (modelEntity.Status != ModelStatus.Loading)
-            {
-                UpdateModelStatus(modelEntity, ModelStatus.Loading);
-            }
-
-            // tscn(ScenePath) はシーン自身が StaticBody3D/CollisionShape3D を持つ想定のため、自動コライダー生成は行わない
-            SceneLoadResult result = SceneAssetLoader.TryFinishLoad(modelNode, modelEntity.ScenePath);
-            if (result == SceneLoadResult.InProgress)
-            {
-                return false;
-            }
-
-            if (!IsActiveEntity(modelEntity))
-            {
-                return true;
-            }
-
-            bool sceneLoaded = result == SceneLoadResult.Loaded;
-            if (sceneLoaded && modelEntity.AlignToAabbCenter)
-            {
-                ModelMeshCenterAligner.AlignPivotToMeshCenter(modelNode);
-            }
-
-            modelNode.ApplyVisibilityLayer(ModelVisibilityResolver.IsVisible(modelEntity));
-            UpdateModelStatus(modelEntity, sceneLoaded ? ModelStatus.Loaded : ModelStatus.LoadFailed);
-            return true;
-        }
-        catch (Exception exception)
-        {
-            UpdateModelStatus(modelEntity, ModelStatus.LoadFailed);
-            Application.Log.Error($"ModelEntityFactory: failed to load model assets for entityId='{modelEntity.Id}', scene='{modelEntity.ScenePath}'. {exception}");
-            return true;
-        }
-    }
-
-    private sealed class SceneLoadQueueItem
-    {
-        public SceneLoadQueueItem(ModelEntity modelEntity, long generation)
-        {
-            ModelEntity = modelEntity;
-            Generation = generation;
-        }
-
-        public ModelEntity ModelEntity { get; }
-
-        public long Generation { get; }
-    }
-
-    private static bool IsActiveEntity(ModelEntity modelEntity)
-    {
-        if (modelEntity == null)
-        {
-            return false;
-        }
-
-        if (modelEntity.Status == ModelStatus.Disposed)
-        {
-            return false;
-        }
-
-        return Application.Model.Registry.IsEntityRegistered(modelEntity.Id)
-            && modelEntity.Node != null
-            && IsInstanceValid(modelEntity.Node);
-    }
-
-    private static void UpdateModelStatus(ModelEntity modelEntity, ModelStatus nextStatus)
-    {
-        if (modelEntity == null)
-        {
-            return;
-        }
-
-        if (modelEntity.Status == ModelStatus.Disposed && nextStatus != ModelStatus.Disposed)
-        {
-            return;
-        }
-
-        modelEntity.Status = nextStatus;
-        Application.Model.Event.NotifyStatus(modelEntity.Id, nextStatus);
-    }
-
-    private static Vector3 ConvertPosition(float[] position)
-    {
-        if (position == null || position.Length != 3)
-        {
-            return Vector3.Zero;
-        }
-
-        Vector3 catiaVector = new Vector3(position[0], position[1], position[2]);
-        return CoordinateSystemUtility.CatiaToGodot(catiaVector);
-    }
-
-    private static Quaternion ConvertRotation(float[] rotation)
-    {
-        if (rotation == null || rotation.Length != 4)
-        {
-            return Quaternion.Identity;
-        }
-
-        Quaternion catiaQuaternion = new Quaternion(rotation[0], rotation[1], rotation[2], rotation[3]);
-        Basis catiaBasis = new Basis(catiaQuaternion);
-        Basis godotBasis = CoordinateSystemUtility.CatiaToGodot(catiaBasis);
-        return godotBasis.GetRotationQuaternion();
     }
 
     #endregion

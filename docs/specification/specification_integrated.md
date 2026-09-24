@@ -237,6 +237,16 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - DBへ直接接続しない
 - 業務操作の主系はPlanner側
 
+モデル実行時責務:
+- `ModelLoadService`: モデル集合の置換・クリアを統括し、旧世代の非同期ロードを無効化してから論理モデルを破棄する
+- `ModelEntityMapper`: IPC/ファイルDTOを検証済みの内部ModelEntityへ変換し、CATIA座標系からGodot座標系への変換境界を担う
+- `ModelRegistry`: ModelEntity/ModelPropertyの識別子検索、論理親子関係、未解決リンク、論理集合の破棄を担う。描画ロードを開始・停止しない
+- `ModelEntityFactory`: Entity登録とModelNodeの親子構築を担う
+- `ModelSceneLoader`: シーンロードキュー、ロード世代、フレーム予算、ロード状態遷移、およびロード済みシーンのModelNode反映を担う
+- `ModelStateService`: 表示状態切替要求とツリー折畳み通知を論理ModelEntityの状態変更へ変換する。ModelNodeやUIを直接操作しない
+- `ModelPresentationService`: 位置・回転・Visibility・選択強調・透明度をModelNodeへ反映する。論理状態の変更要求やUI参照を保持しない
+- UIツリー: ModelEventとPickEventの通知をTreeItemまたはModelPropertyTreeへ投影する。TreeItemはModel Domainで保持せず、UIをModelPresentationServiceへ参照登録しない
+
 ### 4.8 CoaXisAnalyzer
 目的:
 - 本番DB依存を避け、分析しやすい形でEUCデータを提供
@@ -396,6 +406,14 @@ EditorからViewer:
 - Focus
 - Hide
 - Show
+
+`LoadModel`の処理順:
+1. IPC層はpayloadの検証とDTOファイルの読込のみを行う
+2. `ModelLoadService`は旧世代のSceneロードを無効化し、`ModelRegistry`の論理集合をクリアする
+3. `ModelEntityMapper`でDTOをGodot座標系のModelEntityへ変換する
+4. `ModelEntityFactory`がEntityを登録し、論理階層とModelNodeの親子構造を確立する
+5. UIツリーへ親先行でEntity状態を通知した後、`ModelSceneLoader`が非同期シーンロードを開始する
+6. `ModelSceneLoader`は`Loading`、`Loaded`、`LoadFailed`を通知し、UIツリーと表示サービスが状態を反映する
 
 ViewerからEditor:
 - OnSelect

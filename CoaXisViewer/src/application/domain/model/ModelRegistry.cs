@@ -375,10 +375,6 @@ public partial class ModelRegistry : Node
     /// </summary>
     public void Clear()
     {
-        // 再読み込み時に古い非同期タスクが後からモデルを更新しないよう、
-        // まず待機中のロード処理を止めてから実体を削除する。
-        Application.Model.EntityFactory.ClearPendingLoads();
-
         var entityIds = new List<Guid>(_entities.Keys);
         foreach (Guid entityId in entityIds)
         {

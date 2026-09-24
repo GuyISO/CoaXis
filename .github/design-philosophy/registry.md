@@ -117,3 +117,30 @@
   - `.github/design-philosophy/index.md`
   - `.github/design-philosophy/registry.md`
 - Notes: Guid 変換失敗 payload は処理せず警告ログを残す
+
+- Date: 2026-09-24
+- Trigger: Model関連Domainのロード・表示更新・ツリー管理の責務を段階的に分割
+- Decision: モデル集合の置換・取消しはModelLoadService、論理Entity/Property階層はModelRegistry、非同期Sceneロードと状態遷移はModelSceneLoader、ModelNodeへの表示反映はModelPresentationService、TreeItem投影はUIが所有する。各責務は他者の内部状態を保持しない
+- Scope: CoaXisViewerのModel Domain、モデルロード、Scene反映、モデルTree UI
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/model/ModelLoadService.cs`
+  - `CoaXisViewer/src/application/domain/model/ModelEntityMapper.cs`
+  - `CoaXisViewer/src/application/domain/model/ModelSceneLoader.cs`
+  - `CoaXisViewer/src/application/domain/model/ModelRegistry.cs`
+  - `CoaXisViewer/src/model/factory/ModelEntityFactory.cs`
+  - `docs/specification/specification_integrated.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: ModelEntityとModelNodeの結合は互換性のため維持し、完全なGodot非依存化は別フェーズとする
+
+- Date: 2026-09-24
+- Trigger: ModelPresentationServiceを表示反映専任へ分離
+- Decision: 表示状態切替要求とツリー折畳み状態の更新をModelStateServiceへ移し、ModelPresentationServiceはModelNodeへの位置・回転・Visibility・選択強調・透明度反映だけを担う。ModelPresentationServiceからUI Tree参照を禁止し、ModelPropertyTreeはPickEventを直接購読して更新する
+- Scope: CoaXisViewerのModel Domainとモデル/プロパティTree UI
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/model/ModelStateService.cs`
+  - `CoaXisViewer/src/application/domain/model/ModelPresentationService.cs`
+  - `CoaXisViewer/src/ui/tree/EmbededModelPropertyTree.cs`
+  - `CoaXisViewer/src/ui/tree/ModelEntityTree.cs`
+  - `docs/specification/specification_integrated.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: Treeの選択は既存のPickEvent経路でPropertyTreeへ到達するため、Tree間の直接参照を追加しない
