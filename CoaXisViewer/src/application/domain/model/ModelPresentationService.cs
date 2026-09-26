@@ -42,6 +42,8 @@ public partial class ModelPresentationService : Node
 		Application.Model.Event.PositionNotified += OnModelPositionNotified;
 		Application.Model.Event.RotationNotified += OnModelRotationNotified;
 		Application.Model.Event.VisibilityNotified += OnModelVisibilityNotified;
+		Application.Model.Event.Added += OnModelAdded;
+		Application.Model.Event.ModelSetReplaced += OnModelSetReplaced;
 		Application.Model.Event.StatusNotified += OnModelStatusNotified;
 		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
 	}
@@ -54,6 +56,8 @@ public partial class ModelPresentationService : Node
 		Application.Model.Event.PositionNotified -= OnModelPositionNotified;
 		Application.Model.Event.RotationNotified -= OnModelRotationNotified;
 		Application.Model.Event.VisibilityNotified -= OnModelVisibilityNotified;
+		Application.Model.Event.Added -= OnModelAdded;
+		Application.Model.Event.ModelSetReplaced -= OnModelSetReplaced;
 		Application.Model.Event.StatusNotified -= OnModelStatusNotified;
 		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
 	}
@@ -129,19 +133,87 @@ public partial class ModelPresentationService : Node
 
 		// ModelEntity の内部的な表示状態を更新
 		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
-		if (modelEntity != null)
-		{
-			modelEntity.Visibility = visibility;
-		}
-		
-		ModelNode modelNode = modelEntity?.Node;
-		if (modelNode == null)
+		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{parsedEntityId}'");
 			return;
 		}
+		
+		ApplyVisibility(modelEntity, visibility);
+	}
 
-		// Inherit は親モデルの状態で表示可否が決まるため、その場合だけ実効状態へ解決する。
+	/// <summary>
+	/// 追加された部分木の初期表示状態を反映する
+	/// </summary>
+	/// <param name="entityId">追加された部分木ルートの識別子</param>
+	/// <param name="parentEntityId">追加先の親モデルの識別子</param>
+	private void OnModelAdded(string entityId, string parentEntityId)
+	{
+		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
+		{
+			return;
+		}
+
+		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+		if (modelEntity == null)
+		{
+			return;
+		}
+
+		ApplyVisibilitySubtree(modelEntity);
+	}
+
+	/// <summary>
+	/// 全件置換後に登録済みモデルの初期表示状態を同期する
+	/// </summary>
+	private void OnModelSetReplaced()
+	{
+		foreach (ModelEntity modelEntity in Application.Model.Registry.Entities.Values)
+		{
+			if (modelEntity.Id != RootModelEntity.RootEntityId)
+			{
+				ApplyVisibility(modelEntity, modelEntity.Visibility);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 部分木の各Entityへ初期表示状態を反映する
+	/// </summary>
+	/// <param name="rootEntity">反映対象の部分木ルート</param>
+	private void ApplyVisibilitySubtree(ModelEntity rootEntity)
+	{
+		var pendingEntities = new Stack<ModelEntity>();
+		var visitedEntityIds = new HashSet<Guid>();
+		pendingEntities.Push(rootEntity);
+
+		while (pendingEntities.Count > 0)
+		{
+			ModelEntity modelEntity = pendingEntities.Pop();
+			if (modelEntity == null || !visitedEntityIds.Add(modelEntity.Id))
+			{
+				continue;
+			}
+
+			ApplyVisibility(modelEntity, modelEntity.Visibility);
+			foreach (ModelEntity childEntity in modelEntity.Children)
+			{
+				pendingEntities.Push(childEntity);
+			}
+		}
+	}
+
+	private void ApplyVisibility(ModelEntity modelEntity, ModelVisibility visibility)
+	{
+		modelEntity.Visibility = visibility;
+		ModelNode modelNode = modelEntity.Node;
+		if (modelNode == null || !IsInstanceValid(modelNode))
+		{
+			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{modelEntity.Id}'");
+			return;
+		}
+
+		// Inherit は階層全体が確定した後に親の設定から実効状態を解決する。
 		bool isVisible = visibility switch
 		{
 			ModelVisibility.Visible => true,
@@ -149,7 +221,6 @@ public partial class ModelPresentationService : Node
 			_ => ModelVisibilityResolver.IsVisible(modelEntity),
 		};
 		modelNode.ApplyVisibilityLayer(isVisible);
-		
 	}
 
 	/// <summary>

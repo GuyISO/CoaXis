@@ -25,7 +25,7 @@ public partial class ModelLoadService : Node
 
 		ClearModels();
 		IReadOnlyList<ModelEntity> entities = ModelEntityFactory.Create(entityDtos);
-		IReadOnlyList<ModelEntity> notificationOrder = OrderParentFirst(entities);
+		ValidateAcyclicHierarchy(entities);
 
 		// 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
 		foreach (ModelEntity modelEntity in entities)
@@ -42,13 +42,8 @@ public partial class ModelLoadService : Node
 
 		Application.Model.Scene.PrepareLoads(entities);
 
-		// TreeItem は親の通知時点で親が存在する必要があるため、通知だけ親先行にする。
-		foreach (ModelEntity modelEntity in notificationOrder)
-		{
-			Application.Model.Event.NotifyVisibility(modelEntity.Id, modelEntity.Visibility);
-			Application.Model.Event.NotifyAdded(modelEntity.Id, modelEntity.ParentId);
-		}
-
+		// 全Entityと階層が確定してから一括通知し、Tree側に親先行の個別通知を要求しない。
+		Application.Model.Event.NotifyModelSetReplaced();
 		Application.Model.Scene.StartPendingLoads();
 		return entities;
 	}
@@ -90,9 +85,8 @@ public partial class ModelLoadService : Node
 
 	#region Internal Helpers
 
-	private static IReadOnlyList<ModelEntity> OrderParentFirst(IReadOnlyList<ModelEntity> entities)
+	private static void ValidateAcyclicHierarchy(IReadOnlyList<ModelEntity> entities)
 	{
-		var ordered = new List<ModelEntity>(entities.Count);
 		var entityById = new Dictionary<Guid, ModelEntity>(entities.Count);
 		foreach (ModelEntity modelEntity in entities)
 		{
@@ -103,25 +97,22 @@ public partial class ModelLoadService : Node
 		var visited = new HashSet<Guid>();
 		foreach (ModelEntity modelEntity in entities)
 		{
-			AddParentFirst(modelEntity, entityById, visiting, visited, ordered);
+			VisitHierarchy(modelEntity, entityById, visiting, visited);
 		}
-
-		return ordered;
 	}
 
-	private static void AddParentFirst(
+	private static void VisitHierarchy(
 		ModelEntity modelEntity,
 		IReadOnlyDictionary<Guid, ModelEntity> entityById,
 		ISet<Guid> visiting,
-		ISet<Guid> visited,
-		ICollection<ModelEntity> ordered)
+		ISet<Guid> visited)
 	{
 		if (visited.Contains(modelEntity.Id))
 		{
 			return;
 		}
 
-		// 循環した入力は通知順序を確定できないため、登録前に明示的に拒否する。
+		// 循環階層は階層解決やNode配置を壊すため、通知順序とは独立して登録前に拒否する。
 		if (!visiting.Add(modelEntity.Id))
 		{
 			throw new ArgumentException($"Circular model hierarchy detected at '{modelEntity.Id}'.", nameof(entityById));
@@ -130,12 +121,11 @@ public partial class ModelLoadService : Node
 		if (modelEntity.ParentId != Guid.Empty &&
 			entityById.TryGetValue(modelEntity.ParentId, out ModelEntity parentEntity))
 		{
-			AddParentFirst(parentEntity, entityById, visiting, visited, ordered);
+			VisitHierarchy(parentEntity, entityById, visiting, visited);
 		}
 
 		visiting.Remove(modelEntity.Id);
 		visited.Add(modelEntity.Id);
-		ordered.Add(modelEntity);
 	}
 
 	private static ModelNode EnsureNode(ModelEntity modelEntity)

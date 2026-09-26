@@ -100,7 +100,8 @@ public partial class ModelEntityTree : Tree
         Application.Setting.Event.SettingsNotified += ApplySettings;
         Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified += OnClearedNotified;
-        Application.Model.Event.Added += OnModelAddedNotified;
+        Application.Model.Event.Added += OnModelAdded;
+        Application.Model.Event.ModelSetReplaced += OnModelSetReplaced;
         Application.Model.Event.VisibilityNotified += OnModelVisibilityNotified;
         Application.Model.Event.Collapsed += OnModelCollapsed;
         Application.Model.Event.StatusNotified += OnModelStatusNotified;
@@ -116,7 +117,8 @@ public partial class ModelEntityTree : Tree
         Application.Setting.Event.SettingsNotified -= ApplySettings;
         Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Selection.Event.ClearedNotified -= OnClearedNotified;
-        Application.Model.Event.Added -= OnModelAddedNotified;
+        Application.Model.Event.Added -= OnModelAdded;
+        Application.Model.Event.ModelSetReplaced -= OnModelSetReplaced;
         Application.Model.Event.VisibilityNotified -= OnModelVisibilityNotified;
         Application.Model.Event.StatusNotified -= OnModelStatusNotified;
         Application.Model.Event.Collapsed -= OnModelCollapsed;
@@ -223,7 +225,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     /// <param name="entityId">追加する子 ModelEntity の識別子</param>
     /// <param name="parentEntityId">追加先の親 ModelEntity の識別子</param>
-    private void OnModelAddedNotified(string entityId, string parentEntityId)
+    private void OnModelAdded(string entityId, string parentEntityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -232,9 +234,11 @@ public partial class ModelEntityTree : Tree
         }
 
         Guid parsedParentEntityId = Guid.Empty;
-        if (!string.IsNullOrWhiteSpace(parentEntityId))
+        if (!string.IsNullOrWhiteSpace(parentEntityId) &&
+            !Guid.TryParse(parentEntityId, out parsedParentEntityId))
         {
-            Guid.TryParse(parentEntityId, out parsedParentEntityId);
+            Application.Log.Warn($"ModelTree: failed to add entity. invalid parentEntityId='{parentEntityId}'");
+            return;
         }
 
         if (parsedParentEntityId == Guid.Empty)
@@ -242,8 +246,23 @@ public partial class ModelEntityTree : Tree
             AddToTree(parsedEntityId, Guid.Empty);
             return;
         }
+
+        if (!Application.Model.Registry.IsEntityRegistered(parsedParentEntityId) ||
+            !_entityIdToTreeItem.ContainsKey(parsedParentEntityId))
+        {
+            Application.Log.Warn($"ModelTree: parent TreeItem not found for added entity. entityId='{parsedEntityId}', parentEntityId='{parsedParentEntityId}'");
+            return;
+        }
         
         AddToTree(parsedEntityId, parsedParentEntityId);
+    }
+
+    /// <summary>
+    /// モデル集合が置換されたとき、Registryの階層からツリーを再構築する
+    /// </summary>
+    private void OnModelSetReplaced()
+    {
+        RebuildTreeFromRegistry();
     }
 
     /// <summary>
@@ -325,8 +344,12 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void OnRegistryClearedNotified()
     {
-        // レジストリがクリアされたあとにツリーだけ残ると、
-        // 古い TreeItem を参照したまま UI が壊れるので、先にツリーを空にして Root から再構築する。
+        RebuildTreeFromRegistry();
+    }
+
+    private void RebuildTreeFromRegistry()
+    {
+        // Registryの確定済み階層を正として一度だけ再構築し、個別の親先行通知を不要にする。
         Clear();
         _entityIdToTreeItem.Clear();
         _highlightedItems.Clear();
@@ -406,7 +429,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        // 親追加時の子孫再帰と個別のModelAdded通知が重なるため、同じモデルのTreeItemは一度だけ作る。
+        // 部分木通知の再送や循環参照があっても、同じモデルのTreeItemは一度だけ作る。
         if (_entityIdToTreeItem.ContainsKey(entityId))
         {
             return;

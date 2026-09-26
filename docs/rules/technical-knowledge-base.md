@@ -42,6 +42,21 @@
 
 ---
 
+### [2026-09-26] モデル置換ロードを一括通知し、Addedを部分木差分用に維持
+
+- 背景: `ReplaceEntities` は全EntityをRegistryへ登録して階層を解決した後も、Tree構築のため親先行順を計算し、Entityごとに `Added` と `VisibilityNotified` を発行していた。
+- 問題: `ModelEntityTree` は追加Entityの子孫をRegistryから再帰的に構築するため、全件ロード時の個別Added通知は重複したTree追加試行を招く。また、将来の部分木追加と全件置換が同じ通知列に依存する。
+- 判断: 全件置換はpayloadなしの `ModelSetReplaced` を一度通知し、TreeはRegistry Rootから再構築、PresentationはRegistryの初期Visibilityを同期する。`Added` は個別追加用に残し、新しい部分木ルートを一度通知する契約とする。
+- 判断理由: 全件登録・階層解決後ならTreeは確定済み `Children` を辿れるため、親先行通知は不要。差分追加は親へのリンクと部分木全体の登録後にルートのみを通知すれば、既存Treeへ部分木を接続できる。
+- 採用しなかった代替案: EntityごとのAdded/Visibility通知を維持する案は置換時に不要なイベントを繰り返す。Added自体を削除する案は将来の部分木追加を表現できないため不採用。
+- 影響範囲: `ModelLoadService`、`ModelEvent`、`ModelEntityTree`、`ModelPresentationService`。個別の可視性変更通知は維持する。
+- 実装/運用手順: 置換では全件登録・階層解決・Node/Scene準備後に `ModelSetReplaced` を発行する。差分追加では親がRegistryとTreeに存在し、部分木全体がRegistry上で辿れる状態になってからAddedを部分木ルートに対して一度発行する。親未解決のAddedは別Tree rootへ誤配置せず拒否する。
+- 検証方法: 親子の入力順が異なる置換ロード、初期Visibilityと個別変更、空/連続置換、部分木追加通知と親不在時の扱いを確認し、`check: mojibake` と `dotnet build .\\CoaXis.sln` を実行する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/application/domain/model/ModelLoadService.cs`、`CoaXisViewer/src/application/domain/model/ModelEvent.cs`、`CoaXisViewer/src/ui/tree/ModelEntityTree.cs`、`CoaXisViewer/src/application/domain/model/ModelPresentationService.cs`
+- 備考: TreeItem生成とVisibility反映は全モデル分必要なため、全体計算量は引き続きO(N)。この変更は不要なsignal発行と重複追加試行を削減する。
+
+---
+
 ### [2026-09-20] コンテキストメニュー（ModelEntity/PickResult/AxisNavigator）の NativeMenu 検証
 
 - 背景: ModelEntity の右クリックメニューを OS ネイティブの外観・操作感で表示できるか検証する必要がある。
