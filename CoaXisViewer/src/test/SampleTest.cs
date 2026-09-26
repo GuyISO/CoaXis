@@ -9,32 +9,20 @@ public static class SampleTest
     {
         GD.Print("SampleTest: RunLoadCsv");
 
-        Application.Model.LoadService.ClearModels();
+        Application.Model.Load.ClearModels();
 
         // 意図: サンプルデータはGodotプロジェクト外のsamplesへ移設済みのため、res://からの相対脱出で実パスへ解決する。
         string entityCsvPath = ProjectSettings.GlobalizePath("res://../samples/modelentity.csv");
         List<ModelEntityDto> entityDtos = ModelEntityCsvLoader.Load(entityCsvPath);
 
-        if (entityDtos.Count == 0)
-        {
-            GD.Print("SampleTest: no DTOs were loaded from CSV.");
-            return;
-        }
-
-        Application.Model.EntityFactory.CreateEntities(entityDtos);
+        Application.Model.Load.ReplaceEntities(entityDtos);
 
         GD.Print($"SampleTest: created {entityDtos.Count} models from CSV.");
 
         string propertyCsvPath = ProjectSettings.GlobalizePath("res://../samples/modelproperty.csv");
         List<ModelPropertyDto> propertyDtos = ModelPropertyCsvLoader.Load(propertyCsvPath);
 
-        if (propertyDtos.Count == 0)
-        {
-            GD.Print("SampleTest: no property DTOs were loaded from CSV.");
-            return;
-        }
-
-        Application.Model.PropertyFactory.CreateProperties(propertyDtos);
+        Application.Model.Load.LoadProperties(propertyDtos);
 
         GD.Print($"SampleTest: created {propertyDtos.Count} properties from CSV.");
 
@@ -44,7 +32,7 @@ public static class SampleTest
     {
         GD.Print("SampleTest: RunLoadJson");
 
-        Application.Model.LoadService.ClearModels();
+        Application.Model.Load.ClearModels();
 
         // 意図: サンプルデータはGodotプロジェクト外のsamplesへ移設済みのため、res://からの相対脱出で実パスへ解決する。
         string jsonPath = ProjectSettings.GlobalizePath("res://../samples/modelentity.json");
@@ -56,7 +44,7 @@ public static class SampleTest
             return;
         }
 
-        Application.Model.EntityFactory.CreateEntities(dtos);
+        Application.Model.Load.ReplaceEntities(dtos);
 
         GD.Print($"SampleTest: created {dtos.Count} models from JSON.");
     }

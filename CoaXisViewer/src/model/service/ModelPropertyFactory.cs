@@ -1,21 +1,20 @@
 using CoaXis.Protocol.Viewer;
-using Godot;
 using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// ModelPropertyDto から ModelProperty を生成し、ModelRegistry へ登録・階層解決を行うファクトリ
+/// ModelPropertyDto から ModelProperty を生成するファクトリ
 /// </summary>
-public partial class ModelPropertyFactory : Node
+public static class ModelPropertyFactory
 {
     #region Public API
 
     /// <summary>
-    /// ModelPropertyDto の集合から ModelProperty を一括生成し、Registry に登録して階層を解決する。
+    /// ModelPropertyDto の集合から ModelProperty を一括生成する。
     /// </summary>
     /// <param name="propertyDtos">生成元となる Property DTO の集合</param>
     /// <returns>生成された ModelProperty の一覧</returns>
-    public IReadOnlyList<ModelProperty> CreateProperties(IReadOnlyList<ModelPropertyDto> propertyDtos)
+    public static IReadOnlyList<ModelProperty> Create(IReadOnlyList<ModelPropertyDto> propertyDtos)
     {
         if (propertyDtos == null)
         {
@@ -41,33 +40,12 @@ public partial class ModelPropertyFactory : Node
                 throw new ArgumentException($"Duplicate ModelPropertyDto.Id '{dto.Id}'.", nameof(propertyDtos));
             }
 
-            properties.Add(CreateModelProperty(dto));
+            properties.Add(ModelPropertyMapper.Map(dto));
         }
-
-        // 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
-        foreach (ModelProperty property in properties)
-        {
-            Application.Model.Registry.RegisterProperty(property);
-        }
-        Application.Model.Registry.ResolveHierarchy();
 
         return properties;
     }
 
     #endregion
 
-    #region Internal Helpers
-
-    private static ModelProperty CreateModelProperty(ModelPropertyDto dto)
-    {
-        Guid resolvedParentId = dto.ParentId ?? Guid.Empty;
-        return new ModelProperty(
-            dto.Id,
-            resolvedParentId,
-            dto.PropertyType,
-            dto.ValueType,
-            dto.Value);
-    }
-
-    #endregion
 }

@@ -120,12 +120,12 @@
 
 - Date: 2026-09-24
 - Trigger: Model関連Domainのロード・表示更新・ツリー管理の責務を段階的に分割
-- Decision: モデル集合の置換・取消しはModelLoadService、論理Entity/Property階層はModelRegistry、非同期Sceneロードと状態遷移はModelSceneLoader、ModelNodeへの表示反映はModelPresentationService、TreeItem投影はUIが所有する。各責務は他者の内部状態を保持しない
+- Decision: モデル集合の置換・取消しはModelLoadService、論理Entity/Property階層はModelRegistry、非同期Sceneロードと状態遷移はModelSceneService、ModelNodeへの表示反映はModelPresentationService、TreeItem投影はUIが所有する。各責務は他者の内部状態を保持しない
 - Scope: CoaXisViewerのModel Domain、モデルロード、Scene反映、モデルTree UI
 - Artifacts Updated:
   - `CoaXisViewer/src/application/domain/model/ModelLoadService.cs`
   - `CoaXisViewer/src/application/domain/model/ModelEntityMapper.cs`
-  - `CoaXisViewer/src/application/domain/model/ModelSceneLoader.cs`
+  - `CoaXisViewer/src/application/domain/model/ModelSceneService.cs`
   - `CoaXisViewer/src/application/domain/model/ModelRegistry.cs`
   - `CoaXisViewer/src/model/factory/ModelEntityFactory.cs`
   - `docs/specification/specification_integrated.md`
