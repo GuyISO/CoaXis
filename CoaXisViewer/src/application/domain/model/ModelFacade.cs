@@ -3,18 +3,18 @@
 /// </summary>
 public partial class ModelFacade : BaseFacade
 {
-    public ModelEvent Event { get; }
     public ModelRegistry Registry { get; }
     public ModelLoadFacade Load { get; }
-    public ModelPresentationService Presentation { get; }
-    public ModelStateService State { get; }
+    public ModelVisualHub Visual { get; }
+    public ModelStateHub State { get; }
+    public ModelTreeHub Tree { get; }
 
     public ModelFacade()
     {
-        Event = AddModule<ModelEvent>("ModelEvent");
-        Registry = AddModule<ModelRegistry>("ModelRegistry");
-        Load = AddModule<ModelLoadFacade>("ModelLoadFacade");
-        Presentation = AddModule<ModelPresentationService>("ModelPresentation");
-        State = AddModule<ModelStateService>("ModelState");
+        Registry = AddModule<ModelRegistry>("Registry");
+        Load = AddModule<ModelLoadFacade>("Load");
+        Visual = AddModule<ModelVisualHub>("Visual");
+        State = AddModule<ModelStateHub>("State");
+        Tree = AddModule<ModelTreeHub>("Tree");
     }
 }

@@ -3,14 +3,14 @@
 /// </summary>
 public partial class ModelLoadFacade : BaseFacade
 {
-	public ModelLoadEntityService Entity { get; }
-	public ModelLoadPropertyService Property { get; }
-	public ModelLoadSceneService Scene { get; }
+	public ModelLoadEntityHub Entity { get; }
+	public ModelLoadPropertyHub Property { get; }
+	public ModelLoadSceneHub Scene { get; }
 
 	public ModelLoadFacade()
 	{
-		Entity = AddModule<ModelLoadEntityService>("ModelLoadEntityService");
-		Property = AddModule<ModelLoadPropertyService>("ModelLoadPropertyService");
-		Scene = AddModule<ModelLoadSceneService>("ModelLoadSceneService");
+		Entity = AddModule<ModelLoadEntityHub>("Entity");
+		Property = AddModule<ModelLoadPropertyHub>("Property");
+		Scene = AddModule<ModelLoadSceneHub>("Scene");
 	}
 }

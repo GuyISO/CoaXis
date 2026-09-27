@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// モデルシーンの非同期ロードと描画ノードへの反映を管理する
 /// </summary>
-public partial class ModelLoadSceneService : Node
+public partial class ModelLoadSceneHub : Node
 {
 	#region Fields
 
@@ -242,7 +242,7 @@ public partial class ModelLoadSceneService : Node
 		}
 
 		modelEntity.Status = nextStatus;
-		Application.Model.Event.NotifyStatus(modelEntity.Id, nextStatus);
+		Application.Model.State.NotifyStatus(modelEntity.Id, nextStatus);
 	}
 
 	private sealed class SceneLoadQueueItem

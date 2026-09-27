@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデルDTOの置換ロードを統括するサービス
 /// </summary>
-public partial class ModelLoadEntityService : Node
+public partial class ModelLoadPropertyHub : Node
 {
 	#region Public API
 
@@ -43,7 +43,7 @@ public partial class ModelLoadEntityService : Node
 		Application.Model.Load.Scene.PrepareLoads(entities);
 
 		// 全Entityと階層が確定してから一括通知し、Tree側に親先行の個別通知を要求しない。
-		Application.Model.Event.NotifyModelSetReplaced();
+		Application.Model.Registry.NotifyModelSetReplaced();
 		Application.Model.Load.Scene.StartPendingLoads();
 		return entities;
 	}

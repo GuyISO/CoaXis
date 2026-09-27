@@ -13,7 +13,7 @@ public partial class CommandUi : PanelContainer
     private bool _isRequestingCursorMove = false;
     private bool _isRebuildQueued = false;
     private int _cursor = 0;
-    private readonly List<CommandBase> _history = new();
+    private readonly List<BaseCommand> _history = new();
 
     // 関連ノードをキャッシュ
     private Tree _tree = null!;
@@ -111,7 +111,7 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     /// <param name="history">通知された履歴配列</param>
     /// <param name="cursor">通知されたカーソル位置</param>
-    private void OnStateNotified(CommandBase[] history, int cursor)
+    private void OnStateNotified(BaseCommand[] history, int cursor)
     {
         _history.Clear();
         if (history != null)
@@ -228,7 +228,7 @@ public partial class CommandUi : PanelContainer
 
             for (int i = 0; i < _history.Count; i++)
             {
-                CommandBase command = _history[i];
+                BaseCommand command = _history[i];
                 TreeItem item = _tree.CreateItem(root);
                 if (item == null)
                 {

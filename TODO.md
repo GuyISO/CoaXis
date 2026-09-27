@@ -1,5 +1,7 @@
 # Viewer
 
+TransparencyをModelEntity単位で管理するように変更する
+
 ## 3D表示関係
 点群座標へのVFX配置
     GodotのVFX Graphを使用して、点群座標にエフェクトを配置する機能を実装する

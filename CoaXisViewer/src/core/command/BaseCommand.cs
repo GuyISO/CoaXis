@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// コマンドの基底クラス、Undo/Redo 操作の単位となる
 /// </summary>
-public abstract partial class CommandBase : RefCounted
+public abstract partial class BaseCommand : RefCounted
 {
     #region Properties
 

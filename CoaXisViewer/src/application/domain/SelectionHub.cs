@@ -109,7 +109,7 @@ public partial class SelectionHub : Node
         Application.Selection.SetModeRequested += OnSetModeRequested;
         Application.Pick.ResultNotified += OnPickResultNotified;
         Application.Pick.ResultsNotified += OnPickResultsNotified;
-        Application.Model.Event.RegistryCleared += OnModelRegistryCleared;
+        Application.Model.Registry.Cleared += OnModelRegistryCleared;
     }
 
     /// <summary>
@@ -120,7 +120,7 @@ public partial class SelectionHub : Node
         Application.Selection.SetModeRequested -= OnSetModeRequested;
         Application.Pick.ResultNotified -= OnPickResultNotified;
         Application.Pick.ResultsNotified -= OnPickResultsNotified;
-        Application.Model.Event.RegistryCleared -= OnModelRegistryCleared;
+        Application.Model.Registry.Cleared -= OnModelRegistryCleared;
     }
 
     /// <summary>

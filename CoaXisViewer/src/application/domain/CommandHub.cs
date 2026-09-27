@@ -9,7 +9,7 @@ public partial class CommandHub : Node
 {
 	#region Fields
 
-	private readonly List<CommandBase> _history = new();
+	private readonly List<BaseCommand> _history = new();
 	private int _cursor = 0;
 
 	#endregion
@@ -45,13 +45,13 @@ public partial class CommandHub : Node
 
 	#region Notification
 
-	[Signal] public delegate void StateNotifiedEventHandler(CommandBase[] history, int cursor);
+	[Signal] public delegate void StateNotifiedEventHandler(BaseCommand[] history, int cursor);
 	/// <summary>
 	/// コマンド履歴状態を通知する
 	/// </summary>
 	/// <param name="history">履歴配列</param>
 	/// <param name="cursor">現在カーソル位置（-1 の場合は未実行）</param>
-	internal void NotifyState(CommandBase[] history, int cursor)
+	internal void NotifyState(BaseCommand[] history, int cursor)
 	{
 		EmitSignal(SignalName.StateNotified, history, cursor);
 	}
@@ -88,7 +88,7 @@ public partial class CommandHub : Node
 	/// <summary>
 	/// コマンドを実行し、Undoスタックに積む
 	/// </summary>
-	public void Execute(CommandBase command)
+	public void Execute(BaseCommand command)
 	{
 		if (command == null)
 		{

@@ -12,7 +12,7 @@ public partial class Application : BaseFacade
     private SettingHub _setting;
     private AssetHub _asset;
     private IpcHub _ipc;
-    private DeviceInputHandler _deviceInputHandler;
+    private InputHub _input; 
 
     // domain
     private CommandHub _command;
@@ -34,7 +34,7 @@ public partial class Application : BaseFacade
     public static SettingHub Setting => Instance._setting;
     public static AssetHub Asset => Instance._asset;
     public static IpcHub Ipc => Instance._ipc;
-    public static DeviceInputHandler DeviceInputHandler => Instance._deviceInputHandler;
+    public static InputHub Input => Instance._input; 
 
     // domain
     public static CommandHub Command => Instance._command;
@@ -73,11 +73,11 @@ public partial class Application : BaseFacade
     /// </summary>
     private void EnsureInfrastructureModules()
     {
-        _log = AddModule<LogHub>("LogHub");
-        _setting = AddModule<SettingHub>("SettingHub");
-        _asset = AddModule<AssetHub>("AssetHub");
-        _ipc = AddModule<IpcHub>("IpcHub");
-        _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");
+        _log = AddModule<LogHub>("Log");
+        _setting = AddModule<SettingHub>("Setting");
+        _asset = AddModule<AssetHub>("Asset");
+        _ipc = AddModule<IpcHub>("Ipc");
+        _input = AddModule<InputHub>("Input");
     }
 
     /// <summary>

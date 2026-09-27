@@ -100,13 +100,13 @@ public partial class ModelEntityTree : Tree
         Application.Setting.SettingsNotified += ApplySettings;
         Application.Selection.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Selection.ClearedNotified += OnClearedNotified;
-        Application.Model.Event.Added += OnModelAdded;
-        Application.Model.Event.ModelSetReplaced += OnModelSetReplaced;
-        Application.Model.Event.VisibilityNotified += OnModelVisibilityNotified;
-        Application.Model.Event.Collapsed += OnModelCollapsed;
-        Application.Model.Event.StatusNotified += OnModelStatusNotified;
-        Application.Model.Event.RegistryCleared += OnRegistryClearedNotified;
-        Application.Model.Event.TreeCenteringRequested += OnTreeCenteringRequested;
+        Application.Model.Registry.Added += OnModelAdded;
+        Application.Model.Registry.ModelSetReplaced += OnModelSetReplaced;
+        Application.Model.State.VisibilityNotified += OnModelVisibilityNotified;
+        Application.Model.State.Collapsed += OnModelCollapsed;
+        Application.Model.State.StatusNotified += OnModelStatusNotified;
+        Application.Model.Registry.Cleared += OnRegistryClearedNotified;
+        Application.Model.Tree.TreeCenteringRequested += OnTreeCenteringRequested;
     }
 
     /// <summary>
@@ -117,13 +117,13 @@ public partial class ModelEntityTree : Tree
         Application.Setting.SettingsNotified -= ApplySettings;
         Application.Selection.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Selection.ClearedNotified -= OnClearedNotified;
-        Application.Model.Event.Added -= OnModelAdded;
-        Application.Model.Event.ModelSetReplaced -= OnModelSetReplaced;
-        Application.Model.Event.VisibilityNotified -= OnModelVisibilityNotified;
-        Application.Model.Event.StatusNotified -= OnModelStatusNotified;
-        Application.Model.Event.Collapsed -= OnModelCollapsed;
-        Application.Model.Event.RegistryCleared -= OnRegistryClearedNotified;
-        Application.Model.Event.TreeCenteringRequested -= OnTreeCenteringRequested;
+        Application.Model.Registry.Added -= OnModelAdded;
+        Application.Model.Registry.ModelSetReplaced -= OnModelSetReplaced;
+        Application.Model.State.VisibilityNotified -= OnModelVisibilityNotified;
+        Application.Model.State.StatusNotified -= OnModelStatusNotified;
+        Application.Model.State.Collapsed -= OnModelCollapsed;
+        Application.Model.Registry.Cleared -= OnRegistryClearedNotified;
+        Application.Model.Tree.TreeCenteringRequested -= OnTreeCenteringRequested;
     }
 
     /// <summary>
@@ -181,7 +181,7 @@ public partial class ModelEntityTree : Tree
         RefreshAllHighlights();
 
         // モデルの折り畳み状態が変更されたことを通知
-        Application.Model.Event.NotifyCollapsed(TryGetEntityId(item), item.IsCollapsed());
+        Application.Model.State.NotifyCollapsed(TryGetEntityId(item), item.IsCollapsed());
     }
 
     /// <summary>
@@ -746,7 +746,7 @@ public partial class ModelEntityTree : Tree
         }
 
         // モデル実体の表示状態を切り替える
-        Application.Model.Event.ToggleModelVisibility(entityId);
+        Application.Model.State.ToggleModelVisibility(entityId);
     }
 
     /// <summary>

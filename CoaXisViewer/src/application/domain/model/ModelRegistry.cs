@@ -55,6 +55,46 @@ public partial class ModelRegistry : Node
 
     #endregion
 
+	#region --------------------------------------- Action ---------------------------------------
+	#endregion
+
+	#region --------------------------------------- Notification ---------------------------------------
+
+	
+	[Signal] public delegate void AddedEventHandler(string entityId, string parentEntityId);
+	/// <summary>
+	/// 登録済み部分木の追加を通知する
+	/// </summary>
+	/// <param name="entityId">追加する部分木ルート ModelEntity の識別子</param>
+	/// <param name="parentEntityId">追加先の親 ModelEntity の識別子。Guid.Empty の場合はルートに追加される</param>
+	internal void NotifyAdded(Guid entityId, Guid parentEntityId = default)
+	{
+		EmitSignal(SignalName.Added, entityId.ToString(), parentEntityId.ToString());
+	}
+
+	/// <summary>
+	/// モデル集合が置換されたことを表す通知シグナル
+	/// </summary>
+	[Signal] public delegate void ModelSetReplacedEventHandler();
+	/// <summary>
+	/// Registryのモデル集合が置換されたことを通知する
+	/// </summary>
+	internal void NotifyModelSetReplaced()
+	{
+		EmitSignal(SignalName.ModelSetReplaced);
+	}
+
+	[Signal] public delegate void ClearedEventHandler();
+	/// <summary>
+	/// モデルレジストリがクリアされたことを通知する
+	/// </summary>
+	internal void NotifyCleared()
+	{
+		EmitSignal(SignalName.Cleared);
+	}
+
+	#endregion
+
     #region Public Methods
 
     /// <summary>
@@ -400,7 +440,7 @@ public partial class ModelRegistry : Node
         }
 
         _rootEntity.Clear();
-        Application.Model.Event.NotifyRegistryCleared();
+        Application.Model.Registry.NotifyCleared();
     }
 
     #endregion

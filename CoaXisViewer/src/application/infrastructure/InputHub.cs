@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
 /// </summary>
-public partial class DeviceInputHandler : Node
+public partial class InputHub : Node
 {
     #region Lifecycle
 

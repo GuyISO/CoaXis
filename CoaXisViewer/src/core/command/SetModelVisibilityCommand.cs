@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// ModelNode の表示状態を変更する Undo/Redo 対応コマンド、バッチで複数モデルの表示状態を変更することも可能
 /// </summary>
-public sealed partial class SetModelVisibilityCommand : CommandBase
+public sealed partial class SetModelVisibilityCommand : BaseCommand
 {
     #region Fields
 
@@ -104,7 +104,7 @@ public sealed partial class SetModelVisibilityCommand : CommandBase
         {
             if (modelEntity.Node != null && GodotObject.IsInstanceValid(modelEntity.Node))
             {
-                Application.Model.Event.NotifyVisibility(modelEntity.Id, modelEntity.Visibility);
+                Application.Model.State.NotifyVisibility(modelEntity.Id, modelEntity.Visibility);
             }
         }
     }
