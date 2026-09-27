@@ -16,10 +16,10 @@ public partial class Application : FacadeBase
 
     // domain
     private CommandFacade _commandFacade;
-    private MeasurementFacade _measurementFacade;
+    private Measurement _measurement;
     private ModelFacade _modelFacade;
-    private PickFacade _pickFacade;
-    private SelectionFacade _selectionFacade;
+    private Pick _pick;
+    private Selection _selection;
     private UiFacade _uiFacade;
     private ViewportFacade _viewportFacade;
 
@@ -38,10 +38,10 @@ public partial class Application : FacadeBase
 
     // domain
     public static CommandFacade Command => Instance._commandFacade;
-    public static MeasurementFacade Measurement => Instance._measurementFacade;
+    public static Measurement Measurement => Instance._measurement;
     public static ModelFacade Model => Instance._modelFacade;
-    public static PickFacade Pick => Instance._pickFacade;
-    public static SelectionFacade Selection => Instance._selectionFacade;
+    public static Pick Pick => Instance._pick;
+    public static Selection Selection => Instance._selection;
     public static UiFacade Ui => Instance._uiFacade;
     public static ViewportFacade Viewport => Instance._viewportFacade;
 
@@ -86,10 +86,10 @@ public partial class Application : FacadeBase
     private void EnsureDomainModules()
     {
         _commandFacade = AddModule<CommandFacade>("CommandFacade");
-        _measurementFacade = AddModule<MeasurementFacade>("MeasurementFacade");
+        _measurement = AddModule<Measurement>("MeasurementFacade");
         _modelFacade = AddModule<ModelFacade>("ModelFacade");
-        _pickFacade = AddModule<PickFacade>("PickFacade");
-        _selectionFacade = AddModule<SelectionFacade>("SelectionFacade");
+        _pick = AddModule<Pick>("PickFacade");
+        _selection = AddModule<Selection>("Selection");
         _uiFacade = AddModule<UiFacade>("UiFacade");
         _viewportFacade = AddModule<ViewportFacade>("ViewportFacade");
     }

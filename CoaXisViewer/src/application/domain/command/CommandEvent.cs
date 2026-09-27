@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// コマンド操作に関するイベント集約ハブ
 /// </summary>
-public partial class CommandEvent : EventBase<CommandEvent>
+public partial class CommandEvent : Node
 {
 	#region Action
 
@@ -13,7 +13,7 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	/// </summary>
 	internal void AskState()
 	{
-		Emit(SignalName.AskStateRequested);
+		EmitSignal(SignalName.AskStateRequested);
 	}
 
 	[Signal] public delegate void ExecuteRequestedEventHandler(CommandBase command);
@@ -23,7 +23,7 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	/// <param name="command">実行するコマンド</param>
 	internal void Execute(CommandBase command)
 	{
-		Emit(SignalName.ExecuteRequested, command);
+		EmitSignal(SignalName.ExecuteRequested, command);
 	}
 
 	[Signal] public delegate void UndoRequestedEventHandler();
@@ -32,7 +32,7 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	/// </summary>
 	internal void Undo()
 	{
-		Emit(SignalName.UndoRequested);
+		EmitSignal(SignalName.UndoRequested);
 	}
 
 	[Signal] public delegate void RedoRequestedEventHandler();
@@ -41,7 +41,7 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	/// </summary>
 	internal void Redo()
 	{
-		Emit(SignalName.RedoRequested);
+		EmitSignal(SignalName.RedoRequested);
 	}
 
 	[Signal] public delegate void ClearRequestedEventHandler();
@@ -50,7 +50,7 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	/// </summary>
 	internal void Clear()
 	{
-		Emit(SignalName.ClearRequested);
+		EmitSignal(SignalName.ClearRequested);
 	}
 
 	[Signal] public delegate void SetCursorRequestedEventHandler(int cursor);
@@ -60,7 +60,7 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	/// <param name="cursor">移動先カーソル位置</param>
 	internal void SetCursor(int cursor)
 	{
-		Emit(SignalName.SetCursorRequested, cursor);
+		EmitSignal(SignalName.SetCursorRequested, cursor);
 	}
 
 	#endregion
@@ -75,7 +75,7 @@ public partial class CommandEvent : EventBase<CommandEvent>
 	/// <param name="cursor">現在カーソル位置（-1 の場合は未実行）</param>
 	internal void NotifyState(CommandBase[] history, int cursor)
 	{
-		Emit(SignalName.StateNotified, history, cursor);
+		EmitSignal(SignalName.StateNotified, history, cursor);
 	}
 
 	#endregion

@@ -128,7 +128,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
         Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
         Application.Viewport.Event.PositionNotified += OnPositionNotified;
         Application.Viewport.Event.RotationNotified += OnRotationNotified;
@@ -144,7 +144,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
         Application.Viewport.Event.PositionNotified -= OnPositionNotified;
         Application.Viewport.Event.RotationNotified -= OnRotationNotified;
@@ -194,7 +194,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        Node3D[] fitTargetNodes = Application.Selection.Service.GetModelNodeArray();
+        Node3D[] fitTargetNodes = Application.Selection.GetModelNodeArray();
         if (fitTargetNodes.Length == 0)
         {
             Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");
@@ -210,7 +210,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonAlignNormalPressed()
     {
-        Application.Pick.Event.SetHandlingMode(PickHandlingMode.NormalToFace);
+        Application.Pick.SetHandlingMode(PickHandlingMode.NormalToFace);
     }
 
     /// <summary>

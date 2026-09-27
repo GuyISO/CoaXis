@@ -40,7 +40,7 @@ public partial class MeasurementUi : PanelContainer
     {
         if (!_isInitialized)
         {
-            Application.Measurement.Event.AskResult();
+            Application.Measurement.AskResult();
         }
     }
 
@@ -86,8 +86,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Measurement.Event.ResultNotified += OnResultNotified;
-        Application.Measurement.Event.PointNotified += OnPointNotified;
+        Application.Measurement.ResultNotified += OnResultNotified;
+        Application.Measurement.PointNotified += OnPointNotified;
     }
 
     /// <summary>
@@ -95,8 +95,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Measurement.Event.ResultNotified -= OnResultNotified;
-        Application.Measurement.Event.PointNotified -= OnPointNotified;
+        Application.Measurement.ResultNotified -= OnResultNotified;
+        Application.Measurement.PointNotified -= OnPointNotified;
     }
 
     /// <summary>
@@ -127,7 +127,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonPick1Pressed()
     {
         Application.Log.Debug("MeasurementUi: pick point 1 requested.");
-        Application.Measurement.Event.SetPoint(1);
+        Application.Measurement.SetPoint(1);
     }
 
     /// <summary>
@@ -136,7 +136,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonPick2Pressed()
     {
         Application.Log.Debug("MeasurementUi: pick point 2 requested.");
-        Application.Measurement.Event.SetPoint(2);
+        Application.Measurement.SetPoint(2);
     }
 
     /// <summary>
@@ -145,7 +145,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonClear1Pressed()
     {
         Application.Log.Debug("MeasurementUi: clear point 1 requested.");
-        Application.Measurement.Event.ClearPoint(1);
+        Application.Measurement.ClearPoint(1);
     }
 
     /// <summary>
@@ -154,7 +154,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonClear2Pressed()
     {
         Application.Log.Debug("MeasurementUi: clear point 2 requested.");
-        Application.Measurement.Event.ClearPoint(2);
+        Application.Measurement.ClearPoint(2);
     }
 
     /// <summary>

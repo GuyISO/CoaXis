@@ -174,7 +174,7 @@ public partial class VisualUi : PanelContainer
     /// <param name="visibility">適用する表示状態</param>
     private void ApplyVisibilityToSelection(ModelVisibility visibility)
     {
-        var selectedEntityIds = Application.Selection.Service.EntityIds.ToArray();
+        var selectedEntityIds = Application.Selection.EntityIds.ToArray();
         if (selectedEntityIds.Length == 0)
         {
             Application.Log.Warn("VisualUi: No models are selected.");

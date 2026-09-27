@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// 測定機能の状態管理・計算・ビジュアル更新を担当するサービス
 /// </summary>
-public partial class MeasurementService : Node
+public partial class Measurement : Node
 {
     #region Fields
 
@@ -50,6 +50,63 @@ public partial class MeasurementService : Node
 
     #endregion
 
+    #region --------------------------------------- Action ---------------------------------------
+
+    [Signal] public delegate void AskResultRequestedEventHandler();
+    /// <summary>
+    /// 最新の測定結果通知をリクエストする
+    /// </summary>
+    internal void AskResult()
+    {
+        EmitSignal(SignalName.AskResultRequested);
+    }
+
+    [Signal] public delegate void SetPointRequestedEventHandler(int pointIndex);
+    /// <summary>
+    /// 測定ポイントのピック開始をリクエストする
+    /// </summary>
+    /// <param name="pointIndex">1 または 2</param>
+    internal void SetPoint(int pointIndex)
+    {
+        EmitSignal(SignalName.SetPointRequested, pointIndex);
+    }
+
+    [Signal] public delegate void ClearPointRequestedEventHandler(int pointIndex);
+    /// <summary>
+    /// 測定ポイントのクリアをリクエストする
+    /// </summary>
+    /// <param name="pointIndex">1 または 2</param>
+    internal void ClearPoint(int pointIndex)
+    {
+        EmitSignal(SignalName.ClearPointRequested, pointIndex);
+    }
+
+    #endregion
+
+    #region --------------------------------------- Notification ---------------------------------------
+
+    [Signal] public delegate void PointNotifiedEventHandler(int pointIndex);
+    /// <summary>
+    /// 測定ポイントのピック点を通知する
+    /// </summary>
+    /// <param name="pointIndex">ピック対象ポイントのインデックス</param>
+    internal void NotifyPoint(int pointIndex)
+    {
+        EmitSignal(SignalName.PointNotified, pointIndex);
+    }
+
+    [Signal] public delegate void ResultNotifiedEventHandler(MeasurementResult result);
+    /// <summary>
+    /// 測定結果を通知する
+    /// </summary>
+    /// <param name="result">通知する測定結果</param>
+    internal void NotifyResult(MeasurementResult result)
+    {
+        EmitSignal(SignalName.ResultNotified, result);
+    }
+
+    #endregion
+    
     #region Events
 
     /// <summary>
@@ -57,11 +114,11 @@ public partial class MeasurementService : Node
     /// </summary>
     private void SubscribeEvents()
     {
-        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.Event.ResultNotified += OnPickResultNotified;
-        Application.Measurement.Event.AskResultRequested += OnAskResultRequested;
-        Application.Measurement.Event.SetPointRequested += OnSetPointRequested;
-        Application.Measurement.Event.ClearPointRequested += OnClearPointRequested;
+        Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Pick.ResultNotified += OnPickResultNotified;
+        Application.Measurement.AskResultRequested += OnAskResultRequested;
+        Application.Measurement.SetPointRequested += OnSetPointRequested;
+        Application.Measurement.ClearPointRequested += OnClearPointRequested;
         Application.Setting.Event.SettingsNotified += ApplySettings;
     }
 
@@ -70,11 +127,11 @@ public partial class MeasurementService : Node
     /// </summary>
     private void UnsubscribeEvents()
     {
-        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
-        Application.Measurement.Event.AskResultRequested -= OnAskResultRequested;
-        Application.Measurement.Event.SetPointRequested -= OnSetPointRequested;
-        Application.Measurement.Event.ClearPointRequested -= OnClearPointRequested;
+        Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Measurement.AskResultRequested -= OnAskResultRequested;
+        Application.Measurement.SetPointRequested -= OnSetPointRequested;
+        Application.Measurement.ClearPointRequested -= OnClearPointRequested;
         Application.Setting.Event.SettingsNotified -= ApplySettings;
     }
 
@@ -83,7 +140,7 @@ public partial class MeasurementService : Node
     /// </summary>
     private void OnAskResultRequested()
     {
-        Application.Measurement.Event.NotifyResult(GetCurrentResult());
+        Application.Measurement.NotifyResult(GetCurrentResult());
     }
 
     /// <summary>
@@ -100,8 +157,8 @@ public partial class MeasurementService : Node
 
         _pointIndex = pointIndex;
         
-        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Measurement);
-        Application.Measurement.Event.NotifyPoint(pointIndex);
+        Application.Pick.SetHandlingMode(PickHandlingMode.Measurement);
+        Application.Measurement.NotifyPoint(pointIndex);
     }
 
     /// <summary>
@@ -120,7 +177,7 @@ public partial class MeasurementService : Node
         _points[index] = new PickResult();
         RemovePointerLabel(index);
         UpdateMeasurementLine();
-        Application.Measurement.Event.NotifyResult(GetCurrentResult());
+        Application.Measurement.NotifyResult(GetCurrentResult());
     }
 
     /// <summary>
@@ -132,7 +189,7 @@ public partial class MeasurementService : Node
         if (mode != PickHandlingMode.Measurement)
         {
             _pointIndex = 0;
-            Application.Measurement.Event.NotifyPoint(0);
+            Application.Measurement.NotifyPoint(0);
         }
     }
 
@@ -142,7 +199,7 @@ public partial class MeasurementService : Node
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Measurement)
+        if (Application.Pick.HandlingMode != PickHandlingMode.Measurement)
         {
             return;
         }
@@ -164,7 +221,7 @@ public partial class MeasurementService : Node
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
         UpdateMeasurementLine();
-        Application.Measurement.Event.NotifyResult(GetCurrentResult());
+        Application.Measurement.NotifyResult(GetCurrentResult());
     }
 
     #endregion

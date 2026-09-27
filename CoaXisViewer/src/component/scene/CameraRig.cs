@@ -47,7 +47,7 @@ public partial class CameraRig : Node3D
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.Event.ResultNotified += OnPickResultNotified;
+        Application.Pick.ResultNotified += OnPickResultNotified;
         Application.Viewport.Event.AskStateRequested += OnAskStateRequested;
         Application.Viewport.Event.MovePositionToRequested += OnMovePositionToRequested;
         Application.Viewport.Event.MoveRotationToRequested += OnMoveRotationToRequested;
@@ -69,7 +69,7 @@ public partial class CameraRig : Node3D
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
+        Application.Pick.ResultNotified -= OnPickResultNotified;
         Application.Viewport.Event.AskStateRequested -= OnAskStateRequested;
         Application.Viewport.Event.MovePositionToRequested -= OnMovePositionToRequested;
         Application.Viewport.Event.MoveRotationToRequested -= OnMoveRotationToRequested;
@@ -92,7 +92,7 @@ public partial class CameraRig : Node3D
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (Application.Pick.Service.HandlingMode == PickHandlingMode.NormalToFace)
+        if (Application.Pick.HandlingMode == PickHandlingMode.NormalToFace)
         {
             // 法線方向の整列モードの場合は、ピック結果の法線方向を取得してカメラを整列させる
             if (pickResult.HasHit)

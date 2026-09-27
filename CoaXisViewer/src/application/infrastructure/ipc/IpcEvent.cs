@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// IPC 関連のイベント集約ハブ
 /// </summary>
-public partial class IpcEvent : EventBase<IpcEvent>
+public partial class IpcEvent : Node
 {
     #region --------------------------------------- Action ---------------------------------------
 
@@ -20,7 +20,7 @@ public partial class IpcEvent : EventBase<IpcEvent>
     /// <param name="eventType">受信したメッセージの eventType</param>
     internal void NotifyMessageReceived(string eventType)
     {
-        Emit(SignalName.MessageReceived, eventType);
+        EmitSignal(SignalName.MessageReceived, eventType);
     }
 
     [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
@@ -32,7 +32,7 @@ public partial class IpcEvent : EventBase<IpcEvent>
     /// <param name="errorCode">失敗時の標準化エラーコード</param>
     internal void NotifyMessageHandled(string eventType, bool ok, string errorCode)
     {
-        Emit(SignalName.MessageHandled, eventType, ok, errorCode);
+        EmitSignal(SignalName.MessageHandled, eventType, ok, errorCode);
     }
 
     #endregion

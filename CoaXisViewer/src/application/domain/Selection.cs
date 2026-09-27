@@ -4,9 +4,9 @@ using System.Linq;
 using System.Collections.Generic;
 
 /// <summary>
-/// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する Autoload ノード
+/// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する
 /// </summary>
-public partial class SelectionService : Node
+public partial class Selection : Node
 {
     #region Fields
 
@@ -36,6 +36,53 @@ public partial class SelectionService : Node
 
     #endregion
 
+    #region --------------------------------------- Action ---------------------------------------
+
+    [Signal] public delegate void SetModeRequestedEventHandler(SelectionMode mode);
+    /// <summary>
+    /// 選択モードの設定をリクエストする
+    /// </summary>
+    /// <param name="mode">設定する選択モード</param>
+    internal void SetMode(SelectionMode mode)
+    {
+        EmitSignal(SignalName.SetModeRequested, (int)mode);
+    }
+
+    #endregion
+
+    #region --------------------------------------- Notification ---------------------------------------
+
+    [Signal] public delegate void ModeNotifiedEventHandler(SelectionMode mode);
+    /// <summary>
+    /// 選択モードの通知を行う
+    /// </summary>
+    /// <param name="mode">通知する選択モード</param>
+    internal void NotifyMode(SelectionMode mode)
+    {
+        EmitSignal(SignalName.ModeNotified, (int)mode);
+    }
+
+    [Signal] public delegate void ModelStateNotifiedEventHandler(string entityId, bool isSelected);
+    /// <summary>
+    /// モデルの選択状態の通知を行う
+    /// </summary>
+    /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
+    /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
+    internal void NotifyModelState(Guid entityId, bool isSelected)
+    {
+        EmitSignal(SignalName.ModelStateNotified, entityId.ToString(), isSelected);
+    }
+
+    [Signal] public delegate void ClearedNotifiedEventHandler();
+    /// <summary>
+    /// 選択がクリアされたことを通知する
+    /// </summary>
+    internal void NotifyCleared()
+    {
+        EmitSignal(SignalName.ClearedNotified);
+    }
+
+    #endregion
     #region Lifecycle
 
     public override void _Ready()
@@ -59,10 +106,9 @@ public partial class SelectionService : Node
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Selection.Event.SetModeRequested += OnSetModeRequested;
-        Application.Selection.Event.ClearRequested += OnClearRequested;
-        Application.Pick.Event.ResultNotified += OnPickResultNotified;
-        Application.Pick.Event.ResultsNotified += OnPickResultsNotified;
+        Application.Selection.SetModeRequested += OnSetModeRequested;
+        Application.Pick.ResultNotified += OnPickResultNotified;
+        Application.Pick.ResultsNotified += OnPickResultsNotified;
         Application.Model.Event.RegistryCleared += OnModelRegistryCleared;
     }
 
@@ -71,10 +117,9 @@ public partial class SelectionService : Node
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Selection.Event.SetModeRequested -= OnSetModeRequested;
-        Application.Selection.Event.ClearRequested -= OnClearRequested;
-        Application.Pick.Event.ResultNotified -= OnPickResultNotified;
-        Application.Pick.Event.ResultsNotified -= OnPickResultsNotified;
+        Application.Selection.SetModeRequested -= OnSetModeRequested;
+        Application.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Pick.ResultsNotified -= OnPickResultsNotified;
         Application.Model.Event.RegistryCleared -= OnModelRegistryCleared;
     }
 
@@ -90,15 +135,7 @@ public partial class SelectionService : Node
             Application.Log.Debug($"SelectionService: Selection mode changed to {_mode}.");
         }
 
-        Application.Selection.Event.NotifyMode(_mode);
-    }
-
-    /// <summary>
-    /// 選択解除要求を受け取る
-    /// </summary>
-    private void OnClearRequested()
-    {
-        Clear();
+        Application.Selection.NotifyMode(_mode);
     }
 
     /// <summary>
@@ -107,7 +144,7 @@ public partial class SelectionService : Node
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Selection)
+        if (Application.Pick.HandlingMode != PickHandlingMode.Selection)
         {
             return; // 選択操作モードでない場合は無視
         }
@@ -149,7 +186,7 @@ public partial class SelectionService : Node
     /// <param name="pickResults">ピック結果の配列</param>
     private void OnPickResultsNotified(PickResult[] pickResults)
     {
-        if (Application.Pick.Service.HandlingMode != PickHandlingMode.Selection)
+        if (Application.Pick.HandlingMode != PickHandlingMode.Selection)
         {
             return; // 選択操作モードでない場合は無視
         }
@@ -269,7 +306,7 @@ public partial class SelectionService : Node
 
         if (_entityIds.Add(entityId))
         {
-            Application.Selection.Event.NotifyModelState(entityId, true);
+            Application.Selection.NotifyModelState(entityId, true);
             Application.Log.Info($"Selected: {entityId}");
             return true;
         }
@@ -303,12 +340,12 @@ public partial class SelectionService : Node
 
         if (_entityIds.Remove(entityId))
         {
-            Application.Selection.Event.NotifyModelState(entityId, false);
+            Application.Selection.NotifyModelState(entityId, false);
             Application.Log.Info($"Deselected: {entityId}");
             // 選択状態の実体がなくなった場合、クリア通知も行う
             if (_entityIds.Count == 0)
             {
-                Application.Selection.Event.NotifyCleared();
+                Application.Selection.NotifyCleared();
             }
             return true;
         }
@@ -380,11 +417,11 @@ public partial class SelectionService : Node
         // 実体の選択解除シグナルとハイライト解除は個々に行う
         foreach (Guid entityId in entityIdsToDeselect)
         {
-            Application.Selection.Event.NotifyModelState(entityId, false);
+            Application.Selection.NotifyModelState(entityId, false);
             Application.Log.Info($"Deselected: {entityId}");
         }
 
-        Application.Selection.Event.NotifyCleared();
+        Application.Selection.NotifyCleared();
         return true;
     }
 

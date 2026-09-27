@@ -30,7 +30,7 @@ public partial class SelectionUi : PanelContainer
         SubscribeUiEvents();
         SubscribeApplicationEvents();
         SyncInitialState();
-        Application.Pick.Event.AskHandlingMode();
+        Application.Pick.AskHandlingMode();
     }
 
     public override void _ExitTree()
@@ -90,9 +90,9 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.Event.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Selection.Event.ModeNotified += OnModeNotified;
-        Application.Selection.Event.ModelStateNotified += OnModelStateNotified;
+        Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Selection.ModeNotified += OnModeNotified;
+        Application.Selection.ModelStateNotified += OnModelStateNotified;
     }
 
     /// <summary>
@@ -100,9 +100,9 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.Event.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Selection.Event.ModeNotified -= OnModeNotified;
-        Application.Selection.Event.ModelStateNotified -= OnModelStateNotified;
+        Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Selection.ModeNotified -= OnModeNotified;
+        Application.Selection.ModelStateNotified -= OnModelStateNotified;
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ public partial class SelectionUi : PanelContainer
     {
         if (mode == PickHandlingMode.Selection)
         {
-            UpdateModeButtons(Application.Selection.Service.Mode);
+            UpdateModeButtons(Application.Selection.Mode);
             return;
         }
 
@@ -125,8 +125,8 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonSetPressed()
     {
-        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.Event.SetMode(SelectionMode.Set);
+        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Selection.SetMode(SelectionMode.Set);
     }
 
     /// <summary>
@@ -134,8 +134,8 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonAddPressed()
     {
-        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.Event.SetMode(SelectionMode.Add);
+        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Selection.SetMode(SelectionMode.Add);
     }
 
     /// <summary>
@@ -143,8 +143,8 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonRemovePressed()
     {
-        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.Event.SetMode(SelectionMode.Remove);
+        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Selection.SetMode(SelectionMode.Remove);
     }
 
     /// <summary>
@@ -152,8 +152,8 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonTogglePressed()
     {
-        Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.Event.SetMode(SelectionMode.Toggle);
+        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Selection.SetMode(SelectionMode.Toggle);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonClearPressed()
     {
-        Application.Selection.Event.Clear();
+        Application.Selection.Clear();
     }
 
     /// <summary>
@@ -233,10 +233,10 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void SyncInitialState()
     {
-        UpdateModeButtons(Application.Selection.Service.Mode);
+        UpdateModeButtons(Application.Selection.Mode);
 
         _selectedEntityIds.Clear();
-        IReadOnlyCollection<Guid> selectedEntityIds = Application.Selection.Service.EntityIds;
+        IReadOnlyCollection<Guid> selectedEntityIds = Application.Selection.EntityIds;
         if (selectedEntityIds != null && selectedEntityIds.Count > 0)
         {
             _selectedEntityIds.AddRange(selectedEntityIds);

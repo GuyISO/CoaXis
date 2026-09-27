@@ -3,7 +3,7 @@
 /// <summary>
 /// 設定関連のイベント集約ハブ
 /// </summary>
-public partial class SettingEvent : EventBase<SettingEvent>
+public partial class SettingEvent : Node
 {
     #region --------------------------------------- Action ---------------------------------------
 
@@ -19,7 +19,7 @@ public partial class SettingEvent : EventBase<SettingEvent>
     /// </summary>
     internal void NotifySettingsNotified()
     {
-        Emit(SignalName.SettingsNotified);
+        EmitSignal(SignalName.SettingsNotified);
     }
 
     #endregion

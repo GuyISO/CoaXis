@@ -529,7 +529,7 @@ public partial class ViewportInteractionHandler : SubViewport
     private void PickByPoint(Vector2 screenPos)
     {
         var pickResult = PickUtility.PickByRay(GetCamera3D(), screenPos);
-        Application.Pick.Event.NotifyResult(pickResult);
+        Application.Pick.NotifyResult(pickResult);
     }
 
     /// <summary>
@@ -551,7 +551,7 @@ public partial class ViewportInteractionHandler : SubViewport
         var frustumShape = CreateFrustumShape(topLeft, bottomRight);
         var camera = GetCamera3D();
         var pickResults = PickUtility.PickByShape(camera, frustumShape);
-        Application.Pick.Event.NotifyResults(pickResults);
+        Application.Pick.NotifyResults(pickResults);
     }
 
     /// <summary>

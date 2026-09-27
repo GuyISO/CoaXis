@@ -45,7 +45,7 @@ public partial class ModelPresentationService : Node
 		Application.Model.Event.Added += OnModelAdded;
 		Application.Model.Event.ModelSetReplaced += OnModelSetReplaced;
 		Application.Model.Event.StatusNotified += OnModelStatusNotified;
-		Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
+		Application.Selection.ModelStateNotified += OnModelSelectionStateNotified;
 	}
 
 	/// <summary>
@@ -59,7 +59,7 @@ public partial class ModelPresentationService : Node
 		Application.Model.Event.Added -= OnModelAdded;
 		Application.Model.Event.ModelSetReplaced -= OnModelSetReplaced;
 		Application.Model.Event.StatusNotified -= OnModelStatusNotified;
-		Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
+		Application.Selection.ModelStateNotified -= OnModelSelectionStateNotified;
 	}
 
 	/// <summary>
@@ -442,7 +442,7 @@ public partial class ModelPresentationService : Node
 				return false;
 			}
 
-			if (Application.Selection.Service.Contains(modelNode.EntityId))
+			if (Application.Selection.Contains(modelNode.EntityId))
 			{
 				return true;
 			}

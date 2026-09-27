@@ -98,8 +98,8 @@ public partial class ModelEntityTree : Tree
     private void SubscribeApplicationEvents()
     {
         Application.Setting.Event.SettingsNotified += ApplySettings;
-        Application.Selection.Event.ModelStateNotified += OnModelSelectionStateNotified;
-        Application.Selection.Event.ClearedNotified += OnClearedNotified;
+        Application.Selection.ModelStateNotified += OnModelSelectionStateNotified;
+        Application.Selection.ClearedNotified += OnClearedNotified;
         Application.Model.Event.Added += OnModelAdded;
         Application.Model.Event.ModelSetReplaced += OnModelSetReplaced;
         Application.Model.Event.VisibilityNotified += OnModelVisibilityNotified;
@@ -115,8 +115,8 @@ public partial class ModelEntityTree : Tree
     private void UnsubscribeApplicationEvents()
     {
         Application.Setting.Event.SettingsNotified -= ApplySettings;
-        Application.Selection.Event.ModelStateNotified -= OnModelSelectionStateNotified;
-        Application.Selection.Event.ClearedNotified -= OnClearedNotified;
+        Application.Selection.ModelStateNotified -= OnModelSelectionStateNotified;
+        Application.Selection.ClearedNotified -= OnClearedNotified;
         Application.Model.Event.Added -= OnModelAdded;
         Application.Model.Event.ModelSetReplaced -= OnModelSetReplaced;
         Application.Model.Event.VisibilityNotified -= OnModelVisibilityNotified;
@@ -549,7 +549,7 @@ public partial class ModelEntityTree : Tree
     private void RefreshAllHighlights()
     {
         HashSet<TreeItem> nextHighlightedItems = new();
-        foreach (Guid entityId in Application.Selection.Service.EntityIds)
+        foreach (Guid entityId in Application.Selection.EntityIds)
         {
             if (entityId == Guid.Empty)
             {
@@ -599,18 +599,18 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        SelectionMode mode = Application.Selection.Service.Mode;
+        SelectionMode mode = Application.Selection.Mode;
         bool shouldHandleAsRange = ShouldHandleAsRangeSelection(mode);
 
         if (!shouldHandleAsRange)
         {
-            Application.Pick.Event.NotifyResult(PickUtility.PickByEntityId(entityId));
+            Application.Pick.NotifyResult(PickUtility.PickByEntityId(entityId));
         }
         else
         {
             // Add/Removeモードでは範囲選択として扱い、複数実体の選択を通知する
             Guid[] entityIds = GetAllModelsInRange(_lastSelectedItem, item);
-            Application.Pick.Event.NotifyResults(PickUtility.PickByEntityIds(entityIds));
+            Application.Pick.NotifyResults(PickUtility.PickByEntityIds(entityIds));
         }
     }
 

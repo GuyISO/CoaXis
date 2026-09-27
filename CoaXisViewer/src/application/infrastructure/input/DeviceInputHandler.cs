@@ -38,11 +38,11 @@ public partial class DeviceInputHandler : Node
     { 
         if (Input.IsActionJustPressed(actionName))
         {
-            Application.Selection.Event.SetMode(assignMode);
+            Application.Selection.SetMode(assignMode);
         }
-        else if (Input.IsActionJustReleased(actionName) && Application.Selection.Service.Mode == assignMode)
+        else if (Input.IsActionJustReleased(actionName) && Application.Selection.Mode == assignMode)
         {
-            Application.Selection.Event.SetMode(SelectionMode.Set);
+            Application.Selection.SetMode(SelectionMode.Set);
         }
     }
 
@@ -81,9 +81,9 @@ public partial class DeviceInputHandler : Node
         
         if (Input.IsActionJustPressed("escape"))
         {
-            Application.Pick.Event.SetHandlingMode(PickHandlingMode.Selection);
-            Application.Selection.Event.SetMode(SelectionMode.Set);
-            Application.Selection.Event.Clear();
+            Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+            Application.Selection.SetMode(SelectionMode.Set);
+            Application.Selection.Clear();
         }
     }
 

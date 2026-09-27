@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// モデル関連のイベント集約ハブ
 /// </summary>
-public partial class ModelEvent : EventBase<ModelEvent>
+public partial class ModelEvent : Node
 {
 	#region --------------------------------------- Action ---------------------------------------
 
@@ -15,7 +15,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="entityId">切替対象の ModelEntity の識別子</param>
 	internal void ToggleModelVisibility(Guid entityId)
 	{
-		Emit(SignalName.ToggleModelVisibilityRequested, entityId.ToString());
+		EmitSignal(SignalName.ToggleModelVisibilityRequested, entityId.ToString());
 	}
 
 	[Signal] public delegate void TreeCenteringRequestedEventHandler(string entityId);
@@ -25,7 +25,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="entityId">ツリーの中央へ表示するモデル実体の識別子</param>
 	internal void TreeCentering(Guid entityId)
 	{
-		Emit(SignalName.TreeCenteringRequested, entityId.ToString());
+		EmitSignal(SignalName.TreeCenteringRequested, entityId.ToString());
 	}
 
 	#endregion
@@ -40,7 +40,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="parentEntityId">追加先の親 ModelEntity の識別子。Guid.Empty の場合はルートに追加される</param>
 	internal void NotifyAdded(Guid entityId, Guid parentEntityId = default)
 	{
-		Emit(SignalName.Added, entityId.ToString(), parentEntityId.ToString());
+		EmitSignal(SignalName.Added, entityId.ToString(), parentEntityId.ToString());
 	}
 
 	/// <summary>
@@ -52,7 +52,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// </summary>
 	internal void NotifyModelSetReplaced()
 	{
-		Emit(SignalName.ModelSetReplaced);
+		EmitSignal(SignalName.ModelSetReplaced);
 	}
 
 	[Signal] public delegate void PositionNotifiedEventHandler(string entityId, Vector3 position);
@@ -63,7 +63,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="position">変更後の配置位置（Godot座標系）</param>
 	internal void NotifyPosition(Guid entityId, Vector3 position)
 	{
-		Emit(SignalName.PositionNotified, entityId.ToString(), position);
+		EmitSignal(SignalName.PositionNotified, entityId.ToString(), position);
 	}
 
 	[Signal] public delegate void RotationNotifiedEventHandler(string entityId, Quaternion rotation);
@@ -74,7 +74,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="rotation">変更後の回転（Godot座標系）</param>
 	internal void NotifyRotation(Guid entityId, Quaternion rotation)
 	{
-		Emit(SignalName.RotationNotified, entityId.ToString(), rotation);
+		EmitSignal(SignalName.RotationNotified, entityId.ToString(), rotation);
 	}
 
 	[Signal] public delegate void VisibilityNotifiedEventHandler(string entityId, ModelVisibility visibility);
@@ -85,7 +85,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="visibility">変更後のモデル表示設定</param>
 	internal void NotifyVisibility(Guid entityId, ModelVisibility visibility)
 	{
-		Emit(SignalName.VisibilityNotified, entityId.ToString(), (int)visibility);
+		EmitSignal(SignalName.VisibilityNotified, entityId.ToString(), (int)visibility);
 	}
 
 	[Signal] public delegate void CollapsedEventHandler(string entityId, bool isCollapsed);
@@ -96,7 +96,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="isCollapsed">モデルツリーが折りたたまれている場合はtrue、展開されている場合はfalse</param>
 	internal void NotifyCollapsed(Guid entityId, bool isCollapsed)
 	{
-		Emit(SignalName.Collapsed, entityId.ToString(), isCollapsed);
+		EmitSignal(SignalName.Collapsed, entityId.ToString(), isCollapsed);
 	}
 
 	[Signal] public delegate void StatusNotifiedEventHandler(string entityId, int status);
@@ -107,7 +107,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="status">新しい状態</param>
 	internal void NotifyStatus(Guid entityId, ModelStatus status)
 	{
-		Emit(SignalName.StatusNotified, entityId.ToString(), (int)status);
+		EmitSignal(SignalName.StatusNotified, entityId.ToString(), (int)status);
 	}
 
 	[Signal] public delegate void TransparencyNotifiedEventHandler(float transparency);
@@ -117,7 +117,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// <param name="transparency">新しい透明度</param>
 	internal void NotifyTransparency(float transparency)
 	{
-		Emit(SignalName.TransparencyNotified, transparency);
+		EmitSignal(SignalName.TransparencyNotified, transparency);
 	}
 
 	[Signal] public delegate void RegistryClearedEventHandler();
@@ -126,7 +126,7 @@ public partial class ModelEvent : EventBase<ModelEvent>
 	/// </summary>
 	internal void NotifyRegistryCleared()
 	{
-		Emit(SignalName.RegistryCleared);
+		EmitSignal(SignalName.RegistryCleared);
 	}
 
 	#endregion
