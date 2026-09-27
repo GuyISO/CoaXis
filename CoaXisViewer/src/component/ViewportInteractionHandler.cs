@@ -191,7 +191,7 @@ public partial class ViewportInteractionHandler : SubViewport
                 return;
             }
 
-            Application.Menu.Service.ShowPickResultMenu(pickResult);
+            Application.Ui.Menu.ShowPickResultMenu(pickResult);
         }
     }
 

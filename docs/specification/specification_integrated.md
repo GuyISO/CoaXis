@@ -247,6 +247,14 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - `ModelPresentationService`: 位置・回転・Visibility・選択強調・透明度をModelNodeへ反映する。論理状態の変更要求やUI参照を保持しない
 - UIツリー: ModelEventとPickEventの通知をTreeItemまたはModelPropertyTreeへ投影する。TreeItemはModel Domainで保持せず、UIをModelPresentationServiceへ参照登録しない
 
+Model中心DomainのFacade構成:
+- `application/domain` をViewerのModel中心領域とし、Model中核・ModelLoad・ModelState・ModelPresentation・Selection・Measurementを兄弟能力として配置する
+- `ModelFacade` は `ModelEvent` と `ModelRegistry` を公開し、モデル識別と論理階層の中核を所有する
+- `ModelLoadFacade` は `ModelLoadService` と `ModelSceneService` をまとめ、`Application.ModelLoad` 経由でモデル置換・属性ロード・Sceneロードを提供する
+- `ModelStateFacade` と `ModelPresentationFacade` はそれぞれ対応するServiceを公開する。要求・通知契約は既存の `ModelEvent` を利用し、Facade間でイベントを重複定義しない
+- SelectionとMeasurementはModelを利用する操作能力であり、Model配下へ移動しない。Model中核からSelection/Measurementへの依存を禁止し、PresentationからSelection通知を受ける依存は許容する
+- Facade分割は公開責務の境界であり、各Serviceの状態所有者や処理順を変更しない
+
 ### 4.8 CoaXisAnalyzer
 目的:
 - 本番DB依存を避け、分析しやすい形でEUCデータを提供
@@ -409,10 +417,10 @@ EditorからViewer:
 
 `LoadModel`の処理順:
 1. IPC層はpayloadの検証とDTOファイルの読込のみを行う
-2. `ModelLoadService`は旧世代のSceneロードを無効化し、`ModelRegistry`の論理集合をクリアする
+2. `Application.Model.Load.Entity`（`ModelLoadService`）は旧世代のSceneロードを無効化し、`ModelRegistry`の論理集合をクリアする
 3. `ModelEntityMapper`でDTOをGodot座標系のModelEntityへ変換する
 4. `ModelEntityFactory`がEntityを登録し、論理階層とModelNodeの親子構造を確立する
-5. UIツリーへ親先行でEntity状態を通知した後、`ModelSceneService`が非同期シーンロードを開始する
+5. UIツリーへ親先行でEntity状態を通知した後、`Application.ModelLoad.Scene`（`ModelSceneService`）が非同期シーンロードを開始する
 6. `ModelSceneService`は`Loading`、`Loaded`、`LoadFailed`を通知し、UIツリーと表示サービスが状態を反映する
 
 ViewerからEditor:

@@ -184,7 +184,7 @@ public partial class SelectionUi : PanelContainer
             return;
         }
 
-        Application.Menu.Service.ShowModelEntityMenu(entityId);
+        Application.Ui.Menu.ShowModelEntityMenu(entityId);
     }
 
     /// <summary>

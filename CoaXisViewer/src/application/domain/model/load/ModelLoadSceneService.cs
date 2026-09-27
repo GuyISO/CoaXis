@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// モデルシーンの非同期ロードと描画ノードへの反映を管理する
 /// </summary>
-public partial class ModelSceneService : Node
+public partial class ModelLoadSceneService : Node
 {
 	#region Fields
 

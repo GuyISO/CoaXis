@@ -51,8 +51,8 @@ public partial class ShowContainerButton : Button
             return;
         }
 
-        // UiService に対してコンテナの表示を要求する
-        Application.Ui.Service.Show(_container.Instantiate<Container>());
+        // UiWindowService に対してコンテナの表示を要求する
+        Application.Ui.Window.Show(_container.Instantiate<Container>());
     }
 
     #endregion

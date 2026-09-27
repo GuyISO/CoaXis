@@ -64,7 +64,7 @@ public partial class ModelEntityTree : Tree
                 return;
             }
 
-            Application.Menu.Service.ShowModelEntityMenu(entityId);
+            Application.Ui.Menu.ShowModelEntityMenu(entityId);
         }
     }
 

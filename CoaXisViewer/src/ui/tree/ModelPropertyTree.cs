@@ -42,11 +42,11 @@ public partial class ModelPropertyTree : Tree
 					return;
 				}
 
-				Application.Menu.Service.ShowModelEntityMenu(_entityId);
+				Application.Ui.Menu.ShowModelEntityMenu(_entityId);
 			}
 			else
 			{
-				Application.Menu.Service.ShowModelPropertyMenu(TryGetPropertyValue(targetItem));
+				Application.Ui.Menu.ShowModelPropertyMenu(TryGetPropertyValue(targetItem));
 			}
 		}
 	}

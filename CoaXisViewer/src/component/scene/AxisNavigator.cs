@@ -9,168 +9,168 @@ using System.Globalization;
 /// </remarks>
 public partial class AxisNavigator : Control
 {
-    #region Fields
+	#region Fields
 
-    // 関連ノードのキャッシュ
-    private SubViewportContainer _subViewportContainer = null!;
-    private SubViewport _subViewport = null!;
-    private Node3D _focalPoint = null!;
-    private Camera3D _camera = null!;
+	// 関連ノードのキャッシュ
+	private SubViewportContainer _subViewportContainer = null!;
+	private SubViewport _subViewport = null!;
+	private Node3D _focalPoint = null!;
+	private Camera3D _camera = null!;
 
-    private bool _isInitialized = false; // メインビューポートのカメラの初期状態を取得してUIに反映するためのフラグ
+	private bool _isInitialized = false; // メインビューポートのカメラの初期状態を取得してUIに反映するためのフラグ
 
-    #endregion
+	#endregion
 
-    #region Lifecycle
+	#region Lifecycle
 
-    public override void _Ready()
-    {
-        EnsureChildNodes();
-        SubscribeApplicationEvents();
-    }
+	public override void _Ready()
+	{
+		EnsureChildNodes();
+		SubscribeApplicationEvents();
+	}
 
-    public override void _ExitTree()
-    {
-        UnsubscribeApplicationEvents();
+	public override void _ExitTree()
+	{
+		UnsubscribeApplicationEvents();
 
-        base._ExitTree();
-    }
+		base._ExitTree();
+	}
 
-    public override void _Process(double delta)
-    {
-        if (!_isInitialized)
-        {
-            // カメラの初期回転を取得して軸ナビゲータに反映する
-            Application.Viewport.Event.AskState();
-        }
-    }
+	public override void _Process(double delta)
+	{
+		if (!_isInitialized)
+		{
+			// カメラの初期回転を取得して軸ナビゲータに反映する
+			Application.Viewport.Event.AskState();
+		}
+	}
 
-    /// <summary>
-    /// 軸ナビゲータのクリックを検知し、対応する向きへカメラを移動する
-    /// </summary>
-    /// <param name="@event">未処理入力イベント</param>
-    public override void _UnhandledInput(InputEvent @event)
-    {
-        if (@event is not InputEventMouseButton mb || !mb.Pressed)
-        {
-            return;
-        }
+	/// <summary>
+	/// 軸ナビゲータのクリックを検知し、対応する向きへカメラを移動する
+	/// </summary>
+	/// <param name="@event">未処理入力イベント</param>
+	public override void _UnhandledInput(InputEvent @event)
+	{
+		if (@event is not InputEventMouseButton mb || !mb.Pressed)
+		{
+			return;
+		}
 
-        var localMouse = mb.Position - _subViewportContainer.GlobalPosition;
-        if (!new Rect2(Vector2.Zero, _subViewportContainer.Size).HasPoint(localMouse))
-        {
-            return;
-        }
+		var localMouse = mb.Position - _subViewportContainer.GlobalPosition;
+		if (!new Rect2(Vector2.Zero, _subViewportContainer.Size).HasPoint(localMouse))
+		{
+			return;
+		}
 
-        if (mb.ButtonIndex == MouseButton.Left)
-        {
-            PickResult pickResult = PickUtility.PickByRay(_camera, localMouse, (uint)ViewportLayer.AxisNavigator);
-            if (pickResult.HasHit)
-            {
-                ViewLookAt(pickResult.Collider);
-                _subViewport.SetInputAsHandled(); // 入力イベントを消費する
-            }
-        }
-        else if (mb.ButtonIndex == MouseButton.Right)
-        {
-            Application.Menu.Service.ShowAxisNavigatorMenu();
-            _subViewport.SetInputAsHandled(); // 入力イベントを消費する
-        }
-    }
+		if (mb.ButtonIndex == MouseButton.Left)
+		{
+			PickResult pickResult = PickUtility.PickByRay(_camera, localMouse, (uint)ViewportLayer.AxisNavigator);
+			if (pickResult.HasHit)
+			{
+				ViewLookAt(pickResult.Collider);
+				_subViewport.SetInputAsHandled(); // 入力イベントを消費する
+			}
+		}
+		else if (mb.ButtonIndex == MouseButton.Right)
+		{
+			Application.Ui.Menu.ShowAxisNavigatorMenu();
+			_subViewport.SetInputAsHandled(); // 入力イベントを消費する
+		}
+	}
 
-    #endregion
+	#endregion
 
-    #region Events
+	#region Events
 
-    /// <summary>
-    /// 子ノードを解決し、フィールドに保持する
-    /// </summary>
-    private void EnsureChildNodes()
-    {
-        _subViewportContainer = GetNodeOrNull<SubViewportContainer>("SubViewportContainer");
-        _subViewport = _subViewportContainer?.GetNodeOrNull<SubViewport>("SubViewport");
-        _focalPoint = _subViewport?.GetNodeOrNull<Node3D>("FocalPoint");
-        _camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
-    }
+	/// <summary>
+	/// 子ノードを解決し、フィールドに保持する
+	/// </summary>
+	private void EnsureChildNodes()
+	{
+		_subViewportContainer = GetNodeOrNull<SubViewportContainer>("SubViewportContainer");
+		_subViewport = _subViewportContainer?.GetNodeOrNull<SubViewport>("SubViewport");
+		_focalPoint = _subViewport?.GetNodeOrNull<Node3D>("FocalPoint");
+		_camera = _focalPoint?.GetNodeOrNull<Camera3D>("Camera3D");
+	}
 
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Viewport.Event.RotationNotified += OnRotationNotified;
-    }
+	/// <summary>
+	/// Applicationイベントの購読を開始する
+	/// </summary>
+	private void SubscribeApplicationEvents()
+	{
+		Application.Viewport.Event.RotationNotified += OnRotationNotified;
+	}
 
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
-    }
+	/// <summary>
+	/// Applicationイベントの購読を解除する
+	/// </summary>
+	private void UnsubscribeApplicationEvents()
+	{
+		Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+	}
 
-    private void OnRotationNotified(Quaternion rotation)
-    {
-        _isInitialized = true;
-        _focalPoint.Quaternion = rotation;
-    }
+	private void OnRotationNotified(Quaternion rotation)
+	{
+		_isInitialized = true;
+		_focalPoint.Quaternion = rotation;
+	}
 
-    #endregion
+	#endregion
 
-    #region Internal Helpers
+	#region Internal Helpers
 
-    /// <summary>
-    /// 指定されたノードの名前を回転角度（度）として解釈しその向きにカメラを移動させ
-    /// ノード名は "x, y, z" 形式の回転角度を表す想定で、クォータニオンに変換してカメラ回転要求イベントを発行する
-    /// </summary>
-    /// <param name="node">回転角度を表す名称を持つノード</param>
-    private void ViewLookAt(Node3D node)
-    {
-        if (TryParseRotationDegreesFromName(node.Name, out Vector3 rotationDegrees))
-        {
-            // オイラー角をdegからradに変換し、クォータニオンに変換
-            var quaternion = Quaternion.FromEuler(rotationDegrees * (Mathf.Pi / 180f));
-            // _cameraController.MoveFocalPoint(null, quaternion, true);
+	/// <summary>
+	/// 指定されたノードの名前を回転角度（度）として解釈しその向きにカメラを移動させ
+	/// ノード名は "x, y, z" 形式の回転角度を表す想定で、クォータニオンに変換してカメラ回転要求イベントを発行する
+	/// </summary>
+	/// <param name="node">回転角度を表す名称を持つノード</param>
+	private void ViewLookAt(Node3D node)
+	{
+		if (TryParseRotationDegreesFromName(node.Name, out Vector3 rotationDegrees))
+		{
+			// オイラー角をdegからradに変換し、クォータニオンに変換
+			var quaternion = Quaternion.FromEuler(rotationDegrees * (Mathf.Pi / 180f));
+			// _cameraController.MoveFocalPoint(null, quaternion, true);
 
-            // カメラ回転要求イベントを発行
-            Application.Viewport.Event.MoveRotationTo(quaternion, true);
-        }
-    }
+			// カメラ回転要求イベントを発行
+			Application.Viewport.Event.MoveRotationTo(quaternion, true);
+		}
+	}
 
-    /// <summary>
-    /// ノード名を "x, y, z" 形式の回転角度（度）として解釈し、クォータニオンに変換する
-    /// </summary>
-    /// <param name="name">ノード名</param>
-    /// <param name="rotationDegrees">変換された回転角度（度）</param>
-    /// <returns>変換に成功した場合は true、失敗した場合は false を返す</returns>
-    private static bool TryParseRotationDegreesFromName(string name, out Vector3 rotationDegrees)
-    {
-        // ノード名が "x, y, z" 形式の回転角度を表す想定で、Quaternion に変換する
-        rotationDegrees = Vector3.Zero;
-        var parts = name.Split(',');
-        if (parts.Length != 3)
-        {
-            return false;
-        }
+	/// <summary>
+	/// ノード名を "x, y, z" 形式の回転角度（度）として解釈し、クォータニオンに変換する
+	/// </summary>
+	/// <param name="name">ノード名</param>
+	/// <param name="rotationDegrees">変換された回転角度（度）</param>
+	/// <returns>変換に成功した場合は true、失敗した場合は false を返す</returns>
+	private static bool TryParseRotationDegreesFromName(string name, out Vector3 rotationDegrees)
+	{
+		// ノード名が "x, y, z" 形式の回転角度を表す想定で、Quaternion に変換する
+		rotationDegrees = Vector3.Zero;
+		var parts = name.Split(',');
+		if (parts.Length != 3)
+		{
+			return false;
+		}
 
-        if (!float.TryParse(parts[0].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var x))
-        {
-            return false;
-        }
+		if (!float.TryParse(parts[0].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var x))
+		{
+			return false;
+		}
 
-        if (!float.TryParse(parts[1].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
-        {
-            return false;
-        }
+		if (!float.TryParse(parts[1].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var y))
+		{
+			return false;
+		}
 
-        if (!float.TryParse(parts[2].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var z))
-        {
-            return false;
-        }
+		if (!float.TryParse(parts[2].Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var z))
+		{
+			return false;
+		}
 
-        rotationDegrees = new Vector3(x, y, z);
-        return true;
-    }
+		rotationDegrees = new Vector3(x, y, z);
+		return true;
+	}
 
-    #endregion
+	#endregion
 }

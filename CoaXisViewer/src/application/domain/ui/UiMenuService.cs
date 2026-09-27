@@ -7,9 +7,9 @@ using System;
 /// <remarks>
 /// 従来は ModelEntityTree や ViewportInteractionHandler など、呼び出し元 Node の子として
 /// PopupMenu を配置していたが、対象オブジェクト単位でメニューを作る方針に伴い、
-/// メニュー実体は本サービスが一括保持し、呼び出し元は Application.Menu.Service 経由で表示を依頼する
+/// メニュー実体は本サービスが一括保持し、呼び出し元は Application.Ui.Menu 経由で表示を依頼する
 /// </remarks>
-public partial class MenuService : Node
+public partial class UiMenuService : Node
 {
     #region Fields
 

@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://crt7sb6bahnhp"]
 
-[ext_resource type="Script" uid="uid://cna848lw1yani" path="res://src/application/domain/viewport/ViewportInteractionHandler.cs" id="1_a2s2r"]
+[ext_resource type="Script" uid="uid://bpjsx6b8uoiei" path="res://src/component/ViewportInteractionHandler.cs" id="1_wls6u"]
 [ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/component/scene/CameraRig.cs" id="2_woemn"]
 [ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/viewport_overlay.tscn" id="3_uud5i"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewport/axis_navigator.tscn" id="4_o0c0q"]
@@ -18,7 +18,7 @@ stretch = true
 handle_input_locally = false
 size = Vector2i(1152, 648)
 render_target_update_mode = 4
-script = ExtResource("1_a2s2r")
+script = ExtResource("1_wls6u")
 
 [node name="FocalPoint" type="Node3D" parent="Viewport" unique_id=1474385631]
 script = ExtResource("2_woemn")

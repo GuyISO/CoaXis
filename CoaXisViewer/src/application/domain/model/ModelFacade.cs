@@ -4,18 +4,17 @@
 public partial class ModelFacade : FacadeBase
 {
     public ModelEvent Event { get; }
+    public ModelRegistry Registry { get; }
+    public ModelLoadFacade Load { get; }
     public ModelPresentationService Presentation { get; }
     public ModelStateService State { get; }
-    public ModelRegistry Registry { get; }
-    public ModelLoadService Load { get; }
-    public ModelSceneService Scene { get; }
+
     public ModelFacade()
     {
         Event = AddModule<ModelEvent>("ModelEvent");
-        Presentation = AddModule<ModelPresentationService>("ModelPresentationService");
-        State = AddModule<ModelStateService>("ModelStateService");
         Registry = AddModule<ModelRegistry>("ModelRegistry");
-        Load = AddModule<ModelLoadService>("ModelLoadService");
-        Scene = AddModule<ModelSceneService>("ModelSceneService");
+        Load = AddModule<ModelLoadFacade>("ModelLoadFacade");
+        Presentation = AddModule<ModelPresentationService>("ModelPresentation");
+        State = AddModule<ModelStateService>("ModelState");
     }
 }

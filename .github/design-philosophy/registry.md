@@ -73,8 +73,8 @@
 - Notes: 今後、別対象（例: Viewport全体の背景クリックなど対象なしのケース）向けメニューを追加する場合も同じ「対象オブジェクト単位」の方針を踏襲すること
 
 - Date: 2026-09-19
-- Trigger: コンテキストメニュー（PopupMenu）を呼び出し元Node（ModelEntityTree/ViewportInteractionHandler）の子として.tscnに直接配置する方針を廃止し、Application.Menu.Service経由で呼び出せるように変更
-- Decision: `MenuFacade`/`MenuService` を新設し、MenuService が ModelEntityMenu の実体をコード上で保持・生成する（.tscnにPopupMenuノードを並べない）。呼び出し側は `Application.Menu.Service.ShowModelEntityMenu(Guid entityId, Vector2I screenPosition)` を呼ぶだけでよく、GetNodeでの参照保持や各UIでのメニューノード配置は不要になった
+- Trigger: コンテキストメニュー（PopupMenu）を呼び出し元Node（ModelEntityTree/ViewportInteractionHandler）の子として.tscnに直接配置する方針を廃止し、Application.Ui.Menu経由で呼び出せるように変更
+- Decision: `MenuFacade`/`MenuService` を新設し、MenuService が ModelEntityMenu の実体をコード上で保持・生成する（.tscnにPopupMenuノードを並べない）。呼び出し側は `Application.Ui.Menu.ShowModelEntityMenu(Guid entityId, Vector2I screenPosition)` を呼ぶだけでよく、GetNodeでの参照保持や各UIでのメニューノード配置は不要になった
 - Scope: Godot C# の PopupMenu 系 UI コンポーネント全般
 - Artifacts Updated:
   - `CoaXisViewer/src/application/domain/menu/MenuFacade.cs`
@@ -144,3 +144,17 @@
   - `docs/specification/specification_integrated.md`
   - `.github/instructions/design-philosophy.instructions.md`
 - Notes: Treeの選択は既存のPickEvent経路でPropertyTreeへ到達するため、Tree間の直接参照を追加しない
+
+- Date: 2026-09-26
+- Trigger: Model中心Domain内の責務増加を受け、Modelと操作能力のFacade境界を整理
+- Decision: `application/domain`をModel中心領域とし、Model中核・ModelLoad・ModelState・ModelPresentation・Selection・Measurementを兄弟能力として構成する。ModelFacadeはModelEvent/ModelRegistryを所有し、ロード・状態・表示は能力別Facadeから公開する。Selection/MeasurementはModelを利用する操作能力としてModel配下へ移さず、Model中核からの逆依存を禁止する
+- Scope: CoaXisViewerのApplication Domain Facade構成とモデル操作API
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/Application.cs`
+  - `CoaXisViewer/src/application/domain/model/ModelFacade.cs`
+  - `CoaXisViewer/src/application/domain/model-load/ModelLoadFacade.cs`
+  - `CoaXisViewer/src/application/domain/model-state/ModelStateFacade.cs`
+  - `CoaXisViewer/src/application/domain/model-presentation/ModelPresentationFacade.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `docs/specification/specification_integrated.md`
+- Notes: ModelLoadServiceとModelSceneServiceはロード世代・キャンセル処理が連動するため同一Facadeにまとめる。ModelEventの通知契約と各Serviceの状態所有者・実行順は維持する

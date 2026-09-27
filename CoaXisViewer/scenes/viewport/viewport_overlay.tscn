@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cf06e5oyn7g2i"]
 
-[ext_resource type="Script" uid="uid://dynirh5eygkkb" path="res://src/application/domain/viewport/ViewportOverlay.cs" id="1_3a0ha"]
+[ext_resource type="Script" uid="uid://djiuhjkdltsg4" path="res://src/component/ViewportOverlay.cs" id="1_1ns4f"]
 
 [node name="ViewportOverlay" type="Control" unique_id=440684067]
 layout_mode = 3
@@ -12,7 +12,7 @@ grow_vertical = 2
 size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 2
-script = ExtResource("1_3a0ha")
+script = ExtResource("1_1ns4f")
 
 [node name="CenterAxis" type="Control" parent="." unique_id=1023449478]
 visible = false

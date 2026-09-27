@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデルDTOの置換ロードを統括するサービス
 /// </summary>
-public partial class ModelLoadService : Node
+public partial class ModelLoadPropertyService : Node
 {
 	#region Public API
 
@@ -30,7 +30,7 @@ public partial class ModelLoadService : Node
 		// 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
 		foreach (ModelEntity modelEntity in entities)
 		{
-			Application.Model.Scene.MarkInitialized(modelEntity);
+			Application.Model.Load.Scene.MarkInitialized(modelEntity);
 			Application.Model.Registry.RegisterEntity(modelEntity);
 		}
 		Application.Model.Registry.ResolveHierarchy();
@@ -40,11 +40,11 @@ public partial class ModelLoadService : Node
 			modelEntity.Node = EnsureNode(modelEntity);
 		}
 
-		Application.Model.Scene.PrepareLoads(entities);
+		Application.Model.Load.Scene.PrepareLoads(entities);
 
 		// 全Entityと階層が確定してから一括通知し、Tree側に親先行の個別通知を要求しない。
 		Application.Model.Event.NotifyModelSetReplaced();
-		Application.Model.Scene.StartPendingLoads();
+		Application.Model.Load.Scene.StartPendingLoads();
 		return entities;
 	}
 
@@ -77,7 +77,7 @@ public partial class ModelLoadService : Node
 	public void ClearModels()
 	{
 		// 旧世代を先に無効化してからRegistryをクリアし、遅延完了したロードが古いノードを更新しないようにする。
-		Application.Model.Scene.CancelPendingLoads();
+		Application.Model.Load.Scene.CancelPendingLoads();
 		Application.Model.Registry.Clear();
 	}
 

@@ -3,9 +3,9 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// UI管理用 Autoload ノード
+/// UiWindow管理用 Autoload ノード
 /// </summary>
-public partial class UiService : Node
+public partial class UiWindowService : Node
 {
     #region Fields
 
@@ -28,13 +28,13 @@ public partial class UiService : Node
     {
         if (container == null)
         {
-            Application.Log.Warn("UiService: container is null.");
+            Application.Log.Warn("UiWindowService: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Log.Warn("UiService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiWindowService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
@@ -68,13 +68,13 @@ public partial class UiService : Node
     {
         if (container == null)
         {
-            Application.Log.Warn("UiService: container is null.");
+            Application.Log.Warn("UiWindowService: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Log.Warn("UiService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiWindowService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }

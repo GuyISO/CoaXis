@@ -64,7 +64,7 @@ public static class IpcCommandDispatcher
             return IpcResultPayload.Failure("LoadModel", IpcErrorCode.TargetNotFound, $"No models loaded from '{path}'.");
         }
 
-        Application.Model.Load.ReplaceEntities(dtos);
+        Application.Model.Load.Entity.ReplaceEntities(dtos);
 
         return IpcResultPayload.Success("LoadModel", $"Loaded {dtos.Count} model(s) from '{path}'.");
     }
