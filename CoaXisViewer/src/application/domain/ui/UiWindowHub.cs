@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// UiWindow管理用 Autoload ノード
 /// </summary>
-public partial class UiWindowService : Node
+public partial class UiWindowHub : Node
 {
     #region Fields
 
@@ -28,13 +28,13 @@ public partial class UiWindowService : Node
     {
         if (container == null)
         {
-            Application.Log.Warn("UiWindowService: container is null.");
+            Application.Log.Warn("UiWindowHub: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Log.Warn("UiWindowService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiWindowHub: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }
@@ -68,13 +68,13 @@ public partial class UiWindowService : Node
     {
         if (container == null)
         {
-            Application.Log.Warn("UiWindowService: container is null.");
+            Application.Log.Warn("UiWindowHub: container is null.");
             return;
         }
 
         if (_uiWindow == null)
         {
-            Application.Log.Warn("UiWindowService: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
+            Application.Log.Warn("UiWindowHub: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
             container.QueueFree();
             return;
         }

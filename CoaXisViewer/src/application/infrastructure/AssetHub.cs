@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード
 /// </summary>
-public partial class AssetService : Node
+public partial class AssetHub : Node
 {
     #region Fields
 
@@ -46,7 +46,7 @@ public partial class AssetService : Node
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified += ApplySettings;
+        Application.Setting.SettingsNotified += ApplySettings;
     }
 
     /// <summary>
@@ -54,7 +54,7 @@ public partial class AssetService : Node
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
+        Application.Setting.SettingsNotified -= ApplySettings;
     }
 
     /// <summary>
@@ -222,7 +222,7 @@ public partial class AssetService : Node
             return;
         }
 
-        standardMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Service.Current.Color.SelectedMaterialColor);
+        standardMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Current.Color.SelectedMaterialColor);
     }
 
     #endregion

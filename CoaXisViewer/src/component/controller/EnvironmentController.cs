@@ -29,7 +29,7 @@ public partial class EnvironmentController : WorldEnvironment
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Setting.Event.SettingsNotified += ApplySettings;
+		Application.Setting.SettingsNotified += ApplySettings;
 	}
 
 	/// <summary>
@@ -37,7 +37,7 @@ public partial class EnvironmentController : WorldEnvironment
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Setting.Event.SettingsNotified -= ApplySettings;
+		Application.Setting.SettingsNotified -= ApplySettings;
 	}
 
 	/// <summary>
@@ -51,7 +51,7 @@ public partial class EnvironmentController : WorldEnvironment
 			return;
 		}
 
-		ColorSettings c = Application.Setting.Service.Current.Color;
+		ColorSettings c = Application.Setting.Current.Color;
 		env.BackgroundColor = Color.FromHtml(c.EnvironmentBackgroundColor);
 	}
 

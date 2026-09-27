@@ -70,13 +70,13 @@ public partial class DeviceInputHandler : Node
         if (Input.IsActionJustPressed("undo"))
         {
             Application.Log.Debug("DeviceInputHandler: Undo requested.");
-            Application.Command.Event.Undo();
+            Application.Command.Undo();
         }
 
         if (Input.IsActionJustPressed("redo"))
         {
             Application.Log.Debug("DeviceInputHandler: Redo requested.");
-            Application.Command.Event.Redo();
+            Application.Command.Redo();
         }
         
         if (Input.IsActionJustPressed("escape"))
@@ -93,7 +93,7 @@ public partial class DeviceInputHandler : Node
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleTranslationInput(float delta)
     {
-        InputSettings settings = Application.Setting.Service.Current.Input;
+        InputSettings settings = Application.Setting.Current.Input;
         float x = GetAxis("translate_camera_left", "translate_camera_right");
         float y = GetAxis("translate_camera_down", "translate_camera_up");
         float z = GetAxis("translate_camera_forward", "translate_camera_backward");
@@ -110,7 +110,7 @@ public partial class DeviceInputHandler : Node
         }
 
         Vector3 translation = translationDirection * (settings.TranslateSpeed * delta);
-        Application.Viewport.Event.Translate(translation, SpaceMode.Camera);
+        Application.Viewport.Translate(translation, SpaceMode.Camera);
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public partial class DeviceInputHandler : Node
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleRotationInput(float delta)
     {
-        InputSettings settings = Application.Setting.Service.Current.Input;
+        InputSettings settings = Application.Setting.Current.Input;
         float yawInput = GetAxis("rotate_camera_right", "rotate_camera_left");
         float pitchInput = GetAxis("rotate_camera_down", "rotate_camera_up");
         float rollInput = GetAxis("rotate_camera_clockwise", "rotate_camera_counterclockwise");
@@ -137,7 +137,7 @@ public partial class DeviceInputHandler : Node
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
         Quaternion rotation = yaw * pitch * roll;
 
-        Application.Viewport.Event.Rotate(rotation, SpaceMode.Camera);
+        Application.Viewport.Rotate(rotation, SpaceMode.Camera);
     }
 
     /// <summary>

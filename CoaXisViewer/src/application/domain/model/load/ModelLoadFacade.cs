@@ -1,7 +1,7 @@
 /// <summary>
 /// Application 経由でモデルのロード機能を利用するためのファサード
 /// </summary>
-public partial class ModelLoadFacade : FacadeBase
+public partial class ModelLoadFacade : BaseFacade
 {
 	public ModelLoadEntityService Entity { get; }
 	public ModelLoadPropertyService Property { get; }

@@ -182,7 +182,7 @@ public partial class VisualUi : PanelContainer
         }
 
         var command = new SetModelVisibilityCommand(selectedEntityIds, visibility);
-        Application.Command.Event.Execute(command);
+        Application.Command.Execute(command);
     }
 
     #endregion

@@ -41,7 +41,7 @@ public partial class CommandUi : PanelContainer
     {
         if (!_isInitialized)
         {
-            Application.Command.Event.AskState();
+            Application.Command.AskState();
         }
     }
 
@@ -95,7 +95,7 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Command.Event.StateNotified += OnStateNotified;
+        Application.Command.StateNotified += OnStateNotified;
     }
 
     /// <summary>
@@ -103,7 +103,7 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Command.Event.StateNotified -= OnStateNotified;
+        Application.Command.StateNotified -= OnStateNotified;
     }
 
     /// <summary>
@@ -170,7 +170,7 @@ public partial class CommandUi : PanelContainer
         }
 
         _isRequestingCursorMove = true;
-        Application.Command.Event.SetCursor(nextCursor);
+        Application.Command.SetCursor(nextCursor);
     }
 
     #endregion

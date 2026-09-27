@@ -51,7 +51,7 @@ public partial class MessageUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Log.Notified += OnLogNotified;
-        Application.Setting.Event.SettingsNotified += OnSettingsNotified;
+        Application.Setting.SettingsNotified += OnSettingsNotified;
     }
 
     /// <summary>
@@ -60,7 +60,7 @@ public partial class MessageUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Log.Notified -= OnLogNotified;
-        Application.Setting.Event.SettingsNotified -= OnSettingsNotified;
+        Application.Setting.SettingsNotified -= OnSettingsNotified;
     }
 
     /// <summary>
@@ -111,7 +111,7 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void TrimBufferToMaxLines()
     {
-        int maxLines = Application.Setting.Service.Current.Ui.MessageMaxLines;
+        int maxLines = Application.Setting.Current.Ui.MessageMaxLines;
 
         if (maxLines < UiSettings.MinMessageMaxLines)
         {

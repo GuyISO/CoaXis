@@ -64,7 +64,7 @@ public partial class ModelStateService : Node
 		var command = new SetModelVisibilityCommand(
 			[parsedEntityId],
 			GetNextVisibility(modelEntity.Visibility));
-		Application.Command.Event.Execute(command);
+		Application.Command.Execute(command);
 	}
 
 	/// <summary>

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// NamedPipe 経由で IPC メッセージを受信し、ドメイン層への振り分けとResult応答を行う Autoload ノード
 /// </summary>
-public partial class IpcService : Node
+public partial class IpcHub : Node
 {
     #region Fields
 
@@ -41,7 +41,7 @@ public partial class IpcService : Node
 
     public override void _Ready()
     {
-        IpcSettings settings = Application.Setting.Service.Current.Ipc;
+        IpcSettings settings = Application.Setting.Current.Ipc;
         if (settings.StartPipeServerOnReady)
         {
             Start(settings.PipeName);
@@ -54,7 +54,7 @@ public partial class IpcService : Node
         while (_pendingRequests.TryDequeue(out PendingRequest request))
         {
             IpcResultPayload result = IpcCommandDispatcher.Dispatch(request.Envelope);
-            Application.Ipc.Event.NotifyMessageHandled(request.Envelope.EventType, result.Ok, result.ErrorCode);
+            Application.Ipc.NotifyMessageHandled(request.Envelope.EventType, result.Ok, result.ErrorCode);
             request.CompletionSource.TrySetResult(result);
         }
     }
@@ -68,6 +68,38 @@ public partial class IpcService : Node
 
     #endregion
 
+    #region --------------------------------------- Action ---------------------------------------
+
+
+
+    #endregion
+
+    #region --------------------------------------- Notification ---------------------------------------
+
+    [Signal] public delegate void MessageReceivedEventHandler(string eventType);
+    /// <summary>
+    /// IPC メッセージを受信したことを通知する
+    /// </summary>
+    /// <param name="eventType">受信したメッセージの eventType</param>
+    internal void NotifyMessageReceived(string eventType)
+    {
+        EmitSignal(SignalName.MessageReceived, eventType);
+    }
+
+    [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
+    /// <summary>
+    /// IPC メッセージの処理結果を通知する
+    /// </summary>
+    /// <param name="eventType">処理したメッセージの eventType</param>
+    /// <param name="ok">処理が成功した場合は true</param>
+    /// <param name="errorCode">失敗時の標準化エラーコード</param>
+    internal void NotifyMessageHandled(string eventType, bool ok, string errorCode)
+    {
+        EmitSignal(SignalName.MessageHandled, eventType, ok, errorCode);
+    }
+
+    #endregion
+    
     #region Public API
 
     /// <summary>

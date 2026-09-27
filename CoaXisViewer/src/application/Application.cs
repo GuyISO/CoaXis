@@ -3,25 +3,25 @@ using Godot;
 /// <summary>
 /// AutoLoad 登録ノードのエントリポイント。
 /// </summary>
-public partial class Application : FacadeBase
+public partial class Application : BaseFacade
 {
     #region Fields
 
     // infrastructure
-    private LogHub _logHub;
-    private SettingFacade _settingFacade;
-    private AssetFacade _assetFacade;
-    private IpcFacade _ipcFacade;
+    private LogHub _log;
+    private SettingHub _setting;
+    private AssetHub _asset;
+    private IpcHub _ipc;
     private DeviceInputHandler _deviceInputHandler;
 
     // domain
-    private CommandFacade _commandFacade;
-    private Measurement _measurement;
-    private ModelFacade _modelFacade;
-    private Pick _pick;
-    private Selection _selection;
-    private UiFacade _uiFacade;
-    private ViewportFacade _viewportFacade;
+    private CommandHub _command;
+    private MeasurementHub _measurement;
+    private ModelFacade _model;
+    private PickHub _pick;
+    private SelectionHub _selection;
+    private UiFacade _ui;
+    private ViewportHub _viewport;
 
     #endregion
 
@@ -30,20 +30,20 @@ public partial class Application : FacadeBase
     public static Application Instance { get; private set; }
 
     // infrastructure
-    public static LogHub Log => Instance._logHub;
-    public static SettingFacade Setting => Instance._settingFacade;
-    public static AssetFacade Asset => Instance._assetFacade;
-    public static IpcFacade Ipc => Instance._ipcFacade;
+    public static LogHub Log => Instance._log;
+    public static SettingHub Setting => Instance._setting;
+    public static AssetHub Asset => Instance._asset;
+    public static IpcHub Ipc => Instance._ipc;
     public static DeviceInputHandler DeviceInputHandler => Instance._deviceInputHandler;
 
     // domain
-    public static CommandFacade Command => Instance._commandFacade;
-    public static Measurement Measurement => Instance._measurement;
-    public static ModelFacade Model => Instance._modelFacade;
-    public static Pick Pick => Instance._pick;
-    public static Selection Selection => Instance._selection;
-    public static UiFacade Ui => Instance._uiFacade;
-    public static ViewportFacade Viewport => Instance._viewportFacade;
+    public static CommandHub Command => Instance._command;
+    public static MeasurementHub Measurement => Instance._measurement;
+    public static ModelFacade Model => Instance._model;
+    public static PickHub Pick => Instance._pick;
+    public static SelectionHub Selection => Instance._selection;
+    public static UiFacade Ui => Instance._ui;
+    public static ViewportHub Viewport => Instance._viewport;
 
     #endregion
 
@@ -73,10 +73,10 @@ public partial class Application : FacadeBase
     /// </summary>
     private void EnsureInfrastructureModules()
     {
-        _logHub = AddModule<LogHub>("LogHub");
-        _settingFacade = AddModule<SettingFacade>("SettingFacade");
-        _assetFacade = AddModule<AssetFacade>("AssetFacade");
-        _ipcFacade = AddModule<IpcFacade>("IpcFacade");
+        _log = AddModule<LogHub>("LogHub");
+        _setting = AddModule<SettingHub>("SettingHub");
+        _asset = AddModule<AssetHub>("AssetHub");
+        _ipc = AddModule<IpcHub>("IpcHub");
         _deviceInputHandler = AddModule<DeviceInputHandler>("DeviceInputHandler");
     }
 
@@ -85,13 +85,13 @@ public partial class Application : FacadeBase
     /// </summary>
     private void EnsureDomainModules()
     {
-        _commandFacade = AddModule<CommandFacade>("CommandFacade");
-        _measurement = AddModule<Measurement>("MeasurementFacade");
-        _modelFacade = AddModule<ModelFacade>("ModelFacade");
-        _pick = AddModule<Pick>("PickFacade");
-        _selection = AddModule<Selection>("Selection");
-        _uiFacade = AddModule<UiFacade>("UiFacade");
-        _viewportFacade = AddModule<ViewportFacade>("ViewportFacade");
+        _command = AddModule<CommandHub>("Command");
+        _measurement = AddModule<MeasurementHub>("Measurement");
+        _model = AddModule<ModelFacade>("Model");
+        _pick = AddModule<PickHub>("Pick");
+        _selection = AddModule<SelectionHub>("Selection");
+        _ui = AddModule<UiFacade>("Ui");
+        _viewport = AddModule<ViewportHub>("Viewport");
     }
 
     #endregion

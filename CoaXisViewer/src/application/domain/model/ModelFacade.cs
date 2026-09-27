@@ -1,7 +1,7 @@
 /// <summary>
 /// Application 経由で Model 機能を利用するためのファサード
 /// </summary>
-public partial class ModelFacade : FacadeBase
+public partial class ModelFacade : BaseFacade
 {
     public ModelEvent Event { get; }
     public ModelRegistry Registry { get; }

@@ -36,7 +36,7 @@ public partial class PointerLabel : Node3D
 
 	public override void _Process(double delta)
 	{
-		float rotationSpeedDegPerSec = Application.Setting.Service.Current.Input.PointerRotationSpeedDeg;
+		float rotationSpeedDegPerSec = Application.Setting.Current.Input.PointerRotationSpeedDeg;
 		_components.RotateZ(Mathf.DegToRad(rotationSpeedDegPerSec) * (float)delta);
 	}
 

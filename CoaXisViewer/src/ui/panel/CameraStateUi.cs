@@ -42,7 +42,7 @@ public partial class CameraStateUi : PanelContainer
 	{
 		if (!_isInitialized)
 		{
-			Application.Viewport.Event.AskState();
+			Application.Viewport.AskState();
 		}
 	}
 
@@ -96,12 +96,12 @@ public partial class CameraStateUi : PanelContainer
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Viewport.Event.PositionNotified += OnPositionNotified;
-		Application.Viewport.Event.RotationNotified += OnRotationNotified;
-		Application.Viewport.Event.DistanceNotified += OnDistanceNotified;
-		Application.Viewport.Event.SizeNotified += OnSizeNotified;
-		Application.Viewport.Event.FovNotified += OnFovNotified;
-		Application.Viewport.Event.ProjectionTypeNotified += OnProjectionTypeNotified;
+		Application.Viewport.PositionNotified += OnPositionNotified;
+		Application.Viewport.RotationNotified += OnRotationNotified;
+		Application.Viewport.DistanceNotified += OnDistanceNotified;
+		Application.Viewport.SizeNotified += OnSizeNotified;
+		Application.Viewport.FovNotified += OnFovNotified;
+		Application.Viewport.ProjectionTypeNotified += OnProjectionTypeNotified;
 	}
 
 	/// <summary>
@@ -109,12 +109,12 @@ public partial class CameraStateUi : PanelContainer
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Viewport.Event.PositionNotified -= OnPositionNotified;
-		Application.Viewport.Event.RotationNotified -= OnRotationNotified;
-		Application.Viewport.Event.DistanceNotified -= OnDistanceNotified;
-		Application.Viewport.Event.SizeNotified -= OnSizeNotified;
-		Application.Viewport.Event.FovNotified -= OnFovNotified;
-		Application.Viewport.Event.ProjectionTypeNotified -= OnProjectionTypeNotified;
+		Application.Viewport.PositionNotified -= OnPositionNotified;
+		Application.Viewport.RotationNotified -= OnRotationNotified;
+		Application.Viewport.DistanceNotified -= OnDistanceNotified;
+		Application.Viewport.SizeNotified -= OnSizeNotified;
+		Application.Viewport.FovNotified -= OnFovNotified;
+		Application.Viewport.ProjectionTypeNotified -= OnProjectionTypeNotified;
 	}
 
 	/// <summary>
@@ -124,7 +124,7 @@ public partial class CameraStateUi : PanelContainer
 	{
 		if (!_isInitialized)
 		{
-			Application.Viewport.Event.AskState();
+			Application.Viewport.AskState();
 			Application.Log.Warn("CameraStateUi: save skipped because viewport state is not initialized yet.");
 			return;
 		}
@@ -306,12 +306,12 @@ public partial class CameraStateUi : PanelContainer
 		Quaternion rotation = new Quaternion(state.Rotation[0], state.Rotation[1], state.Rotation[2], state.Rotation[3]);
 		Camera3D.ProjectionType projectionType = ParseProjectionType(state.ProjectionType);
 
-		Application.Viewport.Event.SetProjectionType(projectionType);
-		Application.Viewport.Event.MovePositionTo(position, true);
-		Application.Viewport.Event.MoveRotationTo(rotation, true);
-		Application.Viewport.Event.SetDistance(state.Distance, true);
-		Application.Viewport.Event.SetSizeTo(state.Size, true);
-		Application.Viewport.Event.SetFov(state.Fov, true);
+		Application.Viewport.SetProjectionType(projectionType);
+		Application.Viewport.MovePositionTo(position, true);
+		Application.Viewport.MoveRotationTo(rotation, true);
+		Application.Viewport.SetDistance(state.Distance, true);
+		Application.Viewport.SetSizeTo(state.Size, true);
+		Application.Viewport.SetFov(state.Fov, true);
 	}
 
 	/// <summary>

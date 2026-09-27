@@ -65,7 +65,7 @@ public partial class ViewportOverlay : Control
 		if (!_isInitialized)
 		{
 			// カメラの初期状態を取得してUIに反映する
-			Application.Viewport.Event.AskState();
+			Application.Viewport.AskState();
 		}
 	}
 
@@ -100,13 +100,13 @@ public partial class ViewportOverlay : Control
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Setting.Event.SettingsNotified += ApplySettings;
-		Application.Viewport.Event.RotateRequested += OnRotateRequested;
-		Application.Viewport.Event.RotationNotified += OnRotationNotified;
-		Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
-		Application.Viewport.Event.ArcballRadiusNotified += OnArcballRadiusNotified;
-		Application.Viewport.Event.ArcballHandleNotified += OnArcballHandleNotified;
-		Application.Viewport.Event.PickRectNotified += OnPickRectNotified;
+		Application.Setting.SettingsNotified += ApplySettings;
+		Application.Viewport.RotateRequested += OnRotateRequested;
+		Application.Viewport.RotationNotified += OnRotationNotified;
+		Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
+		Application.Viewport.ArcballRadiusNotified += OnArcballRadiusNotified;
+		Application.Viewport.ArcballHandleNotified += OnArcballHandleNotified;
+		Application.Viewport.PickRectNotified += OnPickRectNotified;
 	}
 
 	/// <summary>
@@ -114,13 +114,13 @@ public partial class ViewportOverlay : Control
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Setting.Event.SettingsNotified -= ApplySettings;
-		Application.Viewport.Event.RotateRequested -= OnRotateRequested;
-		Application.Viewport.Event.RotationNotified -= OnRotationNotified;
-		Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
-		Application.Viewport.Event.ArcballRadiusNotified -= OnArcballRadiusNotified;
-		Application.Viewport.Event.ArcballHandleNotified -= OnArcballHandleNotified;
-		Application.Viewport.Event.PickRectNotified -= OnPickRectNotified;
+		Application.Setting.SettingsNotified -= ApplySettings;
+		Application.Viewport.RotateRequested -= OnRotateRequested;
+		Application.Viewport.RotationNotified -= OnRotationNotified;
+		Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
+		Application.Viewport.ArcballRadiusNotified -= OnArcballRadiusNotified;
+		Application.Viewport.ArcballHandleNotified -= OnArcballHandleNotified;
+		Application.Viewport.PickRectNotified -= OnPickRectNotified;
 	}
 
 	/// <summary>
@@ -513,7 +513,7 @@ public partial class ViewportOverlay : Control
 	/// </summary>
 	private void ApplySettings()
 	{
-		ChangeColor(Color.FromHtml(Application.Setting.Service.Current.Color.OverlayLineColor));
+		ChangeColor(Color.FromHtml(Application.Setting.Current.Color.OverlayLineColor));
 	}
 
 	#endregion

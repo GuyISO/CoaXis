@@ -327,7 +327,7 @@ public partial class ModelPresentationService : Node
 	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
 	private static void HighlightMesh(ModelNode modelNode, bool enable = true)
 	{
-		Material selectedMaterial = Application.Asset.Service.GetSelectedMaterial();
+		Material selectedMaterial = Application.Asset.GetSelectedMaterial();
 
 		if (enable)
 		{

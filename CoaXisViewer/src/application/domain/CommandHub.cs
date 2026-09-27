@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// コマンド履歴を管理するサービス
 /// </summary>
-public partial class CommandService : Node
+public partial class CommandHub : Node
 {
 	#region Fields
 
@@ -30,6 +30,34 @@ public partial class CommandService : Node
 
 	#endregion
 
+	#region Action
+
+	[Signal] public delegate void AskStateRequestedEventHandler();
+	/// <summary>
+	/// コマンド履歴状態の通知をリクエストする
+	/// </summary>
+	internal void AskState()
+	{
+		EmitSignal(SignalName.AskStateRequested);
+	}
+
+	#endregion
+
+	#region Notification
+
+	[Signal] public delegate void StateNotifiedEventHandler(CommandBase[] history, int cursor);
+	/// <summary>
+	/// コマンド履歴状態を通知する
+	/// </summary>
+	/// <param name="history">履歴配列</param>
+	/// <param name="cursor">現在カーソル位置（-1 の場合は未実行）</param>
+	internal void NotifyState(CommandBase[] history, int cursor)
+	{
+		EmitSignal(SignalName.StateNotified, history, cursor);
+	}
+
+	#endregion
+
 	#region Events
 
 	/// <summary>
@@ -37,12 +65,7 @@ public partial class CommandService : Node
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Command.Event.AskStateRequested += OnAskStateRequested;
-		Application.Command.Event.ExecuteRequested += OnExecuteRequested;
-		Application.Command.Event.UndoRequested += OnUndoRequested;
-		Application.Command.Event.RedoRequested += OnRedoRequested;
-		Application.Command.Event.ClearRequested += OnClearRequested;
-		Application.Command.Event.SetCursorRequested += OnSetCursorRequested;
+		Application.Command.AskStateRequested += OnAskStateRequested;
 	}
 
 	/// <summary>
@@ -50,42 +73,12 @@ public partial class CommandService : Node
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Command.Event.AskStateRequested -= OnAskStateRequested;
-		Application.Command.Event.ExecuteRequested -= OnExecuteRequested;
-		Application.Command.Event.UndoRequested -= OnUndoRequested;
-		Application.Command.Event.RedoRequested -= OnRedoRequested;
-		Application.Command.Event.ClearRequested -= OnClearRequested;
-		Application.Command.Event.SetCursorRequested -= OnSetCursorRequested;
+		Application.Command.AskStateRequested -= OnAskStateRequested;
 	}
 
 	private void OnAskStateRequested()
 	{
 		NotifyState();
-	}
-
-	private void OnExecuteRequested(CommandBase command)
-	{
-		Execute(command);
-	}
-
-	private void OnUndoRequested()
-	{
-		Undo();
-	}
-
-	private void OnRedoRequested()
-	{
-		Redo();
-	}
-
-	private void OnClearRequested()
-	{
-		Clear();
-	}
-
-	private void OnSetCursorRequested(int cursor)
-	{
-		SetCursor(cursor);
 	}
 
 	#endregion
@@ -95,7 +88,7 @@ public partial class CommandService : Node
 	/// <summary>
 	/// コマンドを実行し、Undoスタックに積む
 	/// </summary>
-	private void Execute(CommandBase command)
+	public void Execute(CommandBase command)
 	{
 		if (command == null)
 		{
@@ -116,7 +109,7 @@ public partial class CommandService : Node
 	/// <summary>
 	/// Undo 実行
 	/// </summary>
-	private void Undo()
+	public void Undo()
 	{
 		if (_cursor <= 0)
 		{
@@ -135,7 +128,7 @@ public partial class CommandService : Node
 	/// <summary>
 	/// Redo 実行
 	/// </summary>
-	private void Redo()
+	public void Redo()
 	{
 		if (_cursor >= _history.Count)
 		{
@@ -154,7 +147,7 @@ public partial class CommandService : Node
 	/// <summary>
 	/// スタックのクリア（シーン切り替え時など）
 	/// </summary>
-	private void Clear()
+	public void Clear()
 	{
 		Application.Log.Info($"CommandService Clear: history={_history.Count}, cursor={_cursor}");
 		_history.Clear();
@@ -166,7 +159,7 @@ public partial class CommandService : Node
 	/// カーソル位置を指定してタイムトラベルする
 	/// </summary>
 	/// <param name="cursor">移動先カーソル</param>
-	private void SetCursor(int cursor)
+	public void SetCursor(int cursor)
 	{
 		int clampedCursor = Math.Clamp(cursor, 0, _history.Count);
 		if (clampedCursor == _cursor)
@@ -208,7 +201,7 @@ public partial class CommandService : Node
 	/// </summary>
 	private void NotifyState()
 	{
-		Application.Command.Event.NotifyState(_history.ToArray(), _cursor);
+		Application.Command.NotifyState(_history.ToArray(), _cursor);
 	}
 
 	#endregion

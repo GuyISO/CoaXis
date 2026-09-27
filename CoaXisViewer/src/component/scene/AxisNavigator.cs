@@ -41,7 +41,7 @@ public partial class AxisNavigator : Control
 		if (!_isInitialized)
 		{
 			// カメラの初期回転を取得して軸ナビゲータに反映する
-			Application.Viewport.Event.AskState();
+			Application.Viewport.AskState();
 		}
 	}
 
@@ -98,7 +98,7 @@ public partial class AxisNavigator : Control
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Viewport.Event.RotationNotified += OnRotationNotified;
+		Application.Viewport.RotationNotified += OnRotationNotified;
 	}
 
 	/// <summary>
@@ -106,7 +106,7 @@ public partial class AxisNavigator : Control
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Viewport.Event.RotationNotified -= OnRotationNotified;
+		Application.Viewport.RotationNotified -= OnRotationNotified;
 	}
 
 	private void OnRotationNotified(Quaternion rotation)
@@ -133,7 +133,7 @@ public partial class AxisNavigator : Control
 			// _cameraController.MoveFocalPoint(null, quaternion, true);
 
 			// カメラ回転要求イベントを発行
-			Application.Viewport.Event.MoveRotationTo(quaternion, true);
+			Application.Viewport.MoveRotationTo(quaternion, true);
 		}
 	}
 

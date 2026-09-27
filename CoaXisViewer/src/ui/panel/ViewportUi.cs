@@ -55,7 +55,7 @@ public partial class ViewportUi : PanelContainer
     {
         if (!_isInitialized)
         {
-            Application.Viewport.Event.AskState();
+            Application.Viewport.AskState();
         }
     }
 
@@ -129,14 +129,14 @@ public partial class ViewportUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Viewport.Event.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.Event.PositionNotified += OnPositionNotified;
-        Application.Viewport.Event.RotationNotified += OnRotationNotified;
-        Application.Viewport.Event.DistanceNotified += OnDistanceNotified;
-        Application.Viewport.Event.SizeNotified += OnSizeNotified;
-        Application.Viewport.Event.FovNotified += OnFovNotified;
-        Application.Viewport.Event.ProjectionTypeNotified += OnProjectionTypeNotified;
-        Application.Viewport.Event.LayerNotified += OnLayerNotified;
+        Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
+        Application.Viewport.PositionNotified += OnPositionNotified;
+        Application.Viewport.RotationNotified += OnRotationNotified;
+        Application.Viewport.DistanceNotified += OnDistanceNotified;
+        Application.Viewport.SizeNotified += OnSizeNotified;
+        Application.Viewport.FovNotified += OnFovNotified;
+        Application.Viewport.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Viewport.LayerNotified += OnLayerNotified;
     }
 
     /// <summary>
@@ -145,14 +145,14 @@ public partial class ViewportUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Viewport.Event.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.Event.PositionNotified -= OnPositionNotified;
-        Application.Viewport.Event.RotationNotified -= OnRotationNotified;
-        Application.Viewport.Event.DistanceNotified -= OnDistanceNotified;
-        Application.Viewport.Event.SizeNotified -= OnSizeNotified;
-        Application.Viewport.Event.FovNotified -= OnFovNotified;
-        Application.Viewport.Event.ProjectionTypeNotified -= OnProjectionTypeNotified;
-        Application.Viewport.Event.LayerNotified -= OnLayerNotified;
+        Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.PositionNotified -= OnPositionNotified;
+        Application.Viewport.RotationNotified -= OnRotationNotified;
+        Application.Viewport.DistanceNotified -= OnDistanceNotified;
+        Application.Viewport.SizeNotified -= OnSizeNotified;
+        Application.Viewport.FovNotified -= OnFovNotified;
+        Application.Viewport.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Viewport.LayerNotified -= OnLayerNotified;
     }
 
     /// <summary>
@@ -171,7 +171,7 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonToggleProjectionPressed()
     {
         Application.Log.Debug("ViewportUi: toggle projection requested.");
-        Application.Viewport.Event.ToggleProjectionType();
+        Application.Viewport.ToggleProjectionType();
     }
 
     /// <summary>
@@ -186,7 +186,7 @@ public partial class ViewportUi : PanelContainer
             return;
         }
         Application.Log.Debug($"ViewportUi: fit-all requested. target='{targetNode.Name}'");
-        Application.Viewport.Event.Fit(new[] { targetNode }, true);
+        Application.Viewport.Fit(new[] { targetNode }, true);
     }
 
     /// <summary>
@@ -202,7 +202,7 @@ public partial class ViewportUi : PanelContainer
         }
 
         Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargetNodes.Length}");
-        Application.Viewport.Event.Fit(fitTargetNodes, true);
+        Application.Viewport.Fit(fitTargetNodes, true);
     }
 
     /// <summary>
@@ -220,7 +220,7 @@ public partial class ViewportUi : PanelContainer
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
         Application.Log.Debug("ViewportUi: roll-left requested.");
-        Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -230,7 +230,7 @@ public partial class ViewportUi : PanelContainer
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
         Application.Log.Debug("ViewportUi: roll-right requested.");
-        Application.Viewport.Event.Rotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -238,7 +238,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonLayerVisiblePressed()
     {
-        Application.Viewport.Event.NotifyLayer(
+        Application.Viewport.NotifyLayer(
             (uint)ViewportLayer.Visible,
             _buttonLayerVisible.ButtonPressed);
     }
@@ -248,7 +248,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonLayerInvisiblePressed()
     {
-        Application.Viewport.Event.NotifyLayer(
+        Application.Viewport.NotifyLayer(
             (uint)ViewportLayer.Invisible,
             _buttonLayerInvisible.ButtonPressed);
     }
@@ -260,7 +260,7 @@ public partial class ViewportUi : PanelContainer
     private void OnSliderFovValueChanged(double value)
     {
         Application.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
-        Application.Viewport.Event.SetFov((float)value);
+        Application.Viewport.SetFov((float)value);
     }
 
     /// <summary>

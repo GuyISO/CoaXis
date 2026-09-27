@@ -67,7 +67,7 @@ public partial class ModelEntityMenu : BaseMenu
 		}
 
 		Node3D[] fitTargetNodes = new Node3D[] { modelNode };
-		Application.Viewport.Event.Fit(fitTargetNodes, true);
+		Application.Viewport.Fit(fitTargetNodes, true);
 	}
 
 	private void HandleEmphasizeMenuItemPressed(Variant tag)

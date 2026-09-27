@@ -1,9 +1,9 @@
 using Godot;
 
 /// <summary>
-/// Domain Facade で共通利用するモジュール生成ヘルパー
+/// Application Facade で共通利用するモジュール生成ヘルパー
 /// </summary>
-public abstract partial class FacadeBase : Node
+public abstract partial class BaseFacade : Node
 {
     #region Internal Helpers
 

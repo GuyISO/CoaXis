@@ -1,7 +1,7 @@
 /// <summary>
 /// Application 経由でモデル表示機能を利用するためのファサード
 /// </summary>
-public partial class ModelPresentationFacade : FacadeBase
+public partial class ModelPresentationFacade : BaseFacade
 {
 	/// <summary>
 	/// モデル表示サービスを取得する

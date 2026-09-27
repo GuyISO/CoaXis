@@ -15,7 +15,7 @@ using System.Text.Json;
 /// 実行ファイル近傍に設定ファイルを置くことで、ビルド後の配布物でも
 /// 再ビルド不要で設定変更できる運用を想定している。
 /// </summary>
-public partial class SettingService : Node
+public partial class SettingHub : Node
 {
 
     /// <summary>
@@ -52,6 +52,25 @@ public partial class SettingService : Node
     {
         Reload();
     }
+
+    #region --------------------------------------- Action ---------------------------------------
+
+
+
+    #endregion
+
+    #region --------------------------------------- Notification ---------------------------------------
+
+    [Signal] public delegate void SettingsNotifiedEventHandler();
+    /// <summary>
+    /// 設定の再読み込みが完了したことを通知する
+    /// </summary>
+    internal void NotifySettingsNotified()
+    {
+        EmitSignal(SignalName.SettingsNotified);
+    }
+
+    #endregion
 
     /// <summary>
     /// 外部設定を再読込する。

@@ -97,7 +97,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified += ApplySettings;
+        Application.Setting.SettingsNotified += ApplySettings;
         Application.Selection.ModelStateNotified += OnModelSelectionStateNotified;
         Application.Selection.ClearedNotified += OnClearedNotified;
         Application.Model.Event.Added += OnModelAdded;
@@ -114,7 +114,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
+        Application.Setting.SettingsNotified -= ApplySettings;
         Application.Selection.ModelStateNotified -= OnModelSelectionStateNotified;
         Application.Selection.ClearedNotified -= OnClearedNotified;
         Application.Model.Event.Added -= OnModelAdded;
@@ -287,11 +287,11 @@ public partial class ModelEntityTree : Tree
         TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
         if (treeItem != null)
         {
-            Texture2D buttonIcon = Application.Asset.Service.GetVisibilityIcon(
+            Texture2D buttonIcon = Application.Asset.GetVisibilityIcon(
                 visibility,
                 ModelVisibilityResolver.IsVisible(modelEntity),
                 Constant.Ui.Tree.HierarchyVisibleIconSize)
-                ?? Application.Asset.Service.GetVisibilityIcon(
+                ?? Application.Asset.GetVisibilityIcon(
                     ModelVisibility.Visible,
                     Constant.Ui.Tree.HierarchyVisibleIconSize);
             treeItem.SetButton(0, 0, buttonIcon);
@@ -449,19 +449,19 @@ public partial class ModelEntityTree : Tree
         treeItem.SetText(0, modelEntity.Name);
 
         // --- 左側アイコン（ModelEntity に紐づくモデルアイコン。不在時は既定アイコンで代替） ---
-        Texture2D icon = Application.Asset.Service.GetIcon(modelEntity.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
-            ?? Application.Asset.Service.GetDefaultIcon(Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D icon = Application.Asset.GetIcon(modelEntity.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
+            ?? Application.Asset.GetDefaultIcon(Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（表示切替・演出用） ---
-        Texture2D btnIcon = Application.Asset.Service.GetVisibilityIcon(
+        Texture2D btnIcon = Application.Asset.GetVisibilityIcon(
             modelEntity.Visibility,
             ModelVisibilityResolver.IsVisible(modelEntity),
             Constant.Ui.Tree.HierarchyVisibleIconSize)
-            ?? Application.Asset.Service.GetVisibilityIcon(
+            ?? Application.Asset.GetVisibilityIcon(
                 ModelVisibility.Visible,
                 Constant.Ui.Tree.HierarchyVisibleIconSize);
-        Texture2D fitIcon = Application.Asset.Service.GetIcon(
+        Texture2D fitIcon = Application.Asset.GetIcon(
             "res://assets/icon/mono/target.svg",
             Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.AddButton(0, btnIcon, id: VisibilityButtonId);
@@ -491,7 +491,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void ApplySettings()
     {
-        _selectedColor = Color.FromHtml(Application.Setting.Service.Current.Color.HierarchySelectedColor);
+        _selectedColor = Color.FromHtml(Application.Setting.Current.Color.HierarchySelectedColor);
         ReapplySelectedRowColors();
     }
 
@@ -762,7 +762,7 @@ public partial class ModelEntityTree : Tree
         }
 
         Node3D[] fitTargetNodes = new Node3D[] { modelNode };
-        Application.Viewport.Event.Fit(fitTargetNodes, true);
+        Application.Viewport.Fit(fitTargetNodes, true);
     }
 
     /// <summary>

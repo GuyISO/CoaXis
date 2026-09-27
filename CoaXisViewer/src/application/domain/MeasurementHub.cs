@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// 測定機能の状態管理・計算・ビジュアル更新を担当するサービス
 /// </summary>
-public partial class Measurement : Node
+public partial class MeasurementHub : Node
 {
     #region Fields
 
@@ -119,7 +119,7 @@ public partial class Measurement : Node
         Application.Measurement.AskResultRequested += OnAskResultRequested;
         Application.Measurement.SetPointRequested += OnSetPointRequested;
         Application.Measurement.ClearPointRequested += OnClearPointRequested;
-        Application.Setting.Event.SettingsNotified += ApplySettings;
+        Application.Setting.SettingsNotified += ApplySettings;
     }
 
     /// <summary>
@@ -132,7 +132,7 @@ public partial class Measurement : Node
         Application.Measurement.AskResultRequested -= OnAskResultRequested;
         Application.Measurement.SetPointRequested -= OnSetPointRequested;
         Application.Measurement.ClearPointRequested -= OnClearPointRequested;
-        Application.Setting.Event.SettingsNotified -= ApplySettings;
+        Application.Setting.SettingsNotified -= ApplySettings;
     }
 
     /// <summary>
@@ -251,7 +251,7 @@ public partial class Measurement : Node
             return;
         }
 
-        _lineMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Service.Current.Color.MeasurementLineColor);
+        _lineMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Current.Color.MeasurementLineColor);
     }
 
     /// <summary>
@@ -405,7 +405,7 @@ public partial class Measurement : Node
         _line.MaterialOverride = _lineMaterial = new StandardMaterial3D
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
-            AlbedoColor = Color.FromHtml(Application.Setting.Service.Current.Color.MeasurementLineColor)
+            AlbedoColor = Color.FromHtml(Application.Setting.Current.Color.MeasurementLineColor)
         };
 
         _visualRoot.AddChild(_line);
