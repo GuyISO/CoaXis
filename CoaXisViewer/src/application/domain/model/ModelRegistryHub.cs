@@ -4,8 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// モデル実体（ModelEntity）と属性（ModelProperty）のインスタンスおよび UUID を一元管理する Autoload ノード。
-/// RootModelEntity をルートとして管理する。
+/// モデル実体、モデル属性、およびそれらの階層関係を管理するハブ。
 /// </summary>
 public partial class ModelRegistry : BaseHub
 {

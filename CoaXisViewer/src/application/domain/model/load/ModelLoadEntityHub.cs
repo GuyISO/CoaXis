@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデル DTO の置換ロードを統括するサービス。
+/// モデル実体の置換ロードと登録を管理するハブ。
 /// </summary>
 public partial class ModelLoadEntityHub : BaseHub
 {

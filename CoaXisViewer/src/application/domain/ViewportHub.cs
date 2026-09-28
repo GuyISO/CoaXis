@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-/// カメラとビューポートの状態を制御するサービス。
+/// ビューポートの操作要求と状態通知を管理するハブ。
 /// </summary>
 public partial class ViewportHub : BaseHub
 {

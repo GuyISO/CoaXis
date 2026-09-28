@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// モデルの論理状態変更要求を処理するサービス。
+/// モデルの論理状態と変更要求を管理するハブ。
 /// </summary>
 public partial class ModelStateHub : BaseHub
 {

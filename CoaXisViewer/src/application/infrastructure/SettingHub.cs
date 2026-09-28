@@ -4,7 +4,7 @@ using System.IO;
 using System.Text.Json;
 
 /// <summary>
-/// 外部 JSON 設定を読み込んでアプリ全体へ提供する Autoload ノード
+/// 外部設定の読み込みとアプリケーションへの提供を管理するハブ。
 /// </summary>
 /// <remarks>
 /// 読み込み優先順位は次の通り。
@@ -14,7 +14,7 @@ using System.Text.Json;
 ///
 /// 実行ファイル近傍に設定ファイルを置くことで、ビルド後の配布物でも
 /// 再ビルド不要で設定変更できる運用を想定している。
-/// </summary>
+/// </remarks>
 public partial class SettingHub : BaseHub
 {
     #region Fields

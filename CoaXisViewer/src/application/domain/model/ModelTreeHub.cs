@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルツリーの状態を ModelNode へ反映する Autoload ノード。
+/// モデルツリー操作の要求を管理するハブ。
 /// </summary>
 public partial class ModelTreeHub : BaseHub
 {

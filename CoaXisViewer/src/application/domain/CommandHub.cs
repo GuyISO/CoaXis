@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// コマンド履歴を管理するサービス。
+/// コマンド履歴と実行状態を管理するハブ。
 /// </summary>
 public partial class CommandHub : BaseHub
 {

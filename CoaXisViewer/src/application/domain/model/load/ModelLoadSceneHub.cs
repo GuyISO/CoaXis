@@ -5,7 +5,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 
 /// <summary>
-/// モデルシーンの非同期ロードと描画ノードへの反映を管理する
+/// モデルシーンの非同期ロードと描画ノードへの反映を管理するハブ。
 /// </summary>
 public partial class ModelLoadSceneHub : BaseHub
 {

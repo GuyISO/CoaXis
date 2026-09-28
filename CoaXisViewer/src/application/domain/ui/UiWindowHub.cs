@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// UiWindow 管理用の Autoload ノード。
+/// UI ウィンドウの生成と表示状態を管理するハブ。
 /// </summary>
 public partial class UiWindowHub : BaseHub
 {

@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデル DTO のロード処理を提供するサービス。
+/// モデル属性のロードと登録を管理するハブ。
 /// </summary>
 public partial class ModelLoadPropertyHub : BaseHub
 {

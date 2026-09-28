@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルの表示状態を ModelNode へ反映する Autoload ノード。
+/// モデルの表示状態と描画ノードへの反映を管理するハブ。
 /// </summary>
 public partial class ModelVisualHub : BaseHub
 {

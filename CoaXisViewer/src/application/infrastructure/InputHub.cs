@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード。
+/// ユーザー入力の取得とアプリケーション操作への変換を管理するハブ。
 /// </summary>
 public partial class InputHub : BaseHub
 {

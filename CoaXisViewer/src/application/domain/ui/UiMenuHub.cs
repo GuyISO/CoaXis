@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// 各種コンテキストメニューの表示を一元管理するサービス。
+/// コンテキストメニューの生成と表示を管理するハブ。
 /// </summary>
 /// <remarks>
 /// 従来は ModelEntityTree や ViewportInteractionHandler など、呼び出し元 Node の子として

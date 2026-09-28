@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 /// <summary>
-/// 選択状態の管理と選択変更イベントの発行を担当する。
+/// モデルの選択状態と変更通知を管理するハブ。
 /// </summary>
 public partial class SelectionHub : BaseHub
 {

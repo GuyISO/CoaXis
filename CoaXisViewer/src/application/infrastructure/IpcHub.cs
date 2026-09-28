@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// NamedPipe 経由で IPC メッセージを受信し、ドメイン層への振り分けと Result 応答を行う Autoload ノード。
+/// IPC メッセージの受信、振り分け、結果応答を管理するハブ。
 /// </summary>
 public partial class IpcHub : BaseHub
 {

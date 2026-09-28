@@ -1,8 +1,7 @@
 using Godot;
 
 /// <summary>
-/// Application を含む AutoLoad モジュールで共通利用する基底クラス。
-/// 階層的なモジュール生成を補助する。
+/// Application を含む AutoLoad モジュールの共通機能と階層的な生成処理を提供する基底ハブ。
 /// </summary>
 public abstract partial class BaseHub : Node
 {

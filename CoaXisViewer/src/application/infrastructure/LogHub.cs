@@ -3,7 +3,7 @@ using System;
 using System.IO;
 
 /// <summary>
-/// ログ機能を提供する Autoload ノード。
+/// アプリケーション全体のログ出力を管理するハブ。
 /// </summary>
 public partial class LogHub : BaseHub
 {

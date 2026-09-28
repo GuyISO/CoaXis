@@ -1,5 +1,5 @@
 /// <summary>
-/// Application 経由でモデル機能を利用するためのファサード。
+/// モデル関連モジュールの構成を管理するハブ。
 /// </summary>
 public partial class ModelHub : BaseHub
 {

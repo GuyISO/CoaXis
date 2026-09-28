@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-/// AutoLoad 登録ノードのエントリポイント。
+/// アプリケーション全体のモジュール構成を管理するハブ。
 /// </summary>
 public partial class Application : BaseHub
 {

@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 /// <summary>
-/// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード。
+/// アセットの取得とキャッシュを管理するハブ。
 /// </summary>
 public partial class AssetHub : BaseHub
 {

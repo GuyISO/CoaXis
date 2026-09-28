@@ -1,5 +1,5 @@
 /// <summary>
-/// Application 経由でモデルのロード機能を利用するためのファサード。
+/// モデルロード関連モジュールの構成を管理するハブ。
 /// </summary>
 public partial class ModelLoadHub : BaseHub
 {

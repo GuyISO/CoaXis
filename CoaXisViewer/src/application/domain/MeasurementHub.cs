@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// 測定機能の状態管理、計算、ビジュアル更新を担当するサービス。
+/// 測定状態、測定結果、測定用ビジュアルを管理するハブ。
 /// </summary>
 public partial class MeasurementHub : BaseHub
 {

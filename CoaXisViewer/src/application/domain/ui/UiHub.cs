@@ -1,5 +1,5 @@
 /// <summary>
-/// Application 経由で UI 機能を利用するためのファサード。
+/// UI 関連モジュールの構成を管理するハブ。
 /// </summary>
 public partial class UiHub : BaseHub
 {

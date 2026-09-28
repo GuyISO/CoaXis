@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-/// ピック関連の状態管理を担当する。
+/// ピック操作のモードと結果を管理するハブ。
 /// </summary>
 public partial class PickHub : BaseHub
 {
