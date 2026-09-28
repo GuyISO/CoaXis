@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// ピック関連の状態管理を担当する
 /// </summary>
-public partial class PickHub : Node
+public partial class PickHub : BaseHub
 {
     #region Fields
 

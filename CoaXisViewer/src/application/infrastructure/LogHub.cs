@@ -5,7 +5,7 @@ using System.IO;
 /// <summary>
 /// ログ機能のハブとなる Autoload ノード
 /// </summary>
-public partial class LogHub : Node
+public partial class LogHub : BaseHub
 {
     #region Fields
 

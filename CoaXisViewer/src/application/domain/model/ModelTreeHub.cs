@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデルツリーの状態をModelNodeへ反映するAutoloadノード
 /// </summary>
-public partial class ModelTreeHub : Node
+public partial class ModelTreeHub : BaseHub
 {
 
 	#region --------------------------------------- Action ---------------------------------------

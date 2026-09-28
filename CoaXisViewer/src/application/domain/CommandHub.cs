@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// コマンド履歴を管理するサービス
 /// </summary>
-public partial class CommandHub : Node
+public partial class CommandHub : BaseHub
 {
 	#region Fields
 

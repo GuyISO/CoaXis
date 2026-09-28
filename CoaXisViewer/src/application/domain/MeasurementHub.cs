@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// 測定機能の状態管理・計算・ビジュアル更新を担当するサービス
 /// </summary>
-public partial class MeasurementHub : Node
+public partial class MeasurementHub : BaseHub
 {
     #region Fields
 

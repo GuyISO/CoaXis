@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// カメラやビューの状態を制御するサービス。
 /// </summary>
-public partial class ViewportHub : Node
+public partial class ViewportHub : BaseHub
 {
 	#region Fields
 

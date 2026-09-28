@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデルDTOの置換ロードを統括するサービス
 /// </summary>
-public partial class ModelLoadEntityHub : Node
+public partial class ModelLoadEntityHub : BaseHub
 {
 	#region Public API
 

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// UiWindow管理用 Autoload ノード
 /// </summary>
-public partial class UiWindowHub : Node
+public partial class UiWindowHub : BaseHub
 {
     #region Fields
 

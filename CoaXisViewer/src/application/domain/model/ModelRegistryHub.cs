@@ -7,7 +7,7 @@ using System.Linq;
 /// モデル実体（ModelEntity）と属性（ModelProperty）のインスタンスおよびUUIDを一元管理する Autoload ノード
 /// RootModelEntity をルートとして管理する
 /// </summary>
-public partial class ModelRegistry : Node
+public partial class ModelRegistry : BaseHub
 {
     #region Fields
 

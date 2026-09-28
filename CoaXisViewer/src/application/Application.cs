@@ -3,7 +3,7 @@ using Godot;
 /// <summary>
 /// AutoLoad 登録ノードのエントリポイント。
 /// </summary>
-public partial class Application : BaseFacade
+public partial class Application : BaseHub
 {
     #region Fields
 
@@ -17,10 +17,10 @@ public partial class Application : BaseFacade
     // domain
     private CommandHub _command;
     private MeasurementHub _measurement;
-    private ModelFacade _model;
+    private ModelHub _model;
     private PickHub _pick;
     private SelectionHub _selection;
-    private UiFacade _ui;
+    private UiHub _ui;
     private ViewportHub _viewport;
 
     #endregion
@@ -39,10 +39,10 @@ public partial class Application : BaseFacade
     // domain
     public static CommandHub Command => Instance._command;
     public static MeasurementHub Measurement => Instance._measurement;
-    public static ModelFacade Model => Instance._model;
+    public static ModelHub Model => Instance._model;
     public static PickHub Pick => Instance._pick;
     public static SelectionHub Selection => Instance._selection;
-    public static UiFacade Ui => Instance._ui;
+    public static UiHub Ui => Instance._ui;
     public static ViewportHub Viewport => Instance._viewport;
 
     #endregion
@@ -69,7 +69,8 @@ public partial class Application : BaseFacade
     #region Internal Helpers
 
     /// <summary>
-    /// 依存関係を考慮してモジュールを初期化する。
+    /// インフラ系モジュールを初期化する。
+    /// 依存関係を考慮して順序指定して初期化する。
     /// </summary>
     private void EnsureInfrastructureModules()
     {
@@ -81,16 +82,17 @@ public partial class Application : BaseFacade
     }
 
     /// <summary>
-    /// モジュールを初期化する。
+    /// ドメイン系モジュールを初期化する。
+    /// 依存関係の考慮は不要なため順序は自由である。
     /// </summary>
     private void EnsureDomainModules()
     {
         _command = AddModule<CommandHub>("Command");
         _measurement = AddModule<MeasurementHub>("Measurement");
-        _model = AddModule<ModelFacade>("Model");
+        _model = AddModule<ModelHub>("Model");
         _pick = AddModule<PickHub>("Pick");
         _selection = AddModule<SelectionHub>("Selection");
-        _ui = AddModule<UiFacade>("Ui");
+        _ui = AddModule<UiHub>("Ui");
         _viewport = AddModule<ViewportHub>("Viewport");
     }
 

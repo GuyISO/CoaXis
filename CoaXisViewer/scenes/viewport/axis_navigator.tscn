@@ -46,5 +46,4 @@ size = 1.5
 far = 3.0
 
 [node name="DirectionalLight3D" type="DirectionalLight3D" parent="SubViewportContainer/SubViewport/FocalPoint" unique_id=1128561678]
-visible = false
 layers = 2

@@ -5,7 +5,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデルの表示状態をModelNodeへ反映するAutoloadノード
 /// </summary>
-public partial class ModelVisualHub : Node
+public partial class ModelVisualHub : BaseHub
 {
 	#region Properties
 

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 /// <summary>
 /// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード
 /// </summary>
-public partial class AssetHub : Node
+public partial class AssetHub : BaseHub
 {
     #region Fields
 

@@ -42,7 +42,6 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_083gc")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_115ws"]
-shading_mode = 0
 
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rgvk7"]
 points = PackedVector3Array(-0.25, 0.25, 0.5, -0.25, -0.25, 0.5, 0.25, 0.25, 0.5, 0.25, -0.25, 0.5)

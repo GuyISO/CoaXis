@@ -1,18 +1,18 @@
 /// <summary>
 /// Application 経由で Model 機能を利用するためのファサード
 /// </summary>
-public partial class ModelFacade : BaseFacade
+public partial class ModelHub : BaseHub
 {
     public ModelRegistry Registry { get; }
-    public ModelLoadFacade Load { get; }
+    public ModelLoadHub Load { get; }
     public ModelVisualHub Visual { get; }
     public ModelStateHub State { get; }
     public ModelTreeHub Tree { get; }
 
-    public ModelFacade()
+    public ModelHub()
     {
         Registry = AddModule<ModelRegistry>("Registry");
-        Load = AddModule<ModelLoadFacade>("Load");
+        Load = AddModule<ModelLoadHub>("Load");
         Visual = AddModule<ModelVisualHub>("Visual");
         State = AddModule<ModelStateHub>("State");
         Tree = AddModule<ModelTreeHub>("Tree");

@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// NamedPipe 経由で IPC メッセージを受信し、ドメイン層への振り分けとResult応答を行う Autoload ノード
 /// </summary>
-public partial class IpcHub : Node
+public partial class IpcHub : BaseHub
 {
     #region Fields
 

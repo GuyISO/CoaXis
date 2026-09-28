@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// モデルの論理状態変更要求を処理するサービス
 /// </summary>
-public partial class ModelStateHub : Node
+public partial class ModelStateHub : BaseHub
 {
 	#region Lifecycle
 

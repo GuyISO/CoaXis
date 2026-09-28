@@ -3,7 +3,6 @@
 AssetHubをFacadeにし、Material,Icon,Sceneなど各Asset種類別のHubを持たせる
 SettingもFacadeにして、各種設定を管理するHubを持たせる
 TransparencyをModelEntity単位で管理するように変更する
-AxisNaviのShading廃止
 
 ## 3D表示関係
 点群座標へのVFX配置
