@@ -27,22 +27,37 @@ public partial class Application : BaseHub
 
     #region Properties
 
+    /// <summary>
+    /// 現在の Application インスタンスを取得する。
+    /// </summary>
     public static Application Instance { get; private set; }
 
     // infrastructure
+    /// <summary>ログ機能を取得する。</summary>
     public static LogHub Log => Instance._log;
+    /// <summary>設定機能を取得する。</summary>
     public static SettingHub Setting => Instance._setting;
+    /// <summary>アセット機能を取得する。</summary>
     public static AssetHub Asset => Instance._asset;
+    /// <summary>IPC 機能を取得する。</summary>
     public static IpcHub Ipc => Instance._ipc;
+    /// <summary>入力機能を取得する。</summary>
     public static InputHub Input => Instance._input; 
 
     // domain
+    /// <summary>コマンド機能を取得する。</summary>
     public static CommandHub Command => Instance._command;
+    /// <summary>測定機能を取得する。</summary>
     public static MeasurementHub Measurement => Instance._measurement;
+    /// <summary>モデル機能を取得する。</summary>
     public static ModelHub Model => Instance._model;
+    /// <summary>ピック機能を取得する。</summary>
     public static PickHub Pick => Instance._pick;
+    /// <summary>選択機能を取得する。</summary>
     public static SelectionHub Selection => Instance._selection;
+    /// <summary>UI 機能を取得する。</summary>
     public static UiHub Ui => Instance._ui;
+    /// <summary>ビューポート機能を取得する。</summary>
     public static ViewportHub Viewport => Instance._viewport;
 
     #endregion
@@ -66,7 +81,23 @@ public partial class Application : BaseHub
 
     #endregion
 
-    #region Internal Helpers
+    #region Actions
+
+    #endregion
+
+    #region Notifications
+
+    #endregion
+
+    #region Events
+
+    #endregion
+
+    #region Methods
+
+    #endregion
+
+    #region Helpers
 
     /// <summary>
     /// インフラ系モジュールを初期化する。

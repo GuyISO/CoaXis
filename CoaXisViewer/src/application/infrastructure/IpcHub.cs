@@ -10,7 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 
 /// <summary>
-/// NamedPipe 経由で IPC メッセージを受信し、ドメイン層への振り分けとResult応答を行う Autoload ノード
+/// NamedPipe 経由で IPC メッセージを受信し、ドメイン層への振り分けと Result 応答を行う Autoload ノード。
 /// </summary>
 public partial class IpcHub : BaseHub
 {
@@ -34,6 +34,10 @@ public partial class IpcHub : BaseHub
     private NamedPipeServerStream _pipeServer;
     private CancellationTokenSource _cts;
     private Task _listenTask;
+
+    #endregion
+
+    #region Properties
 
     #endregion
 
@@ -68,13 +72,13 @@ public partial class IpcHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Action ---------------------------------------
+    #region Actions
 
 
 
     #endregion
 
-    #region --------------------------------------- Notification ---------------------------------------
+    #region Notifications
 
     [Signal] public delegate void MessageReceivedEventHandler(string eventType);
     /// <summary>
@@ -100,7 +104,11 @@ public partial class IpcHub : BaseHub
 
     #endregion
     
-    #region Public API
+    #region Events
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// NamedPipe サーバーを起動する
@@ -149,7 +157,7 @@ public partial class IpcHub : BaseHub
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// クライアント接続を待ち受け、切断されるたびに次の接続待ちへ戻る
@@ -296,10 +304,6 @@ public partial class IpcHub : BaseHub
         };
     }
 
-    #endregion
-
-    #region Nested Types
-
     /// <summary>
     /// 受信スレッドからメインスレッドへ引き渡す1件分のリクエスト
     /// </summary>
@@ -317,3 +321,4 @@ public partial class IpcHub : BaseHub
 
     #endregion
 }
+

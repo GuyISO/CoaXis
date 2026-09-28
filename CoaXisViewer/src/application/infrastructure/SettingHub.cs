@@ -17,12 +17,7 @@ using System.Text.Json;
 /// </summary>
 public partial class SettingHub : BaseHub
 {
-
-    /// <summary>
-    /// 現在有効な設定値。
-    /// 起動時に読み込んだ内容を保持し、他サービスはこの値を参照する。
-    /// </summary>
-    internal ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
+    #region Fields
 
     /// <summary>
     /// 外部設定ファイル名。配置先ディレクトリは実行環境に応じて決定する。
@@ -30,7 +25,7 @@ public partial class SettingHub : BaseHub
     private const string SettingsFileName = "viewer-settings.json";
 
     /// <summary>
-    /// 読み込み時オプション。JSON 側の大文字小文字差異を吸収する。
+    /// 読み込み時に JSON 側の大文字小文字差異を吸収する。
     /// </summary>
     private static readonly JsonSerializerOptions ReadOptions = new JsonSerializerOptions
     {
@@ -38,12 +33,26 @@ public partial class SettingHub : BaseHub
     };
 
     /// <summary>
-    /// 既定ファイル生成時オプション。人手編集しやすい整形出力にする。
+    /// 既定ファイルを人手編集しやすい形式で出力する。
     /// </summary>
     private static readonly JsonSerializerOptions WriteOptions = new JsonSerializerOptions
     {
         WriteIndented = true
     };
+
+    #endregion
+
+    #region Properties
+
+    /// <summary>
+    /// 現在有効な設定値。
+    /// 起動時に読み込んだ内容を保持し、他サービスはこの値を参照する。
+    /// </summary>
+    internal ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
+
+	#endregion
+
+	#region Lifecycle
 
     /// <summary>
     /// AutoLoad 初期化時に設定を読み込む。
@@ -53,13 +62,15 @@ public partial class SettingHub : BaseHub
         Reload();
     }
 
-    #region --------------------------------------- Action ---------------------------------------
+	#endregion
+
+	#region Actions
 
 
 
     #endregion
 
-    #region --------------------------------------- Notification ---------------------------------------
+	#region Notifications
 
     [Signal] public delegate void SettingsNotifiedEventHandler();
     /// <summary>
@@ -71,6 +82,12 @@ public partial class SettingHub : BaseHub
     }
 
     #endregion
+
+    #region Events
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// 外部設定を再読込する。
@@ -116,6 +133,10 @@ public partial class SettingHub : BaseHub
 
         return false;
     }
+
+	#endregion
+
+	#region Helpers
 
     /// <summary>
     /// 指定パスの JSON 設定を読み込み、正規化して返す。
@@ -232,4 +253,6 @@ public partial class SettingHub : BaseHub
 
         return AppContext.BaseDirectory;
     }
+
+	#endregion
 }

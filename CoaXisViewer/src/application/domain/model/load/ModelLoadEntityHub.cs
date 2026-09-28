@@ -4,11 +4,35 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルDTOの置換ロードを統括するサービス
+/// モデル DTO の置換ロードを統括するサービス。
 /// </summary>
 public partial class ModelLoadEntityHub : BaseHub
 {
-	#region Public API
+	#region Fields
+
+	#endregion
+
+	#region Properties
+
+	#endregion
+
+	#region Lifecycle
+
+	#endregion
+
+	#region Actions
+
+	#endregion
+
+	#region Notifications
+
+	#endregion
+
+	#region Events
+
+	#endregion
+
+	#region Methods
 
 	/// <summary>
 	/// 現在のモデル集合をクリアし、指定したDTOからモデル集合を再構築する
@@ -83,7 +107,7 @@ public partial class ModelLoadEntityHub : BaseHub
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	private static void ValidateAcyclicHierarchy(IReadOnlyList<ModelEntity> entities)
 	{

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 
 /// <summary>
-/// 選択管理クラス、選択状態の管理と選択変更イベントの発行を担当する
+/// 選択状態の管理と選択変更イベントの発行を担当する。
 /// </summary>
 public partial class SelectionHub : BaseHub
 {
@@ -36,7 +36,23 @@ public partial class SelectionHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Action ---------------------------------------
+    #region Lifecycle
+
+    public override void _Ready()
+    {
+        SubscribeApplicationEvents();
+    }
+
+    public override void _ExitTree()
+    {
+        UnsubscribeApplicationEvents();
+
+        base._ExitTree();
+    }
+
+    #endregion
+
+    #region Actions
 
     [Signal] public delegate void SetModeRequestedEventHandler(SelectionMode mode);
     /// <summary>
@@ -50,7 +66,7 @@ public partial class SelectionHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Notification ---------------------------------------
+    #region Notifications
 
     [Signal] public delegate void ModeNotifiedEventHandler(SelectionMode mode);
     /// <summary>
@@ -80,21 +96,6 @@ public partial class SelectionHub : BaseHub
     internal void NotifyCleared()
     {
         EmitSignal(SignalName.ClearedNotified);
-    }
-
-    #endregion
-    #region Lifecycle
-
-    public override void _Ready()
-    {
-        SubscribeApplicationEvents();
-    }
-
-    public override void _ExitTree()
-    {
-        UnsubscribeApplicationEvents();
-
-        base._ExitTree();
     }
 
     #endregion
@@ -245,7 +246,7 @@ public partial class SelectionHub : BaseHub
 
     #endregion
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// 現在選択中の実体IDを元に、対応する Node3D 配列を取得する
@@ -424,6 +425,10 @@ public partial class SelectionHub : BaseHub
         Application.Selection.NotifyCleared();
         return true;
     }
+
+    #endregion
+
+    #region Helpers
 
     #endregion
 }

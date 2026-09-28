@@ -2,7 +2,7 @@ using Godot;
 using System.Collections.Generic;
 
 /// <summary>
-/// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード
+/// プロジェクト内アセットの取得とキャッシュを一元化する Autoload ノード。
 /// </summary>
 public partial class AssetHub : BaseHub
 {
@@ -18,6 +18,10 @@ public partial class AssetHub : BaseHub
 
     private readonly Dictionary<string, Texture2D> _iconCache = new Dictionary<string, Texture2D>();
     private Material _selectedMaterial;
+
+    #endregion
+
+    #region Properties
 
     #endregion
 
@@ -39,10 +43,18 @@ public partial class AssetHub : BaseHub
 
     #endregion
 
+    #region Actions
+
+    #endregion
+
+    #region Notifications
+
+    #endregion
+
     #region Events
 
     /// <summary>
-    /// Applicationイベントの購読を開始する
+    /// Application イベントの購読を開始する。
     /// </summary>
     private void SubscribeApplicationEvents()
     {
@@ -50,7 +62,7 @@ public partial class AssetHub : BaseHub
     }
 
     /// <summary>
-    /// Applicationイベントの購読を解除する
+    /// Application イベントの購読を解除する。
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
@@ -58,7 +70,7 @@ public partial class AssetHub : BaseHub
     }
 
     /// <summary>
-    /// 設定値を反映する
+    /// 設定値を反映する。
     /// </summary>
     private void ApplySettings()
     {
@@ -67,7 +79,7 @@ public partial class AssetHub : BaseHub
 
     #endregion
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// モデル表示状態用のアイコンを取得する
@@ -168,7 +180,7 @@ public partial class AssetHub : BaseHub
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     private static bool IsValidIconPath(string path)
     {

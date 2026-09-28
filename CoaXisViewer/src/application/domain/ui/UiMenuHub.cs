@@ -2,12 +2,12 @@ using Godot;
 using System;
 
 /// <summary>
-/// 各種コンテキストメニューの表示を一元管理するサービス
+/// 各種コンテキストメニューの表示を一元管理するサービス。
 /// </summary>
 /// <remarks>
 /// 従来は ModelEntityTree や ViewportInteractionHandler など、呼び出し元 Node の子として
 /// PopupMenu を配置していたが、対象オブジェクト単位でメニューを作る方針に伴い、
-/// メニュー実体は本サービスが一括保持し、呼び出し元は Application.Ui.Menu 経由で表示を依頼する
+/// メニュー実体は本サービスが一括保持し、呼び出し元は Application.Ui.Menu 経由で表示を依頼する。
 /// </remarks>
 public partial class UiMenuHub : BaseHub
 {
@@ -17,6 +17,10 @@ public partial class UiMenuHub : BaseHub
     private ModelPropertyMenu _modelPropertyMenu;
     private PickResultMenu _pickResultMenu;
     private AxisNavigatorMenu _axisNavigatorMenu;
+
+    #endregion
+
+    #region Properties
 
     #endregion
 
@@ -32,7 +36,7 @@ public partial class UiMenuHub : BaseHub
 
     #endregion
 
-    #region Public API
+    #region Actions
 
     /// <summary>
     /// 指定した ModelEntity を対象にコンテキストメニューを表示する
@@ -75,7 +79,19 @@ public partial class UiMenuHub : BaseHub
 
     #endregion
 
-    #region Internal Helpers
+    #region Notifications
+
+    #endregion
+
+    #region Events
+
+    #endregion
+
+    #region Methods
+
+    #endregion
+
+    #region Helpers
 
     /// <summary>
     /// 指定したメニューノードのインスタンスを確保する、シーンに依存せずコードから直接生成する

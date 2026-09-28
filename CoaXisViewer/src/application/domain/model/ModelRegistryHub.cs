@@ -4,8 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// モデル実体（ModelEntity）と属性（ModelProperty）のインスタンスおよびUUIDを一元管理する Autoload ノード
-/// RootModelEntity をルートとして管理する
+/// モデル実体（ModelEntity）と属性（ModelProperty）のインスタンスおよび UUID を一元管理する Autoload ノード。
+/// RootModelEntity をルートとして管理する。
 /// </summary>
 public partial class ModelRegistry : BaseHub
 {
@@ -29,14 +29,18 @@ public partial class ModelRegistry : BaseHub
 
     #region Properties
 
-    // 登録されている ModelEntity の集合を取得する
+    /// <summary>
+    /// 登録されている ModelEntity の集合を取得する。
+    /// </summary>
     public IReadOnlyDictionary<Guid, ModelEntity> Entities => _entities;
 
-    // 登録されている ModelProperty の集合を取得する
+    /// <summary>
+    /// 登録されている ModelProperty の集合を取得する。
+    /// </summary>
     public IReadOnlyDictionary<Guid, ModelProperty> Properties => _properties;
 
     /// <summary>
-    /// シーン全体のルート ModelEntity を取得する
+    /// シーン全体のルート ModelEntity を取得する。
     /// </summary>
     public RootModelEntity RootEntity => _rootEntity;
 
@@ -55,10 +59,10 @@ public partial class ModelRegistry : BaseHub
 
     #endregion
 
-	#region --------------------------------------- Action ---------------------------------------
+    #region Actions
 	#endregion
 
-	#region --------------------------------------- Notification ---------------------------------------
+    #region Notifications
 
 	
 	[Signal] public delegate void AddedEventHandler(string entityId, string parentEntityId);
@@ -95,7 +99,11 @@ public partial class ModelRegistry : BaseHub
 
 	#endregion
 
-    #region Public Methods
+    #region Events
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// ModelEntity を取得する。存在しない場合は null を返す。
@@ -445,7 +453,7 @@ public partial class ModelRegistry : BaseHub
 
     #endregion
 
-    #region Private Methods
+    #region Helpers
 
     /// <summary>
     /// 登録済みの親 ModelEntity にリンクする。親が未登録の場合は、親が登録されるまで待機する。

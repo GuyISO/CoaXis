@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// コマンド履歴を管理するサービス
+/// コマンド履歴を管理するサービス。
 /// </summary>
 public partial class CommandHub : BaseHub
 {
@@ -11,6 +11,10 @@ public partial class CommandHub : BaseHub
 
 	private readonly List<BaseCommand> _history = new();
 	private int _cursor = 0;
+
+	#endregion
+
+	#region Properties
 
 	#endregion
 
@@ -30,7 +34,7 @@ public partial class CommandHub : BaseHub
 
 	#endregion
 
-	#region Action
+	#region Actions
 
 	[Signal] public delegate void AskStateRequestedEventHandler();
 	/// <summary>
@@ -43,7 +47,7 @@ public partial class CommandHub : BaseHub
 
 	#endregion
 
-	#region Notification
+	#region Notifications
 
 	[Signal] public delegate void StateNotifiedEventHandler(BaseCommand[] history, int cursor);
 	/// <summary>
@@ -83,7 +87,7 @@ public partial class CommandHub : BaseHub
 
 	#endregion
 
-	#region Internal Helpers
+	#region Methods
 
 	/// <summary>
 	/// コマンドを実行し、Undoスタックに積む
@@ -181,8 +185,12 @@ public partial class CommandHub : BaseHub
 		}
 	}
 
+	#endregion
+
+	#region Helpers
+
 	/// <summary>
-	/// 現在カーソルより後ろの履歴を削除する
+	/// 現在カーソルより後ろの履歴を削除する。
 	/// </summary>
 	private void TrimRedoBranch()
 	{

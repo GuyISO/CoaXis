@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-/// ピック関連の状態管理を担当する
+/// ピック関連の状態管理を担当する。
 /// </summary>
 public partial class PickHub : BaseHub
 {
@@ -37,7 +37,7 @@ public partial class PickHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Action ---------------------------------------
+    #region Actions
 
     [Signal] public delegate void AskHandlingModeRequestedEventHandler();
     /// <summary>
@@ -50,7 +50,7 @@ public partial class PickHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Notification ---------------------------------------
+    #region Notifications
 
     [Signal] public delegate void HandlingModeNotifiedEventHandler(PickHandlingMode mode);
     /// <summary>
@@ -84,7 +84,7 @@ public partial class PickHub : BaseHub
     }
 
     #endregion
-    
+
     #region Events
 
     /// <summary>
@@ -124,6 +124,14 @@ public partial class PickHub : BaseHub
 
         Application.Pick.NotifyHandlingMode(_handlingMode);
     }
+
+    #endregion
+
+    #region Methods
+
+    #endregion
+
+    #region Helpers
 
     #endregion
 

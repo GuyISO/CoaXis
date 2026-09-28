@@ -3,7 +3,7 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// UiWindow管理用 Autoload ノード
+/// UiWindow 管理用の Autoload ノード。
 /// </summary>
 public partial class UiWindowHub : BaseHub
 {
@@ -15,12 +15,32 @@ public partial class UiWindowHub : BaseHub
 
     #endregion
 
-    #region Public Methods
+    #region Properties
+
+    #endregion
+
+    #region Lifecycle
+
+    #endregion
+
+    #region Actions
+
+    #endregion
+
+    #region Notifications
+
+    #endregion
+
+    #region Events
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// 指定されたコンテナを表示する
     /// </summary>
-    /// <param name="container"></param>
+    /// <param name="container">表示するコンテナ。</param>
     /// <remarks>
     /// コンテナは Container クラスを継承したUIである必要がある
     /// </remarks>
@@ -58,7 +78,7 @@ public partial class UiWindowHub : BaseHub
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 指定されたコンテナを表示する

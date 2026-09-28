@@ -2,10 +2,18 @@ using Godot;
 using System;
 
 /// <summary>
-/// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード
+/// ユーザーのキーボードやコントローラー入力を処理する Autoload ノード。
 /// </summary>
 public partial class InputHub : BaseHub
 {
+    #region Fields
+
+    #endregion
+
+    #region Properties
+
+    #endregion
+
     #region Lifecycle
 
     public override void _Ready()
@@ -29,7 +37,23 @@ public partial class InputHub : BaseHub
 
     #endregion
 
-    #region Internal Helpers
+    #region Actions
+
+    #endregion
+
+    #region Notifications
+
+    #endregion
+
+    #region Events
+
+    #endregion
+
+    #region Methods
+
+    #endregion
+
+    #region Helpers
 
     /// <summary>
     /// 選択モードの切り替えを処理する

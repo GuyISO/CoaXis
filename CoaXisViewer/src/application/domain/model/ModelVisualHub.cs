@@ -3,10 +3,14 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルの表示状態をModelNodeへ反映するAutoloadノード
+/// モデルの表示状態を ModelNode へ反映する Autoload ノード。
 /// </summary>
 public partial class ModelVisualHub : BaseHub
 {
+	#region Fields
+
+	#endregion
+
 	#region Properties
 
 	/// <summary>
@@ -32,11 +36,11 @@ public partial class ModelVisualHub : BaseHub
 
 	#endregion
 
-	#region --------------------------------------- Action ---------------------------------------
+	#region Actions
 
 	#endregion
 
-	#region --------------------------------------- Notification ---------------------------------------
+	#region Notifications
 
 	[Signal] public delegate void AddedEventHandler(string entityId, string parentEntityId);
 	/// <summary>
@@ -376,7 +380,7 @@ public partial class ModelVisualHub : BaseHub
 
 	#endregion
 
-	#region Public Methods
+	#region Methods
 
 	/// <summary>
 	/// モデルメッシュの透明度を設定し、全ロード済みモデルに反映する
@@ -398,7 +402,7 @@ public partial class ModelVisualHub : BaseHub
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	/// <summary>
 	/// 指定したモデルとその子孫のハイライト状態を切り替える

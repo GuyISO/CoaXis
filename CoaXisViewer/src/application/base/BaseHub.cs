@@ -1,8 +1,8 @@
 using Godot;
 
 /// <summary>
-/// Application 含む AutoLoad Module で共通利用する基底クラス
-/// 階層的にモジュールを生成するヘルパー
+/// Application を含む AutoLoad モジュールで共通利用する基底クラス。
+/// 階層的なモジュール生成を補助する。
 /// </summary>
 public abstract partial class BaseHub : Node
 {
@@ -41,7 +41,7 @@ public abstract partial class BaseHub : Node
     /// </summary>
     /// <typeparam name="TModule">追加するモジュールの型。</typeparam>
     /// <param name="nodeName">モジュールのノード名。</param>
-    /// <returns>追加された、もしくは既存のモジュール。</returns>
+    /// <returns>追加したモジュール、または既存のモジュール。</returns>
     protected TModule AddModule<TModule>(string nodeName) where TModule : Node, new()
     {
         TModule existingModule = GetNodeOrNull<TModule>(nodeName);

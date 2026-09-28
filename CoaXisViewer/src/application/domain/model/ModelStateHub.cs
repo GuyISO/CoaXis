@@ -2,10 +2,18 @@ using Godot;
 using System;
 
 /// <summary>
-/// モデルの論理状態変更要求を処理するサービス
+/// モデルの論理状態変更要求を処理するサービス。
 /// </summary>
 public partial class ModelStateHub : BaseHub
 {
+	#region Fields
+
+	#endregion
+
+	#region Properties
+
+	#endregion
+
 	#region Lifecycle
 
 	public override void _Ready()
@@ -22,7 +30,7 @@ public partial class ModelStateHub : BaseHub
 
 	#endregion
 
-	#region --------------------------------------- Action ---------------------------------------
+	#region Actions
 
 	[Signal] public delegate void ToggleModelVisibilityRequestedEventHandler(string entityId);
 	/// <summary>
@@ -36,7 +44,7 @@ public partial class ModelStateHub : BaseHub
 
 	#endregion
 
-	#region --------------------------------------- Notification ---------------------------------------
+	#region Notifications
 
 	[Signal] public delegate void PositionNotifiedEventHandler(string entityId, Vector3 position);
 	/// <summary>
@@ -184,7 +192,11 @@ public partial class ModelStateHub : BaseHub
 
 	#endregion
 
-	#region Internal Helpers
+	#region Methods
+
+	#endregion
+
+	#region Helpers
 
 	private static ModelVisibility GetNextVisibility(ModelVisibility visibility)
 	{

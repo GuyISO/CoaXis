@@ -1,4 +1,4 @@
-param(
+﻿param(
     [string]$Root = "CoaXisViewer/src",
     [string[]]$Extensions = @("*.cs", "*.md", "*.json", "*.gd", "*.tscn")
 )
@@ -17,7 +17,6 @@ if (-not (Test-Path -LiteralPath $targetRoot)) {
 $patterns = @(
     [char]0xFFFD,
     "�E",
-    "、E",
     "冁E",
     "琁E",
     "チE",

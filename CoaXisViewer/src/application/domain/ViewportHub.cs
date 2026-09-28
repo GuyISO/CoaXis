@@ -1,15 +1,25 @@
 using Godot;
 
 /// <summary>
-/// カメラやビューの状態を制御するサービス。
+/// カメラとビューポートの状態を制御するサービス。
 /// </summary>
 public partial class ViewportHub : BaseHub
 {
 	#region Fields
 
 	private uint _activeLayers = (uint)ViewportLayer.Default | (uint)ViewportLayer.Visible;
+    private ViewportInteractionMode _interactionMode = ViewportInteractionMode.None;
 
 	#endregion
+
+    #region Properties
+
+    /// <summary>
+    /// 現在のビューポート操作モードを取得する。
+    /// </summary>
+    internal ViewportInteractionMode InteractionMode => _interactionMode;
+
+    #endregion
 
 	#region Lifecycle
 
@@ -27,7 +37,7 @@ public partial class ViewportHub : BaseHub
 
 	#endregion
 
-    #region --------------------------------------- Action ---------------------------------------
+    #region Actions
 
     [Signal] public delegate void AskStateRequestedEventHandler();
     /// <summary>
@@ -184,7 +194,7 @@ public partial class ViewportHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Notification ---------------------------------------
+    #region Notifications
 
     [Signal] public delegate void InteractionModeNotifiedEventHandler(ViewportInteractionMode mode);
     /// <summary>
@@ -337,23 +347,7 @@ public partial class ViewportHub : BaseHub
 
 	#endregion
 
-	#region Fields
-
-	// 現在のビューポート操作モードを保持する
-	private ViewportInteractionMode _interactionMode = ViewportInteractionMode.None;
-
-	#endregion
-
-	#region Properties
-
-	/// <summary>
-	/// 現在のビューポート操作モードを取得する
-	/// </summary>
-	internal ViewportInteractionMode InteractionMode => _interactionMode;
-
-	#endregion
-
-	#region Public API
+    #region Methods
 
 	/// <summary>
 	/// ビューポート操作モードを更新し、変更があれば通知する
@@ -384,6 +378,10 @@ public partial class ViewportHub : BaseHub
 		Application.Viewport.NotifyLayer(layer, isActive);
 	}
 
-	#endregion
+    #endregion
+
+    #region Helpers
+
+    #endregion
 
 }

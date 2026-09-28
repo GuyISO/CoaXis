@@ -3,7 +3,7 @@ using System;
 using System.IO;
 
 /// <summary>
-/// ログ機能のハブとなる Autoload ノード
+/// ログ機能を提供する Autoload ノード。
 /// </summary>
 public partial class LogHub : BaseHub
 {
@@ -14,6 +14,10 @@ public partial class LogHub : BaseHub
     private bool _enableFileLog = false;
 
     [Signal] public delegate void NotifiedEventHandler(int level, string message);
+
+    #endregion
+
+    #region Properties
 
     #endregion
 
@@ -36,7 +40,19 @@ public partial class LogHub : BaseHub
 
     #endregion
 
-    #region Helper Methods
+    #region Actions
+
+    #endregion
+
+    #region Notifications
+
+    #endregion
+
+    #region Events
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// ログレベルとメッセージを指定してログを出力する
@@ -94,6 +110,10 @@ public partial class LogHub : BaseHub
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
     internal void Error(string msg) => Log(LogLevel.Error, msg);
+
+    #endregion
+
+    #region Helpers
 
     #endregion
 }

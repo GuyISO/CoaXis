@@ -2,7 +2,7 @@ using Godot;
 using System;
 
 /// <summary>
-/// 測定機能の状態管理・計算・ビジュアル更新を担当するサービス
+/// 測定機能の状態管理、計算、ビジュアル更新を担当するサービス。
 /// </summary>
 public partial class MeasurementHub : BaseHub
 {
@@ -21,6 +21,10 @@ public partial class MeasurementHub : BaseHub
     private Node3D _visualRoot = null!;
     private MeshInstance3D _line = null!;
     private StandardMaterial3D _lineMaterial = null!;
+
+    #endregion
+
+    #region Properties
 
     #endregion
 
@@ -50,7 +54,7 @@ public partial class MeasurementHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Action ---------------------------------------
+    #region Actions
 
     [Signal] public delegate void AskResultRequestedEventHandler();
     /// <summary>
@@ -83,7 +87,7 @@ public partial class MeasurementHub : BaseHub
 
     #endregion
 
-    #region --------------------------------------- Notification ---------------------------------------
+    #region Notifications
 
     [Signal] public delegate void PointNotifiedEventHandler(int pointIndex);
     /// <summary>
@@ -226,7 +230,7 @@ public partial class MeasurementHub : BaseHub
 
     #endregion
 
-    #region Public API
+    #region Methods
 
     /// <summary>
     /// 現在の測定結果を取得する
@@ -239,7 +243,7 @@ public partial class MeasurementHub : BaseHub
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 設定値を反映する

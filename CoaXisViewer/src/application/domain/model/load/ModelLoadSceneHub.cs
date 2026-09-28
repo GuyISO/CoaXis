@@ -20,7 +20,27 @@ public partial class ModelLoadSceneHub : BaseHub
 
 	#endregion
 
-	#region Public API
+	#region Properties
+
+	#endregion
+
+	#region Lifecycle
+
+	#endregion
+
+	#region Actions
+
+	#endregion
+
+	#region Notifications
+
+	#endregion
+
+	#region Events
+
+	#endregion
+
+	#region Methods
 
 	/// <summary>
 	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する
@@ -95,7 +115,7 @@ public partial class ModelLoadSceneHub : BaseHub
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	private void QueueSceneLoad(ModelEntity modelEntity)
 	{
