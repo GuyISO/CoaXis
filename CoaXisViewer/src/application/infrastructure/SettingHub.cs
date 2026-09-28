@@ -48,7 +48,7 @@ public partial class SettingHub : BaseHub
     /// 現在有効な設定値。
     /// 起動時に読み込んだ内容を保持し、他サービスはこの値を参照する。
     /// </summary>
-    internal ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
+    public ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
 
 	#endregion
 
@@ -66,8 +66,6 @@ public partial class SettingHub : BaseHub
 
 	#region Actions
 
-
-
     #endregion
 
 	#region Notifications
@@ -76,7 +74,7 @@ public partial class SettingHub : BaseHub
     /// <summary>
     /// 設定の再読み込みが完了したことを通知する
     /// </summary>
-    internal void NotifySettingsNotified()
+    internal void NotifySettings()
     {
         EmitSignal(SignalName.SettingsNotified);
     }
@@ -96,7 +94,7 @@ public partial class SettingHub : BaseHub
     /// 外部ファイルから正常に読めた場合は true。
     /// デフォルト値へフォールバックした場合は false。
     /// </returns>
-    internal bool Reload()
+    public bool Reload()
     {
         // 候補を優先順位順に列挙する。
         string[] candidates = BuildExternalCandidates();

@@ -74,12 +74,20 @@ public partial class IpcHub : BaseHub
 
     #region Actions
 
-
-
     #endregion
 
     #region Notifications
 
+    [Signal] public delegate void ConnectionStatusEventHandler(bool isConnected);
+    /// <summary>
+    /// IPC サーバーの接続状態を通知する
+    /// </summary>
+    /// <param name="isConnected">接続状態。接続されていれば true</param>
+    internal void NotifyConnectionStatus(bool isConnected)
+    {
+        EmitSignal(SignalName.ConnectionStatus, isConnected);
+    }
+    
     [Signal] public delegate void MessageReceivedEventHandler(string eventType);
     /// <summary>
     /// IPC メッセージを受信したことを通知する
@@ -126,6 +134,8 @@ public partial class IpcHub : BaseHub
         _listenTask = Task.Run(() => AcceptLoopAsync(pipeName, token), token);
 
         Application.Log.Info($"Ipc: server started on pipe '{pipeName}'.");
+        
+        NotifyConnectionStatus(true);
     }
 
     /// <summary>
@@ -153,6 +163,16 @@ public partial class IpcHub : BaseHub
         _cts = null;
 
         Application.Log.Info("Ipc: server stopped.");
+
+        NotifyConnectionStatus(false);
+    }
+
+    /// <summary>
+    /// IPC サーバーの接続状態を通知要求する
+    /// </summary>
+    internal void AskConnectionStatus()
+    {
+        NotifyConnectionStatus(_pipeServer?.IsConnected ?? false);
     }
 
     #endregion

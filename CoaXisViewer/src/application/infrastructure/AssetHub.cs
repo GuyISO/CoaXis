@@ -182,6 +182,9 @@ public partial class AssetHub : BaseHub
 
     #region Helpers
 
+    /// <summary>
+    /// 指定パスが有効なアイコンパスかどうかを判定する
+    /// </summary>
     private static bool IsValidIconPath(string path)
     {
         if (string.IsNullOrWhiteSpace(path))
@@ -198,6 +201,9 @@ public partial class AssetHub : BaseHub
         return true;
     }
 
+    /// <summary>
+    /// アイコンを取得し、指定サイズにリサイズして返す
+    /// </summary>
     private Texture2D GetOrCreateIcon(string path, int size)
     {
         string key = $"{path}|{size}";
@@ -227,6 +233,9 @@ public partial class AssetHub : BaseHub
         return resized;
     }
 
+    /// <summary>
+    /// 選択中のマテリアルに設定される色を適用する
+    /// </summary>
     private void ApplySelectedMaterialColor()
     {
         if (_selectedMaterial is not StandardMaterial3D standardMaterial)

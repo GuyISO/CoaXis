@@ -13,8 +13,6 @@ public partial class LogHub : BaseHub
     private string _logFilePath = string.Empty;
     private bool _enableFileLog = false;
 
-    [Signal] public delegate void NotifiedEventHandler(int level, string message);
-
     #endregion
 
     #region Properties
@@ -45,6 +43,13 @@ public partial class LogHub : BaseHub
     #endregion
 
     #region Notifications
+
+    [Signal] public delegate void MessageNotifiedEventHandler(int level, string message);
+    internal void NotifyMessage(int level, string message)
+    {
+        EmitSignal(SignalName.MessageNotified, level, message);
+    }
+
 
     #endregion
 
@@ -84,7 +89,7 @@ public partial class LogHub : BaseHub
         }
 
         // Signalの発行
-        EmitSignal(SignalName.Notified, (int)level, line);
+        NotifyMessage((int)level, line);
     }
 
     /// <summary>
