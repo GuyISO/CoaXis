@@ -1,10 +1,9 @@
-// TODO: リファクタリング確認後に削除
 using System.Text.Json.Serialization;
 
 namespace CoaXis.Protocol.Viewer;
 
 /// <summary>
-/// Result エンベロープの payload に格納する処理結果
+/// Result エンベロープのpayloadに格納する処理結果
 /// </summary>
 public sealed class IpcResultPayload
 {
@@ -23,6 +22,9 @@ public sealed class IpcResultPayload
     /// <summary>
     /// 成功結果を生成する
     /// </summary>
+    /// <param name="request">処理した要求のイベント種別</param>
+    /// <param name="message">結果メッセージ</param>
+    /// <returns>成功状態の結果payload</returns>
     public static IpcResultPayload Success(string request, string message = "")
     {
         return new IpcResultPayload
@@ -37,6 +39,10 @@ public sealed class IpcResultPayload
     /// <summary>
     /// 失敗結果を生成する
     /// </summary>
+    /// <param name="request">処理した要求のイベント種別</param>
+    /// <param name="errorCode">標準化エラーコード</param>
+    /// <param name="message">失敗理由</param>
+    /// <returns>失敗状態の結果payload</returns>
     public static IpcResultPayload Failure(string request, string errorCode, string message)
     {
         return new IpcResultPayload

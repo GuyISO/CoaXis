@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 using System.Collections.Generic;
 
@@ -18,6 +17,8 @@ public static class ModelPropertyValueType
     public const string Quaternion = "Quaternion";
     public const string Color = "Color";
     public const string Transform = "Transform";
+
+    // TODO:ユースケースに応じて追加の型を定義したり、Valueを変換する処理を追加する可能性あり
 
     // サポート対象の型名を網羅したセット（大文字小文字の差異を許容して判定可能にする）
     private static readonly HashSet<string> ValidTypes = new(StringComparer.OrdinalIgnoreCase)

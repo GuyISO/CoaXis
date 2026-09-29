@@ -19,11 +19,6 @@ public static class Constant
 	{
 		public const string PipeName = "CoaXisViewerPipe";
 		public const bool StartPipeServerOnReady = true;
-
-		/// <summary>
-		/// エンベロープの version フィールドと突き合わせるプロトコルバージョン。メジャー番号が一致しない要求は拒否する。
-		/// </summary>
-		public const string ProtocolVersion = "1.2.0";
 	}
 
 	public static class Input

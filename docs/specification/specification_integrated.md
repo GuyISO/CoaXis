@@ -415,8 +415,23 @@ EditorからViewer:
 - Hide
 - Show
 
+payload契約:
+- `LoadModel` は `ModelSetPayload` を使用し、`entities` に `ModelEntityDto` の配列、`properties` に `ModelPropertyDto` の配列を格納する。`entities` は1件以上必須、`properties` は空配列を許可する。
+- 送信側はProtocol.Viewerの `ModelSetPayload.Create` でpayloadを組み立てる。入力DTOリストをコピーするが、DTOからViewerドメインモデルへの変換は行わない。
+- イベント種別とpayload型の対応は `IpcPayloadTypeMap` で定義する。同じpayload型を複数イベントに割り当てられる。
+- 現時点でpayload型を定義していないイベントは、契約が決まった段階で追加する。
+
+```json
+{
+	"entities": [],
+	"properties": []
+}
+```
+
+この例は構造を示すものであり、実際の `LoadModel` では `entities` に1件以上の要素が必要。
+
 `LoadModel`の処理順:
-1. IPC層はpayloadの検証とDTOファイルの読込のみを行う
+1. IPC層はpayloadを検証し、モデル実体DTOとモデル属性DTOを受け取る
 2. `Application.Model.Load.Entity`（`ModelLoadService`）は旧世代のSceneロードを無効化し、`ModelRegistry`の論理集合をクリアする
 3. `ModelEntityMapper`でDTOをGodot座標系のModelEntityへ変換する
 4. `ModelEntityFactory`がEntityを登録し、論理階層とModelNodeの親子構造を確立する
@@ -428,8 +443,13 @@ ViewerからEditor:
 - OnHover
 - OnLoaded
 - OnError
+- Result（要求への処理結果応答）
+
+イベント種別は送信方向ごとに `IpcEventType.ToViewer`（Viewerが受信）と `IpcEventType.FromViewer`（Viewerが送信）の文字列定数で定義する。JSON上の値は引き続き文字列とし、契約上の定義と各イベントの実装状況は区別する。
 
 ### 6.4 バージョン互換ルール
+- 現行のIPCプロトコルバージョンは `IpcProtocolVersion.Current` が示す `1.0.0`
+- 要求のメジャーバージョンが現行と一致しない場合は拒否
 - クライアント起動時にバージョン照会
 - 最低要求未満は接続拒否
 - 推奨未満は警告

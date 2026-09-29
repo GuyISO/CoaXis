@@ -30,7 +30,6 @@ public partial class IpcHub : BaseHub
 
     private const int MainThreadTimeoutMilliseconds = 2000;
     private const string ViewerSourceName = "Viewer";
-    private const string ResultEventType = "Result";
 
     private NamedPipeServerStream _pipeServer;
     private CancellationTokenSource _cts;
@@ -272,7 +271,7 @@ public partial class IpcHub : BaseHub
             return BuildResponse(envelope, IpcResultPayload.Failure(string.Empty, IpcErrorCode.MissingEventType, "eventType is required."));
         }
 
-        if (!IsCompatibleVersion(envelope.Version))
+        if (!IpcProtocolVersion.IsCompatible(envelope.Version))
         {
             return BuildResponse(envelope, IpcResultPayload.Failure(envelope.EventType, IpcErrorCode.VersionMismatch, $"Unsupported protocol version: '{envelope.Version}'."));
         }
@@ -292,37 +291,17 @@ public partial class IpcHub : BaseHub
     }
 
     /// <summary>
-    /// version のメジャー番号がプロトコルバージョンと一致するか判定する
-    /// </summary>
-    private static bool IsCompatibleVersion(string version)
-    {
-        if (string.IsNullOrWhiteSpace(version))
-        {
-            return false;
-        }
-
-        string requiredMajor = Constant.Ipc.ProtocolVersion.Split('.')[0];
-        string requestedMajor = version.Split('.')[0];
-        return string.Equals(requiredMajor, requestedMajor, StringComparison.Ordinal);
-    }
-
-    /// <summary>
     /// Result エンベロープを組み立てる
     /// </summary>
     /// <param name="request">元の受信エンベロープ。パース不能時は null</param>
     /// <param name="payload">処理結果</param>
     private static IpcEnvelope BuildResponse(IpcEnvelope request, IpcResultPayload payload)
     {
-        return new IpcEnvelope
-        {
-            EventId = Guid.NewGuid().ToString(),
-            EventType = ResultEventType,
-            Version = Constant.Ipc.ProtocolVersion,
-            Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"),
-            Source = ViewerSourceName,
-            CorrelationId = request?.EventId,
-            Payload = JsonSerializer.SerializeToElement(payload, SerializerOptions)
-        };
+        return IpcEnvelopeBuilder.Create(
+            IpcEventType.Common.Result,
+            ViewerSourceName,
+            payload,
+            request?.EventId);
     }
 
     /// <summary>

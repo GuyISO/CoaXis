@@ -158,3 +158,23 @@
   - `.github/instructions/design-philosophy.instructions.md`
   - `docs/specification/specification_integrated.md`
 - Notes: ModelLoadServiceとModelSceneServiceはロード世代・キャンセル処理が連動するため同一Facadeにまとめる。ModelEventの通知契約と各Serviceの状態所有者・実行順は維持する
+
+- Date: 2026-09-29
+- Trigger: ProtocolとViewer間のMapperおよびpayload組み立て責務を整理
+- Decision: Protocolはwire契約DTOとpayload/envelopeの組み立てを担当し、DTOからViewerドメインモデルへの変換はViewerに置く。ProtocolのBuilderは契約データのみを扱い、Viewer固有の型や振る舞いに依存させない
+- Scope: CoaXisProtocol.ViewerとCoaXisViewer間のIPC境界
+- Artifacts Updated:
+  - `CoaXisProtocol/Viewer/src/payload/ModelSetPayload.cs`
+  - `docs/specification/specification_integrated.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: PayloadBuilderはDTO配列をコピーしてModelSetPayloadを生成し、ModelEntityMapper等の変換処理は持たない
+
+- Date: 2026-09-29
+- Trigger: Payload専用Builderを増やさず、生成責務をpayloadへ集約する方針に変更
+- Decision: 単一payloadの単純な生成はpayloadクラス内のstatic factoryに置く。複数payloadにまたがる複雑な組み立てがない限り、payload専用Builderクラスを作らない。DTOからViewerドメインモデルへのMapperはViewerに置く
+- Scope: CoaXisProtocol.Viewerのpayload定義と生成処理
+- Artifacts Updated:
+  - `CoaXisProtocol/Viewer/src/payload/ModelSetPayload.cs`
+  - `docs/specification/specification_integrated.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: `ModelSetPayloadBuilder` を廃止し、`ModelSetPayload.Create` に生成処理を統合

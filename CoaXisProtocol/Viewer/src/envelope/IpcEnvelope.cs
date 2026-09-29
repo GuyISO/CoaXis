@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 using System.Text.Json;
 using System.Text.Json.Serialization;

@@ -12,11 +12,11 @@ using System.Text.Json;
 /// </remarks>
 public static class IpcCommandDispatcher
 {
-    private delegate IpcResultPayload Handler(JsonElement payload);
+    private delegate IpcResultPayload Handler(object payload);
 
     private static readonly Dictionary<string, Handler> Handlers = new()
     {
-        ["LoadModel"] = HandleLoadModel
+        [IpcEventType.ToViewer.LoadModel] = HandleLoadModel
     };
 
     /// <summary>
@@ -32,7 +32,17 @@ public static class IpcCommandDispatcher
 
         try
         {
-            return handler(envelope.Payload);
+            if (!IpcPayloadTypeMap.TryGetPayloadType(envelope.EventType, out Type payloadType))
+            {
+                return IpcResultPayload.Failure(envelope.EventType, IpcErrorCode.UnsupportedEventType, $"No payload contract is defined for eventType: {envelope.EventType}");
+            }
+
+            object typedPayload = envelope.Payload.Deserialize(payloadType);
+            return handler(typedPayload);
+        }
+        catch (JsonException ex)
+        {
+            return IpcResultPayload.Failure(envelope.EventType, IpcErrorCode.InvalidPayload, ex.Message);
         }
         catch (Exception ex)
         {
@@ -42,31 +52,29 @@ public static class IpcCommandDispatcher
     }
 
     /// <summary>
-    /// LoadModel: JSON ファイルからモデル群を読み込み、Registry へ登録する
+    /// LoadModel: payloadに含まれるモデル実体と属性をRegistryへ登録する
     /// </summary>
-    /// <param name="payload">{ "path": string } を想定</param>
-    private static IpcResultPayload HandleLoadModel(JsonElement payload)
+    /// <param name="payload">ModelSetPayload</param>
+    private static IpcResultPayload HandleLoadModel(object payload)
     {
-        if (payload.ValueKind != JsonValueKind.Object ||
-            !payload.TryGetProperty("path", out JsonElement pathElement) ||
-            pathElement.ValueKind != JsonValueKind.String)
+        ModelSetPayload modelSetPayload = payload as ModelSetPayload;
+        if (modelSetPayload == null ||
+            modelSetPayload.Entities == null ||
+            modelSetPayload.Properties == null)
         {
-            return IpcResultPayload.Failure("LoadModel", IpcErrorCode.InvalidPayload, "payload.path (string) is required.");
+            return IpcResultPayload.Failure(IpcEventType.ToViewer.LoadModel, IpcErrorCode.InvalidPayload, "payload.entities and payload.properties are required.");
         }
 
-        string path = pathElement.GetString();
-        if (string.IsNullOrWhiteSpace(path))
+        if (modelSetPayload.Entities.Count == 0)
         {
-            return IpcResultPayload.Failure("LoadModel", IpcErrorCode.InvalidPayload, "payload.path must not be empty.");
-        }
-        List<ModelEntityDto> dtos = JsonDtoLoader.Load<ModelEntityDto>(path);
-        if (dtos.Count == 0)
-        {
-            return IpcResultPayload.Failure("LoadModel", IpcErrorCode.TargetNotFound, $"No models loaded from '{path}'.");
+            return IpcResultPayload.Failure(IpcEventType.ToViewer.LoadModel, IpcErrorCode.TargetNotFound, "payload.entities must contain at least one model.");
         }
 
-        Application.Model.Load.Entity.ReplaceEntities(dtos);
+        Application.Model.Load.Entity.ReplaceEntities(modelSetPayload.Entities);
+        Application.Model.Load.Entity.LoadProperties(modelSetPayload.Properties);
 
-        return IpcResultPayload.Success("LoadModel", $"Loaded {dtos.Count} model(s) from '{path}'.");
+        return IpcResultPayload.Success(
+            IpcEventType.ToViewer.LoadModel,
+            $"Loaded {modelSetPayload.Entities.Count} models and {modelSetPayload.Properties.Count} properties.");
     }
 }

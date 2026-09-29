@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 
 namespace CoaXis.Protocol.Viewer;
@@ -6,7 +5,7 @@ namespace CoaXis.Protocol.Viewer;
 /// <summary>
 /// モデルの属性情報（プロパティ）を表す DTO クラス
 /// </summary>
-public class ModelPropertyDto : BaseDto
+public class ModelPropertyDto
 {
     /// <summary>
     /// プロパティの一意識別子
@@ -24,7 +23,7 @@ public class ModelPropertyDto : BaseDto
     public string PropertyType { get; init; } = string.Empty;
 
     /// <summary>
-    /// 値の型 ("int", "float", "string", "bool", "datetime", "Vector3", "Quaternion", "Color", "Transform")
+    /// 値の型
     /// </summary>
     public string ValueType { get; init; } = string.Empty;
 

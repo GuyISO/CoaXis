@@ -1,5 +1,4 @@
 // TODO: リファクタリング確認後に削除
-using CoaXis.Protocol.Viewer;
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -16,7 +15,7 @@ public static class JsonDtoLoader
     /// <typeparam name="T">読み込む DTO の型</typeparam>
     /// <param name="path">JSON ファイルのパス</param>
     /// <returns>読み込んだ DTO のリスト。読み込みに失敗した場合は空リスト</returns>
-    public static List<T> Load<T>(string path) where T : BaseDto
+    public static List<T> Load<T>(string path) where T : class
     {
         var items = new List<T>();
 

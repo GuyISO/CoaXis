@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 
 namespace CoaXis.Protocol.Viewer;
@@ -6,7 +5,7 @@ namespace CoaXis.Protocol.Viewer;
 /// <summary>
 /// モデル実体のデータを表す DTO クラス
 /// </summary>
-public class ModelEntityDto : BaseDto
+public class ModelEntityDto
 {
     public Guid Id { get; init; } = Guid.NewGuid();
     public Guid? ParentId { get; init; } = null;
