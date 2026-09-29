@@ -1,3 +1,4 @@
+// TODO: リファクタリング確認後に削除
 using CoaXis.Protocol.Viewer;
 using Godot;
 using System;

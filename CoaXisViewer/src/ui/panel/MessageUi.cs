@@ -1,3 +1,4 @@
+// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Text;
@@ -50,7 +51,7 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Log.Notified += OnLogNotified;
+        Application.Log.MessageNotified += OnLogMessageNotified;
         Application.Setting.SettingsNotified += OnSettingsNotified;
     }
 
@@ -59,7 +60,7 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Log.Notified -= OnLogNotified;
+        Application.Log.MessageNotified -= OnLogMessageNotified;
         Application.Setting.SettingsNotified -= OnSettingsNotified;
     }
 
@@ -67,7 +68,7 @@ public partial class MessageUi : PanelContainer
     /// ログ出力と同時に画面へログを表示する
     /// </summary>
     /// <param name="line">記録されたメッセージ</param>
-    private void OnLogNotified(int level, string line)
+    private void OnLogMessageNotified(int level, string line)
     {
         if (level < (int)LogLevel.Info)
         {

@@ -1,3 +1,4 @@
+// TODO: リファクタリング確認後に削除
 using System;
 
 namespace CoaXis.Protocol.Viewer;

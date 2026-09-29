@@ -1,3 +1,4 @@
+// TODO: リファクタリング確認後に削除
 using System.Text.Json;
 
 namespace CoaXis.Protocol.Viewer;

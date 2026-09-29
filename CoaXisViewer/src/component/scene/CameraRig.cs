@@ -1,3 +1,4 @@
+// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
