@@ -96,8 +96,8 @@
 - 採用しなかった代替案: Tree側で名前順・GUID順に再ソートする案は、入力リスト順という契約を失い、UIにモデル順序の責務を移すため不採用。
 - 影響範囲: `CoaXisViewer/src/model/service/ModelRegistry.cs`のModelEntity階層解決と、同階層を表示するModelEntityTree。
 - 実装/運用手順: ローダーが返すDTOリストの順序を表示順の正とし、同じデータを再読み込みしても入力順が維持されることを確認する。
-- 検証方法: `check: mojibake`、`dotnet build .\\CoaXis.sln`を実行し、ViewerでCSV/JSONを複数回ロードして兄弟順を比較する。
-- 関連ファイル/関連仕様: `CoaXisViewer/src/model/service/ModelRegistry.cs`、`CoaXisViewer/src/ui/tree/ModelEntityTree.cs`、`CoaXisViewer/src/SampleTest.cs`
+- 検証方法: `check: mojibake`、`dotnet build .\\CoaXis.sln`を実行し、IPCテスターからCSV/JSONを複数回送信して兄弟順を比較する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/model/service/ModelRegistry.cs`、`CoaXisViewer/src/ui/tree/ModelEntityTree.cs`、`CoaXisIpcTester/ModelFileLoader.cs`、[IPCテスターガイド](../guides/viewer/IPC_TESTER_GUIDE.md)
 - 備考: ModelPropertyの並び順やModelAddedイベントの契約は今回の変更対象外とする。
 
 ---
@@ -109,10 +109,10 @@
 - 判断: `ModelFactory.CreateFromDtos(IReadOnlyList<ModelDto>)` を唯一の生成入口とし、DTO変換、重複・循環検証、全件Registry登録、階層解決、Node生成、queue投入、親先行通知の順で処理する。1件の場合も1要素の集合を渡す。
 - 判断理由: 全件登録後に `ResolveHierarchy` を一度だけ実行でき、親子関係を確定してからNodeとTreeへ反映できる。シーンロードqueueは全件投入と通知の後に起動し、生成処理中の状態通知順を安定させる。
 - 採用しなかった代替案: 単件 `CreateFromDto` を互換ラッパーとして残す案は、利用経路が再び単件処理へ戻る余地を残すため不採用。UI向けの新しい一括イベントは、既存の `ModelAdded` 契約を維持できるため追加しない。
-- 影響範囲: `CoaXisViewer/src/application/domain/model/ModelFactory.cs`、IPC/サンプルのモデルロード経路、ModelTreeの `ModelAdded` 通知順。
+- 影響範囲: `CoaXisViewer/src/application/domain/model/ModelFactory.cs`、IPCモデルロード経路、ModelTreeの `ModelAdded` 通知順。
 - 実装/運用手順: ローダーが返した `List<ModelDto>` をそのまま `CreateFromDtos` に渡す。1バッチ内の重複IDと循環親子は入力エラーとして扱う。未登録の親は従来どおりRoot配下へ配置する。ScenePathの実ロード完了はAPI戻り時点では保証しない。
 - 検証方法: `check: mojibake`、`dotnet build .\\CoaXis.sln` を実行し、親先行・子先行・孤児parent・重複ID・循環親子・ScenePath空/重複・Clear直後を確認する。
-- 関連ファイル/関連仕様: `CoaXisViewer/src/application/domain/model/ModelFactory.cs`、`CoaXisViewer/src/application/infrastructure/ipc/IpcCommandDispatcher.cs`、`CoaXisViewer/src/SampleTest.cs`
+- 関連ファイル/関連仕様: `CoaXisViewer/src/application/domain/model/ModelFactory.cs`、`CoaXisViewer/src/core/ipc/IpcCommandDispatcher.cs`、[IPCテスターガイド](../guides/viewer/IPC_TESTER_GUIDE.md)
 - 備考: SceneAssetLoaderのResourceLoader処理自体はGodotの制約により逐次であり、今回の一括化は同期側の重複処理とqueue起動制御を主な対象とする。
 
 ---

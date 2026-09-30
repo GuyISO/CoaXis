@@ -454,6 +454,13 @@ ViewerからEditor:
 - 最低要求未満は接続拒否
 - 推奨未満は警告
 
+### 6.5 Viewer IPCテストツール
+- ViewerはサンプルJSON/CSVを直接読み込むテスト機能を持たず、モデル入力はIPC経由に統一する。
+- `CoaXisIpcTester` は外部クライアントとして動作し、JSON配列または実体CSVと、任意の属性CSVを読み込んで `LoadModel` を送信する。
+- テスターは送信した要求JSON、Viewerから受け取ったResult応答JSON、時刻と結果の履歴を画面に表示する。IPC契約はProtocolプロジェクトを参照し、Viewerと二重定義しない。
+- 現在のテスター送信対象はViewer実装済みの `LoadModel`。その他のイベントはViewer側の実装が揃った段階で追加する。
+- 運用手順は [IPCテスターガイド](../guides/viewer/IPC_TESTER_GUIDE.md) を参照する。
+
 ---
 
 ## 第7章 データベース仕様（方針レベル）

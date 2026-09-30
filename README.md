@@ -16,6 +16,8 @@ CoaXis は、3D モデルの可視化と事前アセット生成を分離して�
   - 3D 表示・操作・IPC 連携を担当する Godot プロジェクト
 - CoaXisProtocol
   - 共通契約と IPC で使う DTO / 定義を管理するプロジェクト
+- CoaXisIpcTester
+  - JSON/CSVを読み込み、ViewerへNamed PipeでLoadModelを送り、要求と応答を確認するWindowsデスクトップツール
 
 ### 管理対象外
 
@@ -28,6 +30,9 @@ CoaXis は、3D モデルの可視化と事前アセット生成を分離して�
 ```powershell
 # 全体ビルド
  dotnet build .\CoaXis.sln
+
+# IPCテスター起動（Viewerを先に起動）
+ dotnet run --project .\CoaXisIpcTester\CoaXis.IpcTester.csproj
 ```
 
 ## 4. 実務ルール

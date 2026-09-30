@@ -77,16 +77,6 @@ public partial class InputHub : BaseHub
     private void HandleButtonInput()
     {
         
-        if (Input.IsActionJustPressed("load_csv"))
-        {
-            SampleTest.RunLoadCsv();
-        }
-        
-        if (Input.IsActionJustPressed("load_json"))
-        {
-            SampleTest.RunLoadJson();
-        }
-        
         if (Input.IsActionJustPressed("clear"))
         {
             Application.Model.Load.Entity.ClearModels();
