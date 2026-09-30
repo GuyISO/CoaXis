@@ -24,7 +24,6 @@ public partial class ModelEntityTree : Tree
     private bool _isInternalSelection = false;
 
     private const int VisibilityButtonId = 1;
-    private const int FitButtonId = 2;
 
     #endregion
 
@@ -81,6 +80,7 @@ public partial class ModelEntityTree : Tree
         CellSelected += OnCellSelected;
         ButtonClicked += OnButtonClicked;
         ItemCollapsed += OnItemCollapsed;
+        ItemActivated += OnItemActivated;
     }
 
     /// <summary>
@@ -91,6 +91,7 @@ public partial class ModelEntityTree : Tree
         CellSelected -= OnCellSelected;
         ButtonClicked -= OnButtonClicked;
         ItemCollapsed -= OnItemCollapsed;
+        ItemActivated -= OnItemActivated;
     }
     
     /// <summary>
@@ -166,10 +167,15 @@ public partial class ModelEntityTree : Tree
             case VisibilityButtonId:
                 HandleVisibleButtonClicked(item);
                 break;
-            case FitButtonId:
-                HandleFitButtonClicked(item);
-                break;
         }
+    }
+
+    /// <summary>
+    /// ツリー項目がアクティブ化されたとき、選択中のモデルを画面に収める
+    /// </summary>
+    private void OnItemActivated()
+    {
+        HandleFitRequested(GetSelected());
     }
 
     /// <summary>
@@ -462,11 +468,7 @@ public partial class ModelEntityTree : Tree
             ?? Application.Asset.GetVisibilityIcon(
                 ModelVisibility.Visible,
                 Constant.Ui.Tree.HierarchyVisibleIconSize);
-        Texture2D fitIcon = Application.Asset.GetIcon(
-            "res://assets/icon/mono/target.svg",
-            Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.AddButton(0, btnIcon, id: VisibilityButtonId);
-        treeItem.AddButton(0, fitIcon, id: FitButtonId);
 
         // EntityId と TreeItem の対応を登録
         treeItem.SetMeta("EntityId", entityId.ToString());
@@ -751,10 +753,10 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
-    /// TreeItem のフィットボタンがクリックされたとき、対応するモデルが画面に収まるよう表示する
+    /// TreeItem のFit要求を受けたとき、対応するモデルが画面に収まるよう表示する
     /// </summary>
-    /// <param name="item">クリックされた TreeItem</param>
-    private void HandleFitButtonClicked(TreeItem item)
+    /// <param name="item">対象の TreeItem</param>
+    private void HandleFitRequested(TreeItem item)
     {
         ModelNode modelNode = GetModelNode(item);
         if (modelNode == null)
