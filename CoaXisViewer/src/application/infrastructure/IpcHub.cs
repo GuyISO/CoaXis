@@ -23,11 +23,6 @@ public partial class IpcHub : BaseHub
     /// </summary>
     private readonly ConcurrentQueue<PendingRequest> _pendingRequests = new();
 
-    private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
-    {
-        PropertyNameCaseInsensitive = true
-    };
-
     private const int MainThreadTimeoutMilliseconds = 2000;
     private const string ViewerSourceName = "Viewer";
 
@@ -236,7 +231,7 @@ public partial class IpcHub : BaseHub
             }
 
             IpcEnvelope response = await ProcessLineAsync(line, token).ConfigureAwait(false);
-            string json = JsonSerializer.Serialize(response, SerializerOptions);
+            string json = JsonSerializer.Serialize(response, IpcJsonOptions.Default);
             await writer.WriteLineAsync(json).ConfigureAwait(false);
         }
     }
@@ -254,7 +249,7 @@ public partial class IpcHub : BaseHub
         IpcEnvelope envelope;
         try
         {
-            envelope = JsonSerializer.Deserialize<IpcEnvelope>(line, SerializerOptions);
+            envelope = JsonSerializer.Deserialize<IpcEnvelope>(line, IpcJsonOptions.Default);
         }
         catch (JsonException ex)
         {

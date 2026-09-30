@@ -37,7 +37,7 @@ public static class IpcCommandDispatcher
                 return IpcResultPayload.Failure(envelope.EventType, IpcErrorCode.UnsupportedEventType, $"No payload contract is defined for eventType: {envelope.EventType}");
             }
 
-            object typedPayload = envelope.Payload.Deserialize(payloadType);
+            object typedPayload = envelope.Payload.Deserialize(payloadType, IpcJsonOptions.Default);
             return handler(typedPayload);
         }
         catch (JsonException ex)

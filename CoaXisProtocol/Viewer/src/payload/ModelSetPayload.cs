@@ -13,14 +13,12 @@ public sealed class ModelSetPayload
     /// 読み込むモデル実体DTOの一覧
     /// </summary>
     [JsonRequired]
-    [JsonPropertyName("entities")]
     public List<ModelEntityDto> Entities { get; init; } = new List<ModelEntityDto>();
 
     /// <summary>
     /// 読み込むモデル属性DTOの一覧
     /// </summary>
     [JsonRequired]
-    [JsonPropertyName("properties")]
     public List<ModelPropertyDto> Properties { get; init; } = new List<ModelPropertyDto>();
 
     /// <summary>

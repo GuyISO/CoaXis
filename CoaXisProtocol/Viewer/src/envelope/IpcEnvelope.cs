@@ -1,32 +1,22 @@
 using System;
 using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace CoaXis.Protocol.Viewer;
 
 /// <summary>
 /// Godot(Viewer) と外部クライアント間でやり取りする IPC メッセージの共通エンベロープ
+/// IpcEnvelopeBuilder を使用して生成することを推奨する
 /// </summary>
+/// <remarks>
+/// プロパティ名は<see cref="IpcJsonOptions.Default"/>のcamelCase命名ポリシーに委ねる
+/// </remarks>
 public sealed class IpcEnvelope
 {
-    [JsonPropertyName("eventId")]
-    public string EventId { get; set; } = Guid.NewGuid().ToString();
-
-    [JsonPropertyName("eventType")]
-    public string EventType { get; set; } = string.Empty;
-
-    [JsonPropertyName("version")]
-    public string Version { get; set; } = string.Empty;
-
-    [JsonPropertyName("timestamp")]
-    public string Timestamp { get; set; } = string.Empty;
-
-    [JsonPropertyName("source")]
-    public string Source { get; set; } = string.Empty;
-
-    [JsonPropertyName("correlationId")]
+    public string EventId { get; set; }
+    public string EventType { get; set; }
+    public string Version { get; set; }
+    public string Timestamp { get; set; }
+    public string Source { get; set; }
     public string CorrelationId { get; set; }
-
-    [JsonPropertyName("payload")]
     public JsonElement Payload { get; set; }
 }

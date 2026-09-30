@@ -1,22 +1,16 @@
-using System.Text.Json.Serialization;
-
 namespace CoaXis.Protocol.Viewer;
 
 /// <summary>
 /// Result エンベロープのpayloadに格納する処理結果
 /// </summary>
+/// <remarks>
+/// プロパティ名は<see cref="IpcJsonOptions.Default"/>のcamelCase命名ポリシーに委ねる
+/// </remarks>
 public sealed class IpcResultPayload
 {
-    [JsonPropertyName("ok")]
     public bool Ok { get; set; }
-
-    [JsonPropertyName("request")]
     public string Request { get; set; } = string.Empty;
-
-    [JsonPropertyName("errorCode")]
     public string ErrorCode { get; set; } = IpcErrorCode.None;
-
-    [JsonPropertyName("message")]
     public string Message { get; set; } = string.Empty;
 
     /// <summary>

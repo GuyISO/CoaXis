@@ -28,7 +28,7 @@ public static class IpcEnvelopeBuilder
             Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
             Source = source,
             CorrelationId = correlationId,
-            Payload = JsonSerializer.SerializeToElement(payload)
+            Payload = JsonSerializer.SerializeToElement(payload, IpcJsonOptions.Default)
         };
     }
 }
