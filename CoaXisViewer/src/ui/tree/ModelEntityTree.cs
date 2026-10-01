@@ -294,13 +294,10 @@ public partial class ModelEntityTree : Tree
         TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
         if (treeItem != null)
         {
-            Texture2D buttonIcon = Application.Asset.GetVisibilityIcon(
+            Texture2D buttonIcon = Application.Asset.Icon.GetVisibility(
                 visibility,
                 ModelVisibilityResolver.IsVisible(modelEntity),
-                Constant.Ui.Tree.HierarchyVisibleIconSize)
-                ?? Application.Asset.GetVisibilityIcon(
-                    ModelVisibility.Visible,
-                    Constant.Ui.Tree.HierarchyVisibleIconSize);
+                Constant.Ui.Tree.HierarchyVisibleIconSize);
             treeItem.SetButton(0, 0, buttonIcon);
         }
     }
@@ -456,18 +453,15 @@ public partial class ModelEntityTree : Tree
         treeItem.SetText(0, modelEntity.Name);
 
         // --- 左側アイコン（ModelEntity に紐づくモデルアイコン。不在時は既定アイコンで代替） ---
-        Texture2D icon = Application.Asset.GetIcon(modelEntity.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
-            ?? Application.Asset.GetDefaultIcon(Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D icon = Application.Asset.Icon.GetByPath(modelEntity.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
+            ?? Application.Asset.Icon.GetDefaultEntity(Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（表示切替・演出用） ---
-        Texture2D btnIcon = Application.Asset.GetVisibilityIcon(
+        Texture2D btnIcon = Application.Asset.Icon.GetVisibility(
             modelEntity.Visibility,
             ModelVisibilityResolver.IsVisible(modelEntity),
-            Constant.Ui.Tree.HierarchyVisibleIconSize)
-            ?? Application.Asset.GetVisibilityIcon(
-                ModelVisibility.Visible,
-                Constant.Ui.Tree.HierarchyVisibleIconSize);
+            Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.AddButton(0, btnIcon, id: VisibilityButtonId);
 
         // EntityId と TreeItem の対応を登録

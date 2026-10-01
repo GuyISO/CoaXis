@@ -58,7 +58,7 @@ public partial class PickHub : BaseHub
     /// 選択操作モードの通知を行う
     /// </summary>
     /// <param name="mode">通知する選択操作モード</param>
-    internal void NotifyHandlingMode(PickHandlingMode mode)
+    private void NotifyHandlingMode(PickHandlingMode mode)
     {
         EmitSignal(SignalName.HandlingModeNotified, (int)mode);
     }
@@ -112,6 +112,10 @@ public partial class PickHub : BaseHub
         Application.Pick.NotifyHandlingMode(_handlingMode);
     }
 
+    #endregion
+
+    #region Methods
+
     /// <summary>
     /// 選択操作モードを変更し、変更内容を通知する
     /// </summary>
@@ -125,10 +129,6 @@ public partial class PickHub : BaseHub
 
         Application.Pick.NotifyHandlingMode(_handlingMode);
     }
-
-    #endregion
-
-    #region Methods
 
     #endregion
 

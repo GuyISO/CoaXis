@@ -31,7 +31,6 @@ public partial class SelectionUi : PanelContainer
         SubscribeUiEvents();
         SubscribeApplicationEvents();
         SyncInitialState();
-        Application.Pick.AskHandlingMode();
     }
 
     public override void _ExitTree()
@@ -288,8 +287,8 @@ public partial class SelectionUi : PanelContainer
             item.SetText(0, modelEntity?.Name ?? entityId.ToString());
 
             // ModelEntityに紐づくアイコンを表示し、不在時は既定アイコンで代替する
-            Texture2D icon = Application.Asset.GetIcon(modelEntity?.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
-                ?? Application.Asset.GetDefaultIcon(Constant.Ui.Tree.HierarchyVisibleIconSize);
+            Texture2D icon = Application.Asset.Icon.GetByPath(modelEntity?.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
+                ?? Application.Asset.Icon.GetDefaultEntity(Constant.Ui.Tree.HierarchyVisibleIconSize);
             item.SetIcon(0, icon);
 
             // 右クリックメニューはModelEntity単位で対象を扱う設計のため、TreeItemにEntityIdをmeta保持しておく

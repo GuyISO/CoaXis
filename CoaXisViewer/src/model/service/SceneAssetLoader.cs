@@ -96,7 +96,7 @@ public static class SceneAssetLoader
                 return true;
             }
 
-            if (isResourcePath && Application.Asset.GetCachedScene(resolvedPath) != null)
+            if (isResourcePath && Application.Asset.Scene.TryGetByPath(resolvedPath) != null)
             {
                 _loadStates.Add(resolvedPath, new SceneResourceLoadState
                 {
@@ -161,7 +161,7 @@ public static class SceneAssetLoader
             }
 
             packedScene = IsResourcePath(resolvedPath)
-                ? Application.Asset.GetCachedScene(resolvedPath)
+                ? Application.Asset.Scene.TryGetByPath(resolvedPath)
                 : state.PackedScene;
             if (packedScene == null)
             {
@@ -254,7 +254,7 @@ public static class SceneAssetLoader
 
         if (IsResourcePath(completedPath))
         {
-            Application.Asset.CacheScene(completedPath, state.PackedScene);
+            Application.Asset.Scene.Cache(completedPath, state.PackedScene);
             state.PackedScene = null;
         }
 

@@ -1,5 +1,4 @@
-﻿// TODO: リファクタリング確認後に削除
-using Godot;
+﻿using Godot;
 using System;
 using System.IO;
 
@@ -46,11 +45,15 @@ public partial class LogHub : BaseHub
     #region Notifications
 
     [Signal] public delegate void MessageNotifiedEventHandler(int level, string message);
-    internal void NotifyMessage(int level, string message)
+    /// <summary>
+    /// ログメッセージが通知されたときに発行されるシグナル。
+    /// </summary>
+    /// <param name="level">ログレベル</param>
+    /// <param name="message">ログメッセージ</param>
+    private void NotifyMessage(int level, string message)
     {
         EmitSignal(SignalName.MessageNotified, level, message);
     }
-
 
     #endregion
 
@@ -76,12 +79,9 @@ public partial class LogHub : BaseHub
             return;
         }
 
-        // デバッグログはファイルと通知には残し、コンソール表示だけを抑制する。
-        if (level != LogLevel.Debug)
-        {
-            GD.Print(line);
-        }
-
+        // コンソール表示
+        GD.Print(line);
+        
         // ファイルへの出力
         if (_enableFileLog)
         {
@@ -90,7 +90,7 @@ public partial class LogHub : BaseHub
         }
 
         // Signalの発行
-        NotifyMessage((int)level, line);
+        NotifyMessage((int)level, message);
     }
 
     /// <summary>

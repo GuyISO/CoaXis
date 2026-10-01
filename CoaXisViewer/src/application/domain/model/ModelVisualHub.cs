@@ -437,7 +437,7 @@ public partial class ModelVisualHub : BaseHub
 	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
 	private static void HighlightMesh(ModelNode modelNode, bool enable = true)
 	{
-		Material selectedMaterial = Application.Asset.GetSelectedMaterial();
+		Material selectedMaterial = Application.Asset.Material.GetSelected();
 
 		if (enable)
 		{

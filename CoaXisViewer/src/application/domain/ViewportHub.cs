@@ -182,17 +182,6 @@ public partial class ViewportHub : BaseHub
         EmitSignal(SignalName.AlignNormalToRequested, normal, useTween);
     }
 
-    [Signal] public delegate void DecidePickRectRequestedEventHandler(Vector2 startPosition, Vector2 endPosition);
-    /// <summary>
-    /// 矩形選択の確定を通知するシグナル
-    /// </summary>
-    /// <param name="startPosition">矩形選択の開始位置</param>
-    /// <param name="endPosition">矩形選択の終了位置</param>
-    internal void DecidePickRect(Vector2 startPosition, Vector2 endPosition)
-    {
-        EmitSignal(SignalName.DecidePickRectRequested, startPosition, endPosition);
-    }
-
     #endregion
 
     #region Notifications
@@ -296,16 +285,6 @@ public partial class ViewportHub : BaseHub
     internal void NotifyPickRect(Vector2 startPosition, Vector2 endPosition)
     {
         EmitSignal(SignalName.PickRectNotified, startPosition, endPosition);
-    }
-
-    [Signal] public delegate void PickResultNotifiedEventHandler(PickResult pickResult);
-    /// <summary>
-    /// 測定用の点選択結果を通知するシグナル
-    /// </summary>
-    /// <param name="pickResult">選択結果の情報を含むオブジェクト</param>
-    internal void NotifyPickResult(PickResult pickResult)
-    {
-        EmitSignal(SignalName.PickResultNotified, pickResult);
     }
 
     [Signal] public delegate void LayerNotifiedEventHandler(uint layer, bool isActive);

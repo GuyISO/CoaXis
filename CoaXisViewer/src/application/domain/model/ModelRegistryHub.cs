@@ -149,19 +149,16 @@ public partial class ModelRegistry : BaseHub
     public IReadOnlyList<ModelEntity> GetAncestorEntities(Guid entityId)
     {
         var ancestors = new List<ModelEntity>();
-        var visitedEntityIds = new HashSet<Guid>();
+        // 開始 Entity 自身を訪問済みとして記録し、以降は祖先を辿るたびに1件ずつ追加する。
+        var visitedEntityIds = new HashSet<Guid> { entityId };
         ModelEntity currentEntity = GetEntity(entityId);
 
-        while (currentEntity != null && visitedEntityIds.Add(currentEntity.Id))
+        while (currentEntity != null)
         {
             ModelEntity parentEntity = GetParentEntity(currentEntity.Id);
-            if (parentEntity == null)
-            {
-                break;
-            }
 
-            // 循環参照では同じ Entity を一覧へ重複追加せず、取得可能な祖先で停止する。
-            if (!visitedEntityIds.Add(parentEntity.Id))
+            // 親が存在しない、または循環参照で既出の Entity に戻った場合はそこで打ち切る。
+            if (parentEntity == null || !visitedEntityIds.Add(parentEntity.Id))
             {
                 break;
             }

@@ -1,9 +1,7 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
-using System;
 
 /// <summary>
-/// ユーザー入力の取得とアプリケーション操作への変換を管理するハブ。
+/// インプットマップによるユーザー入力の取得とアプリケーション操作への変換を管理するハブ。
 /// </summary>
 public partial class InputHub : BaseHub
 {
@@ -28,10 +26,15 @@ public partial class InputHub : BaseHub
 
     public override void _Process(double delta)
     {
+        // 押下中に状態を切り替えるボタンの入力処理
         HandleSelectModeInput("switch_selection_mode_add", SelectionMode.Add);
         HandleSelectModeInput("switch_selection_mode_remove", SelectionMode.Remove);
         HandleSelectModeInput("switch_selection_mode_toggle", SelectionMode.Toggle);
+
+        // ボタン入力処理
         HandleButtonInput();
+
+        // 方向入力処理
         HandleTranslationInput((float)delta);
         HandleRotationInput((float)delta);
     }

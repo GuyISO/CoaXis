@@ -9,8 +9,6 @@ public partial class MeasurementUi : PanelContainer
 {
     #region Fields
 
-    private bool _isInitialized = false;
-
     // 関連ノードの参照
     private readonly Label[] _labelPositionXs = new Label[2];
     private readonly Label[] _labelPositionYs = new Label[2];
@@ -35,14 +33,7 @@ public partial class MeasurementUi : PanelContainer
         EnsureChildNodes();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
-    }
-
-    public override void _Process(double delta)
-    {
-        if (!_isInitialized)
-        {
-            Application.Measurement.AskResult();
-        }
+        SyncInitialState();
     }
 
     public override void _ExitTree()
@@ -165,7 +156,6 @@ public partial class MeasurementUi : PanelContainer
     private void OnResultNotified(MeasurementResult result)
     {
         // 初回実行時に初期化済フラグを立てる
-        _isInitialized = true;
 
         Vector3 position1ForDisplay = Vector3.Zero;
         Vector3 position2ForDisplay = Vector3.Zero;
@@ -231,6 +221,15 @@ public partial class MeasurementUi : PanelContainer
     #endregion
 
     #region Internal Helpers
+
+    /// <summary>
+    /// 初期状態を SelectionService から同期する
+    /// </summary>
+    private void SyncInitialState()
+    {
+        OnResultNotified(Application.Measurement.CurrentResult);
+        OnPointNotified(Application.Measurement.CurrentPointIndex);
+    }
 
     /// <summary>
     /// 測定結果を受け取り、UIラベルを更新する

@@ -1,6 +1,5 @@
 // TODO: リファクタリング確認後に削除
 using Godot;
-using System;
 
 /// <summary>
 /// 測定状態、測定結果、測定用ビジュアルを管理するハブ。
@@ -12,8 +11,6 @@ public partial class MeasurementHub : BaseHub
     // 現在測定対象とするポイントのインデックス（1または2）。0の場合は未選択状態を示す
     private int _pointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
 
-    // TODO: ファイルパスを参照するのやめる
-    private readonly PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/part/pointer_label.tscn")!;
     private readonly PointerLabel[] _pointerLabelInstances = new PointerLabel[2];
     private readonly ImmediateMesh _lineMesh = new ImmediateMesh();
 
@@ -26,6 +23,9 @@ public partial class MeasurementHub : BaseHub
     #endregion
 
     #region Properties
+
+    public int CurrentPointIndex => _pointIndex;
+    public MeasurementResult CurrentResult => GetCurrentResult();
 
     #endregion
 
@@ -56,15 +56,6 @@ public partial class MeasurementHub : BaseHub
     #endregion
 
     #region Actions
-
-    [Signal] public delegate void AskResultRequestedEventHandler();
-    /// <summary>
-    /// 最新の測定結果通知をリクエストする
-    /// </summary>
-    internal void AskResult()
-    {
-        EmitSignal(SignalName.AskResultRequested);
-    }
 
     [Signal] public delegate void SetPointRequestedEventHandler(int pointIndex);
     /// <summary>
@@ -121,7 +112,6 @@ public partial class MeasurementHub : BaseHub
     {
         Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
         Application.Pick.ResultNotified += OnPickResultNotified;
-        Application.Measurement.AskResultRequested += OnAskResultRequested;
         Application.Measurement.SetPointRequested += OnSetPointRequested;
         Application.Measurement.ClearPointRequested += OnClearPointRequested;
         Application.Setting.SettingsNotified += ApplySettings;
@@ -134,18 +124,9 @@ public partial class MeasurementHub : BaseHub
     {
         Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Pick.ResultNotified -= OnPickResultNotified;
-        Application.Measurement.AskResultRequested -= OnAskResultRequested;
         Application.Measurement.SetPointRequested -= OnSetPointRequested;
         Application.Measurement.ClearPointRequested -= OnClearPointRequested;
         Application.Setting.SettingsNotified -= ApplySettings;
-    }
-
-    /// <summary>
-    /// 測定結果の通知がリクエストされたときに呼び出されるイベントハンドラ
-    /// </summary>
-    private void OnAskResultRequested()
-    {
-        Application.Measurement.NotifyResult(GetCurrentResult());
     }
 
     /// <summary>
@@ -335,19 +316,13 @@ public partial class MeasurementHub : BaseHub
             return;
         }
 
-        if (_pointerLabel == null)
-        {
-            Application.Log.Warn("MeasurementService: pointer label scene is not loaded.");
-            return;
-        }
-
         if (pickResult.Collider == null || !GodotObject.IsInstanceValid(pickResult.Collider))
         {
             Application.Log.Warn("MeasurementService: collider is invalid, skip pointer label placement.");
             return;
         }
 
-        PointerLabel pointerLabel = _pointerLabel.Instantiate<PointerLabel>();
+        PointerLabel pointerLabel = Application.Asset.Scene.GetPointerLabel();
         AddChild(pointerLabel);
 
         pointerLabel.Name = $"MeasurementPoint{index + 1}";
