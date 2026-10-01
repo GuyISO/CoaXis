@@ -18,6 +18,7 @@ public partial class AssetHub : BaseHub
     private const string SelectedMaterialPath = "res://assets/material/selected.tres";
 
     private readonly Dictionary<string, Texture2D> _iconCache = new Dictionary<string, Texture2D>();
+    private readonly Dictionary<string, PackedScene> _sceneCache = new Dictionary<string, PackedScene>();
     private Material _selectedMaterial;
 
     #endregion
@@ -37,6 +38,7 @@ public partial class AssetHub : BaseHub
     {
         UnsubscribeApplicationEvents();
         _iconCache.Clear();
+        _sceneCache.Clear();
         _selectedMaterial = null;
 
         base._ExitTree();
@@ -179,9 +181,43 @@ public partial class AssetHub : BaseHub
         return GetOrCreateIcon(path, size);
     }
 
+    /// <summary>
+    /// res:// パスのシーンキャッシュを取得する。
+    /// </summary>
+    /// <param name="path">シーンのリソースパス</param>
+    /// <returns>キャッシュ済みシーン。未登録または res:// 外のパスの場合は null</returns>
+    internal PackedScene GetCachedScene(string path)
+    {
+        if (!IsResourcePath(path))
+        {
+            return null;
+        }
+
+        return _sceneCache.TryGetValue(path, out PackedScene packedScene) ? packedScene : null;
+    }
+
+    /// <summary>
+    /// res:// パスのシーンをアセットキャッシュへ登録する。
+    /// </summary>
+    /// <param name="path">シーンのリソースパス</param>
+    /// <param name="packedScene">キャッシュするシーン</param>
+    internal void CacheScene(string path, PackedScene packedScene)
+    {
+        if (IsResourcePath(path) && packedScene != null)
+        {
+            _sceneCache[path] = packedScene;
+        }
+    }
+
     #endregion
 
     #region Helpers
+
+    private static bool IsResourcePath(string path)
+    {
+        return !string.IsNullOrWhiteSpace(path)
+            && path.StartsWith("res://", System.StringComparison.Ordinal);
+    }
 
     /// <summary>
     /// 指定パスが有効なアイコンパスかどうかを判定する

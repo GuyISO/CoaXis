@@ -12,7 +12,7 @@ public partial class ModelLoadSceneHub : BaseHub
 {
 	#region Fields
 
-	private const long SceneLoadFrameBudgetMs = 4;
+	private const long SceneLoadFrameBudgetMs = 400;
 
 	private readonly Queue<SceneLoadQueueItem> _sceneLoadQueue = new();
 	private readonly object _sceneLoadQueueLock = new();
@@ -163,15 +163,22 @@ public partial class ModelLoadSceneHub : BaseHub
 					continue;
 				}
 
-				if (IsActiveEntity(nextItem.ModelEntity) && !TryFinishSceneLoad(nextItem.ModelEntity))
+				if (IsActiveEntity(nextItem.ModelEntity))
 				{
-					lock (_sceneLoadQueueLock)
+					if (!TryFinishSceneLoad(nextItem.ModelEntity))
 					{
-						if (generation == _sceneLoadGeneration)
+						lock (_sceneLoadQueueLock)
 						{
-							_sceneLoadQueue.Enqueue(nextItem);
+							if (generation == _sceneLoadGeneration)
+							{
+								_sceneLoadQueue.Enqueue(nextItem);
+							}
 						}
 					}
+				}
+				else
+				{
+					SceneAssetLoader.ReleaseLoad(nextItem.ModelEntity.ScenePath);
 				}
 
 				if (stopwatch.ElapsedMilliseconds >= SceneLoadFrameBudgetMs)

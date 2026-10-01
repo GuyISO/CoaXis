@@ -42,6 +42,21 @@
 
 ---
 
+### [2026-10-01] シーンリソースのパス別キャッシュ方針
+
+- 背景: 複数モデルで同じ `res://` シーンを使う場合、ロード済み `PackedScene` を再利用したい。一方、外部ファイル由来のシーンは再利用頻度が低く、キャッシュ参照を長期保持するとメモリ使用量が増える。
+- 問題: `SceneAssetLoader` がすべてのロード済み `PackedScene` を状態辞書に保持しており、プロジェクト内リソースと外部リソースで保持期間を分けられなかった。
+- 判断: `res://` の `PackedScene` は `AssetHub` がアプリケーション寿命中キャッシュする。`res://` 外は `ResourceLoader.CacheMode.Ignore` でロードし、同時利用者がすべてシーンをインスタンス化した後にロード状態とPackedScene参照を破棄する。
+- 判断理由: プロジェクト内シーンはアイコンと同じくAssetHubに所有権を集約でき、繰り返し利用時に再ロードを避けられる。外部シーンは重複した進行中要求のみ一時共有し、利用完了後に参照を切ることで常駐キャッシュを避けられる。
+- 採用しなかった代替案: すべてのシーンをAssetHubに保持する案は外部ファイルのメモリ解放方針に反する。各モデルで同じパスを独立ロードする案は同時利用時の重複とGodotの並行ロード制約を再発させるため不採用。
+- 影響範囲: `AssetHub`、`SceneAssetLoader`、モデルシーンロードqueue。外部シーンがインスタンス化済みNodeやその依存リソースから参照される間は、それらのメモリは引き続き必要となる。
+- 実装/運用手順: シーンロード要求は従来どおり `SceneAssetLoader` 経由とする。`res://` シーンの明示キャッシュ削除が必要な場合はAssetHubの寿命・クリア方針を変更する。外部ロード利用者がロード前に破棄された場合は利用枠を解放する。
+- 検証方法: 同一 `res://` シーンを複数モデルで使い、AssetHubの同一PackedScene参照が再利用されることを確認する。外部シーンは複数利用完了後にロード状態から除去されること、キャンセル時に利用者数が残らないことを確認し、`check: mojibake` と `dotnet build .\\CoaXis.sln` を実行する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/application/infrastructure/AssetHub.cs`、`CoaXisViewer/src/model/service/SceneAssetLoader.cs`、`CoaXisViewer/src/application/domain/model/load/ModelLoadSceneHub.cs`
+- 備考: `ResourceLoader.CacheMode.Ignore` は対象シーン本体とsubresourcesをキャッシュ対象外にし、外部依存リソースはGodotの既定Reuse動作に従う。
+
+---
+
 ### [2026-09-26] モデル置換ロードを一括通知し、Addedを部分木差分用に維持
 
 - 背景: `ReplaceEntities` は全EntityをRegistryへ登録して階層を解決した後も、Tree構築のため親先行順を計算し、Entityごとに `Added` と `VisibilityNotified` を発行していた。
