@@ -8,9 +8,6 @@ public partial class MeasurementHub : BaseHub
 {
     #region Fields
 
-    // 現在測定対象とするポイントのインデックス（1または2）。0の場合は未選択状態を示す
-    private int _pointIndex = 0; // 0: 未選択、1: ポイント1、2: ポイント2
-
     private readonly PointerLabel[] _pointerLabelInstances = new PointerLabel[2];
     private readonly ImmediateMesh _lineMesh = new ImmediateMesh();
 
@@ -24,7 +21,8 @@ public partial class MeasurementHub : BaseHub
 
     #region Properties
 
-    public int CurrentPointIndex => _pointIndex;
+    /// <summary>現在測定対象としているポイントのインデックスを取得する。0は未選択、1と2は各測定ポイントを示す。</summary>
+    public int CurrentPointIndex { get; private set; } = 0;
     public MeasurementResult CurrentResult => GetCurrentResult();
 
     #endregion
@@ -141,7 +139,7 @@ public partial class MeasurementHub : BaseHub
             return;
         }
 
-        _pointIndex = pointIndex;
+        CurrentPointIndex = pointIndex;
         
         Application.Pick.SetHandlingMode(PickHandlingMode.Measurement);
         Application.Measurement.NotifyPoint(pointIndex);
@@ -174,7 +172,7 @@ public partial class MeasurementHub : BaseHub
     {
         if (mode != PickHandlingMode.Measurement)
         {
-            _pointIndex = 0;
+            CurrentPointIndex = 0;
             Application.Measurement.NotifyPoint(0);
         }
     }
@@ -190,7 +188,7 @@ public partial class MeasurementHub : BaseHub
             return;
         }
 
-        if (_pointIndex == 0)
+        if (CurrentPointIndex == 0)
         {
             return;
         }
@@ -200,9 +198,9 @@ public partial class MeasurementHub : BaseHub
             return;
         }
 
-        int index = _pointIndex - 1;
+        int index = CurrentPointIndex - 1;
         _points[index] = pickResult;
-        Application.Log.Debug($"MeasurementService: point {_pointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
+        Application.Log.Debug($"MeasurementService: point {CurrentPointIndex} picked. Position: {_points[index].Position}, Normal: {_points[index].Normal}, Distance: {_points[index].Distance}");
 
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);

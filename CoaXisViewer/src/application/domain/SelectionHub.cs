@@ -11,8 +11,6 @@ public partial class SelectionHub : BaseHub
 {
     #region Fields
 
-    private SelectionMode _mode = SelectionMode.Set;
-
     // 選択状態の管理対象となる実体IDのコレクション、HashSet を使用して重複を防ぐ
     private readonly HashSet<Guid> _entityIds = new();
 
@@ -23,7 +21,7 @@ public partial class SelectionHub : BaseHub
     /// <summary>
     /// 現在の選択モードを取得する
     /// </summary>
-    internal SelectionMode Mode => _mode;
+    internal SelectionMode Mode { get; private set; } = SelectionMode.Set;
 
     /// <summary>
     /// 現在の選択実体IDのコレクションの複製を取得する
@@ -131,13 +129,13 @@ public partial class SelectionHub : BaseHub
     /// <param name="enable">有効化する場合はtrue、無効化する場合はfalse</param>
     private void OnSetModeRequested(SelectionMode mode)
     {
-        if (_mode != mode)
+        if (Mode != mode)
         {
-            _mode = mode;
-            Application.Log.Debug($"SelectionService: Selection mode changed to {_mode}.");
+            Mode = mode;
+            Application.Log.Debug($"SelectionService: Selection mode changed to {Mode}.");
         }
 
-        Application.Selection.NotifyMode(_mode);
+        Application.Selection.NotifyMode(Mode);
     }
 
     /// <summary>
@@ -154,7 +152,7 @@ public partial class SelectionHub : BaseHub
         // ピック結果が null または実体が null の場合、Setモードの場合は選択をクリアする、Hitしているかは選択においては関係ない
         if (pickResult == null || pickResult.EntityId == Guid.Empty)
         {
-            if (_mode == SelectionMode.Set)
+            if (Mode == SelectionMode.Set)
             {
                 Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
             }
@@ -162,7 +160,7 @@ public partial class SelectionHub : BaseHub
         }
 
         Guid entityId = pickResult.EntityId;
-        switch (_mode)
+        switch (Mode)
         {
             case SelectionMode.Set:
                 Set(entityId);
@@ -177,7 +175,7 @@ public partial class SelectionHub : BaseHub
                 Toggle(entityId);
                 break;
             default:
-                Application.Log.Warn($"SelectionService: Unknown selection mode {_mode}.");
+                Application.Log.Warn($"SelectionService: Unknown selection mode {Mode}.");
                 break;
         }
     }
@@ -195,7 +193,7 @@ public partial class SelectionHub : BaseHub
 
         if (pickResults == null || pickResults.Length == 0)
         {
-            if (_mode == SelectionMode.Set)
+            if (Mode == SelectionMode.Set)
             {
                 Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
             }
@@ -210,14 +208,14 @@ public partial class SelectionHub : BaseHub
 
         if (entityIds.Length == 0)
         {
-            if (_mode == SelectionMode.Set)
+            if (Mode == SelectionMode.Set)
             {
                 Clear();
             }
             return;
         }
 
-        switch (_mode)
+        switch (Mode)
         {
             case SelectionMode.Set:
                 Set(entityIds);
@@ -232,7 +230,7 @@ public partial class SelectionHub : BaseHub
                 Toggle(entityIds);
                 break;
             default:
-                Application.Log.Warn($"SelectionService: Unknown selection mode {_mode}.");
+                Application.Log.Warn($"SelectionService: Unknown selection mode {Mode}.");
                 break;
         }
     }

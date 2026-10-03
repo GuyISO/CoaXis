@@ -81,19 +81,19 @@ public partial class AxisNavigatorMenu : BaseMenu
 		}
 
 		Quaternion rotation = Quaternion.FromEuler(rotationDegrees * (Mathf.Pi / 180f));
-		Application.Viewport.MoveRotationTo(rotation, true);
+		Application.Viewport.Camera.MoveRotationTo(rotation, true);
 	}
 
 	private void HandleRollMenuItemPressed(float degrees)
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(degrees));
-		Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
+		Application.Viewport.Camera.Rotate(rotation, SpaceMode.FocalPoint, true);
 	}
 
 	// NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る
 	private void HandleToggleProjectionMenuItemPressed(Variant tag)
 	{
-		Application.Viewport.ToggleProjectionType();
+		Application.Viewport.Camera.ToggleProjectionType();
 	}
 
 	#endregion

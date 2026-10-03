@@ -9,8 +9,6 @@ public partial class ViewportUi : PanelContainer
 {
     #region Fields
 
-    private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
-
     // 関連ノードのキャッシュ
     private Label _labelMode = null!;
     private Label _labelProjection = null!;
@@ -42,6 +40,7 @@ public partial class ViewportUi : PanelContainer
         EnsureChildNodes();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
+        InitializeFromHub();
     }
 
     public override void _ExitTree()
@@ -50,14 +49,6 @@ public partial class ViewportUi : PanelContainer
         UnsubscribeApplicationEvents();
 
         base._ExitTree();
-    }
-
-    public override void _Process(double delta)
-    {
-        if (!_isInitialized)
-        {
-            Application.Viewport.AskState();
-        }
     }
 
     #endregion
@@ -130,14 +121,14 @@ public partial class ViewportUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
-        Application.Viewport.PositionNotified += OnPositionNotified;
-        Application.Viewport.RotationNotified += OnRotationNotified;
-        Application.Viewport.DistanceNotified += OnDistanceNotified;
-        Application.Viewport.SizeNotified += OnSizeNotified;
-        Application.Viewport.FovNotified += OnFovNotified;
-        Application.Viewport.ProjectionTypeNotified += OnProjectionTypeNotified;
-        Application.Viewport.LayerNotified += OnLayerNotified;
+        Application.Viewport.Interaction.ModeNotified += OnInteractionModeNotified;
+        Application.Viewport.Camera.PositionNotified += OnPositionNotified;
+        Application.Viewport.Camera.RotationNotified += OnRotationNotified;
+        Application.Viewport.Camera.DistanceNotified += OnDistanceNotified;
+        Application.Viewport.Camera.SizeNotified += OnSizeNotified;
+        Application.Viewport.Camera.FovNotified += OnFovNotified;
+        Application.Viewport.Camera.ProjectionTypeNotified += OnProjectionTypeNotified;
+        Application.Viewport.Display.LayerActivated += OnLayerNotified;
     }
 
     /// <summary>
@@ -146,14 +137,34 @@ public partial class ViewportUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
-        Application.Viewport.PositionNotified -= OnPositionNotified;
-        Application.Viewport.RotationNotified -= OnRotationNotified;
-        Application.Viewport.DistanceNotified -= OnDistanceNotified;
-        Application.Viewport.SizeNotified -= OnSizeNotified;
-        Application.Viewport.FovNotified -= OnFovNotified;
-        Application.Viewport.ProjectionTypeNotified -= OnProjectionTypeNotified;
-        Application.Viewport.LayerNotified -= OnLayerNotified;
+        Application.Viewport.Interaction.ModeNotified -= OnInteractionModeNotified;
+        Application.Viewport.Camera.PositionNotified -= OnPositionNotified;
+        Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
+        Application.Viewport.Camera.DistanceNotified -= OnDistanceNotified;
+        Application.Viewport.Camera.SizeNotified -= OnSizeNotified;
+        Application.Viewport.Camera.FovNotified -= OnFovNotified;
+        Application.Viewport.Camera.ProjectionTypeNotified -= OnProjectionTypeNotified;
+        Application.Viewport.Display.LayerActivated -= OnLayerNotified;
+    }
+
+    /// <summary>
+    /// Hubが保持する現在状態を読み取り、UIへ初期反映する。
+    /// </summary>
+    private void InitializeFromHub()
+    {
+        ViewportCameraHub camera = Application.Viewport.Camera;
+        OnPickHandlingModeNotified(Application.Pick.HandlingMode);
+        OnInteractionModeNotified(Application.Viewport.Interaction.Mode);
+        OnPositionNotified(camera.Position);
+        OnRotationNotified(camera.Rotation);
+        OnDistanceNotified(camera.Distance);
+        OnSizeNotified(camera.Size);
+        OnFovNotified(camera.Fov);
+        OnProjectionTypeNotified(camera.ProjectionType);
+        OnLayerNotified((uint)ViewportLayer.Visible,
+            (Application.Viewport.Display.ActiveLayers & (uint)ViewportLayer.Visible) != 0);
+        OnLayerNotified((uint)ViewportLayer.Invisible,
+            (Application.Viewport.Display.ActiveLayers & (uint)ViewportLayer.Invisible) != 0);
     }
 
     /// <summary>
@@ -172,7 +183,7 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonToggleProjectionPressed()
     {
         Application.Log.Debug("ViewportUi: toggle projection requested.");
-        Application.Viewport.ToggleProjectionType();
+        Application.Viewport.Camera.ToggleProjectionType();
     }
 
     /// <summary>
@@ -187,7 +198,7 @@ public partial class ViewportUi : PanelContainer
             return;
         }
         Application.Log.Debug($"ViewportUi: fit-all requested. target='{targetNode.Name}'");
-        Application.Viewport.Fit(new[] { targetNode }, true);
+        Application.Viewport.Camera.Fit(new[] { targetNode }, true);
     }
 
     /// <summary>
@@ -203,7 +214,7 @@ public partial class ViewportUi : PanelContainer
         }
 
         Application.Log.Debug($"ViewportUi: fit-to-selection requested. targets={fitTargetNodes.Length}");
-        Application.Viewport.Fit(fitTargetNodes, true);
+        Application.Viewport.Camera.Fit(fitTargetNodes, true);
     }
 
     /// <summary>
@@ -221,7 +232,7 @@ public partial class ViewportUi : PanelContainer
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(-90f));
         Application.Log.Debug("ViewportUi: roll-left requested.");
-        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Viewport.Camera.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -231,7 +242,7 @@ public partial class ViewportUi : PanelContainer
     {
         Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(90f));
         Application.Log.Debug("ViewportUi: roll-right requested.");
-        Application.Viewport.Rotate(rotation, SpaceMode.FocalPoint, true);
+        Application.Viewport.Camera.Rotate(rotation, SpaceMode.FocalPoint, true);
     }
 
     /// <summary>
@@ -239,7 +250,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonLayerVisiblePressed()
     {
-        Application.Viewport.SetLayer(
+        Application.Viewport.Display.SetLayerActive(
             (uint)ViewportLayer.Visible,
             _buttonLayerVisible.ButtonPressed);
     }
@@ -249,7 +260,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonLayerInvisiblePressed()
     {
-        Application.Viewport.SetLayer(
+        Application.Viewport.Display.SetLayerActive(
             (uint)ViewportLayer.Invisible,
             _buttonLayerInvisible.ButtonPressed);
     }
@@ -261,7 +272,7 @@ public partial class ViewportUi : PanelContainer
     private void OnSliderFovValueChanged(double value)
     {
         Application.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
-        Application.Viewport.SetFov((float)value);
+        Application.Viewport.Camera.SetFov((float)value);
     }
 
     /// <summary>
@@ -270,9 +281,6 @@ public partial class ViewportUi : PanelContainer
     /// <param name="mode">ビューポートの操作モード</param>
     private void OnInteractionModeNotified(ViewportInteractionMode mode)
     {
-        // Application.Viewport.AskState の呼び出しによる全情報通知のうちの一つと想定し、初回状態通知を受け取り済みフラグを立てる
-        _isInitialized = true;
-
         _labelMode.Text = mode.ToString();
     }
 

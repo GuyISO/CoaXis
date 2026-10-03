@@ -22,8 +22,6 @@ public partial class ViewportOverlay : Control
 	// オーバーレイの線の色、設定から読み込み　_Ready 後に ApplySettings() で初期化する
 	private Color _lineColor;
 
-	private bool _isInitialized = false; // ビューポートの初期状態を取得してUIに反映するためのフラグ
-	private float _arcballRadius = 0.0f; // アークボールの半径
 	private Quaternion _arcballHandleRotation = Quaternion.Identity;
 
 	// 関連ノードのキャッシュ
@@ -52,6 +50,7 @@ public partial class ViewportOverlay : Control
 		EnsureChildNodes();
 		SubscribeApplicationEvents();
 		ApplySettings();
+		InitializeFromHub();
 	}
 
 	public override void _ExitTree()
@@ -59,15 +58,6 @@ public partial class ViewportOverlay : Control
 		UnsubscribeApplicationEvents();
 
 		base._ExitTree();
-	}
-
-	public override void _Process(double delta)
-	{
-		if (!_isInitialized)
-		{
-			// カメラの初期状態を取得してUIに反映する
-			Application.Viewport.AskState();
-		}
 	}
 
 	#endregion
@@ -102,12 +92,12 @@ public partial class ViewportOverlay : Control
 	private void SubscribeApplicationEvents()
 	{
 		Application.Setting.SettingsNotified += ApplySettings;
-		Application.Viewport.RotateRequested += OnRotateRequested;
-		Application.Viewport.RotationNotified += OnRotationNotified;
-		Application.Viewport.InteractionModeNotified += OnInteractionModeNotified;
-		Application.Viewport.ArcballRadiusNotified += OnArcballRadiusNotified;
-		Application.Viewport.ArcballHandleNotified += OnArcballHandleNotified;
-		Application.Viewport.PickRectNotified += OnPickRectNotified;
+		Application.Viewport.Camera.RotateRequested += OnRotateRequested;
+		Application.Viewport.Camera.RotationNotified += OnRotationNotified;
+		Application.Viewport.Interaction.ModeNotified += OnInteractionModeNotified;
+		Application.Viewport.Interaction.ArcballRadiusNotified += OnArcballRadiusNotified;
+		Application.Viewport.Interaction.ArcballHandleNotified += OnArcballHandleNotified;
+		Application.Viewport.Interaction.PickRectNotified += OnPickRectNotified;
 	}
 
 	/// <summary>
@@ -116,12 +106,24 @@ public partial class ViewportOverlay : Control
 	private void UnsubscribeApplicationEvents()
 	{
 		Application.Setting.SettingsNotified -= ApplySettings;
-		Application.Viewport.RotateRequested -= OnRotateRequested;
-		Application.Viewport.RotationNotified -= OnRotationNotified;
-		Application.Viewport.InteractionModeNotified -= OnInteractionModeNotified;
-		Application.Viewport.ArcballRadiusNotified -= OnArcballRadiusNotified;
-		Application.Viewport.ArcballHandleNotified -= OnArcballHandleNotified;
-		Application.Viewport.PickRectNotified -= OnPickRectNotified;
+		Application.Viewport.Camera.RotateRequested -= OnRotateRequested;
+		Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
+		Application.Viewport.Interaction.ModeNotified -= OnInteractionModeNotified;
+		Application.Viewport.Interaction.ArcballRadiusNotified -= OnArcballRadiusNotified;
+		Application.Viewport.Interaction.ArcballHandleNotified -= OnArcballHandleNotified;
+		Application.Viewport.Interaction.PickRectNotified -= OnPickRectNotified;
+	}
+
+	/// <summary>
+	/// Hubが保持する現在状態を読み取り、初回描画へ反映する。
+	/// </summary>
+	private void InitializeFromHub()
+	{
+		OnRotationNotified(Application.Viewport.Camera.Rotation);
+		OnInteractionModeNotified(Application.Viewport.Interaction.Mode);
+		OnArcballRadiusNotified(Application.Viewport.Interaction.ArcballRadius);
+		OnArcballHandleNotified(Application.Viewport.Interaction.ArcballHandle);
+		OnPickRectNotified(Application.Viewport.Interaction.PickRectStart, Application.Viewport.Interaction.PickRectEnd);
 	}
 
 	/// <summary>
@@ -147,7 +149,6 @@ public partial class ViewportOverlay : Control
 	/// <param name="rotation">通知されたカメラの回転</param>
 	private void OnRotationNotified(Quaternion rotation)
 	{
-		_isInitialized = true;
 		DrawCenterAxis(rotation);
 	}
 
@@ -169,7 +170,6 @@ public partial class ViewportOverlay : Control
 	/// <param name="radius">通知されたアークボールの半径</param>
 	private void OnArcballRadiusNotified(float radius)
 	{
-		_arcballRadius = radius;
 		DrawArcballOutline();
 	}
 
@@ -214,7 +214,8 @@ public partial class ViewportOverlay : Control
 	/// <param name="radius">描画する円の半径</param>
 	private void DrawArcballOutline()
 	{
-		float circumference = Mathf.Tau * _arcballRadius;
+		float arcballRadius = Application.Viewport.Interaction.ArcballRadius;
+		float circumference = Mathf.Tau * arcballRadius;
 		float cycleLength = Mathf.Max(ArcballOutlineDashLength + ArcballOutlineGapLength, 1.0f);
 		int segmentCount = Mathf.Max(MinArcballOutlineDashCount, Mathf.RoundToInt(circumference / cycleLength));
 
@@ -231,8 +232,8 @@ public partial class ViewportOverlay : Control
 			float startAngle = index * step;
 			float endAngle = startAngle + dashAngle;
 
-			Vector2 start = new Vector2(Mathf.Cos(startAngle), Mathf.Sin(startAngle)) * _arcballRadius;
-			Vector2 end = new Vector2(Mathf.Cos(endAngle), Mathf.Sin(endAngle)) * _arcballRadius;
+			Vector2 start = new Vector2(Mathf.Cos(startAngle), Mathf.Sin(startAngle)) * arcballRadius;
+			Vector2 end = new Vector2(Mathf.Cos(endAngle), Mathf.Sin(endAngle)) * arcballRadius;
 
 			Line2D segment = new Line2D
 			{
@@ -370,7 +371,8 @@ public partial class ViewportOverlay : Control
 	/// </summary>
 	private void DrawArcballCross()
 	{
-		if (_arcballRadius <= Mathf.Epsilon)
+		float arcballRadius = Application.Viewport.Interaction.ArcballRadius;
+		if (arcballRadius <= Mathf.Epsilon)
 		{
 			SetLinePoints(_arcballCrossLineX, Vector2.Zero, Vector2.Zero);
 			SetLinePoints(_arcballCrossLineY, Vector2.Zero, Vector2.Zero);
@@ -445,7 +447,8 @@ public partial class ViewportOverlay : Control
 	/// <returns>画面空間に投影された点</returns>
 	private Vector2 ProjectArcballPointToScreen(Vector3 pointOnArcball)
 	{
-		return new Vector2(pointOnArcball.X, -pointOnArcball.Y) * _arcballRadius;
+		float arcballRadius = Application.Viewport.Interaction.ArcballRadius;
+		return new Vector2(pointOnArcball.X, -pointOnArcball.Y) * arcballRadius;
 	}
 
 	/// <summary>

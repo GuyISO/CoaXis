@@ -23,8 +23,6 @@ public partial class ModelRegistry : BaseHub
     // 親へまだリンクできていない ModelProperty の Id 集合
     private readonly HashSet<Guid> _unlinkedPropertyIds = new();
 
-    private RootModelEntity _rootEntity = null!;
-
     #endregion
 
     #region Properties
@@ -42,7 +40,7 @@ public partial class ModelRegistry : BaseHub
     /// <summary>
     /// シーン全体のルート ModelEntity を取得する。
     /// </summary>
-    public RootModelEntity RootEntity => _rootEntity;
+    public RootModelEntity RootEntity { get; private set; } = null!;
 
     #endregion
 
@@ -53,8 +51,8 @@ public partial class ModelRegistry : BaseHub
     /// </summary>
     public override void _Ready()
     {
-        _rootEntity = new RootModelEntity();
-        AddChild(_rootEntity.Node);
+        RootEntity = new RootModelEntity();
+        AddChild(RootEntity.Node);
     }
 
     #endregion
@@ -444,7 +442,7 @@ public partial class ModelRegistry : BaseHub
             DisposeProperty(propertyId);
         }
 
-        _rootEntity.Clear();
+        RootEntity.Clear();
         Application.Model.Registry.NotifyCleared();
     }
 

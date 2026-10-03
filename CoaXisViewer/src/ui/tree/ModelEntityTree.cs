@@ -759,7 +759,7 @@ public partial class ModelEntityTree : Tree
         }
 
         Node3D[] fitTargetNodes = new Node3D[] { modelNode };
-        Application.Viewport.Fit(fitTargetNodes, true);
+        Application.Viewport.Camera.Fit(fitTargetNodes, true);
     }
 
     /// <summary>

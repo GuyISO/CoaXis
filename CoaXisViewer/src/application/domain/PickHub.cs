@@ -8,9 +8,6 @@ public partial class PickHub : BaseHub
 {
     #region Fields
 
-    // 選択操作モードの現在値を保持するフィールド、初期値は選択操作とする
-    private PickHandlingMode _handlingMode = PickHandlingMode.Selection;
-
     #endregion
 
     #region Properties
@@ -18,7 +15,7 @@ public partial class PickHub : BaseHub
     /// <summary>
     /// 現在の選択操作モードを取得する
     /// </summary>
-    internal PickHandlingMode HandlingMode => _handlingMode;
+    internal PickHandlingMode HandlingMode { get; private set; } = PickHandlingMode.Selection;
 
     #endregion
 
@@ -109,7 +106,7 @@ public partial class PickHub : BaseHub
     /// </summary>
     private void OnAskHandlingModeRequested()
     {
-        Application.Pick.NotifyHandlingMode(_handlingMode);
+        Application.Pick.NotifyHandlingMode(HandlingMode);
     }
 
     #endregion
@@ -122,12 +119,12 @@ public partial class PickHub : BaseHub
     /// <param name="mode">設定する選択操作モード</param>
     public void SetHandlingMode(PickHandlingMode mode)
     {
-        if (_handlingMode != mode)
+        if (HandlingMode != mode)
         {
-            _handlingMode = mode;
+            HandlingMode = mode;
         }
 
-        Application.Pick.NotifyHandlingMode(_handlingMode);
+        Application.Pick.NotifyHandlingMode(HandlingMode);
     }
 
     #endregion

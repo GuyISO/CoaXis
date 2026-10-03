@@ -11,16 +11,7 @@ public partial class CameraStateUi : PanelContainer
 	#region Fields
 
 	private readonly List<CameraState> _savedCameraStates = new();
-	private bool _isInitialized = false;
 	private bool _isUpdatingTree = false;
-
-	// 直近のビューポート状態（Godot座標系）
-	private Vector3 _currentPosition = Vector3.Zero;
-	private Quaternion _currentRotation = Quaternion.Identity;
-	private float _currentDistance = 5f;
-	private float _currentSize = 5f;
-	private float _currentFov = 35f;
-	private Camera3D.ProjectionType _currentProjectionType = Camera3D.ProjectionType.Perspective;
 
 	// 関連ノードのキャッシュ
 	private Tree _tree = null!;
@@ -35,22 +26,12 @@ public partial class CameraStateUi : PanelContainer
 	{
 		EnsureChildNodes();
 		SubscribeUiEvents();
-		SubscribeApplicationEvents();
 		UpdateRemoveButtonEnabled();
-	}
-
-	public override void _Process(double delta)
-	{
-		if (!_isInitialized)
-		{
-			Application.Viewport.AskState();
-		}
 	}
 
 	public override void _ExitTree()
 	{
 		UnsubscribeUiEvents();
-		UnsubscribeApplicationEvents();
 
 		base._ExitTree();
 	}
@@ -93,50 +74,17 @@ public partial class CameraStateUi : PanelContainer
 	}
 
 	/// <summary>
-	/// Applicationイベントの購読を開始する
-	/// </summary>
-	private void SubscribeApplicationEvents()
-	{
-		Application.Viewport.PositionNotified += OnPositionNotified;
-		Application.Viewport.RotationNotified += OnRotationNotified;
-		Application.Viewport.DistanceNotified += OnDistanceNotified;
-		Application.Viewport.SizeNotified += OnSizeNotified;
-		Application.Viewport.FovNotified += OnFovNotified;
-		Application.Viewport.ProjectionTypeNotified += OnProjectionTypeNotified;
-	}
-
-	/// <summary>
-	/// Applicationイベントの購読を解除する
-	/// </summary>
-	private void UnsubscribeApplicationEvents()
-	{
-		Application.Viewport.PositionNotified -= OnPositionNotified;
-		Application.Viewport.RotationNotified -= OnRotationNotified;
-		Application.Viewport.DistanceNotified -= OnDistanceNotified;
-		Application.Viewport.SizeNotified -= OnSizeNotified;
-		Application.Viewport.FovNotified -= OnFovNotified;
-		Application.Viewport.ProjectionTypeNotified -= OnProjectionTypeNotified;
-	}
-
-	/// <summary>
 	/// Save ボタン押下時のイベントハンドラ
 	/// </summary>
 	private void OnButtonSavePressed()
 	{
-		if (!_isInitialized)
-		{
-			Application.Viewport.AskState();
-			Application.Log.Warn("CameraStateUi: save skipped because viewport state is not initialized yet.");
-			return;
-		}
-
 		CameraState state = CameraState.Create(
-			_currentPosition,
-			_currentRotation,
-			_currentDistance,
-			_currentSize,
-			_currentFov,
-			_currentProjectionType);
+			Application.Viewport.Camera.Position,
+			Application.Viewport.Camera.Rotation,
+			Application.Viewport.Camera.Distance,
+			Application.Viewport.Camera.Size,
+			Application.Viewport.Camera.Fov,
+			Application.Viewport.Camera.ProjectionType);
 		state.Normalize();
 
 		_savedCameraStates.Add(state);
@@ -187,61 +135,6 @@ public partial class CameraStateUi : PanelContainer
 		}
 
 		ApplyCameraState(_savedCameraStates[selectedIndex]);
-	}
-
-	/// <summary>
-	/// カメラ位置通知のイベントハンドラ
-	/// </summary>
-	/// <param name="position">通知されたカメラ位置</param>
-	private void OnPositionNotified(Vector3 position)
-	{
-		_currentPosition = position;
-	}
-
-	/// <summary>
-	/// カメラ回転通知のイベントハンドラ
-	/// </summary>
-	/// <param name="rotation">通知されたカメラ回転</param>
-	private void OnRotationNotified(Quaternion rotation)
-	{
-		_currentRotation = rotation;
-	}
-
-	/// <summary>
-	/// カメラ距離通知のイベントハンドラ
-	/// </summary>
-	/// <param name="distance">通知されたカメラ距離</param>
-	private void OnDistanceNotified(float distance)
-	{
-		_currentDistance = distance;
-	}
-
-	/// <summary>
-	/// カメラサイズ通知のイベントハンドラ
-	/// </summary>
-	/// <param name="size">通知されたカメラサイズ</param>
-	private void OnSizeNotified(float size)
-	{
-		_currentSize = size;
-	}
-
-	/// <summary>
-	/// カメラFOV通知のイベントハンドラ
-	/// </summary>
-	/// <param name="fov">通知されたFOV</param>
-	private void OnFovNotified(float fov)
-	{
-		_currentFov = fov;
-	}
-
-	/// <summary>
-	/// カメラ投影タイプ通知のイベントハンドラ
-	/// </summary>
-	/// <param name="projectionType">通知された投影タイプ</param>
-	private void OnProjectionTypeNotified(Camera3D.ProjectionType projectionType)
-	{
-		_currentProjectionType = projectionType;
-		_isInitialized = true;
 	}
 
 	#endregion
@@ -307,12 +200,12 @@ public partial class CameraStateUi : PanelContainer
 		Quaternion rotation = new Quaternion(state.Rotation[0], state.Rotation[1], state.Rotation[2], state.Rotation[3]);
 		Camera3D.ProjectionType projectionType = ParseProjectionType(state.ProjectionType);
 
-		Application.Viewport.SetProjectionType(projectionType);
-		Application.Viewport.MovePositionTo(position, true);
-		Application.Viewport.MoveRotationTo(rotation, true);
-		Application.Viewport.SetDistance(state.Distance, true);
-		Application.Viewport.SetSizeTo(state.Size, true);
-		Application.Viewport.SetFov(state.Fov, true);
+		Application.Viewport.Camera.SetProjectionType(projectionType);
+		Application.Viewport.Camera.MovePositionTo(position, true);
+		Application.Viewport.Camera.MoveRotationTo(rotation, true);
+		Application.Viewport.Camera.SetDistance(state.Distance, true);
+		Application.Viewport.Camera.SetSizeTo(state.Size, true);
+		Application.Viewport.Camera.SetFov(state.Fov, true);
 	}
 
 	/// <summary>

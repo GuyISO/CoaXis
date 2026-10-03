@@ -249,3 +249,30 @@
 - 検証方法: 複数モデル、同一モデルの複数Collider、バッチ上限超過、初期除外RID、ヒットなし、至近距離の矩形選択を確認し、`check: mojibake` と `dotnet build .\\CoaXis.sln` を実行する。
 - 関連ファイル/関連仕様: `CoaXisViewer/src/core/util/PickUtility.cs`, `CoaXisViewer/scenes/viewport/ViewportInteractionHandler.cs`, `CoaXisViewer/src/application/domain/selection/SelectionService.cs`, `TODO.md`
 - 備考: `SelectionService` の既存 `Distinct` は防御的処理として残す。
+
+---
+
+### [2026-10-03] ViewportHubをカメラ状態の唯一の所有者にする
+
+- 背景: ViewportHubは操作イベントを仲介していたが、カメラの位置・回転・距離・サイズ・FOV・投影方式はCameraRig上のGodot Node/Camera値から取得していた。
+- 問題: CameraRigの生成順やシーン初期値がViewport状態の正本となり、後から生成されるNode/UIが同一の状態を独立に初期化・保持する必要があった。
+- 判断: カメラ状態の正本・操作要求・通知・TweenをViewportHub配下のViewportCameraHubへ集約し、カメラの数値計算はNode継承やイベント購読を行わないstaticなViewportCameraUtilityへ分離する。CameraRigはCameraHubの状態をシーンへ反映する投影先、UI/他NodeはHubの通知購読者とする。
+- 判断理由: Layerと同じくApplication内のHubが状態と通知を所有することで、生成順に依存せず全購読者が同じ値から動作できるため。
+- 採用しなかった代替案: CameraRigの現在値を初期要求でHubへ同期する方式は、引き続きNodeが正本となり、要求された一方向の状態所有に反するため採用しない。
+- 影響範囲: ViewportHub、CameraRig、ViewportUi、CameraStateUi、ViewportOverlay、AxisNavigator等のViewport状態購読者。座標値はGodot内部座標系のまま保持し、既存の外部境界変換規約を維持する。
+- 実装/運用手順: カメラ状態・要求・通知はViewportCameraHubに追加する。副作用のない計算はViewportCameraUtilityのstatic関数へ置き、Tweenを含む要求処理はHubが実行する。CameraRigは通知購読とScene反映に限定し、Node/UIはイベント購読後の初期化処理でHub Propertyを反映してから変更通知に追従する。シーン上の値を状態初期値として読み込まない。
+- 検証方法: `dotnet build .\\CoaXis.sln` を実行し、カメラの初期状態通知、位置/回転/距離/サイズ/FOV/投影方式の各要求、Tween中の通知、CameraStateUiからの復元、および遅れて生成されたCameraRigへのHub状態反映を確認する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/application/domain/ViewportHub.cs`, `CoaXisViewer/src/application/domain/ViewportCameraHub.cs`, `CoaXisViewer/src/application/domain/ViewportCameraUtility.cs`, `CoaXisViewer/src/component/scene/CameraRig.cs`, `.github/instructions/design-philosophy.instructions.md`
+
+### [2026-10-03] Viewport初期状態をPropertyから直接適用
+
+- 背景: ViewportHubのAskState要求は、生成済みNode/UIへHubの保持状態を再通知して初期化するために使用されていた。
+- 問題: 状態を保持するHubに対して状態の再要求イベントを送る構造は、購読者の生成タイミングと通知順に依存し、Hubの状態Propertyを初期値として使う方針を曖昧にしていた。
+- 判断: Viewportの状態購読者はイベント購読後に専用の初期化処理を実行し、各状態HubのPropertyから現在状態を取得する。ViewportHubのAskState API/Signalと中継処理を廃止する。操作モード、アークボール、矩形選択状態はViewportInteractionHubを唯一の保持者とし、Layer表示状態はViewportDisplayHubを唯一の保持者とする。
+- 判断理由: Hubが保持する現在値をそのまま初期値として読むことで、Node/UIの生成時刻にかかわらず状態の正本を一つに保てる。変更後の状態伝達は従来どおり通知イベントを使う。
+- 採用しなかった代替案: 旧AskStateによる全購読者への再通知は不要なSignal発行と状態要求・通知の往復を残すため不採用。CommandHubのAskStateはViewport状態とは別責務のため変更しない。
+- 影響範囲: ViewportHub、ViewportCameraHub、ViewportInteractionHub、ViewportDisplayHub、ViewportInteractionHandler、ViewportOverlay、CameraRig、AxisNavigator、ViewportUi。カメラ状態はViewportCameraHub、操作モードと操作補助状態はViewportInteractionHub、Layer表示状態はViewportDisplayHubが保持する。
+- 実装/運用手順: Node/UIは`_Ready()`で子Node解決、イベント購読、対応HubのPropertyに基づく初期化の順に処理する。各HubのPropertyを変更する場合は、その値を使う全初期化処理を追従させる。ビューポートサイズ由来のアークボール半径はInteractionHandlerが算出してViewportInteractionHubへ設定し、描画・入力処理は同Hubの現在値を参照する。表示モードや表示対象の絞り込みなど、表示/可視性制御の新機能はViewportDisplayHubへ追加する。
+- 検証方法: `Viewport`領域にAskState/AskStateRequested参照が残っていないことを検索し、`dotnet build .\\CoaXis.sln`を実行する。CameraRig/AxisNavigator/Overlay/ViewportUiの初期生成時にHub既定値または変更済み値が反映されることをGodot上で確認する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/application/domain/ViewportHub.cs`, `CoaXisViewer/src/application/domain/ViewportCameraHub.cs`, `CoaXisViewer/src/application/domain/ViewportInteractionHub.cs`, `CoaXisViewer/src/application/domain/ViewportDisplayHub.cs`, `CoaXisViewer/src/component/ViewportInteractionHandler.cs`, `CoaXisViewer/src/component/ViewportOverlay.cs`, `CoaXisViewer/src/component/scene/CameraRig.cs`, `CoaXisViewer/src/component/scene/AxisNavigator.cs`, `CoaXisViewer/src/ui/panel/ViewportUi.cs`, `.github/instructions/design-philosophy.instructions.md`
+- 備考: CommandHub/CommandUiのAskStateは独立した状態通知契約なので対象外。

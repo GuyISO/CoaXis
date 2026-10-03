@@ -178,3 +178,43 @@
   - `docs/specification/specification_integrated.md`
   - `.github/instructions/design-philosophy.instructions.md`
 - Notes: `ModelSetPayloadBuilder` を廃止し、`ModelSetPayload.Create` に生成処理を統合
+
+- Date: 2026-10-03
+- Trigger: ViewportHubをイベント仲介だけでなくカメラ状態の唯一の所有者にする
+- Decision: カメラの注視点位置・回転、距離、正投影サイズ、FOV、投影方式はViewportCameraHubが保持する。CameraRigとUIはHub状態を初期値として受け取り、変更要求をHubへ送り、Hubの変更通知に追従する。シーン上のNode/Camera値を正本としてHubへ取り込む運用は禁止する
+- Scope: CoaXisViewerのViewportHub、CameraRig、Viewport関連Node/UI
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/ViewportCameraHub.cs`
+  - `CoaXisViewer/src/component/scene/CameraRig.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `docs/rules/technical-knowledge-base.md`
+- Notes: CameraRigはGodotシーンへの状態反映に限定し、CameraHubが正本値を保持してから購読者へ通知する
+
+- Date: 2026-10-03
+- Trigger: CameraRigからカメラ操作の計算責務を分離
+- Decision: カメラ状態・操作要求・通知・TweenはViewportHub配下のViewportCameraHubが担当し、数値計算はNode継承やイベント購読を行わないstaticなViewportCameraUtilityへ置く。CameraRigはCameraHubの状態通知をGodot Sceneへ反映する
+- Scope: CoaXisViewerのViewportHub、ViewportCameraHub、ViewportCameraUtility、CameraRig
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/ViewportHub.cs`
+  - `CoaXisViewer/src/application/domain/ViewportCameraHub.cs`
+  - `CoaXisViewer/src/application/domain/ViewportCameraUtility.cs`
+  - `CoaXisViewer/src/component/scene/CameraRig.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: Fit計算はフィット対象Nodeの所属Viewportを使い、SubViewportの表示比率を保つ。ViewportHubはCameraHubとLayer/操作モード等のViewport共通状態をまとめる
+
+- Date: 2026-10-03
+- Trigger: Viewport状態同期のAskState要求を廃止
+- Decision: Viewportの状態購読者はイベント購読後の初期化処理で各状態HubのPropertyを読み、以降は状態変更通知に追従する。Hubの状態を再通知させるAskState要求を設けない。操作モード・アークボール・矩形選択状態はViewportInteractionHubに、Layer表示と将来の表示制御はViewportDisplayHubに所有させる
+- Scope: CoaXisViewerのViewport関連Node/UIとViewportHub
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/ViewportHub.cs`
+  - `CoaXisViewer/src/application/domain/ViewportCameraHub.cs`
+  - `CoaXisViewer/src/application/domain/ViewportInteractionHub.cs`
+  - `CoaXisViewer/src/component/ViewportInteractionHandler.cs`
+  - `CoaXisViewer/src/component/ViewportOverlay.cs`
+  - `CoaXisViewer/src/component/scene/CameraRig.cs`
+  - `CoaXisViewer/src/component/scene/AxisNavigator.cs`
+  - `CoaXisViewer/src/ui/panel/ViewportUi.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `docs/rules/technical-knowledge-base.md`
+- Notes: 初期表示に必要なLayer状態はViewportDisplayHub、操作モード・アークボール・矩形選択状態はViewportInteractionHub、カメラ状態はViewportCameraHubが保持する。DisplayHubは表示モードや表示対象の絞り込みなど、表示/可視性制御の拡張先とする

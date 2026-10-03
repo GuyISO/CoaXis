@@ -18,8 +18,6 @@ public partial class AxisNavigator : Control
 	private Node3D _focalPoint = null!;
 	private Camera3D _camera = null!;
 
-	private bool _isInitialized = false; // メインビューポートのカメラの初期状態を取得してUIに反映するためのフラグ
-
 	#endregion
 
 	#region Lifecycle
@@ -28,6 +26,7 @@ public partial class AxisNavigator : Control
 	{
 		EnsureChildNodes();
 		SubscribeApplicationEvents();
+		InitializeFromHub();
 	}
 
 	public override void _ExitTree()
@@ -35,15 +34,6 @@ public partial class AxisNavigator : Control
 		UnsubscribeApplicationEvents();
 
 		base._ExitTree();
-	}
-
-	public override void _Process(double delta)
-	{
-		if (!_isInitialized)
-		{
-			// カメラの初期回転を取得して軸ナビゲータに反映する
-			Application.Viewport.AskState();
-		}
 	}
 
 	/// <summary>
@@ -99,7 +89,7 @@ public partial class AxisNavigator : Control
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Viewport.RotationNotified += OnRotationNotified;
+		Application.Viewport.Camera.RotationNotified += OnRotationNotified;
 	}
 
 	/// <summary>
@@ -107,12 +97,19 @@ public partial class AxisNavigator : Control
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Viewport.RotationNotified -= OnRotationNotified;
+		Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
+	}
+
+	/// <summary>
+	/// Hubが保持するカメラ回転を軸ナビゲータへ初期反映する。
+	/// </summary>
+	private void InitializeFromHub()
+	{
+		OnRotationNotified(Application.Viewport.Camera.Rotation);
 	}
 
 	private void OnRotationNotified(Quaternion rotation)
 	{
-		_isInitialized = true;
 		_focalPoint.Quaternion = rotation;
 	}
 
@@ -134,7 +131,7 @@ public partial class AxisNavigator : Control
 			// _cameraController.MoveFocalPoint(null, quaternion, true);
 
 			// カメラ回転要求イベントを発行
-			Application.Viewport.MoveRotationTo(quaternion, true);
+			Application.Viewport.Camera.MoveRotationTo(quaternion, true);
 		}
 	}
 

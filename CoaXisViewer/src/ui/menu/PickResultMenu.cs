@@ -85,7 +85,7 @@ public partial class PickResultMenu : BaseMenu
 			return;
 		}
 
-		Application.Viewport.AlignNormalTo(_pickResult.Normal, true);
+		Application.Viewport.Camera.AlignNormalTo(_pickResult.Normal, true);
 	}
 
 	#endregion

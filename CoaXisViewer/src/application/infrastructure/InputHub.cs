@@ -128,7 +128,7 @@ public partial class InputHub : BaseHub
         }
 
         Vector3 translation = translationDirection * (settings.TranslateSpeed * delta);
-        Application.Viewport.Translate(translation, SpaceMode.Camera);
+        Application.Viewport.Camera.Translate(translation, SpaceMode.Camera);
     }
 
     /// <summary>
@@ -155,7 +155,7 @@ public partial class InputHub : BaseHub
         Quaternion roll = new Quaternion(Vector3.Forward, rollAngle);
         Quaternion rotation = yaw * pitch * roll;
 
-        Application.Viewport.Rotate(rotation, SpaceMode.Camera);
+        Application.Viewport.Camera.Rotate(rotation, SpaceMode.Camera);
     }
 
     /// <summary>
