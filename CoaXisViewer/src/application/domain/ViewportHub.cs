@@ -291,7 +291,7 @@ public partial class ViewportHub : BaseHub
     /// <summary>
     /// ビューポートのレイヤー状態を通知するシグナル
     /// </summary>
-    internal void NotifyLayer(uint layer, bool isActive)
+    private void NotifyLayer(uint layer, bool isActive)
     {
         EmitSignal(SignalName.LayerNotified, layer, isActive);
     }
@@ -322,7 +322,7 @@ public partial class ViewportHub : BaseHub
 	private void OnAskStateRequested()
 	{
 		Application.Viewport.NotifyInteractionMode(_interactionMode);
-		Application.Viewport.NotifyLayer(_activeLayers, true);
+		NotifyLayer(_activeLayers, true);
 	}
 
 	#endregion
@@ -344,7 +344,12 @@ public partial class ViewportHub : BaseHub
 		Application.Viewport.NotifyInteractionMode(mode);
 	}
 
-	internal void SetLayerActive(uint layer, bool isActive)
+	/// <summary>
+	/// ビューポートのレイヤー状態を更新して通知する
+	/// </summary>
+	/// <param name="layer">状態を変更するレイヤー</param>
+	/// <param name="isActive">有効にする場合は <see langword="true"/>、無効にする場合は <see langword="false"/></param>
+	internal void SetLayer(uint layer, bool isActive)
 	{
 		if (isActive)
 		{
@@ -355,7 +360,7 @@ public partial class ViewportHub : BaseHub
 			_activeLayers &= ~layer;
 		}
 
-		Application.Viewport.NotifyLayer(layer, isActive);
+		NotifyLayer(layer, isActive);
 	}
 
     #endregion

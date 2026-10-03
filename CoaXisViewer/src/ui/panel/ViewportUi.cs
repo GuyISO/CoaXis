@@ -239,7 +239,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonLayerVisiblePressed()
     {
-        Application.Viewport.NotifyLayer(
+        Application.Viewport.SetLayer(
             (uint)ViewportLayer.Visible,
             _buttonLayerVisible.ButtonPressed);
     }
@@ -249,7 +249,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonLayerInvisiblePressed()
     {
-        Application.Viewport.NotifyLayer(
+        Application.Viewport.SetLayer(
             (uint)ViewportLayer.Invisible,
             _buttonLayerInvisible.ButtonPressed);
     }
