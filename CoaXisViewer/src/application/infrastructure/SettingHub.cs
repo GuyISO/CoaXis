@@ -66,11 +66,7 @@ public partial class SettingHub : BaseHub
 
 	#endregion
 
-	#region Actions
-
-    #endregion
-
-	#region Notifications
+	#region Events
 
     [Signal] public delegate void SettingsNotifiedEventHandler();
     /// <summary>
@@ -80,10 +76,6 @@ public partial class SettingHub : BaseHub
     {
         EmitSignal(SignalName.SettingsNotified);
     }
-
-    #endregion
-
-    #region Events
 
     #endregion
 

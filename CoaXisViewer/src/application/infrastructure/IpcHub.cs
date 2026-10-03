@@ -67,11 +67,7 @@ public partial class IpcHub : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
+    #region Events
 
     [Signal] public delegate void ConnectionStatusEventHandler(bool isConnected);
     /// <summary>
@@ -107,10 +103,6 @@ public partial class IpcHub : BaseHub
 
     #endregion
     
-    #region Events
-
-    #endregion
-
     #region Methods
 
     /// <summary>

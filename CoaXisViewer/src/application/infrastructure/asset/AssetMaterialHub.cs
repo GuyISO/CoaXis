@@ -36,6 +36,8 @@ public partial class AssetMaterialHub : BaseHub
 
     #region Events
 
+    // TODO: Settingから管理を委譲したら削除できるはず
+
     /// <summary>
     /// Application イベントの購読を開始する。
     /// </summary>

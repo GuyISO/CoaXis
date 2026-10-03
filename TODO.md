@@ -4,6 +4,8 @@ AssetHubをFacadeにし、Material,Icon,Sceneなど各Asset種類別のHubを持
 SettingもFacadeにして、各種設定を管理するHubを持たせる
 TransparencyをModelEntity単位で管理するように変更する
 
+ユーザー可変値はSettingでの一元管理でなく、各Hubが持つものを正とし、Settingはあくまで初期値やデフォルト値をHubに提供する役割にする
+
 IPCの状態確認UI作成する
 Fitでモデルを画面に収める機能で非表示レイヤーを除外する
 

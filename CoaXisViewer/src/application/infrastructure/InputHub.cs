@@ -41,14 +41,6 @@ public partial class InputHub : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
-
-    #endregion
-
     #region Events
 
     #endregion

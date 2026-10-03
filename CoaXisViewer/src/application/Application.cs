@@ -81,16 +81,8 @@ public partial class Application : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
-
-    #endregion
-
     #region Events
-
+    
     #endregion
 
     #region Methods

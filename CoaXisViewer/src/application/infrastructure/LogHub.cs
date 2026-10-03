@@ -38,11 +38,7 @@ public partial class LogHub : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
+    #region Events
 
     [Signal] public delegate void MessageNotifiedEventHandler(int level, string message);
     /// <summary>
@@ -54,10 +50,6 @@ public partial class LogHub : BaseHub
     {
         EmitSignal(SignalName.MessageNotified, level, message);
     }
-
-    #endregion
-
-    #region Events
 
     #endregion
 

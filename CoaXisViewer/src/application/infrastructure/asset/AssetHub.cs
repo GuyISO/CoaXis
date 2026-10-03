@@ -37,10 +37,6 @@ public partial class AssetHub : BaseHub
 
     #endregion
 
-    #region Events
-
-    #endregion
-
     #region Methods
 
     #endregion
