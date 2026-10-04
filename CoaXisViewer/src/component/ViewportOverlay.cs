@@ -22,8 +22,6 @@ public partial class ViewportOverlay : Control
 	// オーバーレイの線の色、設定から読み込み　_Ready 後に ApplySettings() で初期化する
 	private Color _lineColor;
 
-	private Quaternion _arcballHandleRotation = Quaternion.Identity;
-
 	// 関連ノードのキャッシュ
 	private Control _centerAxis;
 	private Line2D _centerAxisLineXPositive;
@@ -92,11 +90,10 @@ public partial class ViewportOverlay : Control
 	private void SubscribeApplicationEvents()
 	{
 		Application.Setting.SettingsNotified += ApplySettings;
-		Application.Viewport.Camera.RotateRequested += OnRotateRequested;
 		Application.Viewport.Camera.RotationNotified += OnRotationNotified;
 		Application.Viewport.Interaction.ModeNotified += OnInteractionModeNotified;
 		Application.Viewport.Interaction.ArcballRadiusNotified += OnArcballRadiusNotified;
-		Application.Viewport.Interaction.ArcballHandleNotified += OnArcballHandleNotified;
+		Application.Viewport.Interaction.ArcballHandleRotationNotified += OnArcballHandleRotationNotified;
 		Application.Viewport.Interaction.PickRectNotified += OnPickRectNotified;
 	}
 
@@ -106,11 +103,10 @@ public partial class ViewportOverlay : Control
 	private void UnsubscribeApplicationEvents()
 	{
 		Application.Setting.SettingsNotified -= ApplySettings;
-		Application.Viewport.Camera.RotateRequested -= OnRotateRequested;
 		Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
 		Application.Viewport.Interaction.ModeNotified -= OnInteractionModeNotified;
 		Application.Viewport.Interaction.ArcballRadiusNotified -= OnArcballRadiusNotified;
-		Application.Viewport.Interaction.ArcballHandleNotified -= OnArcballHandleNotified;
+		Application.Viewport.Interaction.ArcballHandleRotationNotified -= OnArcballHandleRotationNotified;
 		Application.Viewport.Interaction.PickRectNotified -= OnPickRectNotified;
 	}
 
@@ -122,25 +118,8 @@ public partial class ViewportOverlay : Control
 		OnRotationNotified(Application.Viewport.Camera.Rotation);
 		OnInteractionModeNotified(Application.Viewport.Interaction.Mode);
 		OnArcballRadiusNotified(Application.Viewport.Interaction.ArcballRadius);
-		OnArcballHandleNotified(Application.Viewport.Interaction.ArcballHandle);
+		OnArcballHandleRotationNotified(Application.Viewport.Interaction.ArcballHandleRotation);
 		OnPickRectNotified(Application.Viewport.Interaction.PickRectStart, Application.Viewport.Interaction.PickRectEnd);
-	}
-
-	/// <summary>
-	/// カメラの回転設定がリクエストされたときに呼び出されるイベントハンドラ、アークボールの接線ベクトルを回転に合わせて更新する
-	/// </summary>
-	/// <param name="rotation">リクエストされた回転</param>
-	/// <param name="spaceMode">回転の基準となる座標系</param>
-	/// <param name="useTween">回転に補間を使用するかどうかを示すフラグ</param>
-	/// <remarks>
-	/// Arcball操作は回転結果を拾って処理するのが難しいため、リクエスト量を拾って処理する
-	/// </remarks>
-	private void OnRotateRequested(Quaternion rotation, SpaceMode spaceMode, bool useTween)
-	{
-		if (spaceMode == SpaceMode.FocalPoint)
-		{
-			RotateArcball(rotation);
-		}
 	}
 
 	/// <summary>
@@ -170,17 +149,17 @@ public partial class ViewportOverlay : Control
 	/// <param name="radius">通知されたアークボールの半径</param>
 	private void OnArcballRadiusNotified(float radius)
 	{
-		DrawArcballOutline();
+		DrawArcballOutline(radius);
+		DrawArcballCross(Application.Viewport.Interaction.ArcballHandleRotation, radius);
 	}
 
 	/// <summary>
-	/// カメラのアークボール操作のハンドル位置が通知されたときに呼び出されるイベントハンドラ、アークボールの操作点を更新する
+	/// アークボール補助表示の回転が通知されたときに呼び出されるイベントハンドラ。
 	/// </summary>
-	/// <param name="position">通知されたアークボールのハンドル位置</param>
-	private void OnArcballHandleNotified(Vector3 position)
+	/// <param name="rotation">通知された補助表示回転</param>
+	private void OnArcballHandleRotationNotified(Quaternion rotation)
 	{
-		ComputeArcballHandleRotation(position);
-		DrawArcballCross();
+		DrawArcballCross(rotation, Application.Viewport.Interaction.ArcballRadius);
 	}
 
 	/// <summary>
@@ -198,23 +177,11 @@ public partial class ViewportOverlay : Control
 	#region Internal Helpers
 
 	/// <summary>
-	/// アークボールの回転を更新する回転は現在の回転に乗算されて累積される
-	/// </summary>
-	/// <param name="rotation">適用する回転</param>
-	private void RotateArcball(Quaternion rotation)
-	{
-		// Overlay はカメラ操作に対して見た目上逆向きに追従させる
-		_arcballHandleRotation = rotation.Inverse() * _arcballHandleRotation;
-		DrawArcballCross();
-	}
-
-	/// <summary>
 	/// アークボールの補助表示の円を描画する、円は指定した半径に基づいて構成する
 	/// </summary>
-	/// <param name="radius">描画する円の半径</param>
-	private void DrawArcballOutline()
+	/// <param name="arcballRadius">Hubから取得した描画半径</param>
+	private void DrawArcballOutline(float arcballRadius)
 	{
-		float arcballRadius = Application.Viewport.Interaction.ArcballRadius;
 		float circumference = Mathf.Tau * arcballRadius;
 		float cycleLength = Mathf.Max(ArcballOutlineDashLength + ArcballOutlineGapLength, 1.0f);
 		int segmentCount = Mathf.Max(MinArcballOutlineDashCount, Mathf.RoundToInt(circumference / cycleLength));
@@ -247,48 +214,6 @@ public partial class ViewportOverlay : Control
 			segment.AddPoint(end);
 			_arcballOutline.AddChild(segment);
 		}
-	}
-
-	/// <summary>
-	/// アークボールのハンドル位置に基づいて、ハンドルの回転を計算して更新する
-	/// </summary>
-	/// <param name="handlePosition">通知されたアークボールのハンドル位置</param>
-	private void ComputeArcballHandleRotation(Vector3 handlePosition)
-	{
-		if (handlePosition.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
-		{
-			_arcballHandleRotation = Quaternion.Identity;
-			return;
-		}
-
-		Vector3 anchor = handlePosition.Normalized();
-
-		// 画面投影で中心方向（-x, -y）を向く接線を作る
-		Vector3 desiredTowardCenter = new Vector3(-anchor.X, -anchor.Y, 0.0f);
-		Vector3 tangentX = desiredTowardCenter - anchor * desiredTowardCenter.Dot(anchor);
-		if (tangentX.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
-		{
-			Vector3 fallback = Vector3.Right - anchor * Vector3.Right.Dot(anchor);
-			if (fallback.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
-			{
-				fallback = Vector3.Up - anchor * Vector3.Up.Dot(anchor);
-			}
-
-			tangentX = fallback;
-		}
-
-		tangentX = tangentX.Normalized();
-		Vector3 zAxis = -anchor;
-		Vector3 yAxis = zAxis.Cross(tangentX).Normalized();
-		if (yAxis.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
-		{
-			yAxis = Vector3.Up;
-		}
-
-		// 直交化して安定した姿勢を作る
-		Vector3 xAxis = yAxis.Cross(zAxis).Normalized();
-		Basis basis = new Basis(xAxis, yAxis, zAxis).Orthonormalized();
-		_arcballHandleRotation = basis.GetRotationQuaternion();
 	}
 
 	/// <summary>
@@ -369,9 +294,8 @@ public partial class ViewportOverlay : Control
 	/// <summary>
 	/// アークボールのハンドル位置に基づいて補助表示の十字線を描画する、十字線はハンドル位置を中心にカメラ回転へ追従して回転する
 	/// </summary>
-	private void DrawArcballCross()
+	private void DrawArcballCross(Quaternion handleRotation, float arcballRadius)
 	{
-		float arcballRadius = Application.Viewport.Interaction.ArcballRadius;
 		if (arcballRadius <= Mathf.Epsilon)
 		{
 			SetLinePoints(_arcballCrossLineX, Vector2.Zero, Vector2.Zero);
@@ -380,7 +304,7 @@ public partial class ViewportOverlay : Control
 		}
 
 		// ハンドルの回転を正規化して安定させる、未正規化の回転は回転軸計算を不安定にする可能性がある
-		Quaternion normalizedHandleRotation = EnsureNormalizedQuaternion(_arcballHandleRotation);
+		Quaternion normalizedHandleRotation = EnsureNormalizedQuaternion(handleRotation);
 		Vector3 anchor = (normalizedHandleRotation * Vector3.Forward).Normalized();
 		Vector3 tangentX = (normalizedHandleRotation * Vector3.Right).Normalized();
 		Vector3 tangentY = (normalizedHandleRotation * Vector3.Up).Normalized();
@@ -388,8 +312,8 @@ public partial class ViewportOverlay : Control
 		// 球面上の接線方向を回転軸へ変換し、短い円弧をサンプリングして描画する
 		Vector3 axisX = anchor.Cross(tangentX).Normalized();
 		Vector3 axisY = anchor.Cross(tangentY).Normalized();
-		SetCurvedArcballLine(_arcballCrossLineX, anchor, axisX, ArcballCrossAngularSize);
-		SetCurvedArcballLine(_arcballCrossLineY, anchor, axisY, ArcballCrossAngularSize);
+		SetCurvedArcballLine(_arcballCrossLineX, anchor, axisX, ArcballCrossAngularSize, arcballRadius);
+		SetCurvedArcballLine(_arcballCrossLineY, anchor, axisY, ArcballCrossAngularSize, arcballRadius);
 	}
 
 	/// <summary>
@@ -421,13 +345,13 @@ public partial class ViewportOverlay : Control
 	/// <param name="anchor">回転の中心点であるアークボールのハンドル位置</param>
 	/// <param name="rotationAxis">回転の軸、ゼロベクトルに近い場合は回転せずハンドル位置を中心とした直線になる</param>
 	/// <param name="angularSize">回転角度の範囲、ラインは -angularSize から +angularSize の範囲で回転される</param>
-	private void SetCurvedArcballLine(Line2D line, Vector3 anchor, Vector3 rotationAxis, float angularSize)
+	private void SetCurvedArcballLine(Line2D line, Vector3 anchor, Vector3 rotationAxis, float angularSize, float arcballRadius)
 	{
 		line.ClearPoints();
 
 		if (rotationAxis.LengthSquared() < 1e-8f)
 		{
-			line.AddPoint(ProjectArcballPointToScreen(anchor));
+			line.AddPoint(ProjectArcballPointToScreen(anchor, arcballRadius));
 			return;
 		}
 
@@ -436,7 +360,7 @@ public partial class ViewportOverlay : Control
 			float t = (float)i / ArcballCrossCurveSegments;
 			float angle = Mathf.Lerp(-angularSize, angularSize, t);
 			Vector3 point = anchor.Rotated(rotationAxis, angle).Normalized();
-			line.AddPoint(ProjectArcballPointToScreen(point));
+			line.AddPoint(ProjectArcballPointToScreen(point, arcballRadius));
 		}
 	}
 
@@ -445,9 +369,8 @@ public partial class ViewportOverlay : Control
 	/// </summary>
 	/// <param name="pointOnArcball">アークボール上の点</param>
 	/// <returns>画面空間に投影された点</returns>
-	private Vector2 ProjectArcballPointToScreen(Vector3 pointOnArcball)
+	private static Vector2 ProjectArcballPointToScreen(Vector3 pointOnArcball, float arcballRadius)
 	{
-		float arcballRadius = Application.Viewport.Interaction.ArcballRadius;
 		return new Vector2(pointOnArcball.X, -pointOnArcball.Y) * arcballRadius;
 	}
 
@@ -509,7 +432,10 @@ public partial class ViewportOverlay : Control
 		_selectionRectLineVertical1.DefaultColor = color;
 		_selectionRectLineVertical2.DefaultColor = color;
 
-		DrawArcballOutline();
+		DrawArcballOutline(Application.Viewport.Interaction.ArcballRadius);
+		DrawArcballCross(
+			Application.Viewport.Interaction.ArcballHandleRotation,
+			Application.Viewport.Interaction.ArcballRadius);
 	}
 
 	/// <summary>

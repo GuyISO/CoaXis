@@ -94,7 +94,7 @@ public partial class InputHub : BaseHub
     }
 
     /// <summary>
-    /// ユーザーの入力に基づき、カメラの平行移動をリクエストする
+    /// ユーザーの入力に基づき、カメラを平行移動する
     /// </summary>
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleTranslationInput(float delta)
@@ -120,7 +120,7 @@ public partial class InputHub : BaseHub
     }
 
     /// <summary>
-    /// ユーザーの入力に基づき、カメラの回転をリクエストする
+    /// ユーザーの入力に基づき、カメラを回転する
     /// </summary>
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleRotationInput(float delta)

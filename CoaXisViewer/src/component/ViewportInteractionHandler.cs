@@ -249,7 +249,7 @@ public partial class ViewportInteractionHandler : SubViewport
     }
 
     /// <summary>
-    /// 入力モード中の移動量に応じて、Event を通じて注視点の移動や回転をリクエストする
+    /// 入力モード中の移動量に応じて、注視点の移動やカメラ操作を適用する
     /// </summary>
     /// <param name="previousPos">前フレームの画面上位置</param>
     /// <param name="currentPos">現在の画面上位置</param>
@@ -348,6 +348,7 @@ public partial class ViewportInteractionHandler : SubViewport
         Quaternion rotation = ComputeArcballRotation(p0, p1);
 
         Application.Viewport.Camera.Rotate(rotation, SpaceMode.FocalPoint);
+        Application.Viewport.Interaction.RotateArcball(rotation);
     }
 
     /// <summary>
@@ -365,6 +366,7 @@ public partial class ViewportInteractionHandler : SubViewport
         Quaternion rotation = ComputeArcballRotation(p0, p1);
 
         Application.Viewport.Camera.Rotate(rotation, SpaceMode.FocalPoint);
+        Application.Viewport.Interaction.RotateArcball(rotation);
     }
 
     /// <summary>

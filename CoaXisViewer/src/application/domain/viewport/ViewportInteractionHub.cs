@@ -36,8 +36,8 @@ public partial class ViewportInteractionHub : BaseHub
     /// <summary>アークボールの操作半径を取得する。</summary>
     internal float ArcballRadius { get; private set; }
 
-    /// <summary>アークボールの現在の操作点を取得する。</summary>
-    internal Vector3 ArcballHandle { get; private set; } = new(0, 0, 1);
+    /// <summary>アークボールの補助表示の現在回転を取得する。</summary>
+    internal Quaternion ArcballHandleRotation { get; private set; } = Quaternion.Identity;
 
     /// <summary>矩形選択の開始位置を取得する。</summary>
     internal Vector2 PickRectStart { get; private set; }
@@ -84,16 +84,25 @@ public partial class ViewportInteractionHub : BaseHub
         EmitSignal(SignalName.ArcballRadiusNotified, radius);
     }
 
-    /// <summary>アークボール操作点の変更通知。</summary>
-    /// <param name="position">現在の操作点</param>
-    [Signal] public delegate void ArcballHandleNotifiedEventHandler(Vector3 position);
+    /// <summary>アークボール補助表示の回転変更通知。</summary>
+    /// <param name="rotation">現在の補助表示回転</param>
+    [Signal] public delegate void ArcballHandleRotationNotifiedEventHandler(Quaternion rotation);
 
-    /// <summary>アークボール操作点を更新して通知する。</summary>
-    /// <param name="position">新しい操作点</param>
+    /// <summary>操作点からアークボール補助表示の初期回転を設定して通知する。</summary>
+    /// <param name="position">球面上の操作点</param>
     internal void SetArcballHandle(Vector3 position)
     {
-        ArcballHandle = position;
-        EmitSignal(SignalName.ArcballHandleNotified, position);
+        ArcballHandleRotation = CalculateArcballHandleRotation(position);
+        EmitSignal(SignalName.ArcballHandleRotationNotified, ArcballHandleRotation);
+    }
+
+    /// <summary>カメラ回転に追従するアークボール補助表示の回転を更新して通知する。</summary>
+    /// <param name="rotation">カメラへ適用した回転量</param>
+    internal void RotateArcball(Quaternion rotation)
+    {
+        // 補助表示はカメラの回転と逆向きに追従させる。
+        ArcballHandleRotation = rotation.Inverse() * ArcballHandleRotation;
+        EmitSignal(SignalName.ArcballHandleRotationNotified, ArcballHandleRotation);
     }
 
     /// <summary>矩形選択範囲の変更通知。</summary>
@@ -118,6 +127,41 @@ public partial class ViewportInteractionHub : BaseHub
     #endregion
 
     #region Helpers
+
+    private static Quaternion CalculateArcballHandleRotation(Vector3 handlePosition)
+    {
+        if (handlePosition.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
+        {
+            return Quaternion.Identity;
+        }
+
+        Vector3 anchor = handlePosition.Normalized();
+
+        // 画面投影で中心方向（-x, -y）を向く接線を作る。
+        Vector3 desiredTowardCenter = new Vector3(-anchor.X, -anchor.Y, 0.0f);
+        Vector3 tangentX = desiredTowardCenter - anchor * desiredTowardCenter.Dot(anchor);
+        if (tangentX.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
+        {
+            Vector3 fallback = Vector3.Right - anchor * Vector3.Right.Dot(anchor);
+            if (fallback.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
+            {
+                fallback = Vector3.Up - anchor * Vector3.Up.Dot(anchor);
+            }
+
+            tangentX = fallback;
+        }
+
+        tangentX = tangentX.Normalized();
+        Vector3 zAxis = -anchor;
+        Vector3 yAxis = zAxis.Cross(tangentX).Normalized();
+        if (yAxis.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
+        {
+            yAxis = Vector3.Up;
+        }
+
+        Vector3 xAxis = yAxis.Cross(zAxis).Normalized();
+        return new Basis(xAxis, yAxis, zAxis).Orthonormalized().GetRotationQuaternion();
+    }
 
     #endregion
 }
