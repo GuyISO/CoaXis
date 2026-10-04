@@ -293,3 +293,15 @@
   - `.github/design-philosophy/index.md`
   - `.github/design-philosophy/registry.md`
 - Notes: CommandUiはExecuted通知で再構築をキューし、再構築時にCommandHub.History/Cursorを参照する
+
+- Date: 2026-10-04
+- Trigger: Application層とHubの基本アーキテクチャを「Hubが値を保持・公開メソッドで要求を受ける・更新通知のみ発行・購読者がHubのPropertyを直接読む」に統一する
+- Decision: Hubの変更通知Signalは値を運ばず「更新があったこと」だけを通知する（対象識別子entityIdのみ許容）。UI等からの要求はHubの公開メソッドを直接呼び、要求用Signal（XxxRequested/AskXxx）を設けない。購読者は通知受信時にHubのPropertyを読む。一過性のイベント（ピック結果など保持状態を持たないもの）は例外としてpayloadを運んでよい
+- Scope: CoaXisViewerのApplication層Hub（Viewport系・Pick・Selection・Measurement を対応済み。ModelEntityState/Visual/Registry/Tree/Load/Scene、Property系、Ipc/Log/Setting は Model リファクタ時に対応）
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/viewport/*Hub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityPickHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntitySelectionHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityMeasurementHub.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: Display の LayerActivated(layer,isActive) は ActiveLayersNotified() に、Selection の Mode は引数なし通知にした。個々の ModelEntity を対象とする通知（Selected/Visibility/Status/Collapsed/Position/Rotation/Added）は entityId のみを payload とし、値は Registry.GetEntity や Selection.Contains 経由で参照する。折り畳みは State.SetCollapsed(Guid,bool) の直接呼び出しに統一し、ToggleModelVisibilityRequested 要求Signalは廃止した

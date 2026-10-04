@@ -22,16 +22,8 @@ public partial class ViewportDisplayHub : BaseHub
 
     #region Events
 
-    [Signal] public delegate void LayerActivatedEventHandler(uint layer, bool isActive);
-    /// <summary>
-    /// レイヤー表示状態の変更通知。
-    /// </summary>
-    /// <param name="layer">状態を変更したレイヤー</param>
-    /// <param name="isActive">レイヤーが有効な場合は <see langword="true"/></param>
-    private void NotifyLayerActivated(uint layer, bool isActive)
-    {
-        EmitSignal(SignalName.LayerActivated, layer, isActive);
-    }
+    /// <summary>レイヤー表示状態の変更通知。</summary>
+    [Signal] public delegate void ActiveLayersNotifiedEventHandler();
 
     #endregion
 
@@ -61,7 +53,7 @@ public partial class ViewportDisplayHub : BaseHub
             ActiveLayers &= ~layer;
         }
 
-        NotifyLayerActivated(layer, isActive);
+        EmitSignal(SignalName.ActiveLayersNotified);
     }
 
     #endregion

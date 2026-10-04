@@ -105,12 +105,12 @@ public partial class AxisNavigator : Control
 	/// </summary>
 	private void InitializeFromHub()
 	{
-		OnRotationNotified(Application.Viewport.Camera.Rotation);
+		OnRotationNotified();
 	}
 
-	private void OnRotationNotified(Quaternion rotation)
+	private void OnRotationNotified()
 	{
-		_focalPoint.Quaternion = rotation;
+		_focalPoint.Quaternion = Application.Viewport.Camera.Rotation;
 	}
 
 	#endregion

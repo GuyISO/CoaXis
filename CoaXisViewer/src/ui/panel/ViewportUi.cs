@@ -128,7 +128,7 @@ public partial class ViewportUi : PanelContainer
         Application.Viewport.Camera.SizeNotified += OnSizeNotified;
         Application.Viewport.Camera.FovNotified += OnFovNotified;
         Application.Viewport.Camera.ProjectionTypeNotified += OnProjectionTypeNotified;
-        Application.Viewport.Display.LayerActivated += OnLayerNotified;
+        Application.Viewport.Display.ActiveLayersNotified += OnActiveLayersNotified;
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public partial class ViewportUi : PanelContainer
         Application.Viewport.Camera.SizeNotified -= OnSizeNotified;
         Application.Viewport.Camera.FovNotified -= OnFovNotified;
         Application.Viewport.Camera.ProjectionTypeNotified -= OnProjectionTypeNotified;
-        Application.Viewport.Display.LayerActivated -= OnLayerNotified;
+        Application.Viewport.Display.ActiveLayersNotified -= OnActiveLayersNotified;
     }
 
     /// <summary>
@@ -152,29 +152,24 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void InitializeFromHub()
     {
-        ViewportCameraHub camera = Application.Viewport.Camera;
-        OnPickHandlingModeNotified(Application.Model.Entity.Pick.HandlingMode);
-        OnInteractionModeNotified(Application.Viewport.Interaction.Mode);
-        OnPositionNotified(camera.Position);
-        OnRotationNotified(camera.Rotation);
-        OnDistanceNotified(camera.Distance);
-        OnSizeNotified(camera.Size);
-        OnFovNotified(camera.Fov);
-        OnProjectionTypeNotified(camera.ProjectionType);
-        OnLayerNotified((uint)ViewportLayer.Visible,
-            (Application.Viewport.Display.ActiveLayers & (uint)ViewportLayer.Visible) != 0);
-        OnLayerNotified((uint)ViewportLayer.Invisible,
-            (Application.Viewport.Display.ActiveLayers & (uint)ViewportLayer.Invisible) != 0);
+        OnPickHandlingModeNotified();
+        OnInteractionModeNotified();
+        OnPositionNotified();
+        OnRotationNotified();
+        OnDistanceNotified();
+        OnSizeNotified();
+        OnFovNotified();
+        OnProjectionTypeNotified();
+        OnActiveLayersNotified();
     }
 
     /// <summary>
     /// ピック操作モードが通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="mode">通知されたピック操作モード</param>
-    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    private void OnPickHandlingModeNotified()
     {
         // ビューポート操作モードが NormalToFace の場合、Align Normal ボタンを押下状態にする
-        _buttonAlignNormal.ButtonPressed = mode == PickHandlingMode.NormalToFace;
+        _buttonAlignNormal.ButtonPressed = Application.Model.Entity.Pick.HandlingMode == PickHandlingMode.NormalToFace;
     }
 
     /// <summary>
@@ -278,18 +273,17 @@ public partial class ViewportUi : PanelContainer
     /// <summary>
     /// ビューポートの操作モードが通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="mode">ビューポートの操作モード</param>
-    private void OnInteractionModeNotified(ViewportInteractionMode mode)
+    private void OnInteractionModeNotified()
     {
-        _labelMode.Text = mode.ToString();
+        _labelMode.Text = Application.Viewport.Interaction.Mode.ToString();
     }
 
     /// <summary>
     /// カメラの位置が通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="position">カメラの位置</param>
-    private void OnPositionNotified(Vector3 position)
+    private void OnPositionNotified()
     {
+        Vector3 position = Application.Viewport.Camera.Position;
         Vector3 catiaPosition = CoordinateSystemUtility.GodotToCatia(position);
         _labelPositionX.Text = catiaPosition.X.ToString("F3");
         _labelPositionY.Text = catiaPosition.Y.ToString("F3");
@@ -299,10 +293,9 @@ public partial class ViewportUi : PanelContainer
     /// <summary>
     /// カメラの回転が通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="rotation">カメラの回転を表すクォータニオン</param>
-    private void OnRotationNotified(Quaternion rotation)
+    private void OnRotationNotified()
     {
-        Quaternion catiaRotation = CoordinateSystemUtility.GodotToCatia(rotation);
+        Quaternion catiaRotation = CoordinateSystemUtility.GodotToCatia(Application.Viewport.Camera.Rotation);
         Vector3 rotationDegrees = catiaRotation.GetEuler() * (180f / Mathf.Pi);
         _labelRotationX.Text = rotationDegrees.X.ToString("F3");
         _labelRotationY.Text = rotationDegrees.Y.ToString("F3");
@@ -312,27 +305,25 @@ public partial class ViewportUi : PanelContainer
     /// <summary>
     /// カメラの距離が通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="distance">カメラの距離</param>
-    private void OnDistanceNotified(float distance)
+    private void OnDistanceNotified()
     {
-        _labelDistance.Text = CoordinateSystemUtility.GodotDistanceToCatia(distance).ToString("F3");
+        _labelDistance.Text = CoordinateSystemUtility.GodotDistanceToCatia(Application.Viewport.Camera.Distance).ToString("F3");
     }
 
     /// <summary>
     /// カメラのサイズが通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="size">カメラのサイズ</param>
-    private void OnSizeNotified(float size)
+    private void OnSizeNotified()
     {
-        _labelSize.Text = CoordinateSystemUtility.GodotDistanceToCatia(size).ToString("F3");
+        _labelSize.Text = CoordinateSystemUtility.GodotDistanceToCatia(Application.Viewport.Camera.Size).ToString("F3");
     }
 
     /// <summary>
     /// カメラのFOVが通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="fov">カメラのFOV</param>
-    private void OnFovNotified(float fov)
+    private void OnFovNotified()
     {
+        float fov = Application.Viewport.Camera.Fov;
         _labelFov.Text = fov.ToString("F1");
         _sliderFov.Value = fov;
     }
@@ -340,27 +331,19 @@ public partial class ViewportUi : PanelContainer
     /// <summary>
     /// カメラの投影タイプが通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="type">カメラの投影タイプ</param>
-    private void OnProjectionTypeNotified(Camera3D.ProjectionType type)
+    private void OnProjectionTypeNotified()
     {
-        _labelProjection.Text = type.ToString();
+        _labelProjection.Text = Application.Viewport.Camera.ProjectionType.ToString();
     }
 
     /// <summary>
     /// ビューポートレイヤーの状態通知を受けてボタンの押下状態を更新する
     /// </summary>
-    /// <param name="layer">状態が通知されたレイヤー</param>
-    /// <param name="isActive">レイヤーが有効な場合は true</param>
-    private void OnLayerNotified(uint layer, bool isActive)
+    private void OnActiveLayersNotified()
     {
-        if ((layer & (uint)ViewportLayer.Visible) != 0)
-        {
-            _buttonLayerVisible.ButtonPressed = isActive;
-        }
-        if ((layer & (uint)ViewportLayer.Invisible) != 0)
-        {
-            _buttonLayerInvisible.ButtonPressed = isActive;
-        }
+        uint activeLayers = Application.Viewport.Display.ActiveLayers;
+        _buttonLayerVisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.Visible) != 0;
+        _buttonLayerInvisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.Invisible) != 0;
     }
 
     #endregion

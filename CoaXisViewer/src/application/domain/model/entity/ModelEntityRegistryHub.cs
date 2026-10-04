@@ -50,18 +50,16 @@ public partial class ModelEntityRegistryHub : BaseHub
     /// ModelEntity の追加を表すシグナル。
     /// </summary>
     /// <param name="entityId">追加された部分木ルートの識別子</param>
-    /// <param name="parentEntityId">追加先の親識別子</param>
     [Signal]
-    public delegate void AddedEventHandler(string entityId, string parentEntityId);
+    public delegate void AddedEventHandler(string entityId);
 
     /// <summary>
     /// 登録済み部分木の追加を通知する。
     /// </summary>
     /// <param name="entityId">追加する部分木ルート ModelEntity の識別子</param>
-    /// <param name="parentEntityId">追加先の親 ModelEntity の識別子</param>
-    internal void NotifyAdded(Guid entityId, Guid parentEntityId = default)
+    internal void NotifyAdded(Guid entityId)
     {
-        EmitSignal(SignalName.Added, entityId.ToString(), parentEntityId.ToString());
+        EmitSignal(SignalName.Added, entityId.ToString());
     }
 
     /// <summary>

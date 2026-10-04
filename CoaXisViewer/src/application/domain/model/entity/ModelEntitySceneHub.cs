@@ -270,7 +270,7 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 
 		modelEntity.Status = nextStatus;
-		Application.Model.Entity.State.NotifyStatus(modelEntity.Id, nextStatus);
+		Application.Model.Entity.State.NotifyStatus(modelEntity.Id);
 	}
 
 	private sealed class SceneLoadQueueItem

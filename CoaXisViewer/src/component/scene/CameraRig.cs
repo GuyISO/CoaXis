@@ -58,7 +58,7 @@ public partial class CameraRig : Node3D
         Application.Viewport.Camera.ProjectionTypeNotified += OnProjectionTypeNotified;
         Application.Viewport.Camera.CameraNearNotified += OnCameraNearNotified;
         Application.Viewport.Camera.CameraFarNotified += OnCameraFarNotified;
-        Application.Viewport.Display.LayerActivated += OnLayerNotified;
+        Application.Viewport.Display.ActiveLayersNotified += OnActiveLayersNotified;
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public partial class CameraRig : Node3D
         Application.Viewport.Camera.ProjectionTypeNotified -= OnProjectionTypeNotified;
         Application.Viewport.Camera.CameraNearNotified -= OnCameraNearNotified;
         Application.Viewport.Camera.CameraFarNotified -= OnCameraFarNotified;
-        Application.Viewport.Display.LayerActivated -= OnLayerNotified;
+        Application.Viewport.Display.ActiveLayersNotified -= OnActiveLayersNotified;
     }
 
     /// <summary>
@@ -82,67 +82,60 @@ public partial class CameraRig : Node3D
     /// </summary>
     private void InitializeFromHub()
     {
-        OnPositionNotified(Application.Viewport.Camera.Position);
-        OnRotationNotified(Application.Viewport.Camera.Rotation);
-        OnDistanceNotified(Application.Viewport.Camera.Distance);
-        OnSizeNotified(Application.Viewport.Camera.Size);
-        OnFovNotified(Application.Viewport.Camera.Fov);
-        OnProjectionTypeNotified(Application.Viewport.Camera.ProjectionType);
-        OnCameraNearNotified(Application.Viewport.Camera.Near);
-        OnCameraFarNotified(Application.Viewport.Camera.Far);
+        OnPositionNotified();
+        OnRotationNotified();
+        OnDistanceNotified();
+        OnSizeNotified();
+        OnFovNotified();
+        OnProjectionTypeNotified();
+        OnCameraNearNotified();
+        OnCameraFarNotified();
+        OnActiveLayersNotified();
+    }
+
+    private void OnPositionNotified()
+    {
+        Transform = new Transform3D(Transform.Basis, Application.Viewport.Camera.Position);
+    }
+
+    private void OnRotationNotified()
+    {
+        Transform = new Transform3D(new Basis(Application.Viewport.Camera.Rotation), Transform.Origin);
+    }
+
+    private void OnDistanceNotified()
+    {
+        _camera.Position = new Vector3(0, 0, Application.Viewport.Camera.Distance);
+    }
+
+    private void OnSizeNotified()
+    {
+        _camera.Size = Application.Viewport.Camera.Size;
+    }
+
+    private void OnFovNotified()
+    {
+        _camera.Fov = Application.Viewport.Camera.Fov;
+    }
+
+    private void OnProjectionTypeNotified()
+    {
+        _camera.Projection = Application.Viewport.Camera.ProjectionType;
+    }
+
+    private void OnCameraNearNotified()
+    {
+        _camera.Near = Application.Viewport.Camera.Near;
+    }
+
+    private void OnCameraFarNotified()
+    {
+        _camera.Far = Application.Viewport.Camera.Far;
+    }
+
+    private void OnActiveLayersNotified()
+    {
         _camera.CullMask = Application.Viewport.Display.ActiveLayers;
-    }
-
-    private void OnPositionNotified(Vector3 position)
-    {
-        Transform = new Transform3D(Transform.Basis, position);
-    }
-
-    private void OnRotationNotified(Quaternion rotation)
-    {
-        Transform = new Transform3D(new Basis(rotation), Transform.Origin);
-    }
-
-    private void OnDistanceNotified(float distance)
-    {
-        _camera.Position = new Vector3(0, 0, distance);
-    }
-
-    private void OnSizeNotified(float size)
-    {
-        _camera.Size = size;
-    }
-
-    private void OnFovNotified(float fov)
-    {
-        _camera.Fov = fov;
-    }
-
-    private void OnProjectionTypeNotified(Camera3D.ProjectionType projectionType)
-    {
-        _camera.Projection = projectionType;
-    }
-
-    private void OnCameraNearNotified(float near)
-    {
-        _camera.Near = near;
-    }
-
-    private void OnCameraFarNotified(float far)
-    {
-        _camera.Far = far;
-    }
-
-    private void OnLayerNotified(uint layer, bool isActive)
-    {
-        if (isActive)
-        {
-            _camera.CullMask |= layer;
-        }
-        else
-        {
-            _camera.CullMask &= ~layer;
-        }
     }
 
     #endregion

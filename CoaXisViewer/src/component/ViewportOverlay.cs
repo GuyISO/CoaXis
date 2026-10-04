@@ -115,28 +115,27 @@ public partial class ViewportOverlay : Control
 	/// </summary>
 	private void InitializeFromHub()
 	{
-		OnRotationNotified(Application.Viewport.Camera.Rotation);
-		OnInteractionModeNotified(Application.Viewport.Interaction.Mode);
-		OnArcballRadiusNotified(Application.Viewport.Interaction.ArcballRadius);
-		OnArcballHandleRotationNotified(Application.Viewport.Interaction.ArcballHandleRotation);
-		OnPickRectNotified(Application.Viewport.Interaction.PickRectStart, Application.Viewport.Interaction.PickRectEnd);
+		OnRotationNotified();
+		OnInteractionModeNotified();
+		OnArcballRadiusNotified();
+		OnArcballHandleRotationNotified();
+		OnPickRectNotified();
 	}
 
 	/// <summary>
 	/// カメラの回転が通知されたときに呼び出されるイベントハンドラ、中心軸の表示を更新する
 	/// </summary>
-	/// <param name="rotation">通知されたカメラの回転</param>
-	private void OnRotationNotified(Quaternion rotation)
+	private void OnRotationNotified()
 	{
-		DrawCenterAxis(rotation);
+		DrawCenterAxis(Application.Viewport.Camera.Rotation);
 	}
 
 	/// <summary>
 	/// カメラの入力モードが通知されたときに呼び出されるイベントハンドラ、中心軸とアークボール補助表示の表示を切り替える
 	/// </summary>
-	/// <param name="mode">通知されたカメラの入力モード</param>
-	private void OnInteractionModeNotified(ViewportInteractionMode mode)
+	private void OnInteractionModeNotified()
 	{
+		ViewportInteractionMode mode = Application.Viewport.Interaction.Mode;
 		_arcballOutline.Visible = IsArcballMode(mode);
 		_centerAxis.Visible = IsCenterAxisMode(mode);
 		_arcballCross.Visible = IsArcballMode(mode);
@@ -146,30 +145,28 @@ public partial class ViewportOverlay : Control
 	/// <summary>
 	/// カメラのアークボール操作の半径が通知されたときに呼び出されるイベントハンドラ、アークボールの補助表示を更新する
 	/// </summary>
-	/// <param name="radius">通知されたアークボールの半径</param>
-	private void OnArcballRadiusNotified(float radius)
+	private void OnArcballRadiusNotified()
 	{
-		DrawArcballOutline(radius);
-		DrawArcballCross(Application.Viewport.Interaction.ArcballHandleRotation, radius);
+		ViewportInteractionHub interaction = Application.Viewport.Interaction;
+		DrawArcballOutline(interaction.ArcballRadius);
+		DrawArcballCross(interaction.ArcballHandleRotation, interaction.ArcballRadius);
 	}
 
 	/// <summary>
 	/// アークボール補助表示の回転が通知されたときに呼び出されるイベントハンドラ。
 	/// </summary>
-	/// <param name="rotation">通知された補助表示回転</param>
-	private void OnArcballHandleRotationNotified(Quaternion rotation)
+	private void OnArcballHandleRotationNotified()
 	{
-		DrawArcballCross(rotation, Application.Viewport.Interaction.ArcballRadius);
+		ViewportInteractionHub interaction = Application.Viewport.Interaction;
+		DrawArcballCross(interaction.ArcballHandleRotation, interaction.ArcballRadius);
 	}
 
 	/// <summary>
 	/// 矩形選択の範囲が通知されたときに呼び出されるイベントハンドラで、矩形選択の表示を更新する
 	/// </summary>
-	/// <param name="startPosition">通知された矩形選択の開始位置</param>
-	/// <param name="endPosition">通知された矩形選択の終了位置</param>
-	private void OnPickRectNotified(Vector2 startPosition, Vector2 endPosition)
+	private void OnPickRectNotified()
 	{
-		DrawPickRect(startPosition, endPosition);
+		DrawPickRect(Application.Viewport.Interaction.PickRectStart, Application.Viewport.Interaction.PickRectEnd);
 	}
 
 	#endregion

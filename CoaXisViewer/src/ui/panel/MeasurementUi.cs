@@ -152,9 +152,9 @@ public partial class MeasurementUi : PanelContainer
     /// <summary>
     /// 測定結果の通知を受け取り、UIラベルを更新する
     /// </summary>
-    /// <param name="result">測定結果</param>
-    private void OnResultNotified(MeasurementResult result)
+    private void OnResultNotified()
     {
+        MeasurementResult result = Application.Model.Entity.Measurement.CurrentResult;
         // 初回実行時に初期化済フラグを立てる
 
         Vector3 position1ForDisplay = Vector3.Zero;
@@ -195,10 +195,9 @@ public partial class MeasurementUi : PanelContainer
     /// <summary>
     /// 測定ポイントの通知を受け取り、UIラベルの有効/無効状態を更新する
     /// </summary>
-    /// <param name="pointIndex">測定ポイントのインデックス (0: 未選択、1: ポイント1、2: ポイント2)</param>
-    private void OnPointNotified(int pointIndex)
+    private void OnPointNotified()
     {
-        switch (pointIndex)
+        switch (Application.Model.Entity.Measurement.CurrentPointIndex)
         {
             case 0:
                 _buttonPicks[0].ButtonPressed = false;
@@ -213,7 +212,7 @@ public partial class MeasurementUi : PanelContainer
                 _buttonPicks[1].ButtonPressed = true;
                 break;
             default:
-                Application.Log.Warn($"MeasurementUi: invalid pick point index {pointIndex}.");
+                Application.Log.Warn($"MeasurementUi: invalid pick point index {Application.Model.Entity.Measurement.CurrentPointIndex}.");
                 break;
         }
     }
@@ -227,8 +226,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void SyncInitialState()
     {
-        OnResultNotified(Application.Model.Entity.Measurement.CurrentResult);
-        OnPointNotified(Application.Model.Entity.Measurement.CurrentPointIndex);
+        OnResultNotified();
+        OnPointNotified();
     }
 
     /// <summary>

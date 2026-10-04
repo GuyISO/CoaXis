@@ -54,8 +54,7 @@ public partial class ViewportInteractionHub : BaseHub
     #region Events
 
     /// <summary>操作モードの変更通知。</summary>
-    /// <param name="mode">現在の操作モード</param>
-    [Signal] public delegate void ModeNotifiedEventHandler(ViewportInteractionMode mode);
+    [Signal] public delegate void ModeNotifiedEventHandler();
 
     /// <summary>
     /// 操作モードを更新し、変更された場合に通知する。
@@ -69,31 +68,29 @@ public partial class ViewportInteractionHub : BaseHub
         }
 
         Mode = mode;
-        EmitSignal(SignalName.ModeNotified, (int)mode);
+        EmitSignal(SignalName.ModeNotified);
     }
 
     /// <summary>アークボール半径の変更通知。</summary>
-    /// <param name="radius">現在のアークボール半径</param>
-    [Signal] public delegate void ArcballRadiusNotifiedEventHandler(float radius);
+    [Signal] public delegate void ArcballRadiusNotifiedEventHandler();
 
     /// <summary>アークボール半径を更新して通知する。</summary>
     /// <param name="radius">新しいアークボール半径</param>
     internal void SetArcballRadius(float radius)
     {
         ArcballRadius = radius;
-        EmitSignal(SignalName.ArcballRadiusNotified, radius);
+        EmitSignal(SignalName.ArcballRadiusNotified);
     }
 
     /// <summary>アークボール補助表示の回転変更通知。</summary>
-    /// <param name="rotation">現在の補助表示回転</param>
-    [Signal] public delegate void ArcballHandleRotationNotifiedEventHandler(Quaternion rotation);
+    [Signal] public delegate void ArcballHandleRotationNotifiedEventHandler();
 
     /// <summary>操作点からアークボール補助表示の初期回転を設定して通知する。</summary>
     /// <param name="position">球面上の操作点</param>
     internal void SetArcballHandle(Vector3 position)
     {
         ArcballHandleRotation = CalculateArcballHandleRotation(position);
-        EmitSignal(SignalName.ArcballHandleRotationNotified, ArcballHandleRotation);
+        EmitSignal(SignalName.ArcballHandleRotationNotified);
     }
 
     /// <summary>カメラ回転に追従するアークボール補助表示の回転を更新して通知する。</summary>
@@ -102,13 +99,11 @@ public partial class ViewportInteractionHub : BaseHub
     {
         // 補助表示はカメラの回転と逆向きに追従させる。
         ArcballHandleRotation = rotation.Inverse() * ArcballHandleRotation;
-        EmitSignal(SignalName.ArcballHandleRotationNotified, ArcballHandleRotation);
+        EmitSignal(SignalName.ArcballHandleRotationNotified);
     }
 
     /// <summary>矩形選択範囲の変更通知。</summary>
-    /// <param name="startPosition">範囲の開始位置</param>
-    /// <param name="endPosition">範囲の終了位置</param>
-    [Signal] public delegate void PickRectNotifiedEventHandler(Vector2 startPosition, Vector2 endPosition);
+    [Signal] public delegate void PickRectNotifiedEventHandler();
 
     /// <summary>矩形選択範囲を更新して通知する。</summary>
     /// <param name="startPosition">範囲の開始位置</param>
@@ -117,7 +112,7 @@ public partial class ViewportInteractionHub : BaseHub
     {
         PickRectStart = startPosition;
         PickRectEnd = endPosition;
-        EmitSignal(SignalName.PickRectNotified, startPosition, endPosition);
+        EmitSignal(SignalName.PickRectNotified);
     }
 
     #endregion

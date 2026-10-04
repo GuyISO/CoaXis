@@ -188,15 +188,14 @@ public partial class ModelEntityTree : Tree
         RefreshAllHighlights();
 
         // モデルの折り畳み状態が変更されたことを通知
-        Application.Model.Entity.State.NotifyCollapsed(TryGetEntityId(item), item.IsCollapsed());
+        Application.Model.Entity.State.SetCollapsed(TryGetEntityId(item), item.IsCollapsed());
     }
 
     /// <summary>
     /// モデルの選択状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
-    /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    private void OnSelected(string entityId, bool isSelected)
+    private void OnSelected(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -212,7 +211,7 @@ public partial class ModelEntityTree : Tree
         // 差分更新だと折り畳み状態とのタイミングでズレるため、選択変更のたびに全件を見直して再描画する
         RefreshAllHighlights();
 
-        if (isSelected)
+        if (Application.Model.Entity.Selection.Contains(parsedEntityId))
         {
             // 対象が畳まれた祖先の下に隠れている場合、CATIA同様に表示中の祖先までスクロールする
             ScrollToItem(FindNearestVisibleAncestor(treeItem));
@@ -231,8 +230,7 @@ public partial class ModelEntityTree : Tree
     /// モデルの追加がリクエストされたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">追加する子 ModelEntity の識別子</param>
-    /// <param name="parentEntityId">追加先の親 ModelEntity の識別子</param>
-    private void OnModelAdded(string entityId, string parentEntityId)
+    private void OnModelAdded(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -240,13 +238,13 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        Guid parsedParentEntityId = Guid.Empty;
-        if (!string.IsNullOrWhiteSpace(parentEntityId) &&
-            !Guid.TryParse(parentEntityId, out parsedParentEntityId))
+        ModelEntity addedEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+        if (addedEntity == null)
         {
-            Application.Log.Warn($"ModelTree: failed to add entity. invalid parentEntityId='{parentEntityId}'");
             return;
         }
+
+        Guid parsedParentEntityId = addedEntity.ParentId;
 
         if (parsedParentEntityId == Guid.Empty)
         {
@@ -276,8 +274,7 @@ public partial class ModelEntityTree : Tree
     /// モデルの表示状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
-    /// <param name="visibility">変更後のモデル表示設定</param>
-    private void OnModelVisibilityNotified(string entityId, ModelVisibility visibility)
+    private void OnModelVisibilityNotified(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -295,7 +292,7 @@ public partial class ModelEntityTree : Tree
         if (treeItem != null)
         {
             Texture2D buttonIcon = Application.Asset.Icon.GetVisibility(
-                visibility,
+                modelEntity.Visibility,
                 ModelVisibilityResolver.IsVisible(modelEntity),
                 Constant.Ui.Tree.HierarchyVisibleIconSize);
             treeItem.SetButton(0, 0, buttonIcon);
@@ -306,14 +303,20 @@ public partial class ModelEntityTree : Tree
     /// モデルの折り畳み状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">折り畳み状態が変更された ModelEntity の識別子</param>
-    /// <param name="isCollapsed">モデルが折り畳まれている場合はtrue、展開されている場合はfalse</param>
-    private void OnModelCollapsed(string entityId, bool isCollapsed)
+    private void OnModelCollapsed(string entityId)
     {
-        TreeItem item = _entityIdToTreeItem.TryGetValue(Guid.Parse(entityId), out TreeItem foundItem) ? foundItem : null;
-        if (item == null)
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId))
         {
             return;
         }
+
+        TreeItem item = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem foundItem) ? foundItem : null;
+        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+        if (item == null || modelEntity == null)
+        {
+            return;
+        }
+        bool isCollapsed = modelEntity.IsCollapsed;
         // すでに折り畳み状態が一致している場合は自分が発した通知による変更の可能性があり何もしない
         if (item.IsCollapsed() == isCollapsed)
         {
@@ -326,8 +329,7 @@ public partial class ModelEntityTree : Tree
     /// モデルのステータスが更新されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">ステータス更新対象の ModelEntity の識別子</param>
-    /// <param name="status">更新後のステータス</param>
-    private void OnModelStatusNotified(string entityId, int status)
+    private void OnModelStatusNotified(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -335,12 +337,13 @@ public partial class ModelEntityTree : Tree
         }
 
         TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
-        if (treeItem == null)
+        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+        if (treeItem == null || modelEntity == null)
         {
             return;
         }
 
-        treeItem.SetCustomColor(0, ResolveTextColor((ModelStatus)status));
+        treeItem.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
     }
 
     /// <summary>

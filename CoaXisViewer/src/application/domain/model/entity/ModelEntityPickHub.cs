@@ -34,44 +34,12 @@ public partial class ModelEntityPickHub : BaseHub
 
     #region Lifecycle
 
-    public override void _Ready()
-    {
-        SubscribeApplicationEvents();
-    }
-
-    public override void _ExitTree()
-    {
-        UnsubscribeApplicationEvents();
-
-        base._ExitTree();
-    }
-
-    #endregion
-
-    #region Actions
-
-    [Signal] public delegate void AskHandlingModeRequestedEventHandler();
-    /// <summary>
-    /// 選択操作モードの通知をリクエストする
-    /// </summary>
-    internal void AskHandlingMode()
-    {
-        EmitSignal(SignalName.AskHandlingModeRequested);
-    }
-
     #endregion
 
     #region Notifications
 
-    [Signal] public delegate void HandlingModeNotifiedEventHandler(PickHandlingMode mode);
-    /// <summary>
-    /// 選択操作モードの通知を行う
-    /// </summary>
-    /// <param name="mode">通知する選択操作モード</param>
-    private void NotifyHandlingMode(PickHandlingMode mode)
-    {
-        EmitSignal(SignalName.HandlingModeNotified, (int)mode);
-    }
+    /// <summary>選択操作モードの変更通知。</summary>
+    [Signal] public delegate void HandlingModeNotifiedEventHandler();
 
     [Signal] public delegate void ResultNotifiedEventHandler(PickResult pickResult);
     /// <summary>
@@ -96,34 +64,6 @@ public partial class ModelEntityPickHub : BaseHub
 
     #endregion
 
-    #region Events
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Model.Entity.Pick.AskHandlingModeRequested += OnAskHandlingModeRequested;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Model.Entity.Pick.AskHandlingModeRequested -= OnAskHandlingModeRequested;
-    }
-
-    /// <summary>
-    /// 選択操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
-    /// </summary>
-    private void OnAskHandlingModeRequested()
-    {
-        Application.Model.Entity.Pick.NotifyHandlingMode(HandlingMode);
-    }
-
-    #endregion
-
     #region Methods
 
     /// <summary>
@@ -137,7 +77,7 @@ public partial class ModelEntityPickHub : BaseHub
             HandlingMode = mode;
         }
 
-        Application.Model.Entity.Pick.NotifyHandlingMode(HandlingMode);
+        EmitSignal(SignalName.HandlingModeNotified);
     }
 
     #endregion

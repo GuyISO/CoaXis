@@ -3,113 +3,100 @@ using Godot;
 using System;
 
 /// <summary>
-/// モデルの論理状態と変更要求を管理するハブ。
+/// モデルの論理状態の変更要求と変更通知を担当するハブ。
+/// 通知は対象の entityId のみを運び、値は Registry 経由で ModelEntity から参照する。
 /// </summary>
 public partial class ModelEntityStateHub : BaseHub
 {
-	#region Fields
-
-	#endregion
-
-	#region Properties
-
-	#endregion
-
-	#region Lifecycle
-
-	public override void _Ready()
-	{
-		SubscribeApplicationEvents();
-	}
-
-	public override void _ExitTree()
-	{
-		UnsubscribeApplicationEvents();
-
-		base._ExitTree();
-	}
-
-	#endregion
-
 	#region Actions
 
-	[Signal] public delegate void ToggleModelVisibilityRequestedEventHandler(string entityId);
 	/// <summary>
-	/// モデルの表示/非表示切替をリクエストする
+	/// モデルの表示/非表示を切り替える
 	/// </summary>
 	/// <param name="entityId">切替対象の ModelEntity の識別子</param>
 	internal void ToggleModelVisibility(Guid entityId)
 	{
-		EmitSignal(SignalName.ToggleModelVisibilityRequested, entityId.ToString());
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+		if (modelEntity == null)
+		{
+			Application.Log.Warn($"ModelStateService: toggle target not found. entityId='{entityId}'");
+			return;
+		}
+
+		var command = new SetModelVisibilityCommand(
+			[entityId],
+			GetNextVisibility(modelEntity.Visibility));
+		Application.Command.Execute(command);
+	}
+
+	/// <summary>
+	/// モデルの折り畳み状態を更新し、変更があった場合に通知する
+	/// </summary>
+	/// <param name="entityId">対象 ModelEntity の識別子</param>
+	/// <param name="isCollapsed">折り畳む場合は true、展開する場合は false</param>
+	internal void SetCollapsed(Guid entityId, bool isCollapsed)
+	{
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+		if (modelEntity == null)
+		{
+			Application.Log.Warn($"ModelStateService: collapse target not found. entityId='{entityId}'");
+			return;
+		}
+
+		if (modelEntity.IsCollapsed == isCollapsed)
+		{
+			return;
+		}
+
+		modelEntity.IsCollapsed = isCollapsed;
+		EmitSignal(SignalName.Collapsed, entityId.ToString());
 	}
 
 	#endregion
 
 	#region Notifications
 
-	[Signal] public delegate void PositionNotifiedEventHandler(string entityId, Vector3 position);
-	/// <summary>
-	/// モデルの配置位置を通知する
-	/// </summary>
-	/// <param name="entityId">配置位置が変化した ModelEntity の識別子</param>
-	/// <param name="position">変更後の配置位置（Godot座標系）</param>
-	internal void NotifyPosition(Guid entityId, Vector3 position)
+	/// <summary>モデルの配置位置の変更通知。値は ModelEntity.Position を参照する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	[Signal] public delegate void PositionNotifiedEventHandler(string entityId);
+	internal void NotifyPosition(Guid entityId)
 	{
-		EmitSignal(SignalName.PositionNotified, entityId.ToString(), position);
+		EmitSignal(SignalName.PositionNotified, entityId.ToString());
 	}
 
-	[Signal] public delegate void RotationNotifiedEventHandler(string entityId, Quaternion rotation);
-	/// <summary>
-	/// モデルの回転を通知する
-	/// </summary>
-	/// <param name="entityId">回転が変化した ModelEntity の識別子</param>
-	/// <param name="rotation">変更後の回転（Godot座標系）</param>
-	internal void NotifyRotation(Guid entityId, Quaternion rotation)
+	/// <summary>モデルの回転の変更通知。値は ModelEntity.Rotation を参照する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	[Signal] public delegate void RotationNotifiedEventHandler(string entityId);
+	internal void NotifyRotation(Guid entityId)
 	{
-		EmitSignal(SignalName.RotationNotified, entityId.ToString(), rotation);
+		EmitSignal(SignalName.RotationNotified, entityId.ToString());
 	}
 
-	[Signal] public delegate void VisibilityNotifiedEventHandler(string entityId, ModelVisibility visibility);
-	/// <summary>
-	/// モデルの表示状態の通知を行う
-	/// </summary>
-	/// <param name="entityId">表示状態が変化した ModelEntity の識別子</param>
-	/// <param name="visibility">変更後のモデル表示設定</param>
-	internal void NotifyVisibility(Guid entityId, ModelVisibility visibility)
+	/// <summary>モデルの表示設定の変更通知。値は ModelEntity.Visibility を参照する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	[Signal] public delegate void VisibilityNotifiedEventHandler(string entityId);
+	internal void NotifyVisibility(Guid entityId)
 	{
-		EmitSignal(SignalName.VisibilityNotified, entityId.ToString(), (int)visibility);
+		EmitSignal(SignalName.VisibilityNotified, entityId.ToString());
 	}
 
-	[Signal] public delegate void CollapsedEventHandler(string entityId, bool isCollapsed);
-	/// <summary>
-	/// モデルツリーの折りたたみを通知する
-	/// </summary>
-	/// <param name="entityId">折りたたまれた ModelEntity の識別子</param>
-	/// <param name="isCollapsed">モデルツリーが折りたたまれている場合はtrue、展開されている場合はfalse</param>
-	internal void NotifyCollapsed(Guid entityId, bool isCollapsed)
+	/// <summary>モデルツリーの折り畳み状態の変更通知。値は ModelEntity.IsCollapsed を参照する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	[Signal] public delegate void CollapsedEventHandler(string entityId);
+
+	/// <summary>モデルのロード状態の変更通知。値は ModelEntity.Status を参照する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	[Signal] public delegate void StatusNotifiedEventHandler(string entityId);
+	internal void NotifyStatus(Guid entityId)
 	{
-		EmitSignal(SignalName.Collapsed, entityId.ToString(), isCollapsed);
+		EmitSignal(SignalName.StatusNotified, entityId.ToString());
 	}
 
-	[Signal] public delegate void StatusNotifiedEventHandler(string entityId, int status);
-	/// <summary>
-	/// モデルのロード状態が変化したことを通知する
-	/// </summary>
-	/// <param name="entityId">状態が変化した ModelEntity の識別子</param>
-	/// <param name="status">新しい状態</param>
-	internal void NotifyStatus(Guid entityId, ModelStatus status)
+	/// <summary>モデルの透明度の変更通知。値は ModelEntityVisualHub.Transparency を参照する。</summary>
+	[Signal] public delegate void TransparencyNotifiedEventHandler();
+	internal void NotifyTransparency()
 	{
-		EmitSignal(SignalName.StatusNotified, entityId.ToString(), (int)status);
-	}
-
-	[Signal] public delegate void TransparencyNotifiedEventHandler(float transparency);
-	/// <summary>
-	/// モデルの透明度を通知する
-	/// </summary>
-	/// <param name="transparency">新しい透明度</param>
-	internal void NotifyTransparency(float transparency)
-	{
-		EmitSignal(SignalName.TransparencyNotified, transparency);
+		EmitSignal(SignalName.TransparencyNotified);
 	}
 
 	[Signal] public delegate void RegistryClearedEventHandler();
@@ -120,80 +107,6 @@ public partial class ModelEntityStateHub : BaseHub
 	{
 		EmitSignal(SignalName.RegistryCleared);
 	}
-
-	#endregion
-    
-	#region Events
-
-	/// <summary>
-	/// Applicationイベントの購読を開始する
-	/// </summary>
-	private void SubscribeApplicationEvents()
-	{
-		Application.Model.Entity.State.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		Application.Model.Entity.State.Collapsed += OnModelCollapsed;
-	}
-
-	/// <summary>
-	/// Applicationイベントの購読を解除する
-	/// </summary>
-	private void UnsubscribeApplicationEvents()
-	{
-		Application.Model.Entity.State.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		Application.Model.Entity.State.Collapsed -= OnModelCollapsed;
-	}
-
-	/// <summary>
-	/// モデルの表示状態切替がリクエストされたときに呼び出されるイベントハンドラ
-	/// </summary>
-	/// <param name="entityId">表示状態を切り替えるModelEntityの識別子</param>
-	private void OnToggleModelVisibilityRequested(string entityId)
-	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-		{
-			Application.Log.Warn($"ModelStateService: invalid entityId for toggle request. entityId='{entityId}'");
-			return;
-		}
-
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelStateService: toggle target not found. entityId='{parsedEntityId}'");
-			return;
-		}
-
-		var command = new SetModelVisibilityCommand(
-			[parsedEntityId],
-			GetNextVisibility(modelEntity.Visibility));
-		Application.Command.Execute(command);
-	}
-
-	/// <summary>
-	/// モデルの折り畳み状態が通知されたときに呼び出されるイベントハンドラ
-	/// </summary>
-	/// <param name="entityId">折り畳み状態が変更されたModelEntityの識別子</param>
-	/// <param name="isCollapsed">モデルが折り畳まれている場合はtrue、展開されている場合はfalse</param>
-	private void OnModelCollapsed(string entityId, bool isCollapsed)
-	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-		{
-			Application.Log.Warn($"ModelStateService: invalid entityId for collapse notification. entityId='{entityId}'");
-			return;
-		}
-
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelStateService: collapse target not found. entityId='{parsedEntityId}'");
-			return;
-		}
-
-		modelEntity.IsCollapsed = isCollapsed;
-	}
-
-	#endregion
-
-	#region Methods
 
 	#endregion
 

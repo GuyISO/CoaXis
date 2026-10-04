@@ -108,10 +108,9 @@ public partial class SelectionUi : PanelContainer
     /// <summary>
     /// ピック操作モードの通知を受け取り、Selection以外ではモードボタンを解除する
     /// </summary>
-    /// <param name="mode">通知されたピック操作モード</param>
-    private void OnPickHandlingModeNotified(PickHandlingMode mode)
+    private void OnPickHandlingModeNotified()
     {
-        if (mode == PickHandlingMode.Selection)
+        if (Application.Model.Entity.Pick.HandlingMode == PickHandlingMode.Selection)
         {
             UpdateModeButtons(Application.Model.Entity.Selection.Mode);
             return;
@@ -190,18 +189,16 @@ public partial class SelectionUi : PanelContainer
     /// <summary>
     /// 選択モード通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="mode">通知された選択モード</param>
-    private void OnModeNotified(ModelEntitySelectionMode mode)
+    private void OnModeNotified()
     {
-        UpdateModeButtons(mode);
+        UpdateModeButtons(Application.Model.Entity.Selection.Mode);
     }
 
     /// <summary>
     /// モデル選択状態通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
     /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
-    /// <param name="isSelected">選択状態</param>
-    private void OnSelected(string entityId, bool isSelected)
+    private void OnSelected(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -209,7 +206,7 @@ public partial class SelectionUi : PanelContainer
         }
 
         int index = _selectedEntityIds.IndexOf(parsedEntityId);
-        if (isSelected)
+        if (Application.Model.Entity.Selection.Contains(parsedEntityId))
         {
             if (index < 0)
             {

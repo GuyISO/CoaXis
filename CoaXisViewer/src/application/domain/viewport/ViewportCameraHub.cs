@@ -64,36 +64,28 @@ public partial class ViewportCameraHub : BaseHub
     #region Events
 
     /// <summary>注視点位置の変更通知。</summary>
-    /// <param name="position">現在位置</param>
-    [Signal] public delegate void PositionNotifiedEventHandler(Vector3 position);
+    [Signal] public delegate void PositionNotifiedEventHandler();
 
     /// <summary>注視点回転の変更通知。</summary>
-    /// <param name="rotation">現在回転</param>
-    [Signal] public delegate void RotationNotifiedEventHandler(Quaternion rotation);
+    [Signal] public delegate void RotationNotifiedEventHandler();
 
     /// <summary>カメラ距離の変更通知。</summary>
-    /// <param name="distance">現在距離</param>
-    [Signal] public delegate void DistanceNotifiedEventHandler(float distance);
+    [Signal] public delegate void DistanceNotifiedEventHandler();
 
     /// <summary>正投影サイズの変更通知。</summary>
-    /// <param name="size">現在サイズ</param>
-    [Signal] public delegate void SizeNotifiedEventHandler(float size);
+    [Signal] public delegate void SizeNotifiedEventHandler();
 
     /// <summary>視野角の変更通知。</summary>
-    /// <param name="fov">現在視野角</param>
-    [Signal] public delegate void FovNotifiedEventHandler(float fov);
+    [Signal] public delegate void FovNotifiedEventHandler();
 
     /// <summary>投影方式の変更通知。</summary>
-    /// <param name="projectionType">現在の投影方式</param>
-    [Signal] public delegate void ProjectionTypeNotifiedEventHandler(Camera3D.ProjectionType projectionType);
+    [Signal] public delegate void ProjectionTypeNotifiedEventHandler();
 
     /// <summary>クリップ開始距離の通知。</summary>
-    /// <param name="near">開始距離</param>
-    [Signal] public delegate void CameraNearNotifiedEventHandler(float near);
+    [Signal] public delegate void CameraNearNotifiedEventHandler();
 
     /// <summary>クリップ終了距離の通知。</summary>
-    /// <param name="far">終了距離</param>
-    [Signal] public delegate void CameraFarNotifiedEventHandler(float far);
+    [Signal] public delegate void CameraFarNotifiedEventHandler();
 
     #endregion
 
@@ -305,37 +297,37 @@ public partial class ViewportCameraHub : BaseHub
     internal void UpdatePosition(Vector3 value)
     {
         Position = value;
-        EmitSignal(SignalName.PositionNotified, value);
+        EmitSignal(SignalName.PositionNotified);
     }
 
     internal void UpdateRotation(Quaternion value)
     {
         Rotation = new Basis(value).GetRotationQuaternion();
-        EmitSignal(SignalName.RotationNotified, Rotation);
+        EmitSignal(SignalName.RotationNotified);
     }
 
     internal void UpdateDistance(float value)
     {
         Distance = value;
-        EmitSignal(SignalName.DistanceNotified, value);
+        EmitSignal(SignalName.DistanceNotified);
     }
 
     internal void UpdateSize(float value)
     {
         Size = value;
-        EmitSignal(SignalName.SizeNotified, value);
+        EmitSignal(SignalName.SizeNotified);
     }
 
     internal void UpdateFov(float value)
     {
         Fov = value;
-        EmitSignal(SignalName.FovNotified, value);
+        EmitSignal(SignalName.FovNotified);
     }
 
     internal void UpdateProjectionType(Camera3D.ProjectionType value)
     {
         ProjectionType = value;
-        EmitSignal(SignalName.ProjectionTypeNotified, (int)value);
+        EmitSignal(SignalName.ProjectionTypeNotified);
     }
 
     #endregion

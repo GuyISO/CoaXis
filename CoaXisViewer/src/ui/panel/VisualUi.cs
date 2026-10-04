@@ -123,9 +123,9 @@ public partial class VisualUi : PanelContainer
     /// <summary>
     /// Transparency が通知されたときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="transparency">通知された透明度値 (0.0 - 1.0)</param>
-    private void OnTransparencyNotified(float transparency)
+    private void OnTransparencyNotified()
     {
+        float transparency = Application.Model.Entity.Visual.Transparency;
         _isUpdating = true;
         _sliderTransparency.Value = transparency;
         UpdateTransparencyLabel(transparency);

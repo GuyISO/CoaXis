@@ -105,7 +105,7 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
         {
             if (modelEntity.Node != null && GodotObject.IsInstanceValid(modelEntity.Node))
             {
-                Application.Model.Entity.State.NotifyVisibility(modelEntity.Id, modelEntity.Visibility);
+                Application.Model.Entity.State.NotifyVisibility(modelEntity.Id);
             }
         }
     }

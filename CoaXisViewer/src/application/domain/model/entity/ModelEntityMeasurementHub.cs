@@ -55,49 +55,52 @@ public partial class ModelEntityMeasurementHub : BaseHub
 
     #region Actions
 
-    [Signal] public delegate void SetPointRequestedEventHandler(int pointIndex);
     /// <summary>
-    /// 測定ポイントのピック開始をリクエストする
+    /// 測定ポイントのピックを開始する
     /// </summary>
-    /// <param name="pointIndex">1 または 2</param>
+    /// <param name="pointIndex">設定するポイントのインデックス（1または2）</param>
     internal void SetPoint(int pointIndex)
     {
-        EmitSignal(SignalName.SetPointRequested, pointIndex);
+        if (pointIndex is < 1 or > 2)
+        {
+            Application.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
+            return;
+        }
+
+        CurrentPointIndex = pointIndex;
+
+        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Measurement);
+        EmitSignal(SignalName.PointNotified);
     }
 
-    [Signal] public delegate void ClearPointRequestedEventHandler(int pointIndex);
     /// <summary>
-    /// 測定ポイントのクリアをリクエストする
+    /// 測定ポイントをクリアする
     /// </summary>
-    /// <param name="pointIndex">1 または 2</param>
+    /// <param name="pointIndex">クリアするポイントのインデックス（1または2）</param>
     internal void ClearPoint(int pointIndex)
     {
-        EmitSignal(SignalName.ClearPointRequested, pointIndex);
+        if (pointIndex is < 1 or > 2)
+        {
+            Application.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
+            return;
+        }
+
+        int index = pointIndex - 1;
+        _points[index] = new PickResult();
+        RemovePointerLabel(index);
+        UpdateMeasurementLine();
+        EmitSignal(SignalName.ResultNotified);
     }
 
     #endregion
 
     #region Notifications
 
-    [Signal] public delegate void PointNotifiedEventHandler(int pointIndex);
-    /// <summary>
-    /// 測定ポイントのピック点を通知する
-    /// </summary>
-    /// <param name="pointIndex">ピック対象ポイントのインデックス</param>
-    internal void NotifyPoint(int pointIndex)
-    {
-        EmitSignal(SignalName.PointNotified, pointIndex);
-    }
+    /// <summary>測定対象ポイントの変更通知。</summary>
+    [Signal] public delegate void PointNotifiedEventHandler();
 
-    [Signal] public delegate void ResultNotifiedEventHandler(MeasurementResult result);
-    /// <summary>
-    /// 測定結果を通知する
-    /// </summary>
-    /// <param name="result">通知する測定結果</param>
-    internal void NotifyResult(MeasurementResult result)
-    {
-        EmitSignal(SignalName.ResultNotified, result);
-    }
+    /// <summary>測定結果の変更通知。</summary>
+    [Signal] public delegate void ResultNotifiedEventHandler();
 
     #endregion
     
@@ -110,8 +113,6 @@ public partial class ModelEntityMeasurementHub : BaseHub
     {
         Application.Model.Entity.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
         Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
-        Application.Model.Entity.Measurement.SetPointRequested += OnSetPointRequested;
-        Application.Model.Entity.Measurement.ClearPointRequested += OnClearPointRequested;
         Application.Setting.SettingsNotified += ApplySettings;
     }
 
@@ -122,58 +123,18 @@ public partial class ModelEntityMeasurementHub : BaseHub
     {
         Application.Model.Entity.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
-        Application.Model.Entity.Measurement.SetPointRequested -= OnSetPointRequested;
-        Application.Model.Entity.Measurement.ClearPointRequested -= OnClearPointRequested;
         Application.Setting.SettingsNotified -= ApplySettings;
     }
 
     /// <summary>
-    /// 測定対象ポイントの設定がリクエストされたときに呼び出されるイベントハンドラ
+    /// ピック操作モードの変更通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
-    /// <param name="pointIndex">設定するポイントのインデックス（1または2）。0の場合は未選択状態を示す</param>
-    private void OnSetPointRequested(int pointIndex)
+    private void OnPickHandlingModeNotified()
     {
-        if (pointIndex is < 1 or > 2)
-        {
-            Application.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
-            return;
-        }
-
-        CurrentPointIndex = pointIndex;
-        
-        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Measurement);
-        Application.Model.Entity.Measurement.NotifyPoint(pointIndex);
-    }
-
-    /// <summary>
-    /// 測定対象ポイントのクリアがリクエストされたときに呼び出されるイベントハンドラ
-    /// </summary>
-    /// <param name="pointIndex">クリアするポイントのインデックス（1または2）</param>
-    private void OnClearPointRequested(int pointIndex)
-    {
-        if (pointIndex is < 1 or > 2)
-        {
-            Application.Log.Warn($"MeasurementService: invalid point index {pointIndex}.");
-            return;
-        }
-
-        int index = pointIndex - 1;
-        _points[index] = new PickResult();
-        RemovePointerLabel(index);
-        UpdateMeasurementLine();
-        Application.Model.Entity.Measurement.NotifyResult(GetCurrentResult());
-    }
-
-    /// <summary>
-    /// ピック操作モードの通知がリクエストされたときに呼び出されるイベントハンドラ
-    /// </summary>
-    /// <param name="mode">通知されたピック操作モード</param>
-    private void OnPickHandlingModeNotified(PickHandlingMode mode)
-    {
-        if (mode != PickHandlingMode.Measurement)
+        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.Measurement)
         {
             CurrentPointIndex = 0;
-            Application.Model.Entity.Measurement.NotifyPoint(0);
+            EmitSignal(SignalName.PointNotified);
         }
     }
 
@@ -205,7 +166,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
         UpdateMeasurementLine();
-        Application.Model.Entity.Measurement.NotifyResult(GetCurrentResult());
+        EmitSignal(SignalName.ResultNotified);
     }
 
     #endregion

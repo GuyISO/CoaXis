@@ -87,25 +87,17 @@ public partial class ModelEntitySelectionHub : BaseHub
 
     #region Events
 
-    [Signal] public delegate void ModeNotifiedEventHandler(ModelEntitySelectionMode mode);
-    /// <summary>
-    /// 選択モードの通知を行う
-    /// </summary>
-    /// <param name="mode">通知する選択モード</param>
-    private void NotifyMode(ModelEntitySelectionMode mode)
-    {
-        EmitSignal(SignalName.ModeNotified, (int)mode);
-    }
+    /// <summary>選択モードの変更通知。</summary>
+    [Signal] public delegate void ModeNotifiedEventHandler();
 
-    [Signal] public delegate void SelectedEventHandler(string entityId, bool isSelected);
+    [Signal] public delegate void SelectedEventHandler(string entityId);
     /// <summary>
     /// モデルの選択状態の通知を行う
     /// </summary>
     /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
-    /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    private void NotifySelected(Guid entityId, bool isSelected)
+    private void NotifySelected(Guid entityId)
     {
-        EmitSignal(SignalName.Selected, entityId.ToString(), isSelected);
+        EmitSignal(SignalName.Selected, entityId.ToString());
     }
 
     [Signal] public delegate void ClearedNotifiedEventHandler();
@@ -242,7 +234,7 @@ public partial class ModelEntitySelectionHub : BaseHub
             Application.Log.Debug($"SelectionHub: Selection mode changed to {Mode}.");
         }
 
-        NotifyMode(Mode);
+        EmitSignal(SignalName.ModeNotified);
     }
 
     /// <summary>
@@ -304,7 +296,7 @@ public partial class ModelEntitySelectionHub : BaseHub
 
         if (_ids.Add(entityId))
         {
-            NotifySelected(entityId, true);
+            NotifySelected(entityId);
             Application.Log.Info($"Selected: {entityId}");
             return true;
         }
@@ -338,7 +330,7 @@ public partial class ModelEntitySelectionHub : BaseHub
 
         if (_ids.Remove(entityId))
         {
-            NotifySelected(entityId, false);
+            NotifySelected(entityId);
             Application.Log.Info($"Deselected: {entityId}");
             // 選択状態の実体がなくなった場合、クリア通知も行う
             if (_ids.Count == 0)
@@ -415,7 +407,7 @@ public partial class ModelEntitySelectionHub : BaseHub
         // 実体の選択解除シグナルとハイライト解除は個々に行う
         foreach (Guid entityId in entityIdsToDeselect)
         {
-            NotifySelected(entityId, false);
+            NotifySelected(entityId);
             Application.Log.Info($"Deselected: {entityId}");
         }
 
