@@ -107,7 +107,9 @@ public partial class ViewportCameraHub : BaseHub
         Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
     }
 
-    /// <summary>ピック結果の通知を受けたときのイベントハンドラ。</summary>
+    /// <summary>
+    /// ピック結果の通知を受けたときのイベントハンドラ。
+    /// </summary>
     private void OnPickResultNotified(PickResult pickResult)
     {
         if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.NormalToFace || !pickResult.HasHit)
@@ -123,7 +125,9 @@ public partial class ViewportCameraHub : BaseHub
 
     #region Methods
 
-    /// <summary>注視点位置を指定位置へ移動する。</summary>
+    /// <summary>
+    /// 注視点位置を指定位置へ移動する。
+    /// </summary>
     internal void MovePositionTo(Vector3 position, bool useTween = false)
     {
         if (useTween)
@@ -135,7 +139,9 @@ public partial class ViewportCameraHub : BaseHub
         UpdatePosition(position);
     }
 
-    /// <summary>注視点回転を指定回転へ変更する。</summary>
+    /// <summary>
+    /// 注視点回転を指定回転へ変更する。
+    /// </summary>
     internal void MoveRotationTo(Quaternion rotation, bool useTween = false)
     {
         if (useTween)
@@ -147,7 +153,9 @@ public partial class ViewportCameraHub : BaseHub
         UpdateRotation(rotation);
     }
 
-    /// <summary>カメラ距離を設定する。</summary>
+    /// <summary>
+    /// カメラ距離を設定する。
+    /// </summary>
     internal void SetDistance(float distance, bool useTween = false)
     {
         if (useTween)
@@ -159,7 +167,9 @@ public partial class ViewportCameraHub : BaseHub
         UpdateDistance(distance);
     }
 
-    /// <summary>正投影サイズを設定する。</summary>
+    /// <summary>
+    /// 正投影サイズを設定する。
+    /// </summary>
     internal void SetSizeTo(float size, bool useTween = false)
     {
         if (useTween)
@@ -171,7 +181,9 @@ public partial class ViewportCameraHub : BaseHub
         UpdateSize(size);
     }
 
-    /// <summary>視野角を設定する。</summary>
+    /// <summary>
+    /// 視野角を設定する。
+    /// </summary>
     internal void SetFov(float fov, bool useTween = false)
     {
         if (useTween)
@@ -183,7 +195,9 @@ public partial class ViewportCameraHub : BaseHub
         UpdateFov(fov);
     }
 
-    /// <summary>投影方式を設定する。</summary>
+    /// <summary>
+    /// 投影方式を設定する。
+    /// </summary>
     internal void SetProjectionType(Camera3D.ProjectionType projectionType)
     {
         if (ProjectionType == projectionType)
@@ -206,7 +220,9 @@ public partial class ViewportCameraHub : BaseHub
         UpdateProjectionType(projectionType);
     }
 
-    /// <summary>注視点位置を相対移動する。</summary>
+    /// <summary>
+    /// 注視点位置を相対移動する。
+    /// </summary>
     internal void Translate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
     {
         if (!ViewportCameraUtility.TryTranslate(Position, Rotation, translation, spaceMode, out Vector3 position))
@@ -217,7 +233,9 @@ public partial class ViewportCameraHub : BaseHub
         MovePositionTo(position, useTween);
     }
 
-    /// <summary>注視点回転を相対回転する。</summary>
+    /// <summary>
+    /// 注視点回転を相対回転する。
+    /// </summary>
     internal void Rotate(Quaternion rotation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
     {
         float cameraDistance = ProjectionType == Camera3D.ProjectionType.Perspective
@@ -243,7 +261,9 @@ public partial class ViewportCameraHub : BaseHub
         MoveRotationTo(targetRotation, useTween);
     }
 
-    /// <summary>指数に応じて距離または正投影サイズを拡縮する。</summary>
+    /// <summary>
+    /// 指数に応じて距離または正投影サイズを拡縮する。
+    /// </summary>
     internal void Zoom(float exponent, bool useTween = false)
     {
         CameraSettings settings = Application.Setting.Current.Camera;
@@ -263,7 +283,9 @@ public partial class ViewportCameraHub : BaseHub
         SetDistance(distance, useTween);
     }
 
-    /// <summary>透視投影と正投影を切り替える。</summary>
+    /// <summary>
+    /// 透視投影と正投影を切り替える。
+    /// </summary>
     internal void ToggleProjectionType()
     {
         Camera3D.ProjectionType nextType = ProjectionType == Camera3D.ProjectionType.Perspective
@@ -272,7 +294,9 @@ public partial class ViewportCameraHub : BaseHub
         SetProjectionType(nextType);
     }
 
-    /// <summary>対象ノード群が収まるようカメラを調整する。</summary>
+    /// <summary>
+    /// 対象ノード群が収まるようカメラを調整する。
+    /// </summary>
     internal void Fit(Node3D[] targetNodes, bool useTween = false)
     {
         CameraSettings settings = Application.Setting.Current.Camera;
@@ -323,7 +347,9 @@ public partial class ViewportCameraHub : BaseHub
         }
     }
 
-    /// <summary>指定法線方向からの視点へ揃える。</summary>
+    /// <summary>
+    /// 指定法線方向からの視点へ揃える。
+    /// </summary>
     internal void AlignNormalTo(Vector3 normal, bool useTween = false)
     {
         if (!ViewportCameraUtility.TryAlignNormal(Rotation, normal, out Quaternion targetRotation))
@@ -334,42 +360,54 @@ public partial class ViewportCameraHub : BaseHub
         MoveRotationTo(targetRotation, useTween);
     }
 
-    /// <summary>注視点位置の値のみを更新して通知する。</summary>
+    /// <summary>
+    /// 注視点位置を即時に更新して通知する。
+    /// </summary>
     internal void UpdatePosition(Vector3 value)
     {
         Position = value;
         EmitSignal(SignalName.PositionNotified);
     }
 
-    /// <summary>注視点回転の値のみを更新して通知する。</summary>
+    /// <summary>
+    /// 注視点回転を即時に更新して通知する。
+    /// </summary>
     internal void UpdateRotation(Quaternion value)
     {
         Rotation = new Basis(value).GetRotationQuaternion();
         EmitSignal(SignalName.RotationNotified);
     }
 
-    /// <summary>カメラ距離の値のみを更新して通知する。</summary>
+    /// <summary>
+    /// カメラ距離を即時に更新して通知する。
+    /// </summary>
     internal void UpdateDistance(float value)
     {
         Distance = value;
         EmitSignal(SignalName.DistanceNotified);
     }
 
-    /// <summary>正投影サイズの値のみを更新して通知する。</summary>
+    /// <summary>
+    /// 正投影サイズを即時に更新して通知する。
+    /// </summary>
     internal void UpdateSize(float value)
     {
         Size = value;
         EmitSignal(SignalName.SizeNotified);
     }
 
-    /// <summary>視野角の値のみを更新して通知する。</summary>
+    /// <summary>
+    /// 視野角を即時に更新して通知する。
+    /// </summary>
     internal void UpdateFov(float value)
     {
         Fov = value;
         EmitSignal(SignalName.FovNotified);
     }
 
-    /// <summary>投影方式の値のみを更新して通知する。</summary>
+    /// <summary>
+    /// 投影方式を即時に更新して通知する。
+    /// </summary>
     internal void UpdateProjectionType(Camera3D.ProjectionType value)
     {
         ProjectionType = value;
@@ -380,7 +418,9 @@ public partial class ViewportCameraHub : BaseHub
 
     #region Helpers
 
-    /// <summary>注視点位置をTweenで更新する。</summary>
+    /// <summary>
+    /// 注視点位置をTweenで更新する。
+    /// </summary>
     private void TweenPosition(Vector3 position)
     {
         Vector3 start = Position;
@@ -389,7 +429,9 @@ public partial class ViewportCameraHub : BaseHub
             Application.Setting.Current.Camera.TweenDuration);
     }
 
-    /// <summary>注視点回転をTweenで更新する。</summary>
+    /// <summary>
+    /// 注視点回転をTweenで更新する。
+    /// </summary>
     private void TweenRotation(Quaternion rotation)
     {
         Quaternion start = Rotation;
@@ -398,7 +440,9 @@ public partial class ViewportCameraHub : BaseHub
             Application.Setting.Current.Camera.TweenDuration);
     }
 
-    /// <summary>カメラ距離をTweenで更新する。</summary>
+    /// <summary>
+    /// カメラ距離をTweenで更新する。
+    /// </summary>
     private void TweenDistance(float distance)
     {
         float start = Distance;
@@ -407,7 +451,9 @@ public partial class ViewportCameraHub : BaseHub
             Application.Setting.Current.Camera.TweenDuration);
     }
 
-    /// <summary>正投影サイズをTweenで更新する。</summary>
+    /// <summary>
+    /// 正投影サイズをTweenで更新する。
+    /// </summary>
     private void TweenSize(float size)
     {
         float start = Size;
@@ -416,7 +462,9 @@ public partial class ViewportCameraHub : BaseHub
             Application.Setting.Current.Camera.TweenDuration);
     }
 
-    /// <summary>視野角をTweenで更新する。</summary>
+    /// <summary>
+    /// 視野角をTweenで更新する。
+    /// </summary>
     private void TweenFov(float fov)
     {
         float start = Fov;
@@ -425,7 +473,9 @@ public partial class ViewportCameraHub : BaseHub
             Application.Setting.Current.Camera.TweenDuration);
     }
 
-    /// <summary>カメラ操作用のTweenを生成する。</summary>
+    /// <summary>
+    /// カメラ操作用のTweenを生成する。
+    /// </summary>
     private Tween BuildTween()
     {
         return CreateTween()
@@ -433,13 +483,17 @@ public partial class ViewportCameraHub : BaseHub
             .SetEase(Tween.EaseType.Out);
     }
 
-    /// <summary>正投影サイズに相当する透視投影の距離を求める。</summary>
+    /// <summary>
+    /// 正投影サイズに相当する透視投影の距離を求める。
+    /// </summary>
     private float GetPerspectiveDistanceFromOrthographicSize()
     {
         return ViewportCameraUtility.GetPerspectiveDistance(Size, Fov);
     }
 
-    /// <summary>透視投影の距離に相当する正投影サイズを求める。</summary>
+    /// <summary>
+    /// 透視投影の距離に相当する正投影サイズを求める。
+    /// </summary>
     private float GetOrthographicSizeFromPerspectiveDistance()
     {
         return ViewportCameraUtility.GetOrthographicSize(Distance, Fov);

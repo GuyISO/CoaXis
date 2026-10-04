@@ -21,23 +21,17 @@ public partial class ModelEntityRegistryHub : BaseHub
 
     #region Properties
 
-    /// <summary>
-    /// 登録されている ModelEntity の集合を取得する。
-    /// </summary>
+    /// <summary>登録されている ModelEntity の集合を取得する。</summary>
     public IReadOnlyDictionary<Guid, ModelEntity> Entities => _entities;
 
-    /// <summary>
-    /// シーン全体のルート ModelEntity を取得する。
-    /// </summary>
+    /// <summary>シーン全体のルート ModelEntity を取得する。</summary>
     public RootModelEntity RootEntity { get; private set; } = null!;
 
     #endregion
 
     #region Signals
 
-    /// <summary>
-    /// ModelEntity の追加を表すシグナル。
-    /// </summary>
+    /// <summary>ModelEntity の追加通知。値は entityId から Registry を参照する。</summary>
     /// <param name="entityId">追加された部分木ルートの識別子</param>
     [Signal]
     public delegate void AddedEventHandler(string entityId);
@@ -51,9 +45,7 @@ public partial class ModelEntityRegistryHub : BaseHub
         EmitSignal(SignalName.Added, entityId.ToString());
     }
 
-    /// <summary>
-    /// モデル集合の置換を表すシグナル。
-    /// </summary>
+    /// <summary>モデル集合の置換通知。</summary>
     [Signal]
     public delegate void ModelSetReplacedEventHandler();
 
@@ -65,9 +57,7 @@ public partial class ModelEntityRegistryHub : BaseHub
         EmitSignal(SignalName.ModelSetReplaced);
     }
 
-    /// <summary>
-    /// モデル集合のクリアを表すシグナル。
-    /// </summary>
+    /// <summary>モデル集合のクリア通知。</summary>
     [Signal]
     public delegate void ClearedEventHandler();
 
@@ -296,7 +286,9 @@ public partial class ModelEntityRegistryHub : BaseHub
 
     #region Helpers
 
-    /// <summary>Entityを親Entityの子として接続する。</summary>
+    /// <summary>
+    /// Entityを親Entityの子として接続する。
+    /// </summary>
     private bool LinkEntityToParent(ModelEntity modelEntity)
     {
         if (modelEntity.ParentId == Guid.Empty)
@@ -313,7 +305,9 @@ public partial class ModelEntityRegistryHub : BaseHub
         return false;
     }
 
-    /// <summary>指定Entity配下の子孫Entityを収集する。</summary>
+    /// <summary>
+    /// 指定Entity配下の子孫Entityを収集する。
+    /// </summary>
     private static void CollectDescendantEntities(
         ModelEntity entity,
         ICollection<ModelEntity> descendants,

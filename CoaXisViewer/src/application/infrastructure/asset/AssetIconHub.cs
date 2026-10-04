@@ -50,7 +50,7 @@ public partial class AssetIconHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// モデルの表示設定と実効表示状態に対応するアイコンを取得する
+    /// モデルの表示設定と実効表示状態に対応するアイコンを取得する。
     /// </summary>
     /// <param name="visibility">モデルが持つ表示設定</param>
     /// <param name="isVisible">実際にモデルが表示されている場合は true</param>
@@ -68,7 +68,7 @@ public partial class AssetIconHub : BaseHub
     }
 
     /// <summary>
-    /// モデルアイコン不在時に使う既定アイコンを取得する
+    /// モデルアイコン不在時に使う既定アイコンを取得する。
     /// </summary>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
@@ -78,7 +78,7 @@ public partial class AssetIconHub : BaseHub
     }
 
     /// <summary>
-    /// 指定パスのアイコンを取得する
+    /// 指定パスのアイコンを取得する。
     /// </summary>
     /// <param name="path">アセットパス</param>
     /// <param name="size">返却アイコンのサイズ</param>
@@ -104,7 +104,7 @@ public partial class AssetIconHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// 指定パスが有効なアイコンパスかどうかを判定する
+    /// 指定パスが有効なアイコンパスかどうかを判定する。
     /// </summary>
     private static bool IsValidPath(string path)
     {
@@ -123,7 +123,7 @@ public partial class AssetIconHub : BaseHub
     }
 
     /// <summary>
-    /// アイコンを取得し、指定サイズにリサイズして返す
+    /// アイコンを取得し、指定サイズにリサイズして返す。
     /// </summary>
     private Texture2D GetOrCreate(string path, int size)
     {

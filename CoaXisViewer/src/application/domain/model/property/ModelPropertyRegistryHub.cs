@@ -16,9 +16,7 @@ public partial class ModelPropertyRegistryHub : BaseHub
 
     #region Properties
 
-    /// <summary>
-    /// 登録されている ModelProperty の集合を取得する。
-    /// </summary>
+    /// <summary>登録されている ModelProperty の集合を取得する。</summary>
     public IReadOnlyDictionary<Guid, ModelProperty> Properties => _properties;
 
     #endregion
@@ -170,7 +168,9 @@ public partial class ModelPropertyRegistryHub : BaseHub
 
     #region Helpers
 
-    /// <summary>Propertyを親Propertyの子として接続する。</summary>
+    /// <summary>
+    /// Propertyを親Propertyの子として接続する。
+    /// </summary>
     private bool LinkPropertyToParent(ModelProperty property)
     {
         if (property.ParentId == Guid.Empty)

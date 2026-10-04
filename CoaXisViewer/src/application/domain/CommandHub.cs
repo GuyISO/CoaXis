@@ -16,14 +16,10 @@ public partial class CommandHub : BaseHub
 
 	#region Properties
 
-	/// <summary>
-	/// コマンド履歴の配列を取得する
-	/// </summary>
+	/// <summary>コマンド履歴の配列を取得する。</summary>
 	internal BaseCommand[] History => _history.ToArray();
 
-	/// <summary>
-	/// 現在のカーソル位置
-	/// </summary>
+	/// <summary>現在のカーソル位置。</summary>
 	internal int Cursor { get; private set; } = 0;
 
 	#endregion
@@ -33,7 +29,7 @@ public partial class CommandHub : BaseHub
 	/// <summary>コマンド実行の完了通知。</summary>
 	[Signal] public delegate void ExecutedEventHandler();
 	/// <summary>
-	/// コマンドの実行を通知する
+	/// コマンドの実行を通知する。
 	/// </summary>
 	internal void NotifyExecuted()
 	{
@@ -53,7 +49,7 @@ public partial class CommandHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// コマンドを実行し、Undoスタックに積む
+	/// コマンドを実行し、Undoスタックに積む。
 	/// </summary>
 	internal void Execute(BaseCommand command)
 	{
@@ -74,7 +70,7 @@ public partial class CommandHub : BaseHub
 	}
 
 	/// <summary>
-	/// Undo 実行
+	/// Undo 実行。
 	/// </summary>
 	internal void Undo()
 	{
@@ -93,7 +89,7 @@ public partial class CommandHub : BaseHub
 	}
 
 	/// <summary>
-	/// Redo 実行
+	/// Redo 実行。
 	/// </summary>
 	internal void Redo()
 	{
@@ -112,7 +108,7 @@ public partial class CommandHub : BaseHub
 	}
 
 	/// <summary>
-	/// スタックのクリア（シーン切り替え時など）
+	/// スタックのクリア（シーン切り替え時など）。
 	/// </summary>
 	internal void Clear()
 	{
@@ -123,7 +119,7 @@ public partial class CommandHub : BaseHub
 	}
 
 	/// <summary>
-	/// カーソル位置を指定してタイムトラベルする
+	/// カーソル位置を指定してタイムトラベルする。
 	/// </summary>
 	/// <param name="cursor">移動先カーソル</param>
 	internal void SetCursor(int cursor)

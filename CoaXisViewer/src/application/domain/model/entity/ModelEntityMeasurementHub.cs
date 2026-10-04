@@ -73,7 +73,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     #region Events
 
     /// <summary>
-    /// Applicationイベントの購読を開始する
+    /// Applicationイベントの購読を開始する。
     /// </summary>
     private void SubscribeEvents()
     {
@@ -83,7 +83,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// Applicationイベントの購読を解除する
+    /// Applicationイベントの購読を解除する。
     /// </summary>
     private void UnsubscribeEvents()
     {
@@ -93,7 +93,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// ピック操作モードの変更通知を受け取ったときに呼び出されるイベントハンドラ
+    /// ピック操作モードの変更通知を受け取ったときに呼び出されるイベントハンドラ。
     /// </summary>
     private void OnPickHandlingModeNotified()
     {
@@ -105,7 +105,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// ピック結果の通知がリクエストされたときに呼び出されるイベントハンドラ
+    /// ピック結果が通知されたときに呼び出されるイベントハンドラ。
     /// </summary>
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
@@ -140,7 +140,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// 測定ポイントのピックを開始する
+    /// 測定ポイントのピックを開始する。
     /// </summary>
     /// <param name="pointIndex">設定するポイントのインデックス（1または2）</param>
     internal void SetPoint(int pointIndex)
@@ -158,7 +158,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 測定ポイントをクリアする
+    /// 測定ポイントをクリアする。
     /// </summary>
     /// <param name="pointIndex">クリアするポイントのインデックス（1または2）</param>
     internal void ClearPoint(int pointIndex)
@@ -177,7 +177,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 現在の測定結果を取得する
+    /// 現在の測定結果を取得する。
     /// </summary>
     /// <returns>現在の測定結果</returns>
     internal MeasurementResult GetCurrentResult()
@@ -190,7 +190,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// 設定値を反映する
+    /// 設定値を反映する。
     /// </summary>
     private void ApplySettings()
     {
@@ -203,7 +203,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 現在の測定結果を計算する
+    /// 現在の測定結果を計算する。
     /// </summary>
     /// <returns>現在の測定結果</returns>
     private MeasurementResult ComputeMeasurementResult()
@@ -248,7 +248,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 2つの法線ベクトルのなす角を度単位で計算する
+    /// 2つの法線ベクトルのなす角を度単位で計算する。
     /// </summary>
     /// <param name="normal1">法線ベクトル1</param>
     /// <param name="normal2">法線ベクトル2</param>
@@ -265,7 +265,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 指定したインデックスのポイントラベルを更新する
+    /// 指定したインデックスのポイントラベルを更新する。
     /// </summary>
     /// <param name="index">更新するポイントラベルのインデックス（0または1）</param>
     /// <param name="pickResult">ポイントラベルの位置と法線を決定するピック結果</param> 
@@ -296,7 +296,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 指定したインデックスのポイントラベルを削除する
+    /// 指定したインデックスのポイントラベルを削除する。
     /// </summary>
     /// <param name="index">削除するポイントラベルのインデックス（0または1）</param>
     private void RemovePointerLabel(int index)
@@ -311,7 +311,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// すべてのポイントラベルを削除する
+    /// すべてのポイントラベルを削除する。
     /// </summary>
     private void ClearPointerLabels()
     {
@@ -322,7 +322,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 測定用のビジュアルノードをシーンに追加する
+    /// 測定用のビジュアルノードをシーンに追加する。
     /// </summary>
     private void EnsureMeasurementVisuals()
     {
@@ -355,7 +355,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     }
 
     /// <summary>
-    /// 測定用のラインを更新する
+    /// 測定用のラインを更新する。
     /// </summary>
     private void UpdateMeasurementLine()
     {

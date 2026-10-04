@@ -32,7 +32,7 @@ public partial class ModelEntityLoadHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// 現在のモデル集合をクリアし、指定したDTOからモデル集合を再構築する
+	/// 現在のモデル集合をクリアし、指定したDTOからモデル集合を再構築する。
 	/// </summary>
 	/// <param name="entityDtos">読み込むモデル実体DTOの集合</param>
 	/// <returns>登録およびシーン反映を開始したModelEntityの一覧</returns>
@@ -71,7 +71,7 @@ public partial class ModelEntityLoadHub : BaseHub
 	}
 
 	/// <summary>
-	/// 現在のモデル集合と保留中のシーンロードをクリアする
+	/// 現在のモデル集合と保留中のシーンロードをクリアする。
 	/// </summary>
 	public void ClearModels()
 	{
@@ -86,7 +86,9 @@ public partial class ModelEntityLoadHub : BaseHub
 
 	#region Helpers
 
-	/// <summary>Entity階層に循環がないことを検証する。</summary>
+	/// <summary>
+	/// Entity階層に循環がないことを検証する。
+	/// </summary>
 	private static void ValidateAcyclicHierarchy(IReadOnlyList<ModelEntity> entities)
 	{
 		var entityById = new Dictionary<Guid, ModelEntity>(entities.Count);
@@ -103,7 +105,9 @@ public partial class ModelEntityLoadHub : BaseHub
 		}
 	}
 
-	/// <summary>Entity階層を再帰的にたどり、循環を検出する。</summary>
+	/// <summary>
+	/// Entity階層を再帰的にたどり、循環を検出する。
+	/// </summary>
 	private static void VisitHierarchy(
 		ModelEntity modelEntity,
 		IReadOnlyDictionary<Guid, ModelEntity> entityById,
@@ -131,7 +135,9 @@ public partial class ModelEntityLoadHub : BaseHub
 		visited.Add(modelEntity.Id);
 	}
 
-	/// <summary>Entityに対応するModelNodeが無ければ生成して返す。</summary>
+	/// <summary>
+	/// Entityに対応するModelNodeが無ければ生成して返す。
+	/// </summary>
 	private static ModelNode EnsureNode(ModelEntity modelEntity)
 	{
 		if (modelEntity == null)
@@ -172,7 +178,9 @@ public partial class ModelEntityLoadHub : BaseHub
 		return node;
 	}
 
-	/// <summary>親Entityの識別子から親ModelNodeを解決する。</summary>
+	/// <summary>
+	/// 親Entityの識別子から親ModelNodeを解決する。
+	/// </summary>
 	private static ModelNode ResolveParentNode(Guid parentId)
 	{
 		if (parentId == Guid.Empty)

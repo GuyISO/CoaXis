@@ -17,10 +17,7 @@ public partial class IpcHub : BaseHub
 {
     #region Fields
 
-    /// <summary>
-    /// 受信スレッドからメインスレッドへ処理を引き渡すためのキュー
-    /// Godot の Node/Signal API はメインスレッドでのみ安全に呼べるため、実際のディスパッチは _Process 側で行う
-    /// </summary>
+    /// <summary>受信スレッドからメインスレッドへ処理を引き渡すためのキュー Godot の Node/Signal API はメインスレッドでのみ安全に呼べるため、実際のディスパッチは _Process 側で行う。</summary>
     private readonly ConcurrentQueue<PendingRequest> _pendingRequests = new();
 
     /// <summary>メインスレッド処理の待機タイムアウト（ミリ秒）。</summary>
@@ -48,7 +45,7 @@ public partial class IpcHub : BaseHub
     /// <summary>IPC接続状態の変更通知。</summary>
     [Signal] public delegate void ConnectionStatusEventHandler(bool isConnected);
     /// <summary>
-    /// IPC サーバーの接続状態を通知する
+    /// IPC サーバーの接続状態を通知する。
     /// </summary>
     /// <param name="isConnected">接続状態。接続されていれば true</param>
     internal void NotifyConnectionStatus(bool isConnected)
@@ -59,7 +56,7 @@ public partial class IpcHub : BaseHub
     /// <summary>IPCメッセージ受信の通知。</summary>
     [Signal] public delegate void MessageReceivedEventHandler(string eventType);
     /// <summary>
-    /// IPC メッセージを受信したことを通知する
+    /// IPC メッセージを受信したことを通知する。
     /// </summary>
     /// <param name="eventType">受信したメッセージの eventType</param>
     internal void NotifyMessageReceived(string eventType)
@@ -70,7 +67,7 @@ public partial class IpcHub : BaseHub
     /// <summary>IPCメッセージ処理結果の通知。</summary>
     [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
     /// <summary>
-    /// IPC メッセージの処理結果を通知する
+    /// IPC メッセージの処理結果を通知する。
     /// </summary>
     /// <param name="eventType">処理したメッセージの eventType</param>
     /// <param name="ok">処理が成功した場合は true</param>
@@ -120,7 +117,7 @@ public partial class IpcHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// NamedPipe サーバーを起動する
+    /// NamedPipe サーバーを起動する。
     /// </summary>
     /// <param name="pipeName">待ち受けるパイプ名</param>
     internal void Start(string pipeName)
@@ -140,7 +137,7 @@ public partial class IpcHub : BaseHub
     }
 
     /// <summary>
-    /// NamedPipe サーバーを停止する
+    /// NamedPipe サーバーを停止する。
     /// </summary>
     internal void Stop()
     {
@@ -169,7 +166,7 @@ public partial class IpcHub : BaseHub
     }
 
     /// <summary>
-    /// IPC サーバーの接続状態を通知要求する
+    /// IPC サーバーの接続状態を通知要求する。
     /// </summary>
     internal void AskConnectionStatus()
     {
@@ -181,7 +178,7 @@ public partial class IpcHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// クライアント接続を待ち受け、切断されるたびに次の接続待ちへ戻る
+    /// クライアント接続を待ち受け、切断されるたびに次の接続待ちへ戻る。
     /// </summary>
     private async Task AcceptLoopAsync(string pipeName, CancellationToken token)
     {
@@ -217,7 +214,7 @@ public partial class IpcHub : BaseHub
     }
 
     /// <summary>
-    /// 1接続分の受信ループ。1行1メッセージのJSONを読み、Result応答を1行返す
+    /// 1接続分の受信ループ。1行1メッセージのJSONを読み、Result応答を1行返す。
     /// </summary>
     private async Task HandleConnectionAsync(NamedPipeServerStream pipe, CancellationToken token)
     {
@@ -243,7 +240,7 @@ public partial class IpcHub : BaseHub
     }
 
     /// <summary>
-    /// 受信した1行を検証・振り分けし、Result応答エンベロープを組み立てる
+    /// 受信した1行を検証・振り分けし、Result応答エンベロープを組み立てる。
     /// </summary>
     private async Task<IpcEnvelope> ProcessLineAsync(string line, CancellationToken token)
     {
@@ -292,7 +289,7 @@ public partial class IpcHub : BaseHub
     }
 
     /// <summary>
-    /// Result エンベロープを組み立てる
+    /// Result エンベロープを組み立てる。
     /// </summary>
     /// <param name="request">元の受信エンベロープ。パース不能時は null</param>
     /// <param name="payload">処理結果</param>
@@ -306,7 +303,7 @@ public partial class IpcHub : BaseHub
     }
 
     /// <summary>
-    /// 受信スレッドからメインスレッドへ引き渡す1件分のリクエスト
+    /// 受信スレッドからメインスレッドへ引き渡す1件分のリクエスト。
     /// </summary>
     private sealed class PendingRequest
     {

@@ -34,7 +34,7 @@ public partial class ModelEntityTreeHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// 指定したモデルをツリーの中央へ表示する操作をリクエストする
+	/// 指定したモデルをツリーの中央へ表示する操作をリクエストする。
 	/// </summary>
 	/// <param name="entityId">ツリーの中央へ表示するモデル実体の識別子</param>
 	internal void Centering(Guid entityId)

@@ -1,21 +1,21 @@
 using Godot;
 
 /// <summary>
-/// Viewportの操作モードを表す列挙型
+/// Viewportの操作モードを表す列挙型。
 /// </summary>
 public enum ViewportInteractionMode
 {
-    /// <summary>操作待機状態</summary>
+    /// <summary>操作待機状態。</summary>
     None,
-    /// <summary>カメラの注視点の平行移動操作</summary>
+    /// <summary>カメラの注視点の平行移動操作。</summary>
     CameraPan,
-    /// <summary>カメラの注視点中心のオービット回転操作</summary>
+    /// <summary>カメラの注視点中心のオービット回転操作。</summary>
     CameraOrbit,
-    /// <summary>カメラの視線方向を軸としたロール回転操作</summary>
+    /// <summary>カメラの視線方向を軸としたロール回転操作。</summary>
     CameraRoll,
-    /// <summary>カメラのズーム操作</summary>
+    /// <summary>カメラのズーム操作。</summary>
     CameraZoom,
-    /// <summary>選択矩形操作</summary>
+    /// <summary>選択矩形操作。</summary>
     PickRect,
 }
 
@@ -88,7 +88,9 @@ public partial class ViewportInteractionHub : BaseHub
         EmitSignal(SignalName.ModeNotified);
     }
 
-    /// <summary>アークボール半径を更新して通知する。</summary>
+    /// <summary>
+    /// アークボール半径を更新して通知する。
+    /// </summary>
     /// <param name="radius">新しいアークボール半径</param>
     internal void SetArcballRadius(float radius)
     {
@@ -96,7 +98,9 @@ public partial class ViewportInteractionHub : BaseHub
         EmitSignal(SignalName.ArcballRadiusNotified);
     }
 
-    /// <summary>操作点からアークボール補助表示の初期回転を設定して通知する。</summary>
+    /// <summary>
+    /// 操作点からアークボール補助表示の初期回転を設定して通知する。
+    /// </summary>
     /// <param name="position">球面上の操作点</param>
     internal void SetArcballHandle(Vector3 position)
     {
@@ -104,7 +108,9 @@ public partial class ViewportInteractionHub : BaseHub
         EmitSignal(SignalName.ArcballHandleRotationNotified);
     }
 
-    /// <summary>カメラ回転に追従するアークボール補助表示の回転を更新して通知する。</summary>
+    /// <summary>
+    /// カメラ回転に追従するアークボール補助表示の回転を更新して通知する。
+    /// </summary>
     /// <param name="rotation">カメラへ適用した回転量</param>
     internal void RotateArcball(Quaternion rotation)
     {
@@ -113,7 +119,9 @@ public partial class ViewportInteractionHub : BaseHub
         EmitSignal(SignalName.ArcballHandleRotationNotified);
     }
 
-    /// <summary>矩形選択範囲を更新して通知する。</summary>
+    /// <summary>
+    /// 矩形選択範囲を更新して通知する。
+    /// </summary>
     /// <param name="startPosition">範囲の開始位置</param>
     /// <param name="endPosition">範囲の終了位置</param>
     internal void SetPickRect(Vector2 startPosition, Vector2 endPosition)
@@ -127,7 +135,9 @@ public partial class ViewportInteractionHub : BaseHub
 
     #region Helpers
 
-    /// <summary>アークボールハンドル位置から回転を算出する。</summary>
+    /// <summary>
+    /// アークボールハンドル位置から回転を算出する。
+    /// </summary>
     private static Quaternion CalculateArcballHandleRotation(Vector3 handlePosition)
     {
         if (handlePosition.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)

@@ -65,7 +65,7 @@ public partial class AssetMaterialHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// ハイライト表示用のマテリアルを取得する
+    /// ハイライト表示用のマテリアルを取得する。
     /// </summary>
     /// <returns>選択ハイライト用マテリアル。取得失敗時は null</returns>
     internal Material GetSelected()
@@ -100,7 +100,7 @@ public partial class AssetMaterialHub : BaseHub
     }
 
     /// <summary>
-    /// 選択中のマテリアルに設定される色を適用する
+    /// 選択中のマテリアルに設定される色を適用する。
     /// </summary>
     private void ApplySelectedMaterialColor()
     {

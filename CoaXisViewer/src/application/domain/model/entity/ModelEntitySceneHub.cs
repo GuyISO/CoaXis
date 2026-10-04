@@ -45,7 +45,7 @@ public partial class ModelEntitySceneHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する
+	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する。
 	/// </summary>
 	/// <param name="modelEntity">初期化するモデル実体</param>
 	/// <exception cref="ArgumentNullException">modelEntityがnullの場合</exception>
@@ -60,7 +60,7 @@ public partial class ModelEntitySceneHub : BaseHub
 	}
 
 	/// <summary>
-	/// モデル集合のシーンロードを準備する
+	/// モデル集合のシーンロードを準備する。
 	/// </summary>
 	/// <param name="modelEntities">シーンロード対象のモデル集合</param>
 	/// <exception cref="ArgumentNullException">modelEntitiesがnullの場合</exception>
@@ -84,7 +84,7 @@ public partial class ModelEntitySceneHub : BaseHub
 	}
 
 	/// <summary>
-	/// 準備済みのシーンロードキューを開始する
+	/// 準備済みのシーンロードキューを開始する。
 	/// </summary>
 	public void StartPendingLoads()
 	{
@@ -101,7 +101,7 @@ public partial class ModelEntitySceneHub : BaseHub
 	}
 
 	/// <summary>
-	/// 保留中のシーンロードを無効化し、完了済みロードのキャッシュをクリアする
+	/// 保留中のシーンロードを無効化し、完了済みロードのキャッシュをクリアする。
 	/// </summary>
 	public void CancelPendingLoads()
 	{
@@ -119,7 +119,9 @@ public partial class ModelEntitySceneHub : BaseHub
 
 	#region Helpers
 
-	/// <summary>Sceneロードをキューへ追加する。</summary>
+	/// <summary>
+	/// Sceneロードをキューへ追加する。
+	/// </summary>
 	private void QueueSceneLoad(ModelEntity modelEntity)
 	{
 		if (modelEntity == null || !Application.Model.Entity.Registry.IsEntityRegistered(modelEntity.Id))
@@ -136,7 +138,9 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 	}
 
-	/// <summary>Sceneロードキューを順次処理する。</summary>
+	/// <summary>
+	/// Sceneロードキューを順次処理する。
+	/// </summary>
 	private async Task ProcessSceneLoadQueueAsync(long generation)
 	{
 		try
@@ -207,7 +211,9 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 	}
 
-	/// <summary>Sceneロード完了を判定し、完了していれば状態を更新する。</summary>
+	/// <summary>
+	/// Sceneロード完了を判定し、完了していれば状態を更新する。
+	/// </summary>
 	private bool TryFinishSceneLoad(ModelEntity modelEntity)
 	{
 		try
@@ -257,7 +263,9 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 	}
 
-	/// <summary>Entityが現在も有効（登録済み）か判定する。</summary>
+	/// <summary>
+	/// Entityが現在も有効（登録済み）か判定する。
+	/// </summary>
 	private static bool IsActiveEntity(ModelEntity modelEntity)
 	{
 		return modelEntity != null
@@ -267,7 +275,9 @@ public partial class ModelEntitySceneHub : BaseHub
 			&& IsInstanceValid(modelEntity.Node);
 	}
 
-	/// <summary>Entityのロード状態を更新して通知する。</summary>
+	/// <summary>
+	/// Entityのロード状態を更新して通知する。
+	/// </summary>
 	private static void UpdateModelStatus(ModelEntity modelEntity, ModelStatus nextStatus)
 	{
 		if (modelEntity == null || (modelEntity.Status == ModelStatus.Disposed && nextStatus != ModelStatus.Disposed))
@@ -279,7 +289,9 @@ public partial class ModelEntitySceneHub : BaseHub
 		Application.Model.Entity.State.NotifyStatus(modelEntity.Id);
 	}
 
-	/// <summary>Sceneロードキューの要素。</summary>
+	/// <summary>
+	/// Sceneロードキューの要素。
+	/// </summary>
 	private sealed class SceneLoadQueueItem
 	{
 		public SceneLoadQueueItem(ModelEntity modelEntity, long generation)

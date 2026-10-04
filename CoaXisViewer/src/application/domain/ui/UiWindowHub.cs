@@ -32,7 +32,7 @@ public partial class UiWindowHub : BaseHub
     #region Events
 
     /// <summary>
-    /// ウィンドウがツリーから退出したときにキャッシュから削除するためのイベントハンドラ
+    /// ウィンドウがツリーから退出したときにキャッシュから削除するためのイベントハンドラ。
     /// </summary>
     private void OnWindowTreeExited(string cacheKey, UiWindow window)
     {
@@ -47,7 +47,7 @@ public partial class UiWindowHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// 指定されたコンテナを表示する
+    /// 指定されたコンテナを表示する。
     /// </summary>
     /// <param name="container">表示するコンテナ。</param>
     /// <remarks>
@@ -90,7 +90,7 @@ public partial class UiWindowHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// 指定されたコンテナを表示する
+    /// キャッシュキーを指定してコンテナをウィンドウとして表示する。
     /// </summary>
     /// <param name="container">表示するコンテナ</param>
     private void ShowWindow(Container container, string cacheKey)
@@ -120,7 +120,7 @@ public partial class UiWindowHub : BaseHub
     }
 
     /// <summary>
-    /// コンテナのキャッシュキーを取得する
+    /// コンテナのキャッシュキーを取得する。
     /// </summary>
     /// <param name="container">キャッシュキーを取得するコンテナ</param>
     private string GetContainerCacheKey(Container container)

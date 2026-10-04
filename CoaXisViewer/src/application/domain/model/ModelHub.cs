@@ -10,13 +10,9 @@ public partial class ModelHub : BaseHub
 
     #region Properties
 
-    /// <summary>
-    /// ModelEntity 機能を取得する。
-    /// </summary>
+    /// <summary>ModelEntity 機能を取得する。</summary>
     public ModelEntityHub Entity { get; }
-    /// <summary>
-    /// ModelProperty 機能を取得する。
-    /// </summary>
+    /// <summary>ModelProperty 機能を取得する。</summary>
     public ModelPropertyHub Property { get; }
 
     #endregion

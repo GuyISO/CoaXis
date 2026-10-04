@@ -52,7 +52,7 @@ public partial class InputHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// 選択モードの切り替えを処理する
+    /// 選択モードの切り替えを処理する。
     /// </summary>
     private void HandleSelectModeInput(string actionName, ModelEntitySelectionMode assignMode)
     { 
@@ -67,7 +67,7 @@ public partial class InputHub : BaseHub
     }
 
     /// <summary>
-    /// Undo/Redo 入力に応じてコマンド履歴を操作する
+    /// Undo/Redo 入力に応じてコマンド履歴を操作する。
     /// </summary>
     private void HandleButtonInput()
     {
@@ -98,7 +98,7 @@ public partial class InputHub : BaseHub
     }
 
     /// <summary>
-    /// ユーザーの入力に基づき、カメラを平行移動する
+    /// ユーザーの入力に基づき、カメラを平行移動する。
     /// </summary>
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleTranslationInput(float delta)
@@ -124,7 +124,7 @@ public partial class InputHub : BaseHub
     }
 
     /// <summary>
-    /// ユーザーの入力に基づき、カメラを回転する
+    /// ユーザーの入力に基づき、カメラを回転する。
     /// </summary>
     /// <param name="delta">前フレームからの経過時間（秒）</param>
     private void HandleRotationInput(float delta)
@@ -151,7 +151,7 @@ public partial class InputHub : BaseHub
     }
 
     /// <summary>
-    /// 指定されたアクションに基づき、軸の値を取得する
+    /// 指定されたアクションに基づき、軸の値を取得する。
     /// </summary>
     /// <param name="negativeAction">負の方向のアクション名</param>
     /// <param name="positiveAction">正の方向のアクション名</param>

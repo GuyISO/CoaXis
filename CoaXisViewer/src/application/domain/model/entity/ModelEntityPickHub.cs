@@ -2,15 +2,15 @@
 using Godot;
 
 /// <summary>
-/// 選択されたモデルの操作モードを表す列挙型
+/// 選択されたモデルの操作モードを表す列挙型。
 /// </summary>
 public enum PickHandlingMode
 {
-    /// <summary>選択操作モード</summary>
+    /// <summary>選択操作モード。</summary>
     Selection,
-    /// <summary>測定操作モード</summary>
+    /// <summary>測定操作モード。</summary>
     Measurement,
-    /// <summary>面に垂直操作モード</summary>
+    /// <summary>面に垂直操作モード。</summary>
     NormalToFace,
 }
 
@@ -25,9 +25,7 @@ public partial class ModelEntityPickHub : BaseHub
 
     #region Properties
 
-    /// <summary>
-    /// 現在の選択操作モードを取得する
-    /// </summary>
+    /// <summary>現在の選択操作モードを取得する。</summary>
     internal PickHandlingMode HandlingMode { get; private set; } = PickHandlingMode.Selection;
 
     #endregion
@@ -40,7 +38,7 @@ public partial class ModelEntityPickHub : BaseHub
     /// <summary>単一ピック結果の通知。</summary>
     [Signal] public delegate void ResultNotifiedEventHandler(PickResult pickResult);
     /// <summary>
-    /// ピック結果の通知を行う
+    /// ピック結果の通知を行う。
     /// </summary>
     /// <param name="pickResult">ピック結果</param>
     internal void NotifyResult(PickResult pickResult)
@@ -51,7 +49,7 @@ public partial class ModelEntityPickHub : BaseHub
     /// <summary>複数ピック結果の通知。</summary>
     [Signal] public delegate void ResultsNotifiedEventHandler(PickResult[] pickResults);
     /// <summary>
-    /// 複数一括ピック結果の通知を行う
+    /// 複数一括ピック結果の通知を行う。
     /// </summary>
     /// <param name="pickResults">ピック結果の配列</param>
     /// <remarks>複数のピック結果を一括で通知する場合はレイキャストによる取得ではないので座標値などを持たない</remarks>
@@ -73,7 +71,7 @@ public partial class ModelEntityPickHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// 選択操作モードを変更し、変更内容を通知する
+    /// 選択操作モードを変更し、変更内容を通知する。
     /// </summary>
     /// <param name="mode">設定する選択操作モード</param>
     public void SetHandlingMode(PickHandlingMode mode)

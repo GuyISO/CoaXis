@@ -38,7 +38,7 @@ public partial class UiMenuHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// 指定した ModelEntity を対象にコンテキストメニューを表示する
+    /// 指定した ModelEntity を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="entityId">操作対象とする ModelEntity の識別子</param>
     internal void ShowModelEntityMenu(Guid entityId)
@@ -48,7 +48,7 @@ public partial class UiMenuHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した ModelProperty の値を対象にコンテキストメニューを表示する
+    /// 指定した ModelProperty の値を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="value">操作対象とするプロパティ値</param>
     internal void ShowModelPropertyMenu(string value)
@@ -58,7 +58,7 @@ public partial class UiMenuHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した PickResult を対象にコンテキストメニューを表示する
+    /// 指定した PickResult を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="pickResult">操作対象とする PickResult</param>
     internal void ShowPickResultMenu(PickResult pickResult)
@@ -68,7 +68,7 @@ public partial class UiMenuHub : BaseHub
     }
 
     /// <summary>
-    /// AxisNavigator を対象にコンテキストメニューを表示する
+    /// AxisNavigator を対象にコンテキストメニューを表示する。
     /// </summary>
     internal void ShowAxisNavigatorMenu()
     {
@@ -81,7 +81,7 @@ public partial class UiMenuHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// 指定したメニューノードのインスタンスを確保する、シーンに依存せずコードから直接生成する
+    /// 指定したメニューノードのインスタンスを確保する、シーンに依存せずコードから直接生成する。
     /// </summary>
     /// <typeparam name="TMenu">確保するメニューノードの型</typeparam>
     /// <param name="menu">既存のインスタンス、未生成またはツリーから外れている場合は再生成する</param>

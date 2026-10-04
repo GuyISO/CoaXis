@@ -3,17 +3,17 @@ using System;
 using System.IO;
 
 /// <summary>
-/// ログレベルを表す列挙型
+/// ログレベルを表す列挙型。
 /// </summary>
 public enum LogLevel
 {
-    /// <summary>開発中のデバッグ用</summary>
+    /// <summary>開発中のデバッグ用。</summary>
     Debug,
-    /// <summary>ユーザーに通知する必要がある情報</summary>
+    /// <summary>ユーザーに通知する必要がある情報。</summary>
     Info,
-    /// <summary>警告を表す</summary>
+    /// <summary>警告を表す。</summary>
     Warn,
-    /// <summary>エラーを表す</summary>
+    /// <summary>エラーを表す。</summary>
     Error,
 }
 
@@ -42,7 +42,7 @@ public partial class LogHub : BaseHub
     /// <summary>ログ出力の通知。</summary>
     [Signal] public delegate void LoggedEventHandler(int level, string message);
     /// <summary>
-    /// ログメッセージが通知されたときに発行されるシグナル。
+    /// ログの出力を通知する。
     /// </summary>
     /// <param name="level">ログレベル</param>
     /// <param name="message">ログメッセージ</param>
@@ -79,7 +79,7 @@ public partial class LogHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// ログレベルとメッセージを指定してログを出力する
+    /// ログレベルとメッセージを指定してログを出力する。
     /// </summary>
     /// <param name="level">ログレベル</param>
     /// <param name="message">ログメッセージ</param> 
@@ -109,25 +109,25 @@ public partial class LogHub : BaseHub
     }
 
     /// <summary>
-    /// デバッグレベルのログを出力する
+    /// デバッグレベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
     internal void Debug(string msg) => Log(LogLevel.Debug, msg);
 
     /// <summary>
-    /// 情報レベルのログを出力する
+    /// 情報レベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
     internal void Info(string msg) => Log(LogLevel.Info, msg);
 
     /// <summary>
-    /// 警告レベルのログを出力する
+    /// 警告レベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
     internal void Warn(string msg) => Log(LogLevel.Warn, msg);
 
     /// <summary>
-    /// エラーレベルのログを出力する
+    /// エラーレベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
     internal void Error(string msg) => Log(LogLevel.Error, msg);

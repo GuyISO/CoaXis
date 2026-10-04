@@ -21,7 +21,9 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルの配置位置の変更通知。値は ModelEntity.Position を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void PositionNotifiedEventHandler(string entityId);
-	/// <summary>配置位置の変更を通知する。</summary>
+	/// <summary>
+	/// 配置位置の変更を通知する。
+	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyPosition(Guid entityId)
 	{
@@ -31,7 +33,9 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルの回転の変更通知。値は ModelEntity.Rotation を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void RotationNotifiedEventHandler(string entityId);
-	/// <summary>回転の変更を通知する。</summary>
+	/// <summary>
+	/// 回転の変更を通知する。
+	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyRotation(Guid entityId)
 	{
@@ -41,7 +45,9 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルの表示設定の変更通知。値は ModelEntity.Visibility を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void VisibilityNotifiedEventHandler(string entityId);
-	/// <summary>表示設定の変更を通知する。</summary>
+	/// <summary>
+	/// 表示設定の変更を通知する。
+	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyVisibility(Guid entityId)
 	{
@@ -55,7 +61,9 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルのロード状態の変更通知。値は ModelEntity.Status を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void StatusNotifiedEventHandler(string entityId);
-	/// <summary>ロード状態の変更を通知する。</summary>
+	/// <summary>
+	/// ロード状態の変更を通知する。
+	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyStatus(Guid entityId)
 	{
@@ -64,7 +72,9 @@ public partial class ModelEntityStateHub : BaseHub
 
 	/// <summary>モデルの透明度の変更通知。値は ModelEntityVisualHub.Transparency を参照する。</summary>
 	[Signal] public delegate void TransparencyNotifiedEventHandler();
-	/// <summary>透明度の変更を通知する。</summary>
+	/// <summary>
+	/// 透明度の変更を通知する。
+	/// </summary>
 	internal void NotifyTransparency()
 	{
 		EmitSignal(SignalName.TransparencyNotified);
@@ -73,7 +83,7 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>Registryのクリア通知。</summary>
 	[Signal] public delegate void RegistryClearedEventHandler();
 	/// <summary>
-	/// モデルレジストリがクリアされたことを通知する
+	/// モデルレジストリがクリアされたことを通知する。
 	/// </summary>
 	internal void NotifyRegistryCleared()
 	{
@@ -93,7 +103,7 @@ public partial class ModelEntityStateHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// モデルの表示/非表示を切り替える
+	/// モデルの表示/非表示を切り替える。
 	/// </summary>
 	/// <param name="entityId">切替対象の ModelEntity の識別子</param>
 	internal void ToggleModelVisibility(Guid entityId)
@@ -101,7 +111,7 @@ public partial class ModelEntityStateHub : BaseHub
 		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelStateService: toggle target not found. entityId='{entityId}'");
+			Application.Log.Warn($"ModelEntityStateHub: toggle target not found. entityId='{entityId}'");
 			return;
 		}
 
@@ -112,7 +122,7 @@ public partial class ModelEntityStateHub : BaseHub
 	}
 
 	/// <summary>
-	/// モデルの折り畳み状態を更新し、変更があった場合に通知する
+	/// モデルの折り畳み状態を更新し、変更があった場合に通知する。
 	/// </summary>
 	/// <param name="entityId">対象 ModelEntity の識別子</param>
 	/// <param name="isCollapsed">折り畳む場合は true、展開する場合は false</param>
@@ -121,7 +131,7 @@ public partial class ModelEntityStateHub : BaseHub
 		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelStateService: collapse target not found. entityId='{entityId}'");
+			Application.Log.Warn($"ModelEntityStateHub: collapse target not found. entityId='{entityId}'");
 			return;
 		}
 
@@ -138,7 +148,9 @@ public partial class ModelEntityStateHub : BaseHub
 
 	#region Helpers
 
-	/// <summary>現在の表示設定から次の切替先を返す。</summary>
+	/// <summary>
+	/// 現在の表示設定から次の切替先を返す。
+	/// </summary>
 	private static ModelVisibility GetNextVisibility(ModelVisibility visibility)
 	{
 		return visibility switch

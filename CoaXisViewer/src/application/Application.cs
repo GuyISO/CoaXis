@@ -31,9 +31,7 @@ public partial class Application : BaseHub
 
     #region Properties
 
-    /// <summary>
-    /// 現在の Application インスタンスを取得する。
-    /// </summary>
+    /// <summary>現在の Application インスタンスを取得する。</summary>
     public static Application Instance { get; private set; }
 
     // infrastructure

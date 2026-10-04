@@ -21,22 +21,16 @@ public partial class SettingHub : BaseHub
 {
     #region Fields
 
-    /// <summary>
-    /// 外部設定ファイル名。配置先ディレクトリは実行環境に応じて決定する。
-    /// </summary>
+    /// <summary>外部設定ファイル名。配置先ディレクトリは実行環境に応じて決定する。</summary>
     private const string SettingsFileName = "viewer-settings.json";
 
-    /// <summary>
-    /// 読み込み時に JSON 側の大文字小文字差異を吸収する。
-    /// </summary>
+    /// <summary>読み込み時に JSON 側の大文字小文字差異を吸収する。</summary>
     private static readonly JsonSerializerOptions ReadOptions = new JsonSerializerOptions
     {
         PropertyNameCaseInsensitive = true
     };
 
-    /// <summary>
-    /// 既定ファイルを人手編集しやすい形式で出力する。
-    /// </summary>
+    /// <summary>既定ファイルを人手編集しやすい形式で出力する。</summary>
     private static readonly JsonSerializerOptions WriteOptions = new JsonSerializerOptions
     {
         WriteIndented = true
@@ -46,10 +40,7 @@ public partial class SettingHub : BaseHub
 
     #region Properties
 
-    /// <summary>
-    /// 現在有効な設定値。
-    /// 起動時に読み込んだ内容を保持し、他サービスはこの値を参照する。
-    /// </summary>
+    /// <summary>現在有効な設定値。 起動時に読み込んだ内容を保持し、他サービスはこの値を参照する。</summary>
     public ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
 
     #endregion
@@ -59,7 +50,7 @@ public partial class SettingHub : BaseHub
     /// <summary>設定変更の通知。</summary>
     [Signal] public delegate void SettingsNotifiedEventHandler();
     /// <summary>
-    /// 設定の再読み込みが完了したことを通知する
+    /// 設定の再読み込みが完了したことを通知する。
     /// </summary>
     internal void NotifySettings()
     {

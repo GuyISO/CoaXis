@@ -14,9 +14,7 @@ public partial class ModelEntityVisualHub : BaseHub
 
 	#region Properties
 
-	/// <summary>
-	/// モデルの透明度を取得する
-	/// </summary>
+	/// <summary>モデルの透明度を取得する。</summary>
 	internal float Transparency { get; private set; } = 0.0f;
 
 	#endregion
@@ -44,7 +42,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	#region Events
 
 	/// <summary>
-	/// Applicationイベントの購読を開始する
+	/// Applicationイベントの購読を開始する。
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
@@ -58,7 +56,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// Applicationイベントの購読を解除する
+	/// Applicationイベントの購読を解除する。
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
@@ -72,21 +70,21 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// モデルの配置位置が通知されたときに呼び出されるイベントハンドラ
+	/// モデルの配置位置が通知されたときに呼び出されるイベントハンドラ。
 	/// </summary>
 	/// <param name="entityId">配置位置が変更された ModelEntity の識別子</param>
 	private void OnModelPositionNotified(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelPresentationService: invalid entityId for position notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: invalid entityId for position notification. entityId='{entityId}'");
 			return;
 		}
 
 		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelPresentationService: position target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: position target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -98,21 +96,21 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// モデルの回転が通知されたときに呼び出されるイベントハンドラ
+	/// モデルの回転が通知されたときに呼び出されるイベントハンドラ。
 	/// </summary>
 	/// <param name="entityId">回転が変更された ModelEntity の識別子</param>
 	private void OnModelRotationNotified(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelPresentationService: invalid entityId for rotation notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: invalid entityId for rotation notification. entityId='{entityId}'");
 			return;
 		}
 
 		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelPresentationService: rotation target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: rotation target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -124,22 +122,22 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// モデルの表示状態が変更されたときに呼び出されるイベントハンドラ
+	/// モデルの表示状態が変更されたときに呼び出されるイベントハンドラ。
 	/// </summary>
 	/// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
 	private void OnModelVisibilityNotified(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelPresentationService: invalid entityId for visibility notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: invalid entityId for visibility notification. entityId='{entityId}'");
 			return;
 		}
 
-		// ModelEntity の内部的な表示状態を更新
+		// Entityが保持する表示設定を描画ノードへ反映する
 		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
-			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: visibility target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 		
@@ -147,7 +145,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 追加された部分木の初期表示状態を反映する
+	/// 追加された部分木の初期表示状態を反映する。
 	/// </summary>
 	/// <param name="entityId">追加された部分木ルートの識別子</param>
 	private void OnModelAdded(string entityId)
@@ -167,7 +165,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 全件置換後に登録済みモデルの初期表示状態を同期する
+	/// 全件置換後に登録済みモデルの初期表示状態を同期する。
 	/// </summary>
 	private void OnModelSetReplaced()
 	{
@@ -181,7 +179,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// モデルのロード完了通知を受けたときに透明度を適用する
+	/// モデルのロード完了通知を受けたときに透明度を適用する。
 	/// </summary>
 	/// <param name="entityId">ロード完了した ModelEntity の識別子</param>
 	private void OnModelStatusNotified(string entityId)
@@ -207,21 +205,21 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ
+	/// モデルの選択状態が変更されたときに呼び出されるイベントハンドラ。
 	/// </summary>
 	/// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
 	private void OnSelected(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
-			Application.Log.Warn($"ModelPresentationService: invalid entityId for selection notification. entityId='{entityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: invalid entityId for selection notification. entityId='{entityId}'");
 			return;
 		}
 
 		ModelNode modelNode = Application.Model.Entity.Registry.GetEntity(parsedEntityId)?.Node;
 		if (modelNode == null)
 		{
-			Application.Log.Warn($"ModelPresentationService: highlight target not found. entityId='{parsedEntityId}'");
+			Application.Log.Warn($"ModelEntityVisualHub: highlight target not found. entityId='{parsedEntityId}'");
 			return;
 		}
 
@@ -233,7 +231,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// モデルメッシュの透明度を設定し、全ロード済みモデルに反映する
+	/// モデルメッシュの透明度を設定し、全ロード済みモデルに反映する。
 	/// </summary>
 	/// <param name="value">設定する透明度値 (0.0 - 1.0)</param>
 	public void SetTransparency(float value)
@@ -255,7 +253,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	#region Helpers
 
 	/// <summary>
-	/// 部分木の各Entityへ初期表示状態を反映する
+	/// 部分木の各Entityへ初期表示状態を反映する。
 	/// </summary>
 	/// <param name="rootEntity">反映対象の部分木ルート</param>
 	private void ApplyVisibilitySubtree(ModelEntity rootEntity)
@@ -280,14 +278,16 @@ public partial class ModelEntityVisualHub : BaseHub
 		}
 	}
 
-	/// <summary>Entityの表示設定をModelNodeのレイヤーへ反映する。</summary>
+	/// <summary>
+	/// Entityの表示設定をModelNodeのレイヤーへ反映する。
+	/// </summary>
 	private void ApplyVisibility(ModelEntity modelEntity)
 	{
 		ModelVisibility visibility = modelEntity.Visibility;
 		ModelNode modelNode = modelEntity.Node;
 		if (modelNode == null || !IsInstanceValid(modelNode))
 		{
-			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{modelEntity.Id}'");
+			Application.Log.Warn($"ModelEntityVisualHub: visibility target not found. entityId='{modelEntity.Id}'");
 			return;
 		}
 
@@ -302,7 +302,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 指定したモデルとその子孫のハイライト状態を切り替える
+	/// 指定したモデルとその子孫のハイライト状態を切り替える。
 	/// </summary>
 	/// <param name="modelNode">切り替えるモデル</param>
 	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalse</param>
@@ -314,7 +314,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 
-		// 論理階層はRegistryで解決し、描画ノードへの反映だけをModelPresentationServiceが担当する。
+		// 論理階層はRegistryで解決し、描画ノードへの反映だけをModelEntityVisualHubが担当する。
 		var modelEntities = new List<ModelEntity> { modelEntity };
 		modelEntities.AddRange(Application.Model.Entity.Registry.GetDescendantEntities(modelEntity.Id));
 		foreach (ModelEntity targetModelEntity in modelEntities)
@@ -327,7 +327,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 指定したモデルのハイライト状態を切り替える
+	/// 指定したモデルのハイライト状態を切り替える。
 	/// </summary>
 	/// <param name="modelNode">切り替えるモデル</param>
 	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
@@ -364,7 +364,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 指定したノードとその子孫からMeshInstance3Dを再帰的に取得する
+	/// 指定したノードとその子孫からMeshInstance3Dを再帰的に取得する。
 	/// </summary>
 	/// <param name="node">取得対象のノード</param>
 	private static List<MeshInstance3D> GetMeshInstancesRecursively(Node node)
@@ -385,7 +385,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 指定モデル配下のうち、子モデル配下を除いた MeshInstance3D を再帰的に取得する
+	/// 指定モデル配下のうち、子モデル配下を除いた MeshInstance3D を再帰的に取得する。
 	/// </summary>
 	/// <param name="modelNode">取得対象のモデル</param>
 	private static List<MeshInstance3D> GetMeshInstancesUnderModel(ModelNode modelNode)
@@ -396,7 +396,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 子モデル境界で探索を止めながら MeshInstance3D を収集する
+	/// 子モデル境界で探索を止めながら MeshInstance3D を収集する。
 	/// </summary>
 	/// <param name="node">探索対象ノード</param>
 	/// <param name="results">収集先リスト</param>
@@ -419,7 +419,9 @@ public partial class ModelEntityVisualHub : BaseHub
 		}
 	}
 
-	/// <summary>ノード配下へ現在の透明度を再帰的に適用する。</summary>
+	/// <summary>
+	/// ノード配下へ現在の透明度を再帰的に適用する。
+	/// </summary>
 	private void ApplyModelTransparency(Node node)
 	{
 		if (node is MeshInstance3D meshInstance)
@@ -434,7 +436,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 指定したモデルの祖先に選択状態のモデルが存在するかどうかを判定する
+	/// 指定したモデルの祖先に選択状態のモデルが存在するかどうかを判定する。
 	/// </summary>
 	/// <param name="modelNode">判定対象のモデル</param>
 	private static bool HasSelectedAncestor(ModelNode modelNode)

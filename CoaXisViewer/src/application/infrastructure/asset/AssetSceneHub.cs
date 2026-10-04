@@ -82,7 +82,9 @@ public partial class AssetSceneHub : BaseHub
 
     #region Helpers
 
-    /// <summary>リソースパス形式（res://）か判定する。</summary>
+    /// <summary>
+    /// リソースパス形式（res://）か判定する。
+    /// </summary>
     private static bool IsResourcePath(string path)
     {
         return !string.IsNullOrWhiteSpace(path)

@@ -4,17 +4,17 @@ using System.Linq;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルの選択モードを表す列挙型
+/// モデルの選択モードを表す列挙型。
 /// </summary>
 public enum ModelEntitySelectionMode
 {
-    /// <summary>対象のみを選択するデフォルトの選択モード</summary>
+    /// <summary>対象のみを選択するデフォルトの選択モード。</summary>
     Set,
-    /// <summary>追加選択モード</summary>
+    /// <summary>追加選択モード。</summary>
     Add,
-    /// <summary>削除選択モード</summary>
+    /// <summary>削除選択モード。</summary>
     Remove,
-    /// <summary>トグル選択モード</summary>
+    /// <summary>トグル選択モード。</summary>
     Toggle,
 }
 
@@ -25,7 +25,6 @@ public partial class ModelEntitySelectionHub : BaseHub
 {
     #region Fields
 
-    // 選択状態の管理対象となる実体IDのコレクション、HashSet を使用して重複を防ぐ
     /// <summary>選択中のEntity識別子集合。</summary>
     private readonly HashSet<Guid> _ids = new();
 
@@ -33,19 +32,13 @@ public partial class ModelEntitySelectionHub : BaseHub
 
     #region Properties
 
-    /// <summary>
-    /// 現在の選択モードを取得する
-    /// </summary>
+    /// <summary>現在の選択モードを取得する。</summary>
     internal ModelEntitySelectionMode Mode { get; private set; } = ModelEntitySelectionMode.Set;
 
-    /// <summary>
-    /// 現在の選択実体IDのコレクションの複製を取得する
-    /// </summary>
+    /// <summary>現在の選択実体IDのコレクションの複製を取得する。</summary>
     internal IReadOnlyCollection<Guid> EntityIds => _ids.ToList().AsReadOnly();
 
-    /// <summary>
-    /// 現在の選択モデル実体の数を取得する
-    /// </summary>
+    /// <summary>現在の選択モデル実体の数を取得する。</summary>
     internal int Count => _ids.Count;
 
     #endregion
@@ -58,7 +51,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <summary>Entityの選択状態の変更通知。選択有無は Contains で参照する。</summary>
     [Signal] public delegate void SelectedEventHandler(string entityId);
     /// <summary>
-    /// モデルの選択状態の通知を行う
+    /// モデルの選択状態の通知を行う。
     /// </summary>
     /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
     private void NotifySelected(Guid entityId)
@@ -69,7 +62,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <summary>選択クリアの通知。</summary>
     [Signal] public delegate void ClearedNotifiedEventHandler();
     /// <summary>
-    /// 選択がクリアされたことを通知する
+    /// 選択がクリアされたことを通知する。
     /// </summary>
     private void NotifyCleared()
     {
@@ -97,7 +90,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     #region Events
 
     /// <summary>
-    /// Applicationイベントの購読を開始する
+    /// Applicationイベントの購読を開始する。
     /// </summary>
     private void SubscribeApplicationEvents()
     {
@@ -107,7 +100,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// Applicationイベントの購読を解除する
+    /// Applicationイベントの購読を解除する。
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
@@ -117,7 +110,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// ピック結果の通知を受け取る
+    /// ピック結果の通知を受け取る。
     /// </summary>
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
@@ -159,7 +152,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// ピック結果の通知を受け取る
+    /// ピック結果の通知を受け取る。
     /// </summary>
     /// <param name="pickResults">ピック結果の配列</param>
     private void OnPickResultsNotified(PickResult[] pickResults)
@@ -214,7 +207,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// モデルレジストリのクリア通知を受け取る
+    /// モデルレジストリのクリア通知を受け取る。
     /// </summary>
     private void OnEntityRegistryCleared()
     {
@@ -226,7 +219,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// 選択モードを設定する
+    /// 選択モードを設定する。
     /// </summary>
     /// <param name="mode">設定する選択モード</param>
     internal void SetMode(ModelEntitySelectionMode mode)
@@ -241,7 +234,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 現在選択中の実体IDを元に、対応する Node3D 配列を取得する
+    /// 現在選択中の実体IDを元に、対応する Node3D 配列を取得する。
     /// </summary>
     /// <returns>選択中のモデルノード配列</returns>
     /// <remarks>選択モデルへのFit処理などに利用</remarks>
@@ -255,14 +248,14 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体IDが選択されているかどうかを確認する
+    /// 指定した実体IDが選択されているかどうかを確認する。
     /// </summary>
     /// <param name="entityId">確認する実体ID</param>
     /// <returns>実体が選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
     internal bool Contains(Guid entityId) => entityId != Guid.Empty && _ids.Contains(entityId);
 
     /// <summary>
-    /// 指定した実体のみの選択状態にする、既存の選択はすべて解除される
+    /// 指定した実体のみの選択状態にする、既存の選択はすべて解除される。
     /// </summary>
     /// <param name="entityId">選択する実体ID</param>
     internal void Set(Guid entityId)
@@ -272,7 +265,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体群のみの選択状態にする、既存の選択はすべて解除される
+    /// 指定した実体群のみの選択状態にする、既存の選択はすべて解除される。
     /// </summary>
     /// <param name="entityIds">選択する実体IDの配列</param>
     internal void Set(Guid[] entityIds)
@@ -285,7 +278,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体を選択対象に追加する
+    /// 指定した実体を選択対象に追加する。
     /// </summary>
     /// <param name="entityId">選択する実体ID</param>
     /// <returns>実体が新たに選択された場合はtrue、それ以外の場合はfalseを返す</returns>
@@ -307,7 +300,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体群を選択対象に追加する
+    /// 指定した実体群を選択対象に追加する。
     /// </summary>
     /// <param name="entityIds">選択する実体IDの配列</param>
     internal void Add(Guid[] entityIds)
@@ -319,7 +312,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体を選択対象から外す
+    /// 指定した実体を選択対象から外す。
     /// </summary>
     /// <param name="entityId">選択から外す実体ID</param>
     /// <returns>実体が選択から外された場合はtrue、それ以外の場合はfalseを返す</returns>
@@ -346,7 +339,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体群を選択対象から外す
+    /// 指定した実体群を選択対象から外す。
     /// </summary>
     /// <param name="entityIds">選択対象から外す実体IDの配列</param>
     internal void Remove(Guid[] entityIds)
@@ -358,7 +351,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体の選択状態を切り替える
+    /// 指定した実体の選択状態を切り替える。
     /// </summary>
     /// <param name="entityId">切り替える実体ID</param>
     internal void Toggle(Guid entityId)
@@ -374,9 +367,9 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// 指定した実体群の選択状態を切り替える
+    /// 指定した実体群の選択状態を切り替える。
     /// </summary>
-    /// <param name="entityIds">切り替える実体IDの列挙体</param>
+    /// <param name="entityIds">切り替える実体IDの配列</param>
     internal void Toggle(Guid[] entityIds)
     {
         // 切り替える実体がない場合は何もしない
@@ -392,7 +385,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     }
 
     /// <summary>
-    /// すべての選択を解除する
+    /// すべての選択を解除する。
     /// </summary>
     /// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返す</returns>
     internal bool Clear()
