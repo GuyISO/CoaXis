@@ -5,9 +5,9 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデル実体の置換ロードと登録を管理するハブ。
+/// ModelEntityの置換ロードと登録を管理するハブ。
 /// </summary>
-public partial class ModelLoadEntityHub : BaseHub
+public partial class ModelEntityLoadHub : BaseHub
 {
 	#region Fields
 
@@ -55,7 +55,7 @@ public partial class ModelLoadEntityHub : BaseHub
 		// 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
 		foreach (ModelEntity modelEntity in entities)
 		{
-			Application.Model.Load.Scene.MarkInitialized(modelEntity);
+			Application.Model.Entity.Scene.MarkInitialized(modelEntity);
 			Application.Model.Entity.Registry.RegisterEntity(modelEntity);
 		}
 		Application.Model.Entity.Registry.ResolveHierarchy();
@@ -66,35 +66,12 @@ public partial class ModelLoadEntityHub : BaseHub
 			modelEntity.Node = EnsureNode(modelEntity);
 		}
 
-		Application.Model.Load.Scene.PrepareLoads(entities);
+		Application.Model.Entity.Scene.PrepareLoads(entities);
 
 		// 全Entityと階層が確定してから一括通知し、Tree側に親先行の個別通知を要求しない。
 		Application.Model.Entity.Registry.NotifyModelSetReplaced();
-		Application.Model.Load.Scene.StartPendingLoads();
+		Application.Model.Entity.Scene.StartPendingLoads();
 		return entities;
-	}
-
-	/// <summary>
-	/// 指定したDTOからモデル属性を生成し、Property Registryへ登録して階層を解決する
-	/// </summary>
-	/// <param name="propertyDtos">読み込むモデル属性DTOの集合</param>
-	/// <returns>登録されたModelPropertyの一覧</returns>
-	/// <exception cref="ArgumentNullException">propertyDtosがnullの場合</exception>
-	public IReadOnlyList<ModelProperty> LoadProperties(IReadOnlyList<ModelPropertyDto> propertyDtos)
-	{
-		if (propertyDtos == null)
-		{
-			throw new ArgumentNullException(nameof(propertyDtos));
-		}
-
-		IReadOnlyList<ModelProperty> properties = ModelPropertyFactory.Create(propertyDtos);
-		// 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
-		foreach (ModelProperty property in properties)
-		{
-			Application.Model.Property.Registry.RegisterProperty(property);
-		}
-		Application.Model.Property.Registry.ResolveHierarchy();
-		return properties;
 	}
 
 	/// <summary>
@@ -103,7 +80,7 @@ public partial class ModelLoadEntityHub : BaseHub
 	public void ClearModels()
 	{
 		// 旧世代を先に無効化し、EntityとPropertyの両Registryをクリアして古いノードの更新を防ぐ。
-		Application.Model.Load.Scene.CancelPendingLoads();
+		Application.Model.Entity.Scene.CancelPendingLoads();
 		Application.Model.Entity.Registry.Clear();
 		Application.Model.Property.Registry.Clear();
 		Application.Model.Entity.Registry.NotifyCleared();
@@ -189,7 +166,7 @@ public partial class ModelLoadEntityHub : BaseHub
 			}
 			else
 			{
-				Application.Log.Warn($"ModelLoadService: parent node not found for entityId='{modelEntity.Id}'.");
+				Application.Log.Warn($"ModelEntityLoadHub: parent node not found for entityId='{modelEntity.Id}'.");
 			}
 		}
 

@@ -38,6 +38,14 @@ public partial class ModelEntityHub : BaseHub
     /// ModelEntity に対する測定機能を取得する。
     /// </summary>
     public ModelEntityMeasurementHub Measurement { get; }
+    /// <summary>
+    /// ModelEntity の置換ロード機能を取得する。
+    /// </summary>
+    public ModelEntityLoadHub Load { get; }
+    /// <summary>
+    /// ModelEntity のシーンロード機能を取得する。
+    /// </summary>
+    public ModelEntitySceneHub Scene { get; }
 
     #endregion
 
@@ -55,6 +63,8 @@ public partial class ModelEntityHub : BaseHub
         Tree = AddModule<ModelEntityTreeHub>("Tree");
         Pick = AddModule<ModelEntityPickHub>("Pick");
         Measurement = AddModule<ModelEntityMeasurementHub>("Measurement");
+        Load = AddModule<ModelEntityLoadHub>("Load");
+        Scene = AddModule<ModelEntitySceneHub>("Scene");
     }
 
     #endregion

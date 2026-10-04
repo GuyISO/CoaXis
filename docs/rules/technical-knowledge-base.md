@@ -52,7 +52,7 @@
 - 影響範囲: `AssetHub`、`SceneAssetLoader`、モデルシーンロードqueue。外部シーンがインスタンス化済みNodeやその依存リソースから参照される間は、それらのメモリは引き続き必要となる。
 - 実装/運用手順: シーンロード要求は従来どおり `SceneAssetLoader` 経由とする。`res://` シーンの明示キャッシュ削除が必要な場合はAssetHubの寿命・クリア方針を変更する。外部ロード利用者がロード前に破棄された場合は利用枠を解放する。
 - 検証方法: 同一 `res://` シーンを複数モデルで使い、AssetHubの同一PackedScene参照が再利用されることを確認する。外部シーンは複数利用完了後にロード状態から除去されること、キャンセル時に利用者数が残らないことを確認し、`check: mojibake` と `dotnet build .\\CoaXis.sln` を実行する。
-- 関連ファイル/関連仕様: `CoaXisViewer/src/application/infrastructure/AssetHub.cs`、`CoaXisViewer/src/model/service/SceneAssetLoader.cs`、`CoaXisViewer/src/application/domain/model/load/ModelLoadSceneHub.cs`
+- 関連ファイル/関連仕様: `CoaXisViewer/src/application/infrastructure/AssetHub.cs`、`CoaXisViewer/src/model/service/SceneAssetLoader.cs`、`CoaXisViewer/src/application/domain/model/entity/ModelEntitySceneHub.cs`
 - 備考: `ResourceLoader.CacheMode.Ignore` は対象シーン本体とsubresourcesをキャッシュ対象外にし、外部依存リソースはGodotの既定Reuse動作に従う。
 
 ---

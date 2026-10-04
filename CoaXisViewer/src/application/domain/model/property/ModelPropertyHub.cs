@@ -13,6 +13,10 @@ public partial class ModelPropertyHub : BaseHub
     /// ModelProperty の識別子と階層を管理するレジストリを取得する。
     /// </summary>
     public ModelPropertyRegistryHub Registry { get; }
+    /// <summary>
+    /// ModelProperty のロード機能を取得する。
+    /// </summary>
+    public ModelPropertyLoadHub Load { get; }
 
     #endregion
 
@@ -24,6 +28,7 @@ public partial class ModelPropertyHub : BaseHub
     public ModelPropertyHub()
     {
         Registry = AddModule<ModelPropertyRegistryHub>("Registry");
+        Load = AddModule<ModelPropertyLoadHub>("Load");
     }
 
     #endregion

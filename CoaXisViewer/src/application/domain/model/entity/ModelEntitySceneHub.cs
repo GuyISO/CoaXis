@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// モデルシーンの非同期ロードと描画ノードへの反映を管理するハブ。
 /// </summary>
-public partial class ModelLoadSceneHub : BaseHub
+public partial class ModelEntitySceneHub : BaseHub
 {
 	#region Fields
 
@@ -190,7 +190,7 @@ public partial class ModelLoadSceneHub : BaseHub
 		}
 		catch (Exception exception)
 		{
-			Application.Log.Error($"ModelSceneService: scene load queue processing failed. {exception}");
+			Application.Log.Error($"ModelEntitySceneHub: scene load queue processing failed. {exception}");
 		}
 		finally
 		{
@@ -248,7 +248,7 @@ public partial class ModelLoadSceneHub : BaseHub
 		catch (Exception exception)
 		{
 			UpdateModelStatus(modelEntity, ModelStatus.LoadFailed);
-			Application.Log.Error($"ModelSceneService: failed to load model assets for entityId='{modelEntity.Id}', scene='{modelEntity.ScenePath}'. {exception}");
+			Application.Log.Error($"ModelEntitySceneHub: failed to load model assets for entityId='{modelEntity.Id}', scene='{modelEntity.ScenePath}'. {exception}");
 			return true;
 		}
 	}

@@ -238,23 +238,24 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - 業務操作の主系はPlanner側
 
 モデル実行時責務:
-- `ModelLoadService`: モデル集合の置換・クリアを統括し、旧世代の非同期ロードを無効化してから論理モデルを破棄する
+- `ModelEntityLoadHub`: Entity集合の置換・クリアを統括し、Sceneロードを無効化してからEntity/Propertyの論理集合を破棄する
 - `ModelEntityMapper`: IPC/ファイルDTOを検証済みの内部ModelEntityへ変換し、CATIA座標系からGodot座標系への変換境界を担う
 - `ModelEntityRegistryHub`: ModelEntityの識別子検索、論理親子関係、未解決リンク、ルート実体およびEntity集合の破棄を担う
 - `ModelPropertyRegistryHub`: ModelPropertyの識別子検索、Property階層、Entityへの所属解決およびProperty集合の破棄を担う
-- `ModelLoadService`: Entity/Property両Registryの階層解決と集合クリアを調整する。Registryは相手の集合全体を所有しない
+- `ModelEntityLoadHub`: Entity/Property両Registryの階層解決と集合クリアを調整する。Registryは相手の集合全体を所有しない
+- `ModelPropertyLoadHub`: Property DTOからModelPropertyを生成し、Property Registryへの登録と階層解決を担う
 - `ModelEntityFactory`: Entity登録とModelNodeの親子構築を担う
-- `ModelSceneService`: シーンロードキュー、ロード世代、フレーム予算、ロード状態遷移、およびロード済みシーンのModelNode反映を担う
+- `ModelEntitySceneHub`: シーンロードキュー、ロード世代、フレーム予算、ロード状態遷移、およびロード済みシーンのModelNode反映を担う
 - `ModelEntityStateHub`: 表示状態切替要求とツリー折畳み通知を論理ModelEntityの状態変更へ変換する。ModelNodeやUIを直接操作しない
 - `ModelEntityVisualHub`: 位置・回転・Visibility・選択強調・透明度をModelNodeへ反映する。論理状態の変更要求やUI参照を保持しない
 - UIツリー: ModelEventとPickEventの通知をTreeItemまたはModelPropertyTreeへ投影する。TreeItemはModel Domainで保持せず、UIをModelPresentationServiceへ参照登録しない
 
 Model中心DomainのFacade構成:
-- `application/domain` をViewerのModel中心領域とし、Model中核・ModelLoad・Entity操作能力を責務ごとに構成する
-- `ModelHub` は `ModelEntityHub`、`ModelPropertyHub`、`ModelLoadHub` を公開する。Entityに関する状態・表示・選択・ツリー・Registryは `ModelEntityHub` 配下へ配置する
-- `ModelEntityHub` は `ModelEntityRegistryHub`、`ModelEntityStateHub`、`ModelEntityVisualHub`、Selection、Tree、`ModelEntityPickHub`、`ModelEntityMeasurementHub` を構成する。PickとMeasurementはModelEntityを対象とするため、`Application.Model.Entity.Pick` / `Application.Model.Entity.Measurement` から公開し、Application直下には配置しない。StateとVisualの責務は独立したまま、ModelHub直下へは公開しない
-- PropertyのRegistryはModelEntityと並ぶ `ModelPropertyHub` が所有し、モデル識別と各論理階層をRegistryごとに管理する
-- `ModelLoadFacade` は `ModelLoadService` と `ModelSceneService` をまとめ、`Application.ModelLoad` 経由でモデル置換・属性ロード・Sceneロードを提供する
+- `application/domain` をViewerのModel中心領域とし、Model中核・Entity/Property別ロード・Entity操作能力を責務ごとに構成する
+- `ModelHub` は `ModelEntityHub` と `ModelPropertyHub` を構成する。Entityに関する状態・表示・選択・ツリー・Registry・ロード・Sceneは `ModelEntityHub` 配下へ配置する
+- `ModelEntityHub` は `ModelEntityRegistryHub`、`ModelEntityStateHub`、`ModelEntityVisualHub`、Selection、Tree、`ModelEntityPickHub`、`ModelEntityMeasurementHub`、`ModelEntityLoadHub`、`ModelEntitySceneHub` を構成する。PickとMeasurementはModelEntityを対象とするため、`Application.Model.Entity.Pick` / `Application.Model.Entity.Measurement` から公開し、Entityの置換ロードとSceneロードもそれぞれ `Application.Model.Entity.Load` / `Application.Model.Entity.Scene` から公開する。StateとVisualの責務は独立したまま、ModelHub直下へは公開しない
+- PropertyのRegistryとロードはModelEntityと並ぶ `ModelPropertyHub` が所有し、`Application.Model.Property.Load` から属性ロードを提供する。Entity/Propertyの識別子集合と論理階層はRegistryごとに管理する
+- `ModelEntityLoadHub` はEntity置換ロードの過程でEntity/Property双方のRegistryの階層解決・クリア順序を調整し、個々のScene読込は `ModelEntitySceneHub` へ委譲する
 - Entityの状態管理と表示反映はそれぞれ対応するHubが担当する。要求・通知契約を重複定義せず、Hubの配置によって責務や処理順を変更しない
 - Selection、Pick、MeasurementはModelEntityを対象とする操作能力としてModelEntityHub配下に置く。各操作Hubの責務は独立させ、Model中核から操作能力への不要な依存・循環依存を禁止する
 - Facade分割は公開責務の境界であり、各Serviceの状態所有者や処理順を変更しない
@@ -436,11 +437,11 @@ payload契約:
 
 `LoadModel`の処理順:
 1. IPC層はpayloadを検証し、モデル実体DTOとモデル属性DTOを受け取る
-2. `Application.Model.Load.Entity`（`ModelLoadService`）は旧世代のSceneロードを無効化し、ModelEntityRegistryHubとModelPropertyRegistryHubの論理集合を順にクリアする
+2. `Application.Model.Entity.Load`（`ModelEntityLoadHub`）は旧世代のSceneロードを無効化し、ModelEntityRegistryHubとModelPropertyRegistryHubの論理集合を順にクリアする
 3. `ModelEntityMapper`でDTOをGodot座標系のModelEntityへ変換する
 4. `ModelEntityFactory`がEntityを登録し、論理階層とModelNodeの親子構造を確立する
-5. UIツリーへ親先行でEntity状態を通知した後、`Application.ModelLoad.Scene`（`ModelSceneService`）が非同期シーンロードを開始する
-6. `ModelSceneService`は`Loading`、`Loaded`、`LoadFailed`を通知し、UIツリーと表示サービスが状態を反映する
+5. UIツリーへEntity集合置換を通知した後、`Application.Model.Entity.Scene`（`ModelEntitySceneHub`）が非同期シーンロードを開始する
+6. `ModelEntitySceneHub`は`Loading`、`Loaded`、`LoadFailed`を通知し、UIツリーと表示サービスが状態を反映する
 
 ViewerからEditor:
 - OnSelect

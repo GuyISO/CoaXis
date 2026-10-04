@@ -226,7 +226,7 @@
 - Artifacts Updated:
   - `CoaXisViewer/src/application/domain/model/entity/ModelEntityRegistryHub.cs`
   - `CoaXisViewer/src/application/domain/model/property/ModelPropertyRegistryHub.cs`
-  - `CoaXisViewer/src/application/domain/model/load/ModelLoadEntityHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityLoadHub.cs`
   - `docs/specification/specification_integrated.md`
   - `.github/instructions/design-philosophy.instructions.md`
 - Notes: Propertyの所属Entity解決にはEntity Registryを参照し、集合の横断操作はModelLoad側に限定する
@@ -256,3 +256,18 @@
   - `.github/instructions/design-philosophy.instructions.md`
   - `docs/specification/specification_integrated.md`
 - Notes: 既存の操作イベント契約・実行責務は維持し、Hubの構成上の所属と公開経路のみ変更する
+
+- Date: 2026-10-04
+- Trigger: ModelのEntity/Propertyロード機能とEntity Sceneロード機能の所属・命名を明確化
+- Decision: Entity置換ロードは `ModelEntityHub.Load`、Propertyロードは `ModelPropertyHub.Load` として各対象Hub配下に配置する。SceneロードHubはEntity機能の一部として `ModelEntityHub.Scene` に置き、型名を `ModelEntitySceneHub` とする。ロード責務の親Hub `ModelLoadHub` は廃止する
+- Scope: CoaXisViewerのModel Domainロード機能
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/model/ModelHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityLoadHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntitySceneHub.cs`
+  - `CoaXisViewer/src/application/domain/model/property/ModelPropertyHub.cs`
+  - `CoaXisViewer/src/application/domain/model/property/ModelPropertyLoadHub.cs`
+  - `CoaXisViewer/src/core/ipc/IpcCommandDispatcher.cs`
+  - `docs/specification/specification_integrated.md`
+- Notes: Entity/Property Registryをまたぐ置換時の階層解決・クリア順序は引き続きModelEntityLoadHubが調整し、SceneロードはModelEntitySceneHubへ委譲する

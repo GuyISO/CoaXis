@@ -70,8 +70,8 @@ public static class IpcCommandDispatcher
             return IpcResultPayload.Failure(IpcEventType.ToViewer.LoadModel, IpcErrorCode.TargetNotFound, "payload.entities must contain at least one model.");
         }
 
-        Application.Model.Load.Entity.ReplaceEntities(modelSetPayload.Entities);
-        Application.Model.Load.Entity.LoadProperties(modelSetPayload.Properties);
+        Application.Model.Entity.Load.ReplaceEntities(modelSetPayload.Entities);
+        Application.Model.Property.Load.LoadProperties(modelSetPayload.Properties);
 
         return IpcResultPayload.Success(
             IpcEventType.ToViewer.LoadModel,

@@ -18,7 +18,6 @@ public partial class ModelHub : BaseHub
     /// ModelProperty 機能を取得する。
     /// </summary>
     public ModelPropertyHub Property { get; }
-    public ModelLoadHub Load { get; }
 
     #endregion
 
@@ -31,7 +30,6 @@ public partial class ModelHub : BaseHub
     {
         Entity = AddModule<ModelEntityHub>("Entity");
         Property = AddModule<ModelPropertyHub>("Property");
-        Load = AddModule<ModelLoadHub>("Load");
     }
 
     #endregion
