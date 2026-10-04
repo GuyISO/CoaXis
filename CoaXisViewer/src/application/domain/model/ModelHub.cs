@@ -19,8 +19,6 @@ public partial class ModelHub : BaseHub
     /// </summary>
     public ModelPropertyHub Property { get; }
     public ModelLoadHub Load { get; }
-    public ModelVisualHub Visual { get; }
-    public ModelStateHub State { get; }
 
     #endregion
 
@@ -34,8 +32,6 @@ public partial class ModelHub : BaseHub
         Entity = AddModule<ModelEntityHub>("Entity");
         Property = AddModule<ModelPropertyHub>("Property");
         Load = AddModule<ModelLoadHub>("Load");
-        Visual = AddModule<ModelVisualHub>("Visual");
-        State = AddModule<ModelStateHub>("State");
     }
 
     #endregion

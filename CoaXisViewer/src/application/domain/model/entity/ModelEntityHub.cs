@@ -14,7 +14,21 @@ public partial class ModelEntityHub : BaseHub
     /// ModelEntity の識別子と階層を管理するレジストリを取得する。
     /// </summary>
     public ModelEntityRegistryHub Registry { get; }
+    /// <summary>
+    /// ModelEntity の論理状態と変更要求を管理するハブを取得する。
+    /// </summary>
+    public ModelEntityStateHub State { get; }
+    /// <summary>
+    /// ModelEntity の表示状態と描画反映を管理するハブを取得する。
+    /// </summary>
+    public ModelEntityVisualHub Visual { get; }
+    /// <summary>
+    /// ModelEntity の選択機能を取得する。
+    /// </summary>
     public ModelEntitySelectionHub Selection { get; }
+    /// <summary>
+    /// ModelEntity のツリー機能を取得する。
+    /// </summary>
     public ModelEntityTreeHub Tree { get; }
 
     #endregion
@@ -27,6 +41,8 @@ public partial class ModelEntityHub : BaseHub
     public ModelEntityHub()
     {
         Registry = AddModule<ModelEntityRegistryHub>("Registry");
+        State = AddModule<ModelEntityStateHub>("State");
+        Visual = AddModule<ModelEntityVisualHub>("Visual");
         Selection = AddModule<ModelEntitySelectionHub>("Selection");
         Tree = AddModule<ModelEntityTreeHub>("Tree");
     }

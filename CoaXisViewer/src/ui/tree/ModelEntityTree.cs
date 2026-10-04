@@ -104,9 +104,9 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.ClearedNotified += OnClearedNotified;
         Application.Model.Entity.Registry.Added += OnModelAdded;
         Application.Model.Entity.Registry.ModelSetReplaced += OnModelSetReplaced;
-        Application.Model.State.VisibilityNotified += OnModelVisibilityNotified;
-        Application.Model.State.Collapsed += OnModelCollapsed;
-        Application.Model.State.StatusNotified += OnModelStatusNotified;
+        Application.Model.Entity.State.VisibilityNotified += OnModelVisibilityNotified;
+        Application.Model.Entity.State.Collapsed += OnModelCollapsed;
+        Application.Model.Entity.State.StatusNotified += OnModelStatusNotified;
         Application.Model.Entity.Registry.Cleared += OnEntityRegistryClearedNotified;
         Application.Model.Entity.Tree.CenteringRequested += OnTreeCenteringRequested;
     }
@@ -121,9 +121,9 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.ClearedNotified -= OnClearedNotified;
         Application.Model.Entity.Registry.Added -= OnModelAdded;
         Application.Model.Entity.Registry.ModelSetReplaced -= OnModelSetReplaced;
-        Application.Model.State.VisibilityNotified -= OnModelVisibilityNotified;
-        Application.Model.State.StatusNotified -= OnModelStatusNotified;
-        Application.Model.State.Collapsed -= OnModelCollapsed;
+        Application.Model.Entity.State.VisibilityNotified -= OnModelVisibilityNotified;
+        Application.Model.Entity.State.StatusNotified -= OnModelStatusNotified;
+        Application.Model.Entity.State.Collapsed -= OnModelCollapsed;
         Application.Model.Entity.Registry.Cleared -= OnEntityRegistryClearedNotified;
         Application.Model.Entity.Tree.CenteringRequested -= OnTreeCenteringRequested;
     }
@@ -188,7 +188,7 @@ public partial class ModelEntityTree : Tree
         RefreshAllHighlights();
 
         // モデルの折り畳み状態が変更されたことを通知
-        Application.Model.State.NotifyCollapsed(TryGetEntityId(item), item.IsCollapsed());
+        Application.Model.Entity.State.NotifyCollapsed(TryGetEntityId(item), item.IsCollapsed());
     }
 
     /// <summary>
@@ -743,7 +743,7 @@ public partial class ModelEntityTree : Tree
         }
 
         // モデル実体の表示状態を切り替える
-        Application.Model.State.ToggleModelVisibility(entityId);
+        Application.Model.Entity.State.ToggleModelVisibility(entityId);
     }
 
     /// <summary>

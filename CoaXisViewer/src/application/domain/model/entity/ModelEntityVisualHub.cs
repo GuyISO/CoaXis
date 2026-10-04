@@ -6,7 +6,7 @@ using System.Collections.Generic;
 /// <summary>
 /// モデルの表示状態と描画ノードへの反映を管理するハブ。
 /// </summary>
-public partial class ModelVisualHub : BaseHub
+public partial class ModelEntityVisualHub : BaseHub
 {
 	#region Fields
 
@@ -149,12 +149,12 @@ public partial class ModelVisualHub : BaseHub
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Model.State.PositionNotified += OnModelPositionNotified;
-		Application.Model.State.RotationNotified += OnModelRotationNotified;
-		Application.Model.State.VisibilityNotified += OnModelVisibilityNotified;
+		Application.Model.Entity.State.PositionNotified += OnModelPositionNotified;
+		Application.Model.Entity.State.RotationNotified += OnModelRotationNotified;
+		Application.Model.Entity.State.VisibilityNotified += OnModelVisibilityNotified;
 		Application.Model.Entity.Registry.Added += OnModelAdded;
 		Application.Model.Entity.Registry.ModelSetReplaced += OnModelSetReplaced;
-		Application.Model.State.StatusNotified += OnModelStatusNotified;
+		Application.Model.Entity.State.StatusNotified += OnModelStatusNotified;
 		Application.Model.Entity.Selection.Selected += OnSelected;
 	}
 
@@ -163,12 +163,12 @@ public partial class ModelVisualHub : BaseHub
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Model.State.PositionNotified -= OnModelPositionNotified;
-		Application.Model.State.RotationNotified -= OnModelRotationNotified;
-		Application.Model.State.VisibilityNotified -= OnModelVisibilityNotified;
+		Application.Model.Entity.State.PositionNotified -= OnModelPositionNotified;
+		Application.Model.Entity.State.RotationNotified -= OnModelRotationNotified;
+		Application.Model.Entity.State.VisibilityNotified -= OnModelVisibilityNotified;
 		Application.Model.Entity.Registry.Added -= OnModelAdded;
 		Application.Model.Entity.Registry.ModelSetReplaced -= OnModelSetReplaced;
-		Application.Model.State.StatusNotified -= OnModelStatusNotified;
+		Application.Model.Entity.State.StatusNotified -= OnModelStatusNotified;
 		Application.Model.Entity.Selection.Selected -= OnSelected;
 	}
 
@@ -398,7 +398,7 @@ public partial class ModelVisualHub : BaseHub
 			ApplyModelTransparency(rootEntity.Node);
 		}
 
-		Application.Model.State.NotifyTransparency(value);
+		Application.Model.Entity.State.NotifyTransparency(value);
 	}
 
 	#endregion

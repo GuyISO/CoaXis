@@ -230,3 +230,16 @@
   - `docs/specification/specification_integrated.md`
   - `.github/instructions/design-philosophy.instructions.md`
 - Notes: Propertyの所属Entity解決にはEntity Registryを参照し、集合の横断操作はModelLoad側に限定する
+
+- Date: 2026-10-04
+- Trigger: Model.VisualとModel.StateをModel.Entity配下へ移動
+- Decision: ModelEntityに関する状態管理・表示反映は `ModelEntityStateHub` と `ModelEntityVisualHub` が担当し、両Hubを `ModelEntityHub` の子として構成する。Hubの親子関係は機能の所属を示し、State/Visualの責務分離と依存境界は維持する
+- Scope: CoaXisViewerのModel Hub構成とその利用側
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/model/ModelHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityStateHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityVisualHub.cs`
+  - `docs/specification/specification_integrated.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: 呼び出し側は `Application.Model.Entity.State` と `Application.Model.Entity.Visual` を使用する

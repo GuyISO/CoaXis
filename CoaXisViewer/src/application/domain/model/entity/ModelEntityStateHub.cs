@@ -5,7 +5,7 @@ using System;
 /// <summary>
 /// モデルの論理状態と変更要求を管理するハブ。
 /// </summary>
-public partial class ModelStateHub : BaseHub
+public partial class ModelEntityStateHub : BaseHub
 {
 	#region Fields
 
@@ -130,8 +130,8 @@ public partial class ModelStateHub : BaseHub
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Model.State.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
-		Application.Model.State.Collapsed += OnModelCollapsed;
+		Application.Model.Entity.State.ToggleModelVisibilityRequested += OnToggleModelVisibilityRequested;
+		Application.Model.Entity.State.Collapsed += OnModelCollapsed;
 	}
 
 	/// <summary>
@@ -139,8 +139,8 @@ public partial class ModelStateHub : BaseHub
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Model.State.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
-		Application.Model.State.Collapsed -= OnModelCollapsed;
+		Application.Model.Entity.State.ToggleModelVisibilityRequested -= OnToggleModelVisibilityRequested;
+		Application.Model.Entity.State.Collapsed -= OnModelCollapsed;
 	}
 
 	/// <summary>

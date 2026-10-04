@@ -245,15 +245,17 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - `ModelLoadService`: Entity/Property両Registryの階層解決と集合クリアを調整する。Registryは相手の集合全体を所有しない
 - `ModelEntityFactory`: Entity登録とModelNodeの親子構築を担う
 - `ModelSceneService`: シーンロードキュー、ロード世代、フレーム予算、ロード状態遷移、およびロード済みシーンのModelNode反映を担う
-- `ModelStateService`: 表示状態切替要求とツリー折畳み通知を論理ModelEntityの状態変更へ変換する。ModelNodeやUIを直接操作しない
-- `ModelPresentationService`: 位置・回転・Visibility・選択強調・透明度をModelNodeへ反映する。論理状態の変更要求やUI参照を保持しない
+- `ModelEntityStateHub`: 表示状態切替要求とツリー折畳み通知を論理ModelEntityの状態変更へ変換する。ModelNodeやUIを直接操作しない
+- `ModelEntityVisualHub`: 位置・回転・Visibility・選択強調・透明度をModelNodeへ反映する。論理状態の変更要求やUI参照を保持しない
 - UIツリー: ModelEventとPickEventの通知をTreeItemまたはModelPropertyTreeへ投影する。TreeItemはModel Domainで保持せず、UIをModelPresentationServiceへ参照登録しない
 
 Model中心DomainのFacade構成:
-- `application/domain` をViewerのModel中心領域とし、Model中核・ModelLoad・ModelState・ModelPresentation・Selection・Measurementを兄弟能力として配置する
-- `ModelFacade` はEntity/PropertyそれぞれのRegistryを公開し、モデル識別と論理階層の中核を所有する
+- `application/domain` をViewerのModel中心領域とし、Model中核・ModelLoad・Selection・Measurementを能力ごとに構成する
+- `ModelHub` は `ModelEntityHub`、`ModelPropertyHub`、`ModelLoadHub` を公開する。Entityに関する状態・表示・選択・ツリー・Registryは `ModelEntityHub` 配下へ配置する
+- `ModelEntityHub` は `ModelEntityRegistryHub`、`ModelEntityStateHub`、`ModelEntityVisualHub`、Selection、Treeを構成する。StateとVisualの責務は独立したまま、ModelHub直下へは公開しない
+- PropertyのRegistryはModelEntityと並ぶ `ModelPropertyHub` が所有し、モデル識別と各論理階層をRegistryごとに管理する
 - `ModelLoadFacade` は `ModelLoadService` と `ModelSceneService` をまとめ、`Application.ModelLoad` 経由でモデル置換・属性ロード・Sceneロードを提供する
-- `ModelStateFacade` と `ModelPresentationFacade` はそれぞれ対応するServiceを公開する。要求・通知契約は既存の `ModelEvent` を利用し、Facade間でイベントを重複定義しない
+- Entityの状態管理と表示反映はそれぞれ対応するHubが担当する。要求・通知契約を重複定義せず、Hubの配置によって責務や処理順を変更しない
 - SelectionとMeasurementはModelを利用する操作能力であり、Model配下へ移動しない。Model中核からSelection/Measurementへの依存を禁止し、PresentationからSelection通知を受ける依存は許容する
 - Facade分割は公開責務の境界であり、各Serviceの状態所有者や処理順を変更しない
 
