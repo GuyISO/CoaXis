@@ -26,7 +26,11 @@ public partial class UiHub : BaseHub
 	}
 
 	#endregion
-	
+
+	#region Signals
+
+	#endregion
+
 	#region Events
 
 	#endregion

@@ -8,6 +8,26 @@ using System.Collections.Generic;
 /// </summary>
 public partial class ModelPropertyLoadHub : BaseHub
 {
+    #region Fields
+
+    #endregion
+
+    #region Properties
+
+    #endregion
+
+    #region Lifecycle
+
+    #endregion
+
+    #region Signals
+
+    #endregion
+
+    #region Events
+
+    #endregion
+
     #region Methods
 
     /// <summary>
@@ -33,6 +53,10 @@ public partial class ModelPropertyLoadHub : BaseHub
         Application.Model.Property.Registry.ResolveHierarchy();
         return properties;
     }
+
+    #endregion
+
+    #region Helpers
 
     #endregion
 }

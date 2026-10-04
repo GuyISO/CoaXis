@@ -23,6 +23,10 @@ public partial class UiMenuHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
 
     #endregion

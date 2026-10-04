@@ -52,9 +52,9 @@ public partial class SettingHub : BaseHub
     /// </summary>
     public ViewerSettings Current { get; private set; } = ViewerSettings.CreateDefault();
 
-	#endregion
+    #endregion
 
-	#region Lifecycle
+    #region Lifecycle
 
     /// <summary>
     /// AutoLoad 初期化時に設定を読み込む。
@@ -64,9 +64,9 @@ public partial class SettingHub : BaseHub
         Reload();
     }
 
-	#endregion
+    #endregion
 
-	#region Events
+    #region Signals
 
     [Signal] public delegate void SettingsNotifiedEventHandler();
     /// <summary>
@@ -76,6 +76,10 @@ public partial class SettingHub : BaseHub
     {
         EmitSignal(SignalName.SettingsNotified);
     }
+
+    #endregion
+
+    #region Events
 
     #endregion
 
@@ -126,9 +130,9 @@ public partial class SettingHub : BaseHub
         return false;
     }
 
-	#endregion
+    #endregion
 
-	#region Helpers
+    #region Helpers
 
     /// <summary>
     /// 指定パスの JSON 設定を読み込み、正規化して返す。
@@ -246,5 +250,5 @@ public partial class SettingHub : BaseHub
         return AppContext.BaseDirectory;
     }
 
-	#endregion
+    #endregion
 }

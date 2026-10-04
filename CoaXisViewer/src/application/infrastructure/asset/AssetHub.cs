@@ -29,11 +29,11 @@ public partial class AssetHub : BaseHub
 
     #endregion
 
-    #region Actions
+    #region Signals
 
     #endregion
 
-    #region Notifications
+    #region Events
 
     #endregion
 

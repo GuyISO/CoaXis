@@ -23,7 +23,22 @@ public partial class UiWindowHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
+
+    /// <summary>
+    /// ウィンドウがツリーから退出したときにキャッシュから削除するためのイベントハンドラ
+    /// </summary>
+    private void OnWindowTreeExited(string cacheKey, UiWindow window)
+    {
+        if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow) && cachedWindow == window)
+        {
+            _windowCache.Remove(cacheKey);
+        }
+    }
 
     #endregion
 
@@ -100,17 +115,6 @@ public partial class UiWindowHub : BaseHub
         window.Show();
         window.GrabFocus();
 
-    }
-
-    /// <summary>
-    /// ウィンドウがツリーから退出したときにキャッシュから削除するためのイベントハンドラ
-    /// </summary>
-    private void OnWindowTreeExited(string cacheKey, UiWindow window)
-    {
-        if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow) && cachedWindow == window)
-        {
-            _windowCache.Remove(cacheKey);
-        }
     }
 
     /// <summary>

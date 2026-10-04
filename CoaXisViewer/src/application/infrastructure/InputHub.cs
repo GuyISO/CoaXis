@@ -37,6 +37,10 @@ public partial class InputHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
 
     #endregion

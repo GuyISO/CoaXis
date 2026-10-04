@@ -22,6 +22,18 @@ public partial class ModelPropertyRegistryHub : BaseHub
 
     #endregion
 
+    #region Lifecycle
+
+    #endregion
+
+    #region Signals
+
+    #endregion
+
+    #region Events
+
+    #endregion
+
     #region Methods
 
     /// <summary>

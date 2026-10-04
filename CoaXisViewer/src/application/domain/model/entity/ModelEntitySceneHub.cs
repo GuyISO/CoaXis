@@ -29,11 +29,7 @@ public partial class ModelEntitySceneHub : BaseHub
 
 	#endregion
 
-	#region Actions
-
-	#endregion
-
-	#region Notifications
+	#region Signals
 
 	#endregion
 

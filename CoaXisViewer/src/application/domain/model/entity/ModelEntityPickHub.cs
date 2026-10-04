@@ -36,7 +36,7 @@ public partial class ModelEntityPickHub : BaseHub
 
     #endregion
 
-    #region Notifications
+    #region Signals
 
     /// <summary>選択操作モードの変更通知。</summary>
     [Signal] public delegate void HandlingModeNotifiedEventHandler();
@@ -64,6 +64,10 @@ public partial class ModelEntityPickHub : BaseHub
 
     #endregion
 
+    #region Events
+
+    #endregion
+
     #region Methods
 
     /// <summary>
@@ -85,5 +89,4 @@ public partial class ModelEntityPickHub : BaseHub
     #region Helpers
 
     #endregion
-
 }

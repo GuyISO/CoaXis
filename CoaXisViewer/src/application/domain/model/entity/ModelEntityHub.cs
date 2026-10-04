@@ -69,11 +69,7 @@ public partial class ModelEntityHub : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
+    #region Signals
 
     #endregion
 

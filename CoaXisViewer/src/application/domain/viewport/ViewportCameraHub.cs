@@ -61,7 +61,7 @@ public partial class ViewportCameraHub : BaseHub
 
     #endregion
 
-    #region Events
+    #region Signals
 
     /// <summary>注視点位置の変更通知。</summary>
     [Signal] public delegate void PositionNotifiedEventHandler();
@@ -86,6 +86,37 @@ public partial class ViewportCameraHub : BaseHub
 
     /// <summary>クリップ終了距離の通知。</summary>
     [Signal] public delegate void CameraFarNotifiedEventHandler();
+
+    #endregion
+
+    #region Events
+
+    /// <summary>
+    /// ピック結果通知の購読を開始する。
+    /// </summary>
+    private void SubscribeEvents()
+    {
+        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+    }
+
+    /// <summary>
+    /// ピック結果通知の購読を解除する。
+    /// </summary>
+    private void UnsubscribeEvents()
+    {
+        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+    }
+
+    private void OnPickResultNotified(PickResult pickResult)
+    {
+        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.NormalToFace || !pickResult.HasHit)
+        {
+            return;
+        }
+
+        MovePositionTo(pickResult.Position, true);
+        AlignNormalTo(pickResult.Normal, true);
+    }
 
     #endregion
 
@@ -290,10 +321,6 @@ public partial class ViewportCameraHub : BaseHub
         MoveRotationTo(targetRotation, useTween);
     }
 
-    #endregion
-
-    #region Methods
-
     internal void UpdatePosition(Vector3 value)
     {
         Position = value;
@@ -372,33 +399,6 @@ public partial class ViewportCameraHub : BaseHub
         BuildTween().TweenMethod(Callable.From<float>(value =>
             UpdateFov(value)), start, fov,
             Application.Setting.Current.Camera.TweenDuration);
-    }
-
-    /// <summary>
-    /// ピック結果通知の購読を開始する。
-    /// </summary>
-    private void SubscribeEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
-    }
-
-    /// <summary>
-    /// ピック結果通知の購読を解除する。
-    /// </summary>
-    private void UnsubscribeEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
-    }
-
-    private void OnPickResultNotified(PickResult pickResult)
-    {
-        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.NormalToFace || !pickResult.HasHit)
-        {
-            return;
-        }
-
-        MovePositionTo(pickResult.Position, true);
-        AlignNormalTo(pickResult.Normal, true);
     }
 
     private Tween BuildTween()

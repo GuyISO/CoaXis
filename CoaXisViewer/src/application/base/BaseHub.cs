@@ -17,11 +17,7 @@ public abstract partial class BaseHub : Node
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
+    #region Signals
 
     #endregion
 

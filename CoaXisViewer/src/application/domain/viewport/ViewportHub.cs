@@ -20,7 +20,7 @@ public partial class ViewportHub : BaseHub
 	/// <summary>操作モードと操作補助表示を管理するHubを取得する。</summary>
 	internal ViewportInteractionHub Interaction { get; private set; } = null!;
 
-    #endregion
+	#endregion
 
 	#region Lifecycle
 
@@ -36,15 +36,19 @@ public partial class ViewportHub : BaseHub
 
 	#endregion
 
-    #region Events
+	#region Signals
 
-    #endregion
+	#endregion
 
-    #region Methods
+	#region Events
 
-    #endregion
+	#endregion
 
-    #region Helpers
+	#region Methods
 
-    #endregion
+	#endregion
+
+	#region Helpers
+
+	#endregion
 }

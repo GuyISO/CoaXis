@@ -21,11 +21,7 @@ public partial class ModelEntityLoadHub : BaseHub
 
 	#endregion
 
-	#region Actions
-
-	#endregion
-
-	#region Notifications
+	#region Signals
 
 	#endregion
 

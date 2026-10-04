@@ -29,6 +29,10 @@ public partial class AssetSceneHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
 
     #endregion

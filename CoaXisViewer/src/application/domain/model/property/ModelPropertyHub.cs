@@ -33,6 +33,10 @@ public partial class ModelPropertyHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
 
     #endregion

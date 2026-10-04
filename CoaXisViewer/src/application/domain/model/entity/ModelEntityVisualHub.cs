@@ -37,12 +37,10 @@ public partial class ModelEntityVisualHub : BaseHub
 
 	#endregion
 
-	#region Actions
+	#region Signals
 
 	#endregion
 
-
-    
 	#region Events
 
 	/// <summary>
@@ -457,6 +455,6 @@ public partial class ModelEntityVisualHub : BaseHub
 		}
 		return false;
 	}
-	
+
 	#endregion
 }

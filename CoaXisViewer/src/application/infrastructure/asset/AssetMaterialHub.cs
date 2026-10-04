@@ -34,6 +34,10 @@ public partial class AssetMaterialHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
 
     // TODO: Settingから管理を委譲したら削除できるはず

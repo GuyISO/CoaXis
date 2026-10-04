@@ -33,6 +33,10 @@ public partial class AssetIconHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
 
     #endregion

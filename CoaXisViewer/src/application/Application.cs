@@ -70,8 +70,12 @@ public partial class Application : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Events
-    
+
     #endregion
 
     #region Methods

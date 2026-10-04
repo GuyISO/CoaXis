@@ -31,7 +31,7 @@ public partial class CommandHub : BaseHub
 
 	#endregion
 
-	#region Events
+	#region Signals
 
 	[Signal] public delegate void ExecutedEventHandler();
 	/// <summary>
@@ -41,6 +41,10 @@ public partial class CommandHub : BaseHub
 	{
 		EmitSignal(SignalName.Executed);
 	}
+
+	#endregion
+
+	#region Events
 
 	#endregion
 

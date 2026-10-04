@@ -44,7 +44,7 @@ public partial class ModelEntityRegistryHub : BaseHub
 
     #endregion
 
-    #region Notifications
+    #region Signals
 
     /// <summary>
     /// ModelEntity の追加を表すシグナル。
@@ -89,6 +89,10 @@ public partial class ModelEntityRegistryHub : BaseHub
     {
         EmitSignal(SignalName.Cleared);
     }
+
+    #endregion
+
+    #region Events
 
     #endregion
 

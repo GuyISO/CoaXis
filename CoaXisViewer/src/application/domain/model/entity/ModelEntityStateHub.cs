@@ -8,53 +8,19 @@ using System;
 /// </summary>
 public partial class ModelEntityStateHub : BaseHub
 {
-	#region Actions
-
-	/// <summary>
-	/// モデルの表示/非表示を切り替える
-	/// </summary>
-	/// <param name="entityId">切替対象の ModelEntity の識別子</param>
-	internal void ToggleModelVisibility(Guid entityId)
-	{
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelStateService: toggle target not found. entityId='{entityId}'");
-			return;
-		}
-
-		var command = new SetModelVisibilityCommand(
-			[entityId],
-			GetNextVisibility(modelEntity.Visibility));
-		Application.Command.Execute(command);
-	}
-
-	/// <summary>
-	/// モデルの折り畳み状態を更新し、変更があった場合に通知する
-	/// </summary>
-	/// <param name="entityId">対象 ModelEntity の識別子</param>
-	/// <param name="isCollapsed">折り畳む場合は true、展開する場合は false</param>
-	internal void SetCollapsed(Guid entityId, bool isCollapsed)
-	{
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelStateService: collapse target not found. entityId='{entityId}'");
-			return;
-		}
-
-		if (modelEntity.IsCollapsed == isCollapsed)
-		{
-			return;
-		}
-
-		modelEntity.IsCollapsed = isCollapsed;
-		EmitSignal(SignalName.Collapsed, entityId.ToString());
-	}
+	#region Fields
 
 	#endregion
 
-	#region Notifications
+	#region Properties
+
+	#endregion
+
+	#region Lifecycle
+
+	#endregion
+
+	#region Signals
 
 	/// <summary>モデルの配置位置の変更通知。値は ModelEntity.Position を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
@@ -106,6 +72,56 @@ public partial class ModelEntityStateHub : BaseHub
 	internal void NotifyRegistryCleared()
 	{
 		EmitSignal(SignalName.RegistryCleared);
+	}
+
+	#endregion
+
+	#region Events
+
+	#endregion
+
+	#region Methods
+
+	/// <summary>
+	/// モデルの表示/非表示を切り替える
+	/// </summary>
+	/// <param name="entityId">切替対象の ModelEntity の識別子</param>
+	internal void ToggleModelVisibility(Guid entityId)
+	{
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+		if (modelEntity == null)
+		{
+			Application.Log.Warn($"ModelStateService: toggle target not found. entityId='{entityId}'");
+			return;
+		}
+
+		var command = new SetModelVisibilityCommand(
+			[entityId],
+			GetNextVisibility(modelEntity.Visibility));
+		Application.Command.Execute(command);
+	}
+
+	/// <summary>
+	/// モデルの折り畳み状態を更新し、変更があった場合に通知する
+	/// </summary>
+	/// <param name="entityId">対象 ModelEntity の識別子</param>
+	/// <param name="isCollapsed">折り畳む場合は true、展開する場合は false</param>
+	internal void SetCollapsed(Guid entityId, bool isCollapsed)
+	{
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+		if (modelEntity == null)
+		{
+			Application.Log.Warn($"ModelStateService: collapse target not found. entityId='{entityId}'");
+			return;
+		}
+
+		if (modelEntity.IsCollapsed == isCollapsed)
+		{
+			return;
+		}
+
+		modelEntity.IsCollapsed = isCollapsed;
+		EmitSignal(SignalName.Collapsed, entityId.ToString());
 	}
 
 	#endregion

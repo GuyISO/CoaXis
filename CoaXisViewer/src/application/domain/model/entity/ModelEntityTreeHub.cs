@@ -20,9 +20,14 @@ public partial class ModelEntityTreeHub : BaseHub
 
 	#endregion
 
-	#region Events
+	#region Signals
 
 	[Signal] public delegate void CenteringRequestedEventHandler(string entityId);
+
+	#endregion
+
+	#region Events
+
 	/// <summary>
 	/// 指定したモデルをツリーの中央へ表示する操作をリクエストする
 	/// </summary>
@@ -41,5 +46,4 @@ public partial class ModelEntityTreeHub : BaseHub
 	#region Helpers
 
 	#endregion
-
 }

@@ -34,11 +34,7 @@ public partial class ModelHub : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
+    #region Signals
 
     #endregion
 

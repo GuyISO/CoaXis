@@ -56,16 +56,6 @@ public partial class ModelEntitySelectionHub : BaseHub
         SubscribeApplicationEvents();
     }
 
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
-        Application.Model.Entity.Pick.ResultsNotified += OnPickResultsNotified;
-        Application.Model.Entity.Registry.Cleared += OnEntityRegistryCleared;
-    }
-
     public override void _ExitTree()
     {
         UnsubscribeApplicationEvents();
@@ -73,19 +63,9 @@ public partial class ModelEntitySelectionHub : BaseHub
         base._ExitTree();
     }
 
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
-        Application.Model.Entity.Pick.ResultsNotified -= OnPickResultsNotified;
-        Application.Model.Entity.Registry.Cleared -= OnEntityRegistryCleared;
-    }
-
     #endregion
 
-    #region Events
+    #region Signals
 
     /// <summary>選択モードの変更通知。</summary>
     [Signal] public delegate void ModeNotifiedEventHandler();
@@ -112,6 +92,26 @@ public partial class ModelEntitySelectionHub : BaseHub
     #endregion
 
     #region Events
+
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultsNotified += OnPickResultsNotified;
+        Application.Model.Entity.Registry.Cleared += OnEntityRegistryCleared;
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
+    private void UnsubscribeApplicationEvents()
+    {
+        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultsNotified -= OnPickResultsNotified;
+        Application.Model.Entity.Registry.Cleared -= OnEntityRegistryCleared;
+    }
 
     /// <summary>
     /// ピック結果の通知を受け取る
