@@ -91,8 +91,8 @@ public partial class SelectionUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Selection.ModeNotified += OnModeNotified;
-        Application.Selection.ModelStateNotified += OnModelStateNotified;
+        Application.Model.Entity.Selection.ModeNotified += OnModeNotified;
+        Application.Model.Entity.Selection.Selected += OnSelected;
     }
 
     /// <summary>
@@ -101,8 +101,8 @@ public partial class SelectionUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Selection.ModeNotified -= OnModeNotified;
-        Application.Selection.ModelStateNotified -= OnModelStateNotified;
+        Application.Model.Entity.Selection.ModeNotified -= OnModeNotified;
+        Application.Model.Entity.Selection.Selected -= OnSelected;
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ public partial class SelectionUi : PanelContainer
     {
         if (mode == PickHandlingMode.Selection)
         {
-            UpdateModeButtons(Application.Selection.Mode);
+            UpdateModeButtons(Application.Model.Entity.Selection.Mode);
             return;
         }
 
@@ -126,7 +126,7 @@ public partial class SelectionUi : PanelContainer
     private void OnButtonSetPressed()
     {
         Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.SetMode(SelectionMode.Set);
+        Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
     }
 
     /// <summary>
@@ -135,7 +135,7 @@ public partial class SelectionUi : PanelContainer
     private void OnButtonAddPressed()
     {
         Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.SetMode(SelectionMode.Add);
+        Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Add);
     }
 
     /// <summary>
@@ -144,7 +144,7 @@ public partial class SelectionUi : PanelContainer
     private void OnButtonRemovePressed()
     {
         Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.SetMode(SelectionMode.Remove);
+        Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Remove);
     }
 
     /// <summary>
@@ -153,7 +153,7 @@ public partial class SelectionUi : PanelContainer
     private void OnButtonTogglePressed()
     {
         Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
-        Application.Selection.SetMode(SelectionMode.Toggle);
+        Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Toggle);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonClearPressed()
     {
-        Application.Selection.Clear();
+        Application.Model.Entity.Selection.Clear();
     }
 
     /// <summary>
@@ -191,7 +191,7 @@ public partial class SelectionUi : PanelContainer
     /// 選択モード通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
     /// <param name="mode">通知された選択モード</param>
-    private void OnModeNotified(SelectionMode mode)
+    private void OnModeNotified(ModelEntitySelectionMode mode)
     {
         UpdateModeButtons(mode);
     }
@@ -201,7 +201,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
     /// <param name="isSelected">選択状態</param>
-    private void OnModelStateNotified(string entityId, bool isSelected)
+    private void OnSelected(string entityId, bool isSelected)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -233,10 +233,10 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void SyncInitialState()
     {
-        UpdateModeButtons(Application.Selection.Mode);
+        UpdateModeButtons(Application.Model.Entity.Selection.Mode);
 
         _selectedEntityIds.Clear();
-        IReadOnlyCollection<Guid> selectedEntityIds = Application.Selection.EntityIds;
+        IReadOnlyCollection<Guid> selectedEntityIds = Application.Model.Entity.Selection.EntityIds;
         if (selectedEntityIds != null && selectedEntityIds.Count > 0)
         {
             _selectedEntityIds.AddRange(selectedEntityIds);
@@ -249,12 +249,12 @@ public partial class SelectionUi : PanelContainer
     /// モード切替ボタンの押下状態を更新する
     /// </summary>
     /// <param name="mode">選択モード</param>
-    private void UpdateModeButtons(SelectionMode? mode)
+    private void UpdateModeButtons(ModelEntitySelectionMode? mode)
     {
-        _buttonSet.ButtonPressed = mode == SelectionMode.Set;
-        _buttonAdd.ButtonPressed = mode == SelectionMode.Add;
-        _buttonRemove.ButtonPressed = mode == SelectionMode.Remove;
-        _buttonToggle.ButtonPressed = mode == SelectionMode.Toggle;
+        _buttonSet.ButtonPressed = mode == ModelEntitySelectionMode.Set;
+        _buttonAdd.ButtonPressed = mode == ModelEntitySelectionMode.Add;
+        _buttonRemove.ButtonPressed = mode == ModelEntitySelectionMode.Remove;
+        _buttonToggle.ButtonPressed = mode == ModelEntitySelectionMode.Toggle;
     }
 
     /// <summary>

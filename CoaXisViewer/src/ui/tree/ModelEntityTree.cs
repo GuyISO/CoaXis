@@ -100,15 +100,15 @@ public partial class ModelEntityTree : Tree
     private void SubscribeApplicationEvents()
     {
         Application.Setting.SettingsNotified += ApplySettings;
-        Application.Selection.ModelStateNotified += OnModelSelectionStateNotified;
-        Application.Selection.ClearedNotified += OnClearedNotified;
+        Application.Model.Entity.Selection.Selected += OnSelected;
+        Application.Model.Entity.Selection.ClearedNotified += OnClearedNotified;
         Application.Model.Registry.Added += OnModelAdded;
         Application.Model.Registry.ModelSetReplaced += OnModelSetReplaced;
         Application.Model.State.VisibilityNotified += OnModelVisibilityNotified;
         Application.Model.State.Collapsed += OnModelCollapsed;
         Application.Model.State.StatusNotified += OnModelStatusNotified;
         Application.Model.Registry.Cleared += OnRegistryClearedNotified;
-        Application.Model.Tree.TreeCenteringRequested += OnTreeCenteringRequested;
+        Application.Model.Entity.Tree.CenteringRequested += OnTreeCenteringRequested;
     }
 
     /// <summary>
@@ -117,15 +117,15 @@ public partial class ModelEntityTree : Tree
     private void UnsubscribeApplicationEvents()
     {
         Application.Setting.SettingsNotified -= ApplySettings;
-        Application.Selection.ModelStateNotified -= OnModelSelectionStateNotified;
-        Application.Selection.ClearedNotified -= OnClearedNotified;
+        Application.Model.Entity.Selection.Selected -= OnSelected;
+        Application.Model.Entity.Selection.ClearedNotified -= OnClearedNotified;
         Application.Model.Registry.Added -= OnModelAdded;
         Application.Model.Registry.ModelSetReplaced -= OnModelSetReplaced;
         Application.Model.State.VisibilityNotified -= OnModelVisibilityNotified;
         Application.Model.State.StatusNotified -= OnModelStatusNotified;
         Application.Model.State.Collapsed -= OnModelCollapsed;
         Application.Model.Registry.Cleared -= OnRegistryClearedNotified;
-        Application.Model.Tree.TreeCenteringRequested -= OnTreeCenteringRequested;
+        Application.Model.Entity.Tree.CenteringRequested -= OnTreeCenteringRequested;
     }
 
     /// <summary>
@@ -196,7 +196,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     /// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    private void OnModelSelectionStateNotified(string entityId, bool isSelected)
+    private void OnSelected(string entityId, bool isSelected)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -546,7 +546,7 @@ public partial class ModelEntityTree : Tree
     private void RefreshAllHighlights()
     {
         HashSet<TreeItem> nextHighlightedItems = new();
-        foreach (Guid entityId in Application.Selection.EntityIds)
+        foreach (Guid entityId in Application.Model.Entity.Selection.EntityIds)
         {
             if (entityId == Guid.Empty)
             {
@@ -596,7 +596,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        SelectionMode mode = Application.Selection.Mode;
+        ModelEntitySelectionMode mode = Application.Model.Entity.Selection.Mode;
         bool shouldHandleAsRange = ShouldHandleAsRangeSelection(mode);
 
         if (!shouldHandleAsRange)
@@ -616,10 +616,10 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     /// <param name="mode">現在の選択モード</param>
     /// <returns>範囲選択として扱う場合は true</returns>
-    private bool ShouldHandleAsRangeSelection(SelectionMode mode)
+    private bool ShouldHandleAsRangeSelection(ModelEntitySelectionMode mode)
     {
         // AddモードやRemoveモードかつすでに何か選択中のアイテムがある場合は範囲選択として扱う
-        if (mode != SelectionMode.Add && mode != SelectionMode.Remove)
+        if (mode != ModelEntitySelectionMode.Add && mode != ModelEntitySelectionMode.Remove)
         {
             return false;
         }

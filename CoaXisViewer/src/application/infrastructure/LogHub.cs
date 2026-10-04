@@ -3,6 +3,21 @@ using System;
 using System.IO;
 
 /// <summary>
+/// ログレベルを表す列挙型
+/// </summary>
+public enum LogLevel
+{
+    /// <summary>開発中のデバッグ用</summary>
+    Debug,
+    /// <summary>ユーザーに通知する必要がある情報</summary>
+    Info,
+    /// <summary>警告を表す</summary>
+    Warn,
+    /// <summary>エラーを表す</summary>
+    Error,
+}
+
+/// <summary>
 /// アプリケーション全体のログ出力を管理するハブ。
 /// </summary>
 public partial class LogHub : BaseHub

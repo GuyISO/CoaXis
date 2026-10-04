@@ -3,6 +3,25 @@
 using Godot;
 
 /// <summary>
+/// Viewportの操作モードを表す列挙型
+/// </summary>
+public enum ViewportInteractionMode
+{
+    /// <summary>操作待機状態</summary>
+    None,
+    /// <summary>カメラの注視点の平行移動操作</summary>
+    CameraPan,
+    /// <summary>カメラの注視点中心のオービット回転操作</summary>
+    CameraOrbit,
+    /// <summary>カメラの視線方向を軸としたロール回転操作</summary>
+    CameraRoll,
+    /// <summary>カメラのズーム操作</summary>
+    CameraZoom,
+    /// <summary>選択矩形操作</summary>
+    PickRect,
+}
+
+/// <summary>
 /// Viewportの操作モードと操作補助表示状態を保持し、変更を通知する。
 /// </summary>
 public partial class ViewportInteractionHub : BaseHub

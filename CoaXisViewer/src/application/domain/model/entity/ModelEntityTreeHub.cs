@@ -4,9 +4,9 @@ using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルツリー操作の要求を管理するハブ。
+/// ModelEntity ツリー操作の要求を管理するハブ。
 /// </summary>
-public partial class ModelTreeHub : BaseHub
+public partial class ModelEntityTreeHub : BaseHub
 {
 	#region Fields
 
@@ -20,25 +20,17 @@ public partial class ModelTreeHub : BaseHub
 
 	#endregion
 
-	#region Actions
+	#region Events
 
-	[Signal] public delegate void TreeCenteringRequestedEventHandler(string entityId);
+	[Signal] public delegate void CenteringRequestedEventHandler(string entityId);
 	/// <summary>
 	/// 指定したモデルをツリーの中央へ表示する操作をリクエストする
 	/// </summary>
 	/// <param name="entityId">ツリーの中央へ表示するモデル実体の識別子</param>
-	internal void TreeCentering(Guid entityId)
+	internal void Centering(Guid entityId)
 	{
-		EmitSignal(SignalName.TreeCenteringRequested, entityId.ToString());
+		EmitSignal(SignalName.CenteringRequested, entityId.ToString());
 	}
-
-	#endregion
-
-	#region Notifications
-
-	#endregion
-
-	#region Events
 
 	#endregion
 

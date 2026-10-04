@@ -2,7 +2,7 @@
 
 AssetHubをFacadeにし、Material,Icon,Sceneなど各Asset種類別のHubを持たせる
 SettingもFacadeにして、各種設定を管理するHubを持たせる
-TransparencyをModelEntity単位で管理するように変更する
+On
 
 ユーザー可変値はSettingでの一元管理でなく、各Hubが持つものを正とし、Settingはあくまで初期値やデフォルト値をHubに提供する役割にする
 

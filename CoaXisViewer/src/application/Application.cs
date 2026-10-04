@@ -19,7 +19,6 @@ public partial class Application : BaseHub
     private MeasurementHub _measurement;
     private ModelHub _model;
     private PickHub _pick;
-    private SelectionHub _selection;
     private UiHub _ui;
     private ViewportHub _viewport;
 
@@ -53,8 +52,6 @@ public partial class Application : BaseHub
     public static ModelHub Model => Instance._model;
     /// <summary>ピック機能を取得する。</summary>
     public static PickHub Pick => Instance._pick;
-    /// <summary>選択機能を取得する。</summary>
-    public static SelectionHub Selection => Instance._selection;
     /// <summary>UI 機能を取得する。</summary>
     public static UiHub Ui => Instance._ui;
     /// <summary>ビューポート機能を取得する。</summary>
@@ -114,7 +111,6 @@ public partial class Application : BaseHub
         _measurement = AddModule<MeasurementHub>("Measurement");
         _model = AddModule<ModelHub>("Model");
         _pick = AddModule<PickHub>("Pick");
-        _selection = AddModule<SelectionHub>("Selection");
         _ui = AddModule<UiHub>("Ui");
         _viewport = AddModule<ViewportHub>("Viewport");
     }

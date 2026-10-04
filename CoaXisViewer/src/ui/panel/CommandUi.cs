@@ -1,12 +1,35 @@
 // TODO: リファクタリング確認後に削除
+// TODO: CommandHistoryHubをつくってCommandUiから履歴管理を切り離す
+
 using Godot;
 using System.Collections.Generic;
+
+/// <summary>
+/// コマンド履歴の実行状態を表す列挙型
+/// </summary>
+public enum CommandExecutionState
+{
+    Do,
+    Undo,
+}
 
 /// <summary>
 /// コマンド履歴表示と操作用のパネル
 /// </summary>
 public partial class CommandUi : PanelContainer
 {
+    
+    /// <summary>
+    /// CommandUi の列を表す列挙型
+    /// </summary>
+    public enum TreeColumn
+    {
+        No,
+        Name,
+        Description,
+        State,
+    }
+
     #region Fields
 
     private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
@@ -56,21 +79,21 @@ public partial class CommandUi : PanelContainer
     private void EnsureChildNodes()
     {
         _tree = (Tree)FindChild("Tree");
-        CommandTreeColumn[] columns = System.Enum.GetValues<CommandTreeColumn>();
+        TreeColumn[] columns = System.Enum.GetValues<TreeColumn>();
         _tree.Columns = columns.Length;
 
-        foreach (CommandTreeColumn column in columns)
+        foreach (TreeColumn column in columns)
         {
             int columnIndex = (int)column;
             _tree.SetColumnTitle(columnIndex, column.ToString());
 
-            bool isExpand = column != CommandTreeColumn.No && column != CommandTreeColumn.State;
+            bool isExpand = column != TreeColumn.No && column != TreeColumn.State;
             _tree.SetColumnExpand(columnIndex, isExpand);
         }
 
         // 固定幅にして運用する列の幅を指定する
-        _tree.SetColumnCustomMinimumWidth((int)CommandTreeColumn.No, Constant.Ui.Tree.CommandNoColumnMinWidth);
-        _tree.SetColumnCustomMinimumWidth((int)CommandTreeColumn.State, Constant.Ui.Tree.CommandStateColumnMinWidth);
+        _tree.SetColumnCustomMinimumWidth((int)TreeColumn.No, Constant.Ui.Tree.CommandNoColumnMinWidth);
+        _tree.SetColumnCustomMinimumWidth((int)TreeColumn.State, Constant.Ui.Tree.CommandStateColumnMinWidth);
     }
     
     /// <summary>
@@ -236,14 +259,14 @@ public partial class CommandUi : PanelContainer
                     continue;
                 }
 
-                item.SetMetadata((int)CommandTreeColumn.No, i);
-                item.SetText((int)CommandTreeColumn.No, i.ToString());
-                item.SetText((int)CommandTreeColumn.Name, command?.GetType().Name ?? "(null)");
-                item.SetText((int)CommandTreeColumn.Description, command?.Description ?? string.Empty);
+                item.SetMetadata((int)TreeColumn.No, i);
+                item.SetText((int)TreeColumn.No, i.ToString());
+                item.SetText((int)TreeColumn.Name, command?.GetType().Name ?? "(null)");
+                item.SetText((int)TreeColumn.Description, command?.Description ?? string.Empty);
 
                 CommandExecutionState state = ResolveState(i, _cursor);
                 Color color = ResolveStateColor(i, _cursor);
-                item.SetText((int)CommandTreeColumn.State, state.ToString());
+                item.SetText((int)TreeColumn.State, state.ToString());
 
                 for (int column = 0; column < _tree.Columns; column++)
                 {
@@ -252,7 +275,7 @@ public partial class CommandUi : PanelContainer
 
                 if (i == _cursor - 1)
                 {
-                    item.Select((int)CommandTreeColumn.No);
+                    item.Select((int)TreeColumn.No);
                 }
             }
         }

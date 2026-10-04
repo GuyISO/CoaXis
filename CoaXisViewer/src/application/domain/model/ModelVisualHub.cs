@@ -155,7 +155,7 @@ public partial class ModelVisualHub : BaseHub
 		Application.Model.Registry.Added += OnModelAdded;
 		Application.Model.Registry.ModelSetReplaced += OnModelSetReplaced;
 		Application.Model.State.StatusNotified += OnModelStatusNotified;
-		Application.Selection.ModelStateNotified += OnModelSelectionStateNotified;
+		Application.Model.Entity.Selection.Selected += OnSelected;
 	}
 
 	/// <summary>
@@ -169,7 +169,7 @@ public partial class ModelVisualHub : BaseHub
 		Application.Model.Registry.Added -= OnModelAdded;
 		Application.Model.Registry.ModelSetReplaced -= OnModelSetReplaced;
 		Application.Model.State.StatusNotified -= OnModelStatusNotified;
-		Application.Selection.ModelStateNotified -= OnModelSelectionStateNotified;
+		Application.Model.Entity.Selection.Selected -= OnSelected;
 	}
 
 	/// <summary>
@@ -361,7 +361,7 @@ public partial class ModelVisualHub : BaseHub
 	/// </summary>
 	/// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
 	/// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-	private void OnModelSelectionStateNotified(string entityId, bool isSelected)
+	private void OnSelected(string entityId, bool isSelected)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
@@ -552,7 +552,7 @@ public partial class ModelVisualHub : BaseHub
 				return false;
 			}
 
-			if (Application.Selection.Contains(modelNode.EntityId))
+			if (Application.Model.Entity.Selection.Contains(modelNode.EntityId))
 			{
 				return true;
 			}

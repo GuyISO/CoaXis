@@ -1,18 +1,32 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Linq;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルの選択状態と変更通知を管理するハブ。
+/// モデルの選択モードを表す列挙型
 /// </summary>
-public partial class SelectionHub : BaseHub
+public enum ModelEntitySelectionMode
+{
+    /// <summary>対象のみを選択するデフォルトの選択モード</summary>
+    Set,
+    /// <summary>追加選択モード</summary>
+    Add,
+    /// <summary>削除選択モード</summary>
+    Remove,
+    /// <summary>トグル選択モード</summary>
+    Toggle,
+}
+
+/// <summary>
+/// ModelEntity の選択状態と変更通知を管理するハブ。
+/// </summary>
+public partial class ModelEntitySelectionHub : BaseHub
 {
     #region Fields
 
     // 選択状態の管理対象となる実体IDのコレクション、HashSet を使用して重複を防ぐ
-    private readonly HashSet<Guid> _entityIds = new();
+    private readonly HashSet<Guid> _ids = new();
 
     #endregion
 
@@ -21,17 +35,17 @@ public partial class SelectionHub : BaseHub
     /// <summary>
     /// 現在の選択モードを取得する
     /// </summary>
-    internal SelectionMode Mode { get; private set; } = SelectionMode.Set;
+    internal ModelEntitySelectionMode Mode { get; private set; } = ModelEntitySelectionMode.Set;
 
     /// <summary>
     /// 現在の選択実体IDのコレクションの複製を取得する
     /// </summary>
-    internal IReadOnlyCollection<Guid> EntityIds => _entityIds.ToList().AsReadOnly();
+    internal IReadOnlyCollection<Guid> EntityIds => _ids.ToList().AsReadOnly();
 
     /// <summary>
     /// 現在の選択モデル実体の数を取得する
     /// </summary>
-    internal int Count => _entityIds.Count;
+    internal int Count => _ids.Count;
 
     #endregion
 
@@ -42,6 +56,16 @@ public partial class SelectionHub : BaseHub
         SubscribeApplicationEvents();
     }
 
+    /// <summary>
+    /// Applicationイベントの購読を開始する
+    /// </summary>
+    private void SubscribeApplicationEvents()
+    {
+        Application.Pick.ResultNotified += OnPickResultNotified;
+        Application.Pick.ResultsNotified += OnPickResultsNotified;
+        Application.Model.Registry.Cleared += OnModelRegistryCleared;
+    }
+
     public override void _ExitTree()
     {
         UnsubscribeApplicationEvents();
@@ -49,50 +73,46 @@ public partial class SelectionHub : BaseHub
         base._ExitTree();
     }
 
-    #endregion
-
-    #region Actions
-
-    [Signal] public delegate void SetModeRequestedEventHandler(SelectionMode mode);
     /// <summary>
-    /// 選択モードの設定をリクエストする
+    /// Applicationイベントの購読を解除する
     /// </summary>
-    /// <param name="mode">設定する選択モード</param>
-    internal void SetMode(SelectionMode mode)
+    private void UnsubscribeApplicationEvents()
     {
-        EmitSignal(SignalName.SetModeRequested, (int)mode);
+        Application.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Pick.ResultsNotified -= OnPickResultsNotified;
+        Application.Model.Registry.Cleared -= OnModelRegistryCleared;
     }
 
     #endregion
 
-    #region Notifications
+    #region Events
 
-    [Signal] public delegate void ModeNotifiedEventHandler(SelectionMode mode);
+    [Signal] public delegate void ModeNotifiedEventHandler(ModelEntitySelectionMode mode);
     /// <summary>
     /// 選択モードの通知を行う
     /// </summary>
     /// <param name="mode">通知する選択モード</param>
-    internal void NotifyMode(SelectionMode mode)
+    private void NotifyMode(ModelEntitySelectionMode mode)
     {
         EmitSignal(SignalName.ModeNotified, (int)mode);
     }
 
-    [Signal] public delegate void ModelStateNotifiedEventHandler(string entityId, bool isSelected);
+    [Signal] public delegate void SelectedEventHandler(string entityId, bool isSelected);
     /// <summary>
     /// モデルの選択状態の通知を行う
     /// </summary>
     /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
     /// <param name="isSelected">モデルが選択されている場合はtrue、選択されていない場合はfalse</param>
-    internal void NotifyModelState(Guid entityId, bool isSelected)
+    private void NotifySelected(Guid entityId, bool isSelected)
     {
-        EmitSignal(SignalName.ModelStateNotified, entityId.ToString(), isSelected);
+        EmitSignal(SignalName.Selected, entityId.ToString(), isSelected);
     }
 
     [Signal] public delegate void ClearedNotifiedEventHandler();
     /// <summary>
     /// 選択がクリアされたことを通知する
     /// </summary>
-    internal void NotifyCleared()
+    private void NotifyCleared()
     {
         EmitSignal(SignalName.ClearedNotified);
     }
@@ -100,43 +120,6 @@ public partial class SelectionHub : BaseHub
     #endregion
 
     #region Events
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Selection.SetModeRequested += OnSetModeRequested;
-        Application.Pick.ResultNotified += OnPickResultNotified;
-        Application.Pick.ResultsNotified += OnPickResultsNotified;
-        Application.Model.Registry.Cleared += OnModelRegistryCleared;
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Selection.SetModeRequested -= OnSetModeRequested;
-        Application.Pick.ResultNotified -= OnPickResultNotified;
-        Application.Pick.ResultsNotified -= OnPickResultsNotified;
-        Application.Model.Registry.Cleared -= OnModelRegistryCleared;
-    }
-
-    /// <summary>
-    /// マルチ選択モードの有効化/無効化要求を受け取る
-    /// </summary>
-    /// <param name="enable">有効化する場合はtrue、無効化する場合はfalse</param>
-    private void OnSetModeRequested(SelectionMode mode)
-    {
-        if (Mode != mode)
-        {
-            Mode = mode;
-            Application.Log.Debug($"SelectionService: Selection mode changed to {Mode}.");
-        }
-
-        Application.Selection.NotifyMode(Mode);
-    }
 
     /// <summary>
     /// ピック結果の通知を受け取る
@@ -152,7 +135,7 @@ public partial class SelectionHub : BaseHub
         // ピック結果が null または実体が null の場合、Setモードの場合は選択をクリアする、Hitしているかは選択においては関係ない
         if (pickResult == null || pickResult.EntityId == Guid.Empty)
         {
-            if (Mode == SelectionMode.Set)
+            if (Mode == ModelEntitySelectionMode.Set)
             {
                 Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
             }
@@ -162,20 +145,20 @@ public partial class SelectionHub : BaseHub
         Guid entityId = pickResult.EntityId;
         switch (Mode)
         {
-            case SelectionMode.Set:
+            case ModelEntitySelectionMode.Set:
                 Set(entityId);
                 break;
-            case SelectionMode.Add:
+            case ModelEntitySelectionMode.Add:
                 Add(entityId);
                 break;
-            case SelectionMode.Remove:
+            case ModelEntitySelectionMode.Remove:
                 Remove(entityId);
                 break;
-            case SelectionMode.Toggle:
+            case ModelEntitySelectionMode.Toggle:
                 Toggle(entityId);
                 break;
             default:
-                Application.Log.Warn($"SelectionService: Unknown selection mode {Mode}.");
+                Application.Log.Warn($"SelectionHub: Unknown selection mode {Mode}.");
                 break;
         }
     }
@@ -193,7 +176,7 @@ public partial class SelectionHub : BaseHub
 
         if (pickResults == null || pickResults.Length == 0)
         {
-            if (Mode == SelectionMode.Set)
+            if (Mode == ModelEntitySelectionMode.Set)
             {
                 Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
             }
@@ -208,7 +191,7 @@ public partial class SelectionHub : BaseHub
 
         if (entityIds.Length == 0)
         {
-            if (Mode == SelectionMode.Set)
+            if (Mode == ModelEntitySelectionMode.Set)
             {
                 Clear();
             }
@@ -217,20 +200,20 @@ public partial class SelectionHub : BaseHub
 
         switch (Mode)
         {
-            case SelectionMode.Set:
+            case ModelEntitySelectionMode.Set:
                 Set(entityIds);
                 break;
-            case SelectionMode.Add:
+            case ModelEntitySelectionMode.Add:
                 Add(entityIds);
                 break;
-            case SelectionMode.Remove:
+            case ModelEntitySelectionMode.Remove:
                 Remove(entityIds);
                 break;
-            case SelectionMode.Toggle:
+            case ModelEntitySelectionMode.Toggle:
                 Toggle(entityIds);
                 break;
             default:
-                Application.Log.Warn($"SelectionService: Unknown selection mode {Mode}.");
+                Application.Log.Warn($"SelectionHub: Unknown selection mode {Mode}.");
                 break;
         }
     }
@@ -246,6 +229,21 @@ public partial class SelectionHub : BaseHub
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// 選択モードを設定する
+    /// </summary>
+    /// <param name="mode">設定する選択モード</param>
+    internal void SetMode(ModelEntitySelectionMode mode)
+    {
+        if (Mode != mode)
+        {
+            Mode = mode;
+            Application.Log.Debug($"SelectionHub: Selection mode changed to {Mode}.");
+        }
+
+        NotifyMode(Mode);
+    }
 
     /// <summary>
     /// 現在選択中の実体IDを元に、対応する Node3D 配列を取得する
@@ -266,7 +264,7 @@ public partial class SelectionHub : BaseHub
     /// </summary>
     /// <param name="entityId">確認する実体ID</param>
     /// <returns>実体が選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
-    internal bool Contains(Guid entityId) => entityId != Guid.Empty && _entityIds.Contains(entityId);
+    internal bool Contains(Guid entityId) => entityId != Guid.Empty && _ids.Contains(entityId);
 
     /// <summary>
     /// 指定した実体のみの選択状態にする、既存の選択はすべて解除される
@@ -304,9 +302,9 @@ public partial class SelectionHub : BaseHub
             return false;
         }
 
-        if (_entityIds.Add(entityId))
+        if (_ids.Add(entityId))
         {
-            Application.Selection.NotifyModelState(entityId, true);
+            NotifySelected(entityId, true);
             Application.Log.Info($"Selected: {entityId}");
             return true;
         }
@@ -338,14 +336,14 @@ public partial class SelectionHub : BaseHub
             return false;
         }
 
-        if (_entityIds.Remove(entityId))
+        if (_ids.Remove(entityId))
         {
-            Application.Selection.NotifyModelState(entityId, false);
+            NotifySelected(entityId, false);
             Application.Log.Info($"Deselected: {entityId}");
             // 選択状態の実体がなくなった場合、クリア通知も行う
-            if (_entityIds.Count == 0)
+            if (_ids.Count == 0)
             {
-                Application.Selection.NotifyCleared();
+                NotifyCleared();
             }
             return true;
         }
@@ -370,7 +368,7 @@ public partial class SelectionHub : BaseHub
     /// <param name="entityId">切り替える実体ID</param>
     internal void Toggle(Guid entityId)
     {
-        if (_entityIds.Contains(entityId))
+        if (_ids.Contains(entityId))
         {
             Remove(entityId);
         }
@@ -404,24 +402,24 @@ public partial class SelectionHub : BaseHub
     /// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返す</returns>
     internal bool Clear()
     {
-        if (_entityIds.Count == 0)
+        if (_ids.Count == 0)
         {
             return false;
         }
 
-        Guid[] entityIdsToDeselect = _entityIds.ToArray();
+        Guid[] entityIdsToDeselect = _ids.ToArray();
 
         // 先にクリアしてからシグナル発報することで、シグナルハンドラ内で選択状態確認した際の整合性を保つ
-        _entityIds.Clear();
+        _ids.Clear();
 
         // 実体の選択解除シグナルとハイライト解除は個々に行う
         foreach (Guid entityId in entityIdsToDeselect)
         {
-            Application.Selection.NotifyModelState(entityId, false);
+            NotifySelected(entityId, false);
             Application.Log.Info($"Deselected: {entityId}");
         }
 
-        Application.Selection.NotifyCleared();
+        NotifyCleared();
         return true;
     }
 

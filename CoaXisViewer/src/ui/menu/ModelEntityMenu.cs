@@ -89,7 +89,7 @@ public partial class ModelEntityMenu : BaseMenu
 			return;
 		}
 
-		Application.Model.Tree.TreeCentering(modelNode.EntityId);
+		Application.Model.Entity.Tree.Centering(modelNode.EntityId);
 	}
 
 	private ModelNode GetModelNode()

@@ -10,11 +10,11 @@ public partial class ModelHub : BaseHub
 
     #region Properties
 
+    public ModelEntityHub Entity { get; }
     public ModelRegistry Registry { get; }
     public ModelLoadHub Load { get; }
     public ModelVisualHub Visual { get; }
     public ModelStateHub State { get; }
-    public ModelTreeHub Tree { get; }
 
     #endregion
 
@@ -25,11 +25,11 @@ public partial class ModelHub : BaseHub
     /// </summary>
     public ModelHub()
     {
+        Entity = AddModule<ModelEntityHub>("Entity");
         Registry = AddModule<ModelRegistry>("Registry");
         Load = AddModule<ModelLoadHub>("Load");
         Visual = AddModule<ModelVisualHub>("Visual");
         State = AddModule<ModelStateHub>("State");
-        Tree = AddModule<ModelTreeHub>("Tree");
     }
 
     #endregion

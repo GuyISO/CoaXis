@@ -206,7 +206,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitToSelectionPressed()
     {
-        Node3D[] fitTargetNodes = Application.Selection.GetModelNodeArray();
+        Node3D[] fitTargetNodes = Application.Model.Entity.Selection.GetModelNodeArray();
         if (fitTargetNodes.Length == 0)
         {
             Application.Log.Debug("ViewportUi: fit-to-selection skipped (no selected nodes).");

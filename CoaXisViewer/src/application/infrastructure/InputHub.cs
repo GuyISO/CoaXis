@@ -27,9 +27,9 @@ public partial class InputHub : BaseHub
     public override void _Process(double delta)
     {
         // 押下中に状態を切り替えるボタンの入力処理
-        HandleSelectModeInput("switch_selection_mode_add", SelectionMode.Add);
-        HandleSelectModeInput("switch_selection_mode_remove", SelectionMode.Remove);
-        HandleSelectModeInput("switch_selection_mode_toggle", SelectionMode.Toggle);
+        HandleSelectModeInput("switch_selection_mode_add", ModelEntitySelectionMode.Add);
+        HandleSelectModeInput("switch_selection_mode_remove", ModelEntitySelectionMode.Remove);
+        HandleSelectModeInput("switch_selection_mode_toggle", ModelEntitySelectionMode.Toggle);
 
         // ボタン入力処理
         HandleButtonInput();
@@ -54,15 +54,15 @@ public partial class InputHub : BaseHub
     /// <summary>
     /// 選択モードの切り替えを処理する
     /// </summary>
-    private void HandleSelectModeInput(string actionName, SelectionMode assignMode)
+    private void HandleSelectModeInput(string actionName, ModelEntitySelectionMode assignMode)
     { 
         if (Input.IsActionJustPressed(actionName))
         {
-            Application.Selection.SetMode(assignMode);
+            Application.Model.Entity.Selection.SetMode(assignMode);
         }
-        else if (Input.IsActionJustReleased(actionName) && Application.Selection.Mode == assignMode)
+        else if (Input.IsActionJustReleased(actionName) && Application.Model.Entity.Selection.Mode == assignMode)
         {
-            Application.Selection.SetMode(SelectionMode.Set);
+            Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
         }
     }
 
@@ -92,8 +92,8 @@ public partial class InputHub : BaseHub
         if (Input.IsActionJustPressed("escape"))
         {
             Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
-            Application.Selection.SetMode(SelectionMode.Set);
-            Application.Selection.Clear();
+            Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
+            Application.Model.Entity.Selection.Clear();
         }
     }
 
