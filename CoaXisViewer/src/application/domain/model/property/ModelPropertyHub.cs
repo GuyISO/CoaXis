@@ -20,6 +20,10 @@ public partial class ModelPropertyHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Lifecycle
 
     /// <summary>
@@ -30,10 +34,6 @@ public partial class ModelPropertyHub : BaseHub
         Registry = AddModule<ModelPropertyRegistryHub>("Registry");
         Load = AddModule<ModelPropertyLoadHub>("Load");
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 

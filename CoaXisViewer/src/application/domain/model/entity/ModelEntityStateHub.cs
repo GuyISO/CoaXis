@@ -16,15 +16,13 @@ public partial class ModelEntityStateHub : BaseHub
 
 	#endregion
 
-	#region Lifecycle
-
-	#endregion
-
 	#region Signals
 
 	/// <summary>モデルの配置位置の変更通知。値は ModelEntity.Position を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void PositionNotifiedEventHandler(string entityId);
+	/// <summary>配置位置の変更を通知する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyPosition(Guid entityId)
 	{
 		EmitSignal(SignalName.PositionNotified, entityId.ToString());
@@ -33,6 +31,8 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルの回転の変更通知。値は ModelEntity.Rotation を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void RotationNotifiedEventHandler(string entityId);
+	/// <summary>回転の変更を通知する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyRotation(Guid entityId)
 	{
 		EmitSignal(SignalName.RotationNotified, entityId.ToString());
@@ -41,6 +41,8 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルの表示設定の変更通知。値は ModelEntity.Visibility を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void VisibilityNotifiedEventHandler(string entityId);
+	/// <summary>表示設定の変更を通知する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyVisibility(Guid entityId)
 	{
 		EmitSignal(SignalName.VisibilityNotified, entityId.ToString());
@@ -53,6 +55,8 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルのロード状態の変更通知。値は ModelEntity.Status を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void StatusNotifiedEventHandler(string entityId);
+	/// <summary>ロード状態の変更を通知する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	internal void NotifyStatus(Guid entityId)
 	{
 		EmitSignal(SignalName.StatusNotified, entityId.ToString());
@@ -60,11 +64,13 @@ public partial class ModelEntityStateHub : BaseHub
 
 	/// <summary>モデルの透明度の変更通知。値は ModelEntityVisualHub.Transparency を参照する。</summary>
 	[Signal] public delegate void TransparencyNotifiedEventHandler();
+	/// <summary>透明度の変更を通知する。</summary>
 	internal void NotifyTransparency()
 	{
 		EmitSignal(SignalName.TransparencyNotified);
 	}
 
+	/// <summary>Registryのクリア通知。</summary>
 	[Signal] public delegate void RegistryClearedEventHandler();
 	/// <summary>
 	/// モデルレジストリがクリアされたことを通知する
@@ -73,6 +79,10 @@ public partial class ModelEntityStateHub : BaseHub
 	{
 		EmitSignal(SignalName.RegistryCleared);
 	}
+
+	#endregion
+
+	#region Lifecycle
 
 	#endregion
 
@@ -128,6 +138,7 @@ public partial class ModelEntityStateHub : BaseHub
 
 	#region Helpers
 
+	/// <summary>現在の表示設定から次の切替先を返す。</summary>
 	private static ModelVisibility GetNextVisibility(ModelVisibility visibility)
 	{
 		return visibility switch

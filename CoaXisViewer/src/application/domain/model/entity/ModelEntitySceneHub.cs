@@ -12,11 +12,16 @@ public partial class ModelEntitySceneHub : BaseHub
 {
 	#region Fields
 
+	/// <summary>1フレームあたりのSceneロードに使える時間（ミリ秒）。</summary>
 	private const long SceneLoadFrameBudgetMs = 400;
 
+	/// <summary>Sceneロード待ちのキュー。</summary>
 	private readonly Queue<SceneLoadQueueItem> _sceneLoadQueue = new();
+	/// <summary>Sceneロードキューの排他制御用ロック。</summary>
 	private readonly object _sceneLoadQueueLock = new();
+	/// <summary>Sceneロードキューの処理中フラグ。</summary>
 	private bool _isSceneLoadQueueRunning;
+	/// <summary>Sceneロードの世代番号。取消し判定に使う。</summary>
 	private long _sceneLoadGeneration;
 
 	#endregion
@@ -25,11 +30,11 @@ public partial class ModelEntitySceneHub : BaseHub
 
 	#endregion
 
-	#region Lifecycle
+	#region Signals
 
 	#endregion
 
-	#region Signals
+	#region Lifecycle
 
 	#endregion
 
@@ -114,6 +119,7 @@ public partial class ModelEntitySceneHub : BaseHub
 
 	#region Helpers
 
+	/// <summary>Sceneロードをキューへ追加する。</summary>
 	private void QueueSceneLoad(ModelEntity modelEntity)
 	{
 		if (modelEntity == null || !Application.Model.Entity.Registry.IsEntityRegistered(modelEntity.Id))
@@ -130,6 +136,7 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 	}
 
+	/// <summary>Sceneロードキューを順次処理する。</summary>
 	private async Task ProcessSceneLoadQueueAsync(long generation)
 	{
 		try
@@ -200,6 +207,7 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 	}
 
+	/// <summary>Sceneロード完了を判定し、完了していれば状態を更新する。</summary>
 	private bool TryFinishSceneLoad(ModelEntity modelEntity)
 	{
 		try
@@ -249,6 +257,7 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 	}
 
+	/// <summary>Entityが現在も有効（登録済み）か判定する。</summary>
 	private static bool IsActiveEntity(ModelEntity modelEntity)
 	{
 		return modelEntity != null
@@ -258,6 +267,7 @@ public partial class ModelEntitySceneHub : BaseHub
 			&& IsInstanceValid(modelEntity.Node);
 	}
 
+	/// <summary>Entityのロード状態を更新して通知する。</summary>
 	private static void UpdateModelStatus(ModelEntity modelEntity, ModelStatus nextStatus)
 	{
 		if (modelEntity == null || (modelEntity.Status == ModelStatus.Disposed && nextStatus != ModelStatus.Disposed))
@@ -269,6 +279,7 @@ public partial class ModelEntitySceneHub : BaseHub
 		Application.Model.Entity.State.NotifyStatus(modelEntity.Id);
 	}
 
+	/// <summary>Sceneロードキューの要素。</summary>
 	private sealed class SceneLoadQueueItem
 	{
 		public SceneLoadQueueItem(ModelEntity modelEntity, long generation)

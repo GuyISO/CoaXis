@@ -54,6 +54,20 @@ public partial class SettingHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    /// <summary>設定変更の通知。</summary>
+    [Signal] public delegate void SettingsNotifiedEventHandler();
+    /// <summary>
+    /// 設定の再読み込みが完了したことを通知する
+    /// </summary>
+    internal void NotifySettings()
+    {
+        EmitSignal(SignalName.SettingsNotified);
+    }
+
+    #endregion
+
     #region Lifecycle
 
     /// <summary>
@@ -62,19 +76,6 @@ public partial class SettingHub : BaseHub
     public override void _Ready()
     {
         Reload();
-    }
-
-    #endregion
-
-    #region Signals
-
-    [Signal] public delegate void SettingsNotifiedEventHandler();
-    /// <summary>
-    /// 設定の再読み込みが完了したことを通知する
-    /// </summary>
-    internal void NotifySettings()
-    {
-        EmitSignal(SignalName.SettingsNotified);
     }
 
     #endregion

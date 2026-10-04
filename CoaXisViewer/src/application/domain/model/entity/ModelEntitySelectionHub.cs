@@ -26,6 +26,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     #region Fields
 
     // 選択状態の管理対象となる実体IDのコレクション、HashSet を使用して重複を防ぐ
+    /// <summary>選択中のEntity識別子集合。</summary>
     private readonly HashSet<Guid> _ids = new();
 
     #endregion
@@ -49,6 +50,34 @@ public partial class ModelEntitySelectionHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    /// <summary>選択モードの変更通知。</summary>
+    [Signal] public delegate void ModeNotifiedEventHandler();
+
+    /// <summary>Entityの選択状態の変更通知。選択有無は Contains で参照する。</summary>
+    [Signal] public delegate void SelectedEventHandler(string entityId);
+    /// <summary>
+    /// モデルの選択状態の通知を行う
+    /// </summary>
+    /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
+    private void NotifySelected(Guid entityId)
+    {
+        EmitSignal(SignalName.Selected, entityId.ToString());
+    }
+
+    /// <summary>選択クリアの通知。</summary>
+    [Signal] public delegate void ClearedNotifiedEventHandler();
+    /// <summary>
+    /// 選択がクリアされたことを通知する
+    /// </summary>
+    private void NotifyCleared()
+    {
+        EmitSignal(SignalName.ClearedNotified);
+    }
+
+    #endregion
+
     #region Lifecycle
 
     public override void _Ready()
@@ -61,32 +90,6 @@ public partial class ModelEntitySelectionHub : BaseHub
         UnsubscribeApplicationEvents();
 
         base._ExitTree();
-    }
-
-    #endregion
-
-    #region Signals
-
-    /// <summary>選択モードの変更通知。</summary>
-    [Signal] public delegate void ModeNotifiedEventHandler();
-
-    [Signal] public delegate void SelectedEventHandler(string entityId);
-    /// <summary>
-    /// モデルの選択状態の通知を行う
-    /// </summary>
-    /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
-    private void NotifySelected(Guid entityId)
-    {
-        EmitSignal(SignalName.Selected, entityId.ToString());
-    }
-
-    [Signal] public delegate void ClearedNotifiedEventHandler();
-    /// <summary>
-    /// 選択がクリアされたことを通知する
-    /// </summary>
-    private void NotifyCleared()
-    {
-        EmitSignal(SignalName.ClearedNotified);
     }
 
     #endregion

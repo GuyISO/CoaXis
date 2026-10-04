@@ -22,6 +22,10 @@ public partial class ViewportHub : BaseHub
 
 	#endregion
 
+	#region Signals
+
+	#endregion
+
 	#region Lifecycle
 
     /// <summary>
@@ -33,10 +37,6 @@ public partial class ViewportHub : BaseHub
         Display = AddModule<ViewportDisplayHub>("Display");
         Interaction = AddModule<ViewportInteractionHub>("Interaction");
 	}
-
-	#endregion
-
-	#region Signals
 
 	#endregion
 

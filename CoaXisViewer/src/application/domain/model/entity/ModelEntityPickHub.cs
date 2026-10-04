@@ -32,15 +32,12 @@ public partial class ModelEntityPickHub : BaseHub
 
     #endregion
 
-    #region Lifecycle
-
-    #endregion
-
     #region Signals
 
     /// <summary>選択操作モードの変更通知。</summary>
     [Signal] public delegate void HandlingModeNotifiedEventHandler();
 
+    /// <summary>単一ピック結果の通知。</summary>
     [Signal] public delegate void ResultNotifiedEventHandler(PickResult pickResult);
     /// <summary>
     /// ピック結果の通知を行う
@@ -51,6 +48,7 @@ public partial class ModelEntityPickHub : BaseHub
         EmitSignal(SignalName.ResultNotified, pickResult);
     }
 
+    /// <summary>複数ピック結果の通知。</summary>
     [Signal] public delegate void ResultsNotifiedEventHandler(PickResult[] pickResults);
     /// <summary>
     /// 複数一括ピック結果の通知を行う
@@ -61,6 +59,10 @@ public partial class ModelEntityPickHub : BaseHub
     {
         EmitSignal(SignalName.ResultsNotified, pickResults);
     }
+
+    #endregion
+
+    #region Lifecycle
 
     #endregion
 

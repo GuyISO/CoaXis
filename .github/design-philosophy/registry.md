@@ -307,5 +307,5 @@
 - Notes: Display の LayerActivated(layer,isActive) は ActiveLayersNotified() に、Selection の Mode は引数なし通知にした。個々の ModelEntity を対象とする通知（Selected/Visibility/Status/Collapsed/Position/Rotation/Added）は entityId のみを payload とし、値は Registry.GetEntity や Selection.Contains 経由で参照する。折り畳みは State.SetCollapsed(Guid,bool) の直接呼び出しに統一し、ToggleModelVisibilityRequested 要求Signalは廃止した
 
 ## 2026-10-04 Hubのregion構成統一
-- Policy: Application配下の全Hubを Fields/Properties/Lifecycle/Signals/Events/Methods/Helpers の共通7regionに統一
+- Policy: Application配下の全Hubを Fields/Properties/Signals/Lifecycle/Events/Methods/Helpers の共通7regionに統一（Signalsを上位に配置、Lifecycle以外の全メンバーにXMLコメント必須）
 - Notes: Notifications/Actions regionを廃止。Signal宣言と NotifyXxx は Signals、On*/Subscribe*/Unsubscribe* は Events へ移動（旧Helpers/Lifecycle内のものも含む）

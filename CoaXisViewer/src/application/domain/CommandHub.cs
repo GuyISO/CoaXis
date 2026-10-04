@@ -9,6 +9,7 @@ public partial class CommandHub : BaseHub
 {
 	#region Fields
 
+	/// <summary>実行済みコマンドの履歴。</summary>
 	private readonly List<BaseCommand> _history = new();
 
 	#endregion
@@ -27,12 +28,9 @@ public partial class CommandHub : BaseHub
 
 	#endregion
 
-	#region Lifecycle
-
-	#endregion
-
 	#region Signals
 
+	/// <summary>コマンド実行の完了通知。</summary>
 	[Signal] public delegate void ExecutedEventHandler();
 	/// <summary>
 	/// コマンドの実行を通知する
@@ -41,6 +39,10 @@ public partial class CommandHub : BaseHub
 	{
 		EmitSignal(SignalName.Executed);
 	}
+
+	#endregion
+
+	#region Lifecycle
 
 	#endregion
 

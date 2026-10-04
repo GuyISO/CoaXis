@@ -17,11 +17,11 @@ public partial class ModelEntityLoadHub : BaseHub
 
 	#endregion
 
-	#region Lifecycle
+	#region Signals
 
 	#endregion
 
-	#region Signals
+	#region Lifecycle
 
 	#endregion
 
@@ -86,6 +86,7 @@ public partial class ModelEntityLoadHub : BaseHub
 
 	#region Helpers
 
+	/// <summary>Entity階層に循環がないことを検証する。</summary>
 	private static void ValidateAcyclicHierarchy(IReadOnlyList<ModelEntity> entities)
 	{
 		var entityById = new Dictionary<Guid, ModelEntity>(entities.Count);
@@ -102,6 +103,7 @@ public partial class ModelEntityLoadHub : BaseHub
 		}
 	}
 
+	/// <summary>Entity階層を再帰的にたどり、循環を検出する。</summary>
 	private static void VisitHierarchy(
 		ModelEntity modelEntity,
 		IReadOnlyDictionary<Guid, ModelEntity> entityById,
@@ -129,6 +131,7 @@ public partial class ModelEntityLoadHub : BaseHub
 		visited.Add(modelEntity.Id);
 	}
 
+	/// <summary>Entityに対応するModelNodeが無ければ生成して返す。</summary>
 	private static ModelNode EnsureNode(ModelEntity modelEntity)
 	{
 		if (modelEntity == null)
@@ -169,6 +172,7 @@ public partial class ModelEntityLoadHub : BaseHub
 		return node;
 	}
 
+	/// <summary>親Entityの識別子から親ModelNodeを解決する。</summary>
 	private static ModelNode ResolveParentNode(Guid parentId)
 	{
 		if (parentId == Guid.Empty)

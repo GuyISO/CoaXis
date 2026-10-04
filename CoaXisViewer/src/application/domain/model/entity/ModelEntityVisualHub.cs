@@ -21,6 +21,10 @@ public partial class ModelEntityVisualHub : BaseHub
 
 	#endregion
 
+	#region Signals
+
+	#endregion
+
 	#region Lifecycle
 
 	public override void _Ready()
@@ -34,10 +38,6 @@ public partial class ModelEntityVisualHub : BaseHub
 
 		base._ExitTree();
 	}
-
-	#endregion
-
-	#region Signals
 
 	#endregion
 
@@ -181,52 +181,6 @@ public partial class ModelEntityVisualHub : BaseHub
 	}
 
 	/// <summary>
-	/// 部分木の各Entityへ初期表示状態を反映する
-	/// </summary>
-	/// <param name="rootEntity">反映対象の部分木ルート</param>
-	private void ApplyVisibilitySubtree(ModelEntity rootEntity)
-	{
-		var pendingEntities = new Stack<ModelEntity>();
-		var visitedEntityIds = new HashSet<Guid>();
-		pendingEntities.Push(rootEntity);
-
-		while (pendingEntities.Count > 0)
-		{
-			ModelEntity modelEntity = pendingEntities.Pop();
-			if (modelEntity == null || !visitedEntityIds.Add(modelEntity.Id))
-			{
-				continue;
-			}
-
-			ApplyVisibility(modelEntity);
-			foreach (ModelEntity childEntity in modelEntity.Children)
-			{
-				pendingEntities.Push(childEntity);
-			}
-		}
-	}
-
-	private void ApplyVisibility(ModelEntity modelEntity)
-	{
-		ModelVisibility visibility = modelEntity.Visibility;
-		ModelNode modelNode = modelEntity.Node;
-		if (modelNode == null || !IsInstanceValid(modelNode))
-		{
-			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{modelEntity.Id}'");
-			return;
-		}
-
-		// Inherit は階層全体が確定した後に親の設定から実効状態を解決する。
-		bool isVisible = visibility switch
-		{
-			ModelVisibility.Visible => true,
-			ModelVisibility.Invisible => false,
-			_ => ModelVisibilityResolver.IsVisible(modelEntity),
-		};
-		modelNode.ApplyVisibilityLayer(isVisible);
-	}
-
-	/// <summary>
 	/// モデルのロード完了通知を受けたときに透明度を適用する
 	/// </summary>
 	/// <param name="entityId">ロード完了した ModelEntity の識別子</param>
@@ -299,6 +253,53 @@ public partial class ModelEntityVisualHub : BaseHub
 	#endregion
 
 	#region Helpers
+
+	/// <summary>
+	/// 部分木の各Entityへ初期表示状態を反映する
+	/// </summary>
+	/// <param name="rootEntity">反映対象の部分木ルート</param>
+	private void ApplyVisibilitySubtree(ModelEntity rootEntity)
+	{
+		var pendingEntities = new Stack<ModelEntity>();
+		var visitedEntityIds = new HashSet<Guid>();
+		pendingEntities.Push(rootEntity);
+
+		while (pendingEntities.Count > 0)
+		{
+			ModelEntity modelEntity = pendingEntities.Pop();
+			if (modelEntity == null || !visitedEntityIds.Add(modelEntity.Id))
+			{
+				continue;
+			}
+
+			ApplyVisibility(modelEntity);
+			foreach (ModelEntity childEntity in modelEntity.Children)
+			{
+				pendingEntities.Push(childEntity);
+			}
+		}
+	}
+
+	/// <summary>Entityの表示設定をModelNodeのレイヤーへ反映する。</summary>
+	private void ApplyVisibility(ModelEntity modelEntity)
+	{
+		ModelVisibility visibility = modelEntity.Visibility;
+		ModelNode modelNode = modelEntity.Node;
+		if (modelNode == null || !IsInstanceValid(modelNode))
+		{
+			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{modelEntity.Id}'");
+			return;
+		}
+
+		// Inherit は階層全体が確定した後に親の設定から実効状態を解決する。
+		bool isVisible = visibility switch
+		{
+			ModelVisibility.Visible => true,
+			ModelVisibility.Invisible => false,
+			_ => ModelVisibilityResolver.IsVisible(modelEntity),
+		};
+		modelNode.ApplyVisibilityLayer(isVisible);
+	}
 
 	/// <summary>
 	/// 指定したモデルとその子孫のハイライト状態を切り替える
@@ -418,6 +419,7 @@ public partial class ModelEntityVisualHub : BaseHub
 		}
 	}
 
+	/// <summary>ノード配下へ現在の透明度を再帰的に適用する。</summary>
 	private void ApplyModelTransparency(Node node)
 	{
 		if (node is MeshInstance3D meshInstance)

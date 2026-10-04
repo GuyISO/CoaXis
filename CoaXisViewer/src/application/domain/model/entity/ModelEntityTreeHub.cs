@@ -16,17 +16,22 @@ public partial class ModelEntityTreeHub : BaseHub
 
 	#endregion
 
-	#region Lifecycle
-
-	#endregion
-
 	#region Signals
 
+	/// <summary>指定Entityへのツリー上センタリング要求。</summary>
 	[Signal] public delegate void CenteringRequestedEventHandler(string entityId);
 
 	#endregion
 
+	#region Lifecycle
+
+	#endregion
+
 	#region Events
+
+	#endregion
+
+	#region Methods
 
 	/// <summary>
 	/// 指定したモデルをツリーの中央へ表示する操作をリクエストする
@@ -36,10 +41,6 @@ public partial class ModelEntityTreeHub : BaseHub
 	{
 		EmitSignal(SignalName.CenteringRequested, entityId.ToString());
 	}
-
-	#endregion
-
-	#region Methods
 
 	#endregion
 

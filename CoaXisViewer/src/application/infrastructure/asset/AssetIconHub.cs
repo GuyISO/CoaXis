@@ -8,17 +8,27 @@ public partial class AssetIconHub : BaseHub
 {
     #region Fields
 
+    /// <summary>Entity既定アイコンのパス。</summary>
     private const string DefaultEntityIconPath = "res://assets/icon/mono/question.svg";
+    /// <summary>継承表示（可視）アイコンのパス。</summary>
     private const string InheritVisibleIconPath = "res://assets/icon/visibility/inherit_visible.svg";
+    /// <summary>継承表示（不可視）アイコンのパス。</summary>
     private const string InheritInvisibleIconPath = "res://assets/icon/visibility/inherit_invisible.svg";
+    /// <summary>表示アイコンのパス。</summary>
     private const string VisibleIconPath = "res://assets/icon/visibility/visible.svg";
+    /// <summary>非表示アイコンのパス。</summary>
     private const string InvisibleIconPath = "res://assets/icon/visibility/invisible.svg";
 
+    /// <summary>読み込み済みアイコンのキャッシュ。</summary>
     private readonly Dictionary<string, Texture2D> _iconCache = new Dictionary<string, Texture2D>();
 
     #endregion
 
     #region Properties
+
+    #endregion
+
+    #region Signals
 
     #endregion
 
@@ -30,10 +40,6 @@ public partial class AssetIconHub : BaseHub
 
         base._ExitTree();
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 

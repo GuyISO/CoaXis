@@ -16,11 +16,11 @@ public partial class ModelPropertyLoadHub : BaseHub
 
     #endregion
 
-    #region Lifecycle
+    #region Signals
 
     #endregion
 
-    #region Signals
+    #region Lifecycle
 
     #endregion
 

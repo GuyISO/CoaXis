@@ -8,13 +8,19 @@ public partial class ModelEntityMeasurementHub : BaseHub
 {
     #region Fields
 
+    /// <summary>計測点に表示するラベルのインスタンス。</summary>
     private readonly PointerLabel[] _pointerLabelInstances = new PointerLabel[2];
+    /// <summary>計測線の描画メッシュ。</summary>
     private readonly ImmediateMesh _lineMesh = new ImmediateMesh();
 
+    /// <summary>計測の始点・終点のピック結果。</summary>
     private readonly PickResult[] _points = new PickResult[2] { new PickResult(), new PickResult() };
 
+    /// <summary>計測表示用ノードのルート。</summary>
     private Node3D _visualRoot = null!;
+    /// <summary>計測線を描画するメッシュインスタンス。</summary>
     private MeshInstance3D _line = null!;
+    /// <summary>計測線のマテリアル。</summary>
     private StandardMaterial3D _lineMaterial = null!;
 
     #endregion
@@ -23,7 +29,18 @@ public partial class ModelEntityMeasurementHub : BaseHub
 
     /// <summary>現在測定対象としているポイントのインデックスを取得する。0は未選択、1と2は各測定ポイントを示す。</summary>
     public int CurrentPointIndex { get; private set; } = 0;
+    /// <summary>現在の計測結果を取得する。</summary>
     public MeasurementResult CurrentResult => GetCurrentResult();
+
+    #endregion
+
+    #region Signals
+
+    /// <summary>測定対象ポイントの変更通知。</summary>
+    [Signal] public delegate void PointNotifiedEventHandler();
+
+    /// <summary>測定結果の変更通知。</summary>
+    [Signal] public delegate void ResultNotifiedEventHandler();
 
     #endregion
 
@@ -50,16 +67,6 @@ public partial class ModelEntityMeasurementHub : BaseHub
 
         base._ExitTree();
     }
-
-    #endregion
-
-    #region Signals
-
-    /// <summary>測定対象ポイントの変更通知。</summary>
-    [Signal] public delegate void PointNotifiedEventHandler();
-
-    /// <summary>測定結果の変更通知。</summary>
-    [Signal] public delegate void ResultNotifiedEventHandler();
 
     #endregion
 

@@ -9,9 +9,16 @@ public partial class AssetHub : BaseHub
 
     #region Properties
 
+    /// <summary>アイコンハブを取得する。</summary>
     public AssetIconHub Icon { get; }
+    /// <summary>シーンハブを取得する。</summary>
     public AssetSceneHub Scene { get; }
+    /// <summary>マテリアルハブを取得する。</summary>
     public AssetMaterialHub Material { get; }
+
+    #endregion
+
+    #region Signals
 
     #endregion
 
@@ -26,10 +33,6 @@ public partial class AssetHub : BaseHub
         Scene = AddModule<AssetSceneHub>("Scene");
         Material = AddModule<AssetMaterialHub>("Material");
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 

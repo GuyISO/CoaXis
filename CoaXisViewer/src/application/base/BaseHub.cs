@@ -13,11 +13,11 @@ public abstract partial class BaseHub : Node
 
     #endregion
 
-    #region Lifecycle
+    #region Signals
 
     #endregion
 
-    #region Signals
+    #region Lifecycle
 
     #endregion
 

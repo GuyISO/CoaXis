@@ -47,10 +47,6 @@ public partial class ViewportInteractionHub : BaseHub
 
     #endregion
 
-    #region Lifecycle
-
-    #endregion
-
     #region Signals
 
     /// <summary>操作モードの変更通知。</summary>
@@ -67,7 +63,15 @@ public partial class ViewportInteractionHub : BaseHub
 
     #endregion
 
+    #region Lifecycle
+
+    #endregion
+
     #region Events
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// 操作モードを更新し、変更された場合に通知する。
@@ -121,12 +125,9 @@ public partial class ViewportInteractionHub : BaseHub
 
     #endregion
 
-    #region Methods
-
-    #endregion
-
     #region Helpers
 
+    /// <summary>アークボールハンドル位置から回転を算出する。</summary>
     private static Quaternion CalculateArcballHandleRotation(Vector3 handlePosition)
     {
         if (handlePosition.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)

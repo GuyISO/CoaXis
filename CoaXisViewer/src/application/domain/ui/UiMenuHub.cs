@@ -8,9 +8,13 @@ public partial class UiMenuHub : BaseHub
 {
     #region Fields
 
+    /// <summary>ModelEntity用コンテキストメニュー。</summary>
     private ModelEntityMenu _modelEntityMenu;
+    /// <summary>ModelProperty用コンテキストメニュー。</summary>
     private ModelPropertyMenu _modelPropertyMenu;
+    /// <summary>ピック結果用コンテキストメニュー。</summary>
     private PickResultMenu _pickResultMenu;
+    /// <summary>軸ナビゲーター用コンテキストメニュー。</summary>
     private AxisNavigatorMenu _axisNavigatorMenu;
 
     #endregion
@@ -19,11 +23,11 @@ public partial class UiMenuHub : BaseHub
 
     #endregion
 
-    #region Lifecycle
+    #region Signals
 
     #endregion
 
-    #region Signals
+    #region Lifecycle
 
     #endregion
 

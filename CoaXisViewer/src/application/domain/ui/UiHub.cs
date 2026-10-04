@@ -9,8 +9,14 @@ public partial class UiHub : BaseHub
 
 	#region Properties
 
+	/// <summary>メニューハブを取得する。</summary>
 	public UiMenuHub Menu { get; }
+	/// <summary>ウィンドウハブを取得する。</summary>
 	public UiWindowHub Window { get; }
+
+	#endregion
+
+	#region Signals
 
 	#endregion
 
@@ -24,10 +30,6 @@ public partial class UiHub : BaseHub
 		Menu = AddModule<UiMenuHub>("Menu");
 		Window = AddModule<UiWindowHub>("Window");
 	}
-
-	#endregion
-
-	#region Signals
 
 	#endregion
 

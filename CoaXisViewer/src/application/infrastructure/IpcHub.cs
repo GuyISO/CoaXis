@@ -23,11 +23,16 @@ public partial class IpcHub : BaseHub
     /// </summary>
     private readonly ConcurrentQueue<PendingRequest> _pendingRequests = new();
 
+    /// <summary>メインスレッド処理の待機タイムアウト（ミリ秒）。</summary>
     private const int MainThreadTimeoutMilliseconds = 2000;
+    /// <summary>IPCメッセージの送信元名。</summary>
     private const string ViewerSourceName = "Viewer";
 
+    /// <summary>IPC用の名前付きパイプサーバー。</summary>
     private NamedPipeServerStream _pipeServer;
+    /// <summary>受信待機の取消しトークン。</summary>
     private CancellationTokenSource _cts;
+    /// <summary>受信待機タスク。</summary>
     private Task _listenTask;
 
     #endregion
@@ -35,6 +40,45 @@ public partial class IpcHub : BaseHub
     #region Properties
 
     // TODO: IsConnected プロパティを追加するが名称が重複するため適切か検討する
+
+    #endregion
+
+    #region Signals
+
+    /// <summary>IPC接続状態の変更通知。</summary>
+    [Signal] public delegate void ConnectionStatusEventHandler(bool isConnected);
+    /// <summary>
+    /// IPC サーバーの接続状態を通知する
+    /// </summary>
+    /// <param name="isConnected">接続状態。接続されていれば true</param>
+    internal void NotifyConnectionStatus(bool isConnected)
+    {
+        EmitSignal(SignalName.ConnectionStatus, isConnected);
+    }
+    
+    /// <summary>IPCメッセージ受信の通知。</summary>
+    [Signal] public delegate void MessageReceivedEventHandler(string eventType);
+    /// <summary>
+    /// IPC メッセージを受信したことを通知する
+    /// </summary>
+    /// <param name="eventType">受信したメッセージの eventType</param>
+    internal void NotifyMessageReceived(string eventType)
+    {
+        EmitSignal(SignalName.MessageReceived, eventType);
+    }
+
+    /// <summary>IPCメッセージ処理結果の通知。</summary>
+    [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
+    /// <summary>
+    /// IPC メッセージの処理結果を通知する
+    /// </summary>
+    /// <param name="eventType">処理したメッセージの eventType</param>
+    /// <param name="ok">処理が成功した場合は true</param>
+    /// <param name="errorCode">失敗時の標準化エラーコード</param>
+    internal void NotifyMessageHandled(string eventType, bool ok, string errorCode)
+    {
+        EmitSignal(SignalName.MessageHandled, eventType, ok, errorCode);
+    }
 
     #endregion
 
@@ -65,42 +109,6 @@ public partial class IpcHub : BaseHub
         Stop();
 
         base._ExitTree();
-    }
-
-    #endregion
-
-    #region Signals
-
-    [Signal] public delegate void ConnectionStatusEventHandler(bool isConnected);
-    /// <summary>
-    /// IPC サーバーの接続状態を通知する
-    /// </summary>
-    /// <param name="isConnected">接続状態。接続されていれば true</param>
-    internal void NotifyConnectionStatus(bool isConnected)
-    {
-        EmitSignal(SignalName.ConnectionStatus, isConnected);
-    }
-    
-    [Signal] public delegate void MessageReceivedEventHandler(string eventType);
-    /// <summary>
-    /// IPC メッセージを受信したことを通知する
-    /// </summary>
-    /// <param name="eventType">受信したメッセージの eventType</param>
-    internal void NotifyMessageReceived(string eventType)
-    {
-        EmitSignal(SignalName.MessageReceived, eventType);
-    }
-
-    [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
-    /// <summary>
-    /// IPC メッセージの処理結果を通知する
-    /// </summary>
-    /// <param name="eventType">処理したメッセージの eventType</param>
-    /// <param name="ok">処理が成功した場合は true</param>
-    /// <param name="errorCode">失敗時の標準化エラーコード</param>
-    internal void NotifyMessageHandled(string eventType, bool ok, string errorCode)
-    {
-        EmitSignal(SignalName.MessageHandled, eventType, ok, errorCode);
     }
 
     #endregion

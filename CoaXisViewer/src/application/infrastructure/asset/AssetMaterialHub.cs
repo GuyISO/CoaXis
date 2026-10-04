@@ -7,13 +7,19 @@ public partial class AssetMaterialHub : BaseHub
 {
     #region Fields
 
+    /// <summary>選択強調マテリアルのパス。</summary>
     private const string SelectedMaterialPath = "res://assets/material/selected.tres";
 
+    /// <summary>選択強調マテリアル。</summary>
     private Material _selectedMaterial;
 
     #endregion
 
     #region Properties
+
+    #endregion
+
+    #region Signals
 
     #endregion
 
@@ -31,10 +37,6 @@ public partial class AssetMaterialHub : BaseHub
 
         base._ExitTree();
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 
@@ -56,14 +58,6 @@ public partial class AssetMaterialHub : BaseHub
     private void UnsubscribeApplicationEvents()
     {
         Application.Setting.SettingsNotified -= ApplySettings;
-    }
-
-    /// <summary>
-    /// 設定値を反映する。
-    /// </summary>
-    private void ApplySettings()
-    {
-        ApplySelectedMaterialColor();
     }
 
     #endregion
@@ -96,6 +90,14 @@ public partial class AssetMaterialHub : BaseHub
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// 設定値を反映する。
+    /// </summary>
+    private void ApplySettings()
+    {
+        ApplySelectedMaterialColor();
+    }
 
     /// <summary>
     /// 選択中のマテリアルに設定される色を適用する

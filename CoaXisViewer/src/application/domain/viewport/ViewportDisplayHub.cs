@@ -16,14 +16,14 @@ public partial class ViewportDisplayHub : BaseHub
 
     #endregion
 
-    #region Lifecycle
-
-    #endregion
-
     #region Signals
 
     /// <summary>レイヤー表示状態の変更通知。</summary>
     [Signal] public delegate void ActiveLayersNotifiedEventHandler();
+
+    #endregion
+
+    #region Lifecycle
 
     #endregion
 

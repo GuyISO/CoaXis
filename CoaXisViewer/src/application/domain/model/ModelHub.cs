@@ -21,6 +21,10 @@ public partial class ModelHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Lifecycle
 
     /// <summary>
@@ -31,10 +35,6 @@ public partial class ModelHub : BaseHub
         Entity = AddModule<ModelEntityHub>("Entity");
         Property = AddModule<ModelPropertyHub>("Property");
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 

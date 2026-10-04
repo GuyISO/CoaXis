@@ -24,13 +24,32 @@ public partial class LogHub : BaseHub
 {
     #region Fields
 
+    /// <summary>ログファイルの書き込み先。</summary>
     private StreamWriter _fileWriter;
+    /// <summary>ログファイルのパス。</summary>
     private string _logFilePath = string.Empty;
+    /// <summary>ファイルログの有効フラグ。</summary>
     private bool _enableFileLog = false;
 
     #endregion
 
     #region Properties
+
+    #endregion
+
+    #region Signals
+
+    /// <summary>ログ出力の通知。</summary>
+    [Signal] public delegate void LoggedEventHandler(int level, string message);
+    /// <summary>
+    /// ログメッセージが通知されたときに発行されるシグナル。
+    /// </summary>
+    /// <param name="level">ログレベル</param>
+    /// <param name="message">ログメッセージ</param>
+    private void NotifyLogged(int level, string message)
+    {
+        EmitSignal(SignalName.Logged, level, message);
+    }
 
     #endregion
 
@@ -49,21 +68,6 @@ public partial class LogHub : BaseHub
         _fileWriter?.Dispose();
 
         base._ExitTree();
-    }
-
-    #endregion
-
-    #region Signals
-
-    [Signal] public delegate void LoggedEventHandler(int level, string message);
-    /// <summary>
-    /// ログメッセージが通知されたときに発行されるシグナル。
-    /// </summary>
-    /// <param name="level">ログレベル</param>
-    /// <param name="message">ログメッセージ</param>
-    private void NotifyLogged(int level, string message)
-    {
-        EmitSignal(SignalName.Logged, level, message);
     }
 
     #endregion

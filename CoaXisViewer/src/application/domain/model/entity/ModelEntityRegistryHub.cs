@@ -10,9 +10,11 @@ public partial class ModelEntityRegistryHub : BaseHub
 {
     #region Fields
 
+    /// <summary>登録済みEntityの識別子辞書。</summary>
     private readonly Dictionary<Guid, ModelEntity> _entities = new();
 
     // 未解決Entityの登録順を保持し、親が後から登録された場合も兄弟順を安定させる。
+    /// <summary>親へ未接続のEntity識別子。</summary>
     private readonly List<Guid> _unlinkedIds = new();
 
     #endregion
@@ -28,19 +30,6 @@ public partial class ModelEntityRegistryHub : BaseHub
     /// シーン全体のルート ModelEntity を取得する。
     /// </summary>
     public RootModelEntity RootEntity { get; private set; } = null!;
-
-    #endregion
-
-    #region Lifecycle
-
-    /// <summary>
-    /// レジストリのルート ModelEntity を初期化する。
-    /// </summary>
-    public override void _Ready()
-    {
-        RootEntity = new RootModelEntity();
-        AddChild(RootEntity.Node);
-    }
 
     #endregion
 
@@ -88,6 +77,19 @@ public partial class ModelEntityRegistryHub : BaseHub
     internal void NotifyCleared()
     {
         EmitSignal(SignalName.Cleared);
+    }
+
+    #endregion
+
+    #region Lifecycle
+
+    /// <summary>
+    /// レジストリのルート ModelEntity を初期化する。
+    /// </summary>
+    public override void _Ready()
+    {
+        RootEntity = new RootModelEntity();
+        AddChild(RootEntity.Node);
     }
 
     #endregion
@@ -294,6 +296,7 @@ public partial class ModelEntityRegistryHub : BaseHub
 
     #region Helpers
 
+    /// <summary>Entityを親Entityの子として接続する。</summary>
     private bool LinkEntityToParent(ModelEntity modelEntity)
     {
         if (modelEntity.ParentId == Guid.Empty)
@@ -310,6 +313,7 @@ public partial class ModelEntityRegistryHub : BaseHub
         return false;
     }
 
+    /// <summary>指定Entity配下の子孫Entityを収集する。</summary>
     private static void CollectDescendantEntities(
         ModelEntity entity,
         ICollection<ModelEntity> descendants,

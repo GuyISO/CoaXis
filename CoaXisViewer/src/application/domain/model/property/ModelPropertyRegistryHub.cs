@@ -9,6 +9,7 @@ public partial class ModelPropertyRegistryHub : BaseHub
 {
     #region Fields
 
+    /// <summary>登録済みPropertyの識別子辞書。</summary>
     private readonly Dictionary<Guid, ModelProperty> _properties = new();
 
     #endregion
@@ -22,11 +23,11 @@ public partial class ModelPropertyRegistryHub : BaseHub
 
     #endregion
 
-    #region Lifecycle
+    #region Signals
 
     #endregion
 
-    #region Signals
+    #region Lifecycle
 
     #endregion
 
@@ -169,6 +170,7 @@ public partial class ModelPropertyRegistryHub : BaseHub
 
     #region Helpers
 
+    /// <summary>Propertyを親Propertyの子として接続する。</summary>
     private bool LinkPropertyToParent(ModelProperty property)
     {
         if (property.ParentId == Guid.Empty)

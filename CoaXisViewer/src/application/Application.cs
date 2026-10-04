@@ -6,16 +6,25 @@ public partial class Application : BaseHub
     #region Fields
 
     // infrastructure
+    /// <summary>ログハブの実体。</summary>
     private LogHub _log;
+    /// <summary>設定ハブの実体。</summary>
     private SettingHub _setting;
+    /// <summary>アセットハブの実体。</summary>
     private AssetHub _asset;
+    /// <summary>IPCハブの実体。</summary>
     private IpcHub _ipc;
+    /// <summary>入力ハブの実体。</summary>
     private InputHub _input; 
 
     // domain
+    /// <summary>コマンドハブの実体。</summary>
     private CommandHub _command;
+    /// <summary>モデルハブの実体。</summary>
     private ModelHub _model;
+    /// <summary>UIハブの実体。</summary>
     private UiHub _ui;
+    /// <summary>ビューポートハブの実体。</summary>
     private ViewportHub _viewport;
 
     #endregion
@@ -51,6 +60,10 @@ public partial class Application : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Lifecycle
 
     public override void _EnterTree()
@@ -67,10 +80,6 @@ public partial class Application : BaseHub
 
         base._ExitTree();
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 

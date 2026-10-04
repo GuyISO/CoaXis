@@ -8,13 +8,19 @@ public partial class AssetSceneHub : BaseHub
 {
     #region Fields
 
+    /// <summary>計測点ラベルのシーン。</summary>
     private readonly PackedScene _pointerLabel = ResourceLoader.Load<PackedScene>("res://scenes/part/pointer_label.tscn")!;
 
+    /// <summary>読み込み済みシーンのキャッシュ。</summary>
     private readonly Dictionary<string, PackedScene> _cache = new Dictionary<string, PackedScene>();
 
     #endregion
 
     #region Properties
+
+    #endregion
+
+    #region Signals
 
     #endregion
 
@@ -26,10 +32,6 @@ public partial class AssetSceneHub : BaseHub
 
         base._ExitTree();
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 
@@ -80,6 +82,7 @@ public partial class AssetSceneHub : BaseHub
 
     #region Helpers
 
+    /// <summary>リソースパス形式（res://）か判定する。</summary>
     private static bool IsResourcePath(string path)
     {
         return !string.IsNullOrWhiteSpace(path)

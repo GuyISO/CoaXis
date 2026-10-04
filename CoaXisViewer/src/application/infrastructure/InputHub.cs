@@ -13,6 +13,10 @@ public partial class InputHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Lifecycle
 
     public override void _ExitTree()
@@ -34,10 +38,6 @@ public partial class InputHub : BaseHub
         HandleTranslationInput((float)delta);
         HandleRotationInput((float)delta);
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 

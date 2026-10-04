@@ -49,6 +49,10 @@ public partial class ModelEntityHub : BaseHub
 
     #endregion
 
+    #region Signals
+
+    #endregion
+
     #region Lifecycle
 
     /// <summary>
@@ -66,10 +70,6 @@ public partial class ModelEntityHub : BaseHub
         Load = AddModule<ModelEntityLoadHub>("Load");
         Scene = AddModule<ModelEntitySceneHub>("Scene");
     }
-
-    #endregion
-
-    #region Signals
 
     #endregion
 
