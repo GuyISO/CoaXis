@@ -102,12 +102,12 @@ public partial class ModelEntityTree : Tree
         Application.Setting.SettingsNotified += ApplySettings;
         Application.Model.Entity.Selection.Selected += OnSelected;
         Application.Model.Entity.Selection.ClearedNotified += OnClearedNotified;
-        Application.Model.Registry.Added += OnModelAdded;
-        Application.Model.Registry.ModelSetReplaced += OnModelSetReplaced;
+        Application.Model.Entity.Registry.Added += OnModelAdded;
+        Application.Model.Entity.Registry.ModelSetReplaced += OnModelSetReplaced;
         Application.Model.State.VisibilityNotified += OnModelVisibilityNotified;
         Application.Model.State.Collapsed += OnModelCollapsed;
         Application.Model.State.StatusNotified += OnModelStatusNotified;
-        Application.Model.Registry.Cleared += OnRegistryClearedNotified;
+        Application.Model.Entity.Registry.Cleared += OnEntityRegistryClearedNotified;
         Application.Model.Entity.Tree.CenteringRequested += OnTreeCenteringRequested;
     }
 
@@ -119,12 +119,12 @@ public partial class ModelEntityTree : Tree
         Application.Setting.SettingsNotified -= ApplySettings;
         Application.Model.Entity.Selection.Selected -= OnSelected;
         Application.Model.Entity.Selection.ClearedNotified -= OnClearedNotified;
-        Application.Model.Registry.Added -= OnModelAdded;
-        Application.Model.Registry.ModelSetReplaced -= OnModelSetReplaced;
+        Application.Model.Entity.Registry.Added -= OnModelAdded;
+        Application.Model.Entity.Registry.ModelSetReplaced -= OnModelSetReplaced;
         Application.Model.State.VisibilityNotified -= OnModelVisibilityNotified;
         Application.Model.State.StatusNotified -= OnModelStatusNotified;
         Application.Model.State.Collapsed -= OnModelCollapsed;
-        Application.Model.Registry.Cleared -= OnRegistryClearedNotified;
+        Application.Model.Entity.Registry.Cleared -= OnEntityRegistryClearedNotified;
         Application.Model.Entity.Tree.CenteringRequested -= OnTreeCenteringRequested;
     }
 
@@ -254,7 +254,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        if (!Application.Model.Registry.IsEntityRegistered(parsedParentEntityId) ||
+        if (!Application.Model.Entity.Registry.IsEntityRegistered(parsedParentEntityId) ||
             !_entityIdToTreeItem.ContainsKey(parsedParentEntityId))
         {
             Application.Log.Warn($"ModelTree: parent TreeItem not found for added entity. entityId='{parsedEntityId}', parentEntityId='{parsedParentEntityId}'");
@@ -284,7 +284,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
         if (modelEntity == null)
         {
             return;
@@ -346,7 +346,7 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// モデルレジストリがクリアされたことを通知されたときのイベントハンドラ
     /// </summary>
-    private void OnRegistryClearedNotified()
+    private void OnEntityRegistryClearedNotified()
     {
         RebuildTreeFromRegistry();
     }
@@ -359,17 +359,17 @@ public partial class ModelEntityTree : Tree
         _highlightedItems.Clear();
         _lastSelectedItem = null;
 
-        if (Application.Model.Registry.RootEntity == null)
+        if (Application.Model.Entity.Registry.RootEntity == null)
         {
             return;
         }
 
-        if (Application.Model.Registry.GetEntity(Application.Model.Registry.RootEntity.Id) == null)
+        if (Application.Model.Entity.Registry.GetEntity(Application.Model.Entity.Registry.RootEntity.Id) == null)
         {
             return;
         }
 
-        AddToTree(Application.Model.Registry.RootEntity.Id, Guid.Empty);
+        AddToTree(Application.Model.Entity.Registry.RootEntity.Id, Guid.Empty);
     }
 
     /// <summary>
@@ -440,7 +440,7 @@ public partial class ModelEntityTree : Tree
         }
 
         TreeItem parentTreeItem = _entityIdToTreeItem.TryGetValue(parentEntityId, out TreeItem item) ? item : null;
-        ModelEntity modelEntity = Application.Model.Registry.GetEntity(entityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
         if (modelEntity == null)
         {
             return;
@@ -775,7 +775,7 @@ public partial class ModelEntityTree : Tree
             return null;
         }
 
-        return Application.Model.Registry.GetEntity(entityId)?.Node;
+        return Application.Model.Entity.Registry.GetEntity(entityId)?.Node;
     }
 
     #endregion

@@ -269,7 +269,7 @@ public partial class SelectionUi : PanelContainer
 
         _isUpdatingTree = true;
 
-        _selectedEntityIds.RemoveAll(entityId => entityId == Guid.Empty || Application.Model.Registry.GetEntity(entityId) == null);
+        _selectedEntityIds.RemoveAll(entityId => entityId == Guid.Empty || Application.Model.Entity.Registry.GetEntity(entityId) == null);
 
         _tree.Clear();
         TreeItem root = _tree.CreateItem();
@@ -282,7 +282,7 @@ public partial class SelectionUi : PanelContainer
         for (int i = 0; i < _selectedEntityIds.Count; i++)
         {
             Guid entityId = _selectedEntityIds[i];
-            ModelEntity modelEntity = Application.Model.Registry.GetEntity(entityId);
+            ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
             TreeItem item = _tree.CreateItem(root);
             item.SetText(0, modelEntity?.Name ?? entityId.ToString());
 

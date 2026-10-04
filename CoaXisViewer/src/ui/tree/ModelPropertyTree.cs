@@ -66,7 +66,7 @@ public partial class ModelPropertyTree : Tree
 		Clear();
 		_rootItem = null;
 
-		ModelEntity entity = Application.Model.Registry.GetEntity(_entityId);
+		ModelEntity entity = Application.Model.Entity.Registry.GetEntity(_entityId);
 		if (entity == null)
 		{
 			return;

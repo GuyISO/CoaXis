@@ -63,7 +63,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     {
         Application.Pick.ResultNotified += OnPickResultNotified;
         Application.Pick.ResultsNotified += OnPickResultsNotified;
-        Application.Model.Registry.Cleared += OnModelRegistryCleared;
+        Application.Model.Entity.Registry.Cleared += OnEntityRegistryCleared;
     }
 
     public override void _ExitTree()
@@ -80,7 +80,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     {
         Application.Pick.ResultNotified -= OnPickResultNotified;
         Application.Pick.ResultsNotified -= OnPickResultsNotified;
-        Application.Model.Registry.Cleared -= OnModelRegistryCleared;
+        Application.Model.Entity.Registry.Cleared -= OnEntityRegistryCleared;
     }
 
     #endregion
@@ -221,7 +221,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <summary>
     /// モデルレジストリのクリア通知を受け取る
     /// </summary>
-    private void OnModelRegistryCleared()
+    private void OnEntityRegistryCleared()
     {
         Clear(); // モデルレジストリがクリアされた場合、選択状態もクリアする
     }
@@ -253,7 +253,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     internal Node3D[] GetModelNodeArray()
     {
         return EntityIds
-            .Select(entityId => Application.Model.Registry.GetEntity(entityId)?.Node)
+            .Select(entityId => Application.Model.Entity.Registry.GetEntity(entityId)?.Node)
             .Where(node => node != null)
             .Cast<Node3D>()
             .ToArray();

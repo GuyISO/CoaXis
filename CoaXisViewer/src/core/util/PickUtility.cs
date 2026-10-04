@@ -1,4 +1,4 @@
-﻿// TODO: リファクタリング確認後に削除
+// TODO: リファクタリング確認後に削除
 using Godot;
 using Godot.Collections;
 using System;
@@ -217,7 +217,7 @@ public static class PickUtility
     /// <returns>モデル情報を含む PickResult。対応する ModelNode が見つからない場合はヒットなしを返す</returns>
     public static PickResult PickByEntityId(Guid entityId)
     {
-        ModelNode modelNode = Application.Model.Registry.GetEntity(entityId)?.Node;
+        ModelNode modelNode = Application.Model.Entity.Registry.GetEntity(entityId)?.Node;
         return PickByModel(modelNode);
     }
 

@@ -99,7 +99,7 @@ public partial class ModelEntityMenu : BaseMenu
 			return null;
 		}
 
-		return Application.Model.Registry.GetEntity(_targetEntityId)?.Node;
+		return Application.Model.Entity.Registry.GetEntity(_targetEntityId)?.Node;
 	}
 
 	#endregion

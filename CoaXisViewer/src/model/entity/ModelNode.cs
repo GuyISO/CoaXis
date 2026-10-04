@@ -19,7 +19,7 @@ public partial class ModelNode : Node3D
     /// <summary>
     /// このモデルに対応する ModelEntity を取得する
     /// </summary>
-    public ModelEntity Entity => EntityId == Guid.Empty ? null : Application.Model.Registry.GetEntity(EntityId);
+    public ModelEntity Entity => EntityId == Guid.Empty ? null : Application.Model.Entity.Registry.GetEntity(EntityId);
 
     /// <summary>
     /// このモデルの内部構造を保持するコンポーネントルート
@@ -46,7 +46,7 @@ public partial class ModelNode : Node3D
     public ModelNode(Guid entityId)
     {
         // Registry に先に ModelEntity が存在していることを前提にノードを作る
-        ModelEntity modelEntity = Application.Model.Registry.GetEntity(entityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
         if (modelEntity == null)
         {
             throw new ArgumentException($"ModelNode: ModelEntity not found for entityId='{entityId}'");

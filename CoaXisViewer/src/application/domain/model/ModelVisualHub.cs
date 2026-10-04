@@ -152,8 +152,8 @@ public partial class ModelVisualHub : BaseHub
 		Application.Model.State.PositionNotified += OnModelPositionNotified;
 		Application.Model.State.RotationNotified += OnModelRotationNotified;
 		Application.Model.State.VisibilityNotified += OnModelVisibilityNotified;
-		Application.Model.Registry.Added += OnModelAdded;
-		Application.Model.Registry.ModelSetReplaced += OnModelSetReplaced;
+		Application.Model.Entity.Registry.Added += OnModelAdded;
+		Application.Model.Entity.Registry.ModelSetReplaced += OnModelSetReplaced;
 		Application.Model.State.StatusNotified += OnModelStatusNotified;
 		Application.Model.Entity.Selection.Selected += OnSelected;
 	}
@@ -166,8 +166,8 @@ public partial class ModelVisualHub : BaseHub
 		Application.Model.State.PositionNotified -= OnModelPositionNotified;
 		Application.Model.State.RotationNotified -= OnModelRotationNotified;
 		Application.Model.State.VisibilityNotified -= OnModelVisibilityNotified;
-		Application.Model.Registry.Added -= OnModelAdded;
-		Application.Model.Registry.ModelSetReplaced -= OnModelSetReplaced;
+		Application.Model.Entity.Registry.Added -= OnModelAdded;
+		Application.Model.Entity.Registry.ModelSetReplaced -= OnModelSetReplaced;
 		Application.Model.State.StatusNotified -= OnModelStatusNotified;
 		Application.Model.Entity.Selection.Selected -= OnSelected;
 	}
@@ -185,7 +185,7 @@ public partial class ModelVisualHub : BaseHub
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelPresentationService: position target not found. entityId='{parsedEntityId}'");
@@ -213,7 +213,7 @@ public partial class ModelVisualHub : BaseHub
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelPresentationService: rotation target not found. entityId='{parsedEntityId}'");
@@ -242,7 +242,7 @@ public partial class ModelVisualHub : BaseHub
 		}
 
 		// ModelEntity の内部的な表示状態を更新
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelPresentationService: visibility target not found. entityId='{parsedEntityId}'");
@@ -264,7 +264,7 @@ public partial class ModelVisualHub : BaseHub
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
 			return;
@@ -278,7 +278,7 @@ public partial class ModelVisualHub : BaseHub
 	/// </summary>
 	private void OnModelSetReplaced()
 	{
-		foreach (ModelEntity modelEntity in Application.Model.Registry.Entities.Values)
+		foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Entities.Values)
 		{
 			if (modelEntity.Id != RootModelEntity.RootEntityId)
 			{
@@ -347,7 +347,7 @@ public partial class ModelVisualHub : BaseHub
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedEntityId)?.Node;
+		ModelNode modelNode = Application.Model.Entity.Registry.GetEntity(parsedEntityId)?.Node;
 		if (modelNode == null || !IsInstanceValid(modelNode))
 		{
 			return;
@@ -369,7 +369,7 @@ public partial class ModelVisualHub : BaseHub
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Registry.GetEntity(parsedEntityId)?.Node;
+		ModelNode modelNode = Application.Model.Entity.Registry.GetEntity(parsedEntityId)?.Node;
 		if (modelNode == null)
 		{
 			Application.Log.Warn($"ModelPresentationService: highlight target not found. entityId='{parsedEntityId}'");
@@ -392,7 +392,7 @@ public partial class ModelVisualHub : BaseHub
 		Transparency = value;
 
 		// ルート ModelEntity 配下のすべてのノードに透明度を適用
-		RootModelEntity rootEntity = Application.Model.Registry.RootEntity;
+		RootModelEntity rootEntity = Application.Model.Entity.Registry.RootEntity;
 		if (rootEntity?.Node != null && IsInstanceValid(rootEntity.Node))
 		{
 			ApplyModelTransparency(rootEntity.Node);
@@ -412,7 +412,7 @@ public partial class ModelVisualHub : BaseHub
 	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalse</param>
 	private static void HighLightModel(ModelNode modelNode, bool enable = true)
 	{
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(modelNode.EntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(modelNode.EntityId);
 		if (modelEntity == null)
 		{
 			return;
@@ -420,7 +420,7 @@ public partial class ModelVisualHub : BaseHub
 
 		// 論理階層はRegistryで解決し、描画ノードへの反映だけをModelPresentationServiceが担当する。
 		var modelEntities = new List<ModelEntity> { modelEntity };
-		modelEntities.AddRange(Application.Model.Registry.GetDescendantEntities(modelEntity.Id));
+		modelEntities.AddRange(Application.Model.Entity.Registry.GetDescendantEntities(modelEntity.Id));
 		foreach (ModelEntity targetModelEntity in modelEntities)
 		{
 			if (targetModelEntity.Node != null && IsInstanceValid(targetModelEntity.Node))

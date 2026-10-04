@@ -92,7 +92,7 @@ public class ModelEntity
     /// <summary>
     /// 親実体を参照するためのプロパティ
     /// </summary>
-    public ModelEntity Parent => ParentId != Guid.Empty ? Application.Model.Registry.GetEntity(ParentId) : null;
+    public ModelEntity Parent => ParentId != Guid.Empty ? Application.Model.Entity.Registry.GetEntity(ParentId) : null;
 
     /// <summary>
     /// 子実体の一覧を返す

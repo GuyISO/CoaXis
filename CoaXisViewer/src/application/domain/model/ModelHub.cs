@@ -10,8 +10,14 @@ public partial class ModelHub : BaseHub
 
     #region Properties
 
+    /// <summary>
+    /// ModelEntity 機能を取得する。
+    /// </summary>
     public ModelEntityHub Entity { get; }
-    public ModelRegistry Registry { get; }
+    /// <summary>
+    /// ModelProperty 機能を取得する。
+    /// </summary>
+    public ModelPropertyHub Property { get; }
     public ModelLoadHub Load { get; }
     public ModelVisualHub Visual { get; }
     public ModelStateHub State { get; }
@@ -26,7 +32,7 @@ public partial class ModelHub : BaseHub
     public ModelHub()
     {
         Entity = AddModule<ModelEntityHub>("Entity");
-        Registry = AddModule<ModelRegistry>("Registry");
+        Property = AddModule<ModelPropertyHub>("Property");
         Load = AddModule<ModelLoadHub>("Load");
         Visual = AddModule<ModelVisualHub>("Visual");
         State = AddModule<ModelStateHub>("State");

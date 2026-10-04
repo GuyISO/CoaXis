@@ -2,13 +2,13 @@
 
 ## 目的
 
-モデル本体とビューを分離し、ロジックの中心を `ModelEntity` / `ModelProperty` と `ModelRegistry` に統一する。
+モデル本体とビューを分離し、ロジックの中心を `ModelEntity` / `ModelProperty` と、それぞれを管理するEntity/Property Registryに置く。
 
 ## 必須ルール
 
 1. `ModelEntity` を正とし、`ModelNode` は再生成可能なビューとする。
 2. Signal / Event / UI 通知 / Pick 結果は `ModelNode` ではなく `EntityId` を運ぶ。
-3. `ModelNode` からの要求は、まず `EntityId` に変換し、`ModelRegistry` で `ModelEntity` に解決する。
+3. `ModelNode` からの要求は、まず `EntityId` に変換し、`ModelEntityRegistryHub` で `ModelEntity` に解決する。
 4. `Guid.TryParse` に失敗した payload は破棄し、警告ログを残す。
 5. `ModelEntity` から `ModelNode` を長期保持しない。
 
@@ -23,7 +23,7 @@
 ## ルーティング順序
 
 ```text
-ModelNode / Collider -> EntityId -> ModelRegistry -> ModelEntity
+ModelNode / Collider -> EntityId -> ModelEntityRegistryHub -> ModelEntity
 ```
 
 ## 禁止事項

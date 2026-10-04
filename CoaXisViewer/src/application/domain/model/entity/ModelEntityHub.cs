@@ -10,6 +10,10 @@ public partial class ModelEntityHub : BaseHub
 
     #region Properties
 
+    /// <summary>
+    /// ModelEntity の識別子と階層を管理するレジストリを取得する。
+    /// </summary>
+    public ModelEntityRegistryHub Registry { get; }
     public ModelEntitySelectionHub Selection { get; }
     public ModelEntityTreeHub Tree { get; }
 
@@ -22,6 +26,7 @@ public partial class ModelEntityHub : BaseHub
     /// </summary>
     public ModelEntityHub()
     {
+        Registry = AddModule<ModelEntityRegistryHub>("Registry");
         Selection = AddModule<ModelEntitySelectionHub>("Selection");
         Tree = AddModule<ModelEntityTreeHub>("Tree");
     }

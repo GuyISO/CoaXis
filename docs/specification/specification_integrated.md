@@ -240,7 +240,9 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 モデル実行時責務:
 - `ModelLoadService`: モデル集合の置換・クリアを統括し、旧世代の非同期ロードを無効化してから論理モデルを破棄する
 - `ModelEntityMapper`: IPC/ファイルDTOを検証済みの内部ModelEntityへ変換し、CATIA座標系からGodot座標系への変換境界を担う
-- `ModelRegistry`: ModelEntity/ModelPropertyの識別子検索、論理親子関係、未解決リンク、論理集合の破棄を担う。描画ロードを開始・停止しない
+- `ModelEntityRegistryHub`: ModelEntityの識別子検索、論理親子関係、未解決リンク、ルート実体およびEntity集合の破棄を担う
+- `ModelPropertyRegistryHub`: ModelPropertyの識別子検索、Property階層、Entityへの所属解決およびProperty集合の破棄を担う
+- `ModelLoadService`: Entity/Property両Registryの階層解決と集合クリアを調整する。Registryは相手の集合全体を所有しない
 - `ModelEntityFactory`: Entity登録とModelNodeの親子構築を担う
 - `ModelSceneService`: シーンロードキュー、ロード世代、フレーム予算、ロード状態遷移、およびロード済みシーンのModelNode反映を担う
 - `ModelStateService`: 表示状態切替要求とツリー折畳み通知を論理ModelEntityの状態変更へ変換する。ModelNodeやUIを直接操作しない
@@ -249,7 +251,7 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 
 Model中心DomainのFacade構成:
 - `application/domain` をViewerのModel中心領域とし、Model中核・ModelLoad・ModelState・ModelPresentation・Selection・Measurementを兄弟能力として配置する
-- `ModelFacade` は `ModelEvent` と `ModelRegistry` を公開し、モデル識別と論理階層の中核を所有する
+- `ModelFacade` はEntity/PropertyそれぞれのRegistryを公開し、モデル識別と論理階層の中核を所有する
 - `ModelLoadFacade` は `ModelLoadService` と `ModelSceneService` をまとめ、`Application.ModelLoad` 経由でモデル置換・属性ロード・Sceneロードを提供する
 - `ModelStateFacade` と `ModelPresentationFacade` はそれぞれ対応するServiceを公開する。要求・通知契約は既存の `ModelEvent` を利用し、Facade間でイベントを重複定義しない
 - SelectionとMeasurementはModelを利用する操作能力であり、Model配下へ移動しない。Model中核からSelection/Measurementへの依存を禁止し、PresentationからSelection通知を受ける依存は許容する
@@ -432,7 +434,7 @@ payload契約:
 
 `LoadModel`の処理順:
 1. IPC層はpayloadを検証し、モデル実体DTOとモデル属性DTOを受け取る
-2. `Application.Model.Load.Entity`（`ModelLoadService`）は旧世代のSceneロードを無効化し、`ModelRegistry`の論理集合をクリアする
+2. `Application.Model.Load.Entity`（`ModelLoadService`）は旧世代のSceneロードを無効化し、ModelEntityRegistryHubとModelPropertyRegistryHubの論理集合を順にクリアする
 3. `ModelEntityMapper`でDTOをGodot座標系のModelEntityへ変換する
 4. `ModelEntityFactory`がEntityを登録し、論理階層とModelNodeの親子構造を確立する
 5. UIツリーへ親先行でEntity状態を通知した後、`Application.ModelLoad.Scene`（`ModelSceneService`）が非同期シーンロードを開始する

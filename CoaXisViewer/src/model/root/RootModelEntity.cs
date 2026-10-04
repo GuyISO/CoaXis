@@ -65,7 +65,7 @@ public class RootModelEntity : ModelEntity
         // Root は常に存在するため、初期化直後からロード済みとして扱う、Registryの制約上、Initialized状態で追加する必要がある
         Status = ModelStatus.Initialized;
 
-        Application.Model.Registry.RegisterEntity(this);
+        Application.Model.Entity.Registry.RegisterEntity(this);
 
         // 登録後に最終状態へ更新する
         Status = ModelStatus.Loaded;

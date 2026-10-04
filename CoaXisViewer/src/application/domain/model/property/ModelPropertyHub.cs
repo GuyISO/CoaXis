@@ -9,9 +9,22 @@ public partial class ModelPropertyHub : BaseHub
 
     #region Properties
 
+    /// <summary>
+    /// ModelProperty の識別子と階層を管理するレジストリを取得する。
+    /// </summary>
+    public ModelPropertyRegistryHub Registry { get; }
+
     #endregion
 
     #region Lifecycle
+
+    /// <summary>
+    /// ModelProperty 機能を担当するモジュールを初期化する。
+    /// </summary>
+    public ModelPropertyHub()
+    {
+        Registry = AddModule<ModelPropertyRegistryHub>("Registry");
+    }
 
     #endregion
 

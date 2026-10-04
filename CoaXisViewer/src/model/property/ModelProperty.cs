@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 /// <summary>
 /// モデルに付与される属性情報を表すクラス。
-/// 木構造で管理され、ModelRegistry によって一元管理される。
+/// 木構造で管理され、ModelPropertyRegistryHub によって管理される。
 /// </summary>
 public class ModelProperty
 {
@@ -47,7 +47,7 @@ public class ModelProperty
     /// <summary>
     /// 親プロパティを取得する。親がモデル実体（ルートプロパティ）または未登録の場合は null を返す
     /// </summary>
-    public ModelProperty ParentProperty => ParentId != Guid.Empty ? Application.Model.Registry.GetProperty(ParentId) : null;
+    public ModelProperty ParentProperty => ParentId != Guid.Empty ? Application.Model.Property.Registry.GetProperty(ParentId) : null;
 
     /// <summary>
     /// 親プロパティの参照（ParentProperty のエイリアス）
@@ -57,7 +57,7 @@ public class ModelProperty
     /// <summary>
     /// 親がモデル実体である場合に、その親モデル実体を取得する。親がプロパティまたは未登録の場合は null を返す
     /// </summary>
-    public ModelEntity ParentEntity => ParentId != Guid.Empty ? Application.Model.Registry.GetEntity(ParentId) : null;
+    public ModelEntity ParentEntity => ParentId != Guid.Empty ? Application.Model.Entity.Registry.GetEntity(ParentId) : null;
 
     /// <summary>
     /// このプロパティがモデル実体に直接紐づくルートプロパティかどうかを判定する
@@ -105,7 +105,7 @@ public class ModelProperty
     /// <returns>所属する ModelEntity。見つからない場合は null</returns>
     public ModelEntity GetEntity()
     {
-        return Application.Model.Registry.GetOwningEntity(Id);
+        return Application.Model.Property.Registry.GetOwningEntity(Id);
     }
     
     /// <summary>

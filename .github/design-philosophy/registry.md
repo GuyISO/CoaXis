@@ -218,3 +218,15 @@
   - `.github/instructions/design-philosophy.instructions.md`
   - `docs/rules/technical-knowledge-base.md`
 - Notes: 初期表示に必要なLayer状態はViewportDisplayHub、操作モード・アークボール・矩形選択状態はViewportInteractionHub、カメラ状態はViewportCameraHubが保持する。DisplayHubは表示モードや表示対象の絞り込みなど、表示/可視性制御の拡張先とする
+
+- Date: 2026-10-04
+- Trigger: ModelEntityHubとModelPropertyHubの分離に合わせてRegistry責務を分離
+- Decision: Entity集合・Entity階層は`ModelEntityRegistryHub`、Property集合・Property階層は`ModelPropertyRegistryHub`がそれぞれ所有する。両Registryにまたがる階層解決とクリアの順序はModelLoadが調整し、統合Registryを再導入しない
+- Scope: CoaXisViewerのModel DomainとModelの利用側
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityRegistryHub.cs`
+  - `CoaXisViewer/src/application/domain/model/property/ModelPropertyRegistryHub.cs`
+  - `CoaXisViewer/src/application/domain/model/load/ModelLoadEntityHub.cs`
+  - `docs/specification/specification_integrated.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: Propertyの所属Entity解決にはEntity Registryを参照し、集合の横断操作はModelLoad側に限定する

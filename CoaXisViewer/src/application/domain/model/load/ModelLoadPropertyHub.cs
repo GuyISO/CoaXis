@@ -56,9 +56,10 @@ public partial class ModelLoadPropertyHub : BaseHub
 		foreach (ModelEntity modelEntity in entities)
 		{
 			Application.Model.Load.Scene.MarkInitialized(modelEntity);
-			Application.Model.Registry.RegisterEntity(modelEntity);
+			Application.Model.Entity.Registry.RegisterEntity(modelEntity);
 		}
-		Application.Model.Registry.ResolveHierarchy();
+		Application.Model.Entity.Registry.ResolveHierarchy();
+		Application.Model.Property.Registry.ResolveHierarchy();
 
 		foreach (ModelEntity modelEntity in entities)
 		{
@@ -68,13 +69,13 @@ public partial class ModelLoadPropertyHub : BaseHub
 		Application.Model.Load.Scene.PrepareLoads(entities);
 
 		// 全Entityと階層が確定してから一括通知し、Tree側に親先行の個別通知を要求しない。
-		Application.Model.Registry.NotifyModelSetReplaced();
+		Application.Model.Entity.Registry.NotifyModelSetReplaced();
 		Application.Model.Load.Scene.StartPendingLoads();
 		return entities;
 	}
 
 	/// <summary>
-	/// 指定したDTOからモデル属性を生成し、Registryへ登録して階層を解決する
+	/// 指定したDTOからモデル属性を生成し、Property Registryへ登録して階層を解決する
 	/// </summary>
 	/// <param name="propertyDtos">読み込むモデル属性DTOの集合</param>
 	/// <returns>登録されたModelPropertyの一覧</returns>
@@ -90,9 +91,9 @@ public partial class ModelLoadPropertyHub : BaseHub
 		// 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
 		foreach (ModelProperty property in properties)
 		{
-			Application.Model.Registry.RegisterProperty(property);
+			Application.Model.Property.Registry.RegisterProperty(property);
 		}
-		Application.Model.Registry.ResolveHierarchy();
+		Application.Model.Property.Registry.ResolveHierarchy();
 		return properties;
 	}
 
@@ -101,9 +102,11 @@ public partial class ModelLoadPropertyHub : BaseHub
 	/// </summary>
 	public void ClearModels()
 	{
-		// 旧世代を先に無効化してからRegistryをクリアし、遅延完了したロードが古いノードを更新しないようにする。
+		// 旧世代を先に無効化し、EntityとPropertyの両Registryをクリアして古いノードの更新を防ぐ。
 		Application.Model.Load.Scene.CancelPendingLoads();
-		Application.Model.Registry.Clear();
+		Application.Model.Entity.Registry.Clear();
+		Application.Model.Property.Registry.Clear();
+		Application.Model.Entity.Registry.NotifyCleared();
 	}
 
 	#endregion
@@ -179,7 +182,7 @@ public partial class ModelLoadPropertyHub : BaseHub
 		}
 		else
 		{
-			ModelNode rootNode = Application.Model.Registry.RootEntity?.Node;
+			ModelNode rootNode = Application.Model.Entity.Registry.RootEntity?.Node;
 			if (rootNode != null)
 			{
 				rootNode.AddChild(node);
@@ -200,7 +203,7 @@ public partial class ModelLoadPropertyHub : BaseHub
 			return null;
 		}
 
-		ModelEntity parentEntity = Application.Model.Registry.GetEntity(parentId);
+		ModelEntity parentEntity = Application.Model.Entity.Registry.GetEntity(parentId);
 		if (parentEntity == null)
 		{
 			return null;

@@ -155,7 +155,7 @@ public partial class ModelStateHub : BaseHub
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelStateService: toggle target not found. entityId='{parsedEntityId}'");
@@ -181,7 +181,7 @@ public partial class ModelStateHub : BaseHub
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelStateService: collapse target not found. entityId='{parsedEntityId}'");
