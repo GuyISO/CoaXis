@@ -271,3 +271,25 @@
   - `CoaXisViewer/src/core/ipc/IpcCommandDispatcher.cs`
   - `docs/specification/specification_integrated.md`
 - Notes: Entity/Property Registryをまたぐ置換時の階層解決・クリア順序は引き続きModelEntityLoadHubが調整し、SceneロードはModelEntitySceneHubへ委譲する
+
+- Date: 2026-10-04
+- Trigger: CommandHubの初期同期にAskState再要求を使わず、要求側が保持状態を読む
+- Decision: 状態Hubの購読者は通知購読後にHubの現在状態を直接読み、以降は状態変更通知に追従する。状態再要求Signalによる通知再送を設けない
+- Scope: 状態Hubとその状態を表示・利用するNode/UI
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/CommandHub.cs`
+  - `CoaXisViewer/src/ui/panel/CommandUi.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `.github/design-philosophy/index.md`
+- Notes: CommandUiは購読直後にHistory/Cursorを取得し、以後はHistoryNotifiedで更新する
+
+- Date: 2026-10-04
+- Trigger: CommandUiがCommandHub所有の履歴とカーソルを重複保持しないようにする
+- Decision: 状態Hubを表示するUIは、履歴やカーソルなどHubが所有する正本状態のコピーをフィールドに保持しない。UI更新時にHubのPropertyを読み、変更通知後に再描画する
+- Scope: CoaXisViewerのCommandUiおよびHub状態を表示するNode/UI
+- Artifacts Updated:
+  - `CoaXisViewer/src/ui/panel/CommandUi.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `.github/design-philosophy/index.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: CommandUiはExecuted通知で再構築をキューし、再構築時にCommandHub.History/Cursorを参照する

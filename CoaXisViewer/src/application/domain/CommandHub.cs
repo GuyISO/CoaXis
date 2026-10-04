@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -11,79 +10,36 @@ public partial class CommandHub : BaseHub
 	#region Fields
 
 	private readonly List<BaseCommand> _history = new();
-	private int _cursor = 0;
 
 	#endregion
 
 	#region Properties
 
+	/// <summary>
+	/// コマンド履歴の配列を取得する
+	/// </summary>
+	internal BaseCommand[] History => _history.ToArray();
+
+	/// <summary>
+	/// 現在のカーソル位置
+	/// </summary>
+	internal int Cursor { get; private set; } = 0;
+
 	#endregion
 
 	#region Lifecycle
-
-	public override void _Ready()
-	{
-		SubscribeApplicationEvents();
-	}
-
-	public override void _ExitTree()
-	{
-		UnsubscribeApplicationEvents();
-
-		base._ExitTree();
-	}
-
-	#endregion
-
-	#region Actions
-
-	[Signal] public delegate void AskStateRequestedEventHandler();
-	/// <summary>
-	/// コマンド履歴状態の通知をリクエストする
-	/// </summary>
-	internal void AskState()
-	{
-		EmitSignal(SignalName.AskStateRequested);
-	}
-
-	#endregion
-
-	#region Notifications
-
-	[Signal] public delegate void StateNotifiedEventHandler(BaseCommand[] history, int cursor);
-	/// <summary>
-	/// コマンド履歴状態を通知する
-	/// </summary>
-	/// <param name="history">履歴配列</param>
-	/// <param name="cursor">現在カーソル位置（-1 の場合は未実行）</param>
-	internal void NotifyState(BaseCommand[] history, int cursor)
-	{
-		EmitSignal(SignalName.StateNotified, history, cursor);
-	}
 
 	#endregion
 
 	#region Events
 
+	[Signal] public delegate void ExecutedEventHandler();
 	/// <summary>
-	/// Applicationイベントの購読を開始する
+	/// コマンドの実行を通知する
 	/// </summary>
-	private void SubscribeApplicationEvents()
+	internal void NotifyExecuted()
 	{
-		Application.Command.AskStateRequested += OnAskStateRequested;
-	}
-
-	/// <summary>
-	/// Applicationイベントの購読を解除する
-	/// </summary>
-	private void UnsubscribeApplicationEvents()
-	{
-		Application.Command.AskStateRequested -= OnAskStateRequested;
-	}
-
-	private void OnAskStateRequested()
-	{
-		NotifyState();
+		EmitSignal(SignalName.Executed);
 	}
 
 	#endregion
@@ -93,7 +49,7 @@ public partial class CommandHub : BaseHub
 	/// <summary>
 	/// コマンドを実行し、Undoスタックに積む
 	/// </summary>
-	public void Execute(BaseCommand command)
+	internal void Execute(BaseCommand command)
 	{
 		if (command == null)
 		{
@@ -106,81 +62,80 @@ public partial class CommandHub : BaseHub
 		Application.Log.Debug($"CommandService Execute: {command.Description}");
 		command.Do();
 		_history.Add(command);
-		_cursor++;
-		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={_cursor}");
-		NotifyState();
+		Cursor++;
+		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={Cursor}");
+		NotifyExecuted();
 	}
 
 	/// <summary>
 	/// Undo 実行
 	/// </summary>
-	public void Undo()
+	internal void Undo()
 	{
-		if (_cursor <= 0)
+		if (Cursor <= 0)
 		{
 			Application.Log.Debug("CommandService Undo skipped: cursor is at initial position.");
 			return;
 		}
 
-		var cmd = _history[_cursor - 1];
+		var cmd = _history[Cursor - 1];
 		Application.Log.Debug($"CommandService Undo: {cmd.Description}");
 		cmd.Undo();
-		_cursor--;
-		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={_cursor}");
-		NotifyState();
+		Cursor--;
+		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={Cursor}");
+		NotifyExecuted();
 	}
 
 	/// <summary>
 	/// Redo 実行
 	/// </summary>
-	public void Redo()
+	internal void Redo()
 	{
-		if (_cursor >= _history.Count)
+		if (Cursor >= _history.Count)
 		{
 			Application.Log.Debug("CommandService Redo skipped: no command can be redone.");
 			return;
 		}
 
-		var cmd = _history[_cursor];
+		var cmd = _history[Cursor];
 		Application.Log.Debug($"CommandService Redo: {cmd.Description}");
 		cmd.Do();
-		_cursor++;
-		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={_cursor}");
-		NotifyState();
+		Cursor++;
+		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={Cursor}");
+		NotifyExecuted();
 	}
 
 	/// <summary>
 	/// スタックのクリア（シーン切り替え時など）
 	/// </summary>
-	public void Clear()
+	internal void Clear()
 	{
-		Application.Log.Info($"CommandService Clear: history={_history.Count}, cursor={_cursor}");
+		Application.Log.Info($"CommandService Clear: history={_history.Count}, cursor={Cursor}");
 		_history.Clear();
-		_cursor = 0;
-		NotifyState();
+		Cursor = 0;
+		NotifyExecuted();
 	}
 
 	/// <summary>
 	/// カーソル位置を指定してタイムトラベルする
 	/// </summary>
 	/// <param name="cursor">移動先カーソル</param>
-	public void SetCursor(int cursor)
+	internal void SetCursor(int cursor)
 	{
 		int clampedCursor = Math.Clamp(cursor, 0, _history.Count);
-		if (clampedCursor == _cursor)
+		if (clampedCursor == Cursor)
 		{
-			NotifyState();
 			return;
 		}
 
-		Application.Log.Debug($"CommandService SetCursor: from={_cursor}, to={clampedCursor}");
+		Application.Log.Debug($"CommandService SetCursor: from={Cursor}, to={clampedCursor}");
 
-		while (_cursor > clampedCursor)
+		while (Cursor > clampedCursor)
 		{
 			Undo();
 		}
 
-		while (_cursor < clampedCursor)
+		while (Cursor < clampedCursor)
 		{
 			Redo();
 		}
@@ -195,22 +150,14 @@ public partial class CommandHub : BaseHub
 	/// </summary>
 	private void TrimRedoBranch()
 	{
-		if (_cursor >= _history.Count)
+		if (Cursor >= _history.Count)
 		{
 			return;
 		}
 
-		int removeStart = _cursor;
+		int removeStart = Cursor;
 		int removeCount = _history.Count - removeStart;
 		_history.RemoveRange(removeStart, removeCount);
-	}
-
-	/// <summary>
-	/// 現在の履歴状態を通知する
-	/// </summary>
-	private void NotifyState()
-	{
-		Application.Command.NotifyState(_history.ToArray(), _cursor);
 	}
 
 	#endregion

@@ -1,8 +1,4 @@
-// TODO: リファクタリング確認後に削除
-// TODO: CommandHistoryHubをつくってCommandUiから履歴管理を切り離す
-
 using Godot;
-using System.Collections.Generic;
 
 /// <summary>
 /// コマンド履歴の実行状態を表す列挙型
@@ -32,12 +28,9 @@ public partial class CommandUi : PanelContainer
 
     #region Fields
 
-    private bool _isInitialized = false; // 初回状態通知を受けたかだけを保持する
     private bool _isUpdatingTree = false;
     private bool _isRequestingCursorMove = false;
     private bool _isRebuildQueued = false;
-    private int _cursor = 0;
-    private readonly List<BaseCommand> _history = new();
 
     // 関連ノードをキャッシュ
     private Tree _tree = null!;
@@ -51,6 +44,8 @@ public partial class CommandUi : PanelContainer
         EnsureChildNodes();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
+
+        QueueRebuildTimelineTree();
     }
 
     public override void _ExitTree()
@@ -59,14 +54,6 @@ public partial class CommandUi : PanelContainer
         UnsubscribeApplicationEvents();
 
         base._ExitTree();
-    }
-
-    public override void _Process(double delta)
-    {
-        if (!_isInitialized)
-        {
-            Application.Command.AskState();
-        }
     }
 
     #endregion
@@ -119,7 +106,7 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Command.StateNotified += OnStateNotified;
+        Application.Command.Executed += OnCommandExecuted;
     }
 
     /// <summary>
@@ -127,24 +114,14 @@ public partial class CommandUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Command.StateNotified -= OnStateNotified;
+        Application.Command.Executed -= OnCommandExecuted;
     }
 
     /// <summary>
-    /// コマンド履歴状態の通知を受け取ったときに呼び出されるイベントハンドラ
+    /// コマンド実行状態の変更通知を受け取り、Hubの最新状態でツリーを更新する
     /// </summary>
-    /// <param name="history">通知された履歴配列</param>
-    /// <param name="cursor">通知されたカーソル位置</param>
-    private void OnStateNotified(BaseCommand[] history, int cursor)
+    private void OnCommandExecuted()
     {
-        _history.Clear();
-        if (history != null)
-        {
-            _history.AddRange(history);
-        }
-
-        _cursor = cursor;
-        _isInitialized = true;
         _isRequestingCursorMove = false;
         QueueRebuildTimelineTree();
     }
@@ -188,7 +165,7 @@ public partial class CommandUi : PanelContainer
         }
 
         int nextCursor = (int)metadata + 1;
-        if (nextCursor == _cursor)
+        if (nextCursor == Application.Command.Cursor)
         {
             return;
         }
@@ -240,6 +217,8 @@ public partial class CommandUi : PanelContainer
         }
 
         _isUpdatingTree = true;
+        BaseCommand[] history = Application.Command.History;
+        int cursor = Application.Command.Cursor;
 
         try
         {
@@ -250,9 +229,9 @@ public partial class CommandUi : PanelContainer
                 return;
             }
 
-            for (int i = 0; i < _history.Count; i++)
+            for (int i = 0; i < history.Length; i++)
             {
-                BaseCommand command = _history[i];
+                BaseCommand command = history[i];
                 TreeItem item = _tree.CreateItem(root);
                 if (item == null)
                 {
@@ -264,8 +243,8 @@ public partial class CommandUi : PanelContainer
                 item.SetText((int)TreeColumn.Name, command?.GetType().Name ?? "(null)");
                 item.SetText((int)TreeColumn.Description, command?.Description ?? string.Empty);
 
-                CommandExecutionState state = ResolveState(i, _cursor);
-                Color color = ResolveStateColor(i, _cursor);
+                CommandExecutionState state = ResolveState(i, cursor);
+                Color color = ResolveStateColor(i, cursor);
                 item.SetText((int)TreeColumn.State, state.ToString());
 
                 for (int column = 0; column < _tree.Columns; column++)
@@ -273,7 +252,7 @@ public partial class CommandUi : PanelContainer
                     item.SetCustomColor(column, color);
                 }
 
-                if (i == _cursor - 1)
+                if (i == cursor - 1)
                 {
                     item.Select((int)TreeColumn.No);
                 }

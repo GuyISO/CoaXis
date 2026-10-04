@@ -29,6 +29,7 @@ description: "Use when: 設計思想・実装方針・責務分割・命名規�
 - Godot の Signal 引数に渡す自前の参照型は `RefCounted` を継承する。`GodotObject` の直継承は避け、signal payload として安全に受け渡せる型に限定する。
 - 設定値参照の方針: `Constant` 由来の値はキャッシュしない。`SettingService` 由来の値は「高頻度参照（毎フレーム/入力処理/大量ループ）」の場合のみキャッシュし、低頻度参照は都度取得する。
 - 即時反映の方針: `SettingsNotified` を購読するコンポーネントは、値更新だけで終わらせず、必要な再描画/再構築（例: `QueueRedraw`, `Rebuild`, `Draw*` 再実行）を同一ハンドラ内で必須実施する。
+- 状態所有と初期同期の方針: 状態Hubの購読者は通知購読後にHubの現在状態を直接読み、以降は状態変更通知に追従する。Node/UIはHubが所有する正本状態を重複して保持せず、状態再要求Signalで通知を再送させない。
 - モデル識別の方針: Model 系の Signal/Event/Pick/UI payload は ModelNode 参照を直接運ばず ModelId を運ぶ。Godot Signal 層では `string modelId` を使い、受信直後に `Guid.TryParse` でドメイン層の Guid へ変換する。
 - コンテキストメニューの方針: PopupMenu は「表示元 UI（Tree/Viewport等）」単位ではなく「操作対象オブジェクト（例: ModelEntity）」単位で作成する。呼び出し側（Tree/Viewport等）は TreeItem や PickResult から対象の識別子（Guid）を解決してから `ShowForEntity(Guid, Vector2I)` 相当の対象単位APIを呼び出す。同じ対象を扱うUIコンポーネント間でメニュー実装を重複させない。
 - メニューの保持場所の方針: PopupMenu は呼び出し元 Node（ModelEntityTree や ViewportInteractionHandler 等）の子としてシーンに直接配置しない。`Application.Ui.Menu` がメニュー実体を保持・生成し、呼び出し側は `Application.Ui.Menu.ShowXxxMenu(...)` を呼ぶだけにする。新規メニューを追加する場合も MenuService に `ShowXxxMenu` メソッドを追加し、.tscn に PopupMenu ノードを直接並べない。

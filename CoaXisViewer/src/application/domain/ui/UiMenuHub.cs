@@ -1,15 +1,9 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
 /// <summary>
 /// コンテキストメニューの生成と表示を管理するハブ。
 /// </summary>
-/// <remarks>
-/// 従来は ModelEntityTree や ViewportInteractionHandler など、呼び出し元 Node の子として
-/// PopupMenu を配置していたが、対象オブジェクト単位でメニューを作る方針に伴い、
-/// メニュー実体は本サービスが一括保持し、呼び出し元は Application.Ui.Menu 経由で表示を依頼する。
-/// </remarks>
 public partial class UiMenuHub : BaseHub
 {
     #region Fields
@@ -27,17 +21,13 @@ public partial class UiMenuHub : BaseHub
 
     #region Lifecycle
 
-    public override void _Ready()
-    {
-        _modelEntityMenu = EnsureMenu(_modelEntityMenu, "ModelEntityMenu");
-        _modelPropertyMenu = EnsureMenu(_modelPropertyMenu, "ModelPropertyMenu");
-        _pickResultMenu = EnsureMenu(_pickResultMenu, "PickResultMenu");
-        _axisNavigatorMenu = EnsureMenu(_axisNavigatorMenu, "AxisNavigatorMenu");
-    }
+    #endregion
+
+    #region Events
 
     #endregion
 
-    #region Actions
+    #region Methods
 
     /// <summary>
     /// 指定した ModelEntity を対象にコンテキストメニューを表示する
@@ -77,18 +67,6 @@ public partial class UiMenuHub : BaseHub
         _axisNavigatorMenu = EnsureMenu(_axisNavigatorMenu, "AxisNavigatorMenu");
         _axisNavigatorMenu.ShowAtPosition();
     }
-
-    #endregion
-
-    #region Notifications
-
-    #endregion
-
-    #region Events
-
-    #endregion
-
-    #region Methods
 
     #endregion
 

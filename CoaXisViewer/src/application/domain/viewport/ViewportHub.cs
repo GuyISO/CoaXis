@@ -36,14 +36,6 @@ public partial class ViewportHub : BaseHub
 
 	#endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
-
-    #endregion
-
     #region Events
 
     #endregion

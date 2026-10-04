@@ -5,6 +5,10 @@ using Godot;
 /// </summary>
 public partial class ViewportDisplayHub : BaseHub
 {
+    #region Fields
+
+    #endregion
+
     #region Properties
 
     /// <summary>有効なビューポートレイヤーのマスクを取得する。</summary>
@@ -16,11 +20,7 @@ public partial class ViewportDisplayHub : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
+    #region Events
 
     [Signal] public delegate void LayerActivatedEventHandler(uint layer, bool isActive);
     /// <summary>
@@ -32,10 +32,6 @@ public partial class ViewportDisplayHub : BaseHub
     {
         EmitSignal(SignalName.LayerActivated, layer, isActive);
     }
-
-    #endregion
-
-    #region Events
 
     #endregion
 

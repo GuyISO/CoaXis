@@ -63,124 +63,6 @@ public partial class ViewportCameraHub : BaseHub
 
     #region Events
 
-    /// <summary>
-    /// カメラ操作要求の購読を開始する。
-    /// </summary>
-    private void SubscribeEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
-        MovePositionToRequested += OnMovePositionToRequested;
-        MoveRotationToRequested += OnMoveRotationToRequested;
-        SetDistanceRequested += OnSetDistanceRequested;
-        SetSizeRequested += OnSetSizeRequested;
-        SetFovRequested += OnSetFovRequested;
-        SetProjectionTypeRequested += OnSetProjectionTypeRequested;
-        TranslateRequested += OnTranslateRequested;
-        RotateRequested += OnRotateRequested;
-        ZoomRequested += OnZoomRequested;
-        ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
-        FitRequested += OnFitRequested;
-        AlignNormalToRequested += OnAlignNormalToRequested;
-    }
-
-    /// <summary>
-    /// カメラ操作要求の購読を解除する。
-    /// </summary>
-    private void UnsubscribeEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
-        MovePositionToRequested -= OnMovePositionToRequested;
-        MoveRotationToRequested -= OnMoveRotationToRequested;
-        SetDistanceRequested -= OnSetDistanceRequested;
-        SetSizeRequested -= OnSetSizeRequested;
-        SetFovRequested -= OnSetFovRequested;
-        SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
-        TranslateRequested -= OnTranslateRequested;
-        RotateRequested -= OnRotateRequested;
-        ZoomRequested -= OnZoomRequested;
-        ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
-        FitRequested -= OnFitRequested;
-        AlignNormalToRequested -= OnAlignNormalToRequested;
-    }
-
-    private void OnPickResultNotified(PickResult pickResult)
-    {
-        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.NormalToFace || !pickResult.HasHit)
-        {
-            return;
-        }
-
-        MovePositionTo(pickResult.Position, true);
-        ApplyAlignNormalToRequest(pickResult.Normal, true);
-    }
-
-    private void OnMovePositionToRequested(Vector3 position, bool useTween)
-    {
-        ApplyPosition(position, useTween);
-    }
-
-    private void OnMoveRotationToRequested(Quaternion rotation, bool useTween)
-    {
-        ApplyRotation(rotation, useTween);
-    }
-
-    private void OnSetDistanceRequested(float distance, bool useTween)
-    {
-        ApplyDistance(distance, useTween);
-    }
-
-    private void OnSetSizeRequested(float size, bool useTween)
-    {
-        ApplySize(size, useTween);
-    }
-
-    private void OnSetFovRequested(float fov, bool useTween)
-    {
-        ApplyFov(fov, useTween);
-    }
-
-    private void OnSetProjectionTypeRequested(Camera3D.ProjectionType projectionType)
-    {
-        ApplyProjectionType(projectionType);
-    }
-
-    private void OnTranslateRequested(Vector3 translation, SpaceMode spaceMode, bool useTween)
-    {
-        ApplyTranslationRequest(translation, spaceMode, useTween);
-    }
-
-    private void OnRotateRequested(Quaternion rotation, SpaceMode spaceMode, bool useTween)
-    {
-        ApplyRotationRequest(rotation, spaceMode, useTween);
-    }
-
-    private void OnZoomRequested(float exponent, bool useTween)
-    {
-        ApplyZoomRequest(exponent, useTween);
-    }
-
-    private void OnToggleProjectionTypeRequested()
-    {
-        Camera3D.ProjectionType nextType = ProjectionType == Camera3D.ProjectionType.Perspective
-            ? Camera3D.ProjectionType.Orthogonal
-            : Camera3D.ProjectionType.Perspective;
-        ApplyProjectionType(nextType);
-    }
-
-    private void OnFitRequested(Node3D[] targetNodes, bool useTween)
-    {
-        ApplyFitRequest(targetNodes, useTween);
-    }
-
-    private void OnAlignNormalToRequested(Vector3 normal, bool useTween)
-    {
-        ApplyAlignNormalToRequest(normal, useTween);
-    }
-
-    #endregion
-
-    #region Actions
-
     /// <summary>注視点位置の移動要求。</summary>
     /// <param name="position">移動先位置</param>
     /// <param name="useTween">補間を使用する場合は true</param>
@@ -254,10 +136,6 @@ public partial class ViewportCameraHub : BaseHub
     internal void AlignNormalTo(Vector3 normal, bool useTween = false) =>
         EmitSignal(SignalName.AlignNormalToRequested, normal, useTween);
 
-    #endregion
-
-    #region Notifications
-
     /// <summary>注視点位置の変更通知。</summary>
     /// <param name="position">現在位置</param>
     [Signal] public delegate void PositionNotifiedEventHandler(Vector3 position);
@@ -282,6 +160,10 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>クリップ終了距離の通知。</summary>
     /// <param name="far">終了距離</param>
     [Signal] public delegate void CameraFarNotifiedEventHandler(float far);
+
+    #endregion
+
+    #region Methods
 
     internal void UpdatePosition(Vector3 value)
     {
@@ -321,7 +203,7 @@ public partial class ViewportCameraHub : BaseHub
 
     #endregion
 
-    #region Methods
+    #region Helpers
 
     private void ApplyPosition(Vector3 position, bool useTween)
     {
@@ -557,9 +439,119 @@ public partial class ViewportCameraHub : BaseHub
         ApplyRotation(targetRotation, useTween);
     }
 
-    #endregion
+    /// <summary>
+    /// カメラ操作要求の購読を開始する。
+    /// </summary>
+    private void SubscribeEvents()
+    {
+        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+        MovePositionToRequested += OnMovePositionToRequested;
+        MoveRotationToRequested += OnMoveRotationToRequested;
+        SetDistanceRequested += OnSetDistanceRequested;
+        SetSizeRequested += OnSetSizeRequested;
+        SetFovRequested += OnSetFovRequested;
+        SetProjectionTypeRequested += OnSetProjectionTypeRequested;
+        TranslateRequested += OnTranslateRequested;
+        RotateRequested += OnRotateRequested;
+        ZoomRequested += OnZoomRequested;
+        ToggleProjectionTypeRequested += OnToggleProjectionTypeRequested;
+        FitRequested += OnFitRequested;
+        AlignNormalToRequested += OnAlignNormalToRequested;
+    }
 
-    #region Helpers
+    /// <summary>
+    /// カメラ操作要求の購読を解除する。
+    /// </summary>
+    private void UnsubscribeEvents()
+    {
+        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+        MovePositionToRequested -= OnMovePositionToRequested;
+        MoveRotationToRequested -= OnMoveRotationToRequested;
+        SetDistanceRequested -= OnSetDistanceRequested;
+        SetSizeRequested -= OnSetSizeRequested;
+        SetFovRequested -= OnSetFovRequested;
+        SetProjectionTypeRequested -= OnSetProjectionTypeRequested;
+        TranslateRequested -= OnTranslateRequested;
+        RotateRequested -= OnRotateRequested;
+        ZoomRequested -= OnZoomRequested;
+        ToggleProjectionTypeRequested -= OnToggleProjectionTypeRequested;
+        FitRequested -= OnFitRequested;
+        AlignNormalToRequested -= OnAlignNormalToRequested;
+    }
+
+    private void OnPickResultNotified(PickResult pickResult)
+    {
+        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.NormalToFace || !pickResult.HasHit)
+        {
+            return;
+        }
+
+        MovePositionTo(pickResult.Position, true);
+        ApplyAlignNormalToRequest(pickResult.Normal, true);
+    }
+
+    private void OnMovePositionToRequested(Vector3 position, bool useTween)
+    {
+        ApplyPosition(position, useTween);
+    }
+
+    private void OnMoveRotationToRequested(Quaternion rotation, bool useTween)
+    {
+        ApplyRotation(rotation, useTween);
+    }
+
+    private void OnSetDistanceRequested(float distance, bool useTween)
+    {
+        ApplyDistance(distance, useTween);
+    }
+
+    private void OnSetSizeRequested(float size, bool useTween)
+    {
+        ApplySize(size, useTween);
+    }
+
+    private void OnSetFovRequested(float fov, bool useTween)
+    {
+        ApplyFov(fov, useTween);
+    }
+
+    private void OnSetProjectionTypeRequested(Camera3D.ProjectionType projectionType)
+    {
+        ApplyProjectionType(projectionType);
+    }
+
+    private void OnTranslateRequested(Vector3 translation, SpaceMode spaceMode, bool useTween)
+    {
+        ApplyTranslationRequest(translation, spaceMode, useTween);
+    }
+
+    private void OnRotateRequested(Quaternion rotation, SpaceMode spaceMode, bool useTween)
+    {
+        ApplyRotationRequest(rotation, spaceMode, useTween);
+    }
+
+    private void OnZoomRequested(float exponent, bool useTween)
+    {
+        ApplyZoomRequest(exponent, useTween);
+    }
+
+    private void OnToggleProjectionTypeRequested()
+    {
+        Camera3D.ProjectionType nextType = ProjectionType == Camera3D.ProjectionType.Perspective
+            ? Camera3D.ProjectionType.Orthogonal
+            : Camera3D.ProjectionType.Perspective;
+        ApplyProjectionType(nextType);
+    }
+
+    private void OnFitRequested(Node3D[] targetNodes, bool useTween)
+    {
+        ApplyFitRequest(targetNodes, useTween);
+    }
+
+    private void OnAlignNormalToRequested(Vector3 normal, bool useTween)
+    {
+        ApplyAlignNormalToRequest(normal, useTween);
+    }
 
     private Tween BuildTween()
     {

@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -21,14 +20,6 @@ public partial class UiWindowHub : BaseHub
     #endregion
 
     #region Lifecycle
-
-    #endregion
-
-    #region Actions
-
-    #endregion
-
-    #region Notifications
 
     #endregion
 

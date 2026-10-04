@@ -1,5 +1,3 @@
-// TODO: リファクタリング確認後に削除
-
 using Godot;
 
 /// <summary>
@@ -53,11 +51,7 @@ public partial class ViewportInteractionHub : BaseHub
 
     #endregion
 
-    #region Actions
-
-    #endregion
-
-    #region Notifications
+    #region Events
 
     /// <summary>操作モードの変更通知。</summary>
     /// <param name="mode">現在の操作モード</param>
@@ -116,6 +110,14 @@ public partial class ViewportInteractionHub : BaseHub
         PickRectEnd = endPosition;
         EmitSignal(SignalName.PickRectNotified, startPosition, endPosition);
     }
+
+    #endregion
+
+    #region Methods
+
+    #endregion
+
+    #region Helpers
 
     #endregion
 }

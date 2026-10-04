@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// UI 関連モジュールの構成を管理するハブ。
 /// </summary>
@@ -27,15 +26,7 @@ public partial class UiHub : BaseHub
 	}
 
 	#endregion
-
-	#region Actions
-
-	#endregion
-
-	#region Notifications
-
-	#endregion
-
+	
 	#region Events
 
 	#endregion
