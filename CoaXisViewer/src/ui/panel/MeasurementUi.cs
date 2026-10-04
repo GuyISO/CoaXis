@@ -78,8 +78,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Measurement.ResultNotified += OnResultNotified;
-        Application.Measurement.PointNotified += OnPointNotified;
+        Application.Model.Entity.Measurement.ResultNotified += OnResultNotified;
+        Application.Model.Entity.Measurement.PointNotified += OnPointNotified;
     }
 
     /// <summary>
@@ -87,8 +87,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Measurement.ResultNotified -= OnResultNotified;
-        Application.Measurement.PointNotified -= OnPointNotified;
+        Application.Model.Entity.Measurement.ResultNotified -= OnResultNotified;
+        Application.Model.Entity.Measurement.PointNotified -= OnPointNotified;
     }
 
     /// <summary>
@@ -119,7 +119,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonPick1Pressed()
     {
         Application.Log.Debug("MeasurementUi: pick point 1 requested.");
-        Application.Measurement.SetPoint(1);
+        Application.Model.Entity.Measurement.SetPoint(1);
     }
 
     /// <summary>
@@ -128,7 +128,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonPick2Pressed()
     {
         Application.Log.Debug("MeasurementUi: pick point 2 requested.");
-        Application.Measurement.SetPoint(2);
+        Application.Model.Entity.Measurement.SetPoint(2);
     }
 
     /// <summary>
@@ -137,7 +137,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonClear1Pressed()
     {
         Application.Log.Debug("MeasurementUi: clear point 1 requested.");
-        Application.Measurement.ClearPoint(1);
+        Application.Model.Entity.Measurement.ClearPoint(1);
     }
 
     /// <summary>
@@ -146,7 +146,7 @@ public partial class MeasurementUi : PanelContainer
     private void OnButtonClear2Pressed()
     {
         Application.Log.Debug("MeasurementUi: clear point 2 requested.");
-        Application.Measurement.ClearPoint(2);
+        Application.Model.Entity.Measurement.ClearPoint(2);
     }
 
     /// <summary>
@@ -227,8 +227,8 @@ public partial class MeasurementUi : PanelContainer
     /// </summary>
     private void SyncInitialState()
     {
-        OnResultNotified(Application.Measurement.CurrentResult);
-        OnPointNotified(Application.Measurement.CurrentPointIndex);
+        OnResultNotified(Application.Model.Entity.Measurement.CurrentResult);
+        OnPointNotified(Application.Model.Entity.Measurement.CurrentPointIndex);
     }
 
     /// <summary>

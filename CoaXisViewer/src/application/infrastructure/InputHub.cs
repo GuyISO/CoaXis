@@ -15,10 +15,6 @@ public partial class InputHub : BaseHub
 
     #region Lifecycle
 
-    public override void _Ready()
-    {
-    }
-
     public override void _ExitTree()
     {
         base._ExitTree();
@@ -91,7 +87,7 @@ public partial class InputHub : BaseHub
         
         if (Input.IsActionJustPressed("escape"))
         {
-            Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+            Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Selection);
             Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
             Application.Model.Entity.Selection.Clear();
         }

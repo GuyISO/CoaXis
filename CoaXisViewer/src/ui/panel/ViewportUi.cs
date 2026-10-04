@@ -120,7 +120,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Model.Entity.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
         Application.Viewport.Interaction.ModeNotified += OnInteractionModeNotified;
         Application.Viewport.Camera.PositionNotified += OnPositionNotified;
         Application.Viewport.Camera.RotationNotified += OnRotationNotified;
@@ -136,7 +136,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Model.Entity.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Viewport.Interaction.ModeNotified -= OnInteractionModeNotified;
         Application.Viewport.Camera.PositionNotified -= OnPositionNotified;
         Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
@@ -153,7 +153,7 @@ public partial class ViewportUi : PanelContainer
     private void InitializeFromHub()
     {
         ViewportCameraHub camera = Application.Viewport.Camera;
-        OnPickHandlingModeNotified(Application.Pick.HandlingMode);
+        OnPickHandlingModeNotified(Application.Model.Entity.Pick.HandlingMode);
         OnInteractionModeNotified(Application.Viewport.Interaction.Mode);
         OnPositionNotified(camera.Position);
         OnRotationNotified(camera.Rotation);
@@ -222,7 +222,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonAlignNormalPressed()
     {
-        Application.Pick.SetHandlingMode(PickHandlingMode.NormalToFace);
+        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.NormalToFace);
     }
 
     /// <summary>

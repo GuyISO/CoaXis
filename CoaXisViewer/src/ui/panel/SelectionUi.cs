@@ -90,7 +90,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Model.Entity.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
         Application.Model.Entity.Selection.ModeNotified += OnModeNotified;
         Application.Model.Entity.Selection.Selected += OnSelected;
     }
@@ -100,7 +100,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Model.Entity.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
         Application.Model.Entity.Selection.ModeNotified -= OnModeNotified;
         Application.Model.Entity.Selection.Selected -= OnSelected;
     }
@@ -125,7 +125,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonSetPressed()
     {
-        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Selection);
         Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
     }
 
@@ -134,7 +134,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonAddPressed()
     {
-        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Selection);
         Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Add);
     }
 
@@ -143,7 +143,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonRemovePressed()
     {
-        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Selection);
         Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Remove);
     }
 
@@ -152,7 +152,7 @@ public partial class SelectionUi : PanelContainer
     /// </summary>
     private void OnButtonTogglePressed()
     {
-        Application.Pick.SetHandlingMode(PickHandlingMode.Selection);
+        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Selection);
         Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Toggle);
     }
 

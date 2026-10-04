@@ -1,5 +1,3 @@
-using Godot;
-
 /// <summary>
 /// アプリケーション全体のモジュール構成を管理するハブ。
 /// </summary>
@@ -16,9 +14,7 @@ public partial class Application : BaseHub
 
     // domain
     private CommandHub _command;
-    private MeasurementHub _measurement;
     private ModelHub _model;
-    private PickHub _pick;
     private UiHub _ui;
     private ViewportHub _viewport;
 
@@ -46,12 +42,8 @@ public partial class Application : BaseHub
     // domain
     /// <summary>コマンド機能を取得する。</summary>
     public static CommandHub Command => Instance._command;
-    /// <summary>測定機能を取得する。</summary>
-    public static MeasurementHub Measurement => Instance._measurement;
     /// <summary>モデル機能を取得する。</summary>
     public static ModelHub Model => Instance._model;
-    /// <summary>ピック機能を取得する。</summary>
-    public static PickHub Pick => Instance._pick;
     /// <summary>UI 機能を取得する。</summary>
     public static UiHub Ui => Instance._ui;
     /// <summary>ビューポート機能を取得する。</summary>
@@ -108,9 +100,7 @@ public partial class Application : BaseHub
     private void EnsureDomainModules()
     {
         _command = AddModule<CommandHub>("Command");
-        _measurement = AddModule<MeasurementHub>("Measurement");
         _model = AddModule<ModelHub>("Model");
-        _pick = AddModule<PickHub>("Pick");
         _ui = AddModule<UiHub>("Ui");
         _viewport = AddModule<ViewportHub>("Viewport");
     }

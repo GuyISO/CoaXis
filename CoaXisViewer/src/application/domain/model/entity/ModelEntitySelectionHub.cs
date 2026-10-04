@@ -61,8 +61,8 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.ResultNotified += OnPickResultNotified;
-        Application.Pick.ResultsNotified += OnPickResultsNotified;
+        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultsNotified += OnPickResultsNotified;
         Application.Model.Entity.Registry.Cleared += OnEntityRegistryCleared;
     }
 
@@ -78,8 +78,8 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.ResultNotified -= OnPickResultNotified;
-        Application.Pick.ResultsNotified -= OnPickResultsNotified;
+        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultsNotified -= OnPickResultsNotified;
         Application.Model.Entity.Registry.Cleared -= OnEntityRegistryCleared;
     }
 
@@ -127,7 +127,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (Application.Pick.HandlingMode != PickHandlingMode.Selection)
+        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.Selection)
         {
             return; // 選択操作モードでない場合は無視
         }
@@ -169,7 +169,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="pickResults">ピック結果の配列</param>
     private void OnPickResultsNotified(PickResult[] pickResults)
     {
-        if (Application.Pick.HandlingMode != PickHandlingMode.Selection)
+        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.Selection)
         {
             return; // 選択操作モードでない場合は無視
         }

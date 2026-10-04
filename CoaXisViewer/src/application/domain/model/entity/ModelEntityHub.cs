@@ -30,6 +30,14 @@ public partial class ModelEntityHub : BaseHub
     /// ModelEntity のツリー機能を取得する。
     /// </summary>
     public ModelEntityTreeHub Tree { get; }
+    /// <summary>
+    /// ModelEntity に対するピック機能を取得する。
+    /// </summary>
+    public ModelEntityPickHub Pick { get; }
+    /// <summary>
+    /// ModelEntity に対する測定機能を取得する。
+    /// </summary>
+    public ModelEntityMeasurementHub Measurement { get; }
 
     #endregion
 
@@ -45,6 +53,8 @@ public partial class ModelEntityHub : BaseHub
         Visual = AddModule<ModelEntityVisualHub>("Visual");
         Selection = AddModule<ModelEntitySelectionHub>("Selection");
         Tree = AddModule<ModelEntityTreeHub>("Tree");
+        Pick = AddModule<ModelEntityPickHub>("Pick");
+        Measurement = AddModule<ModelEntityMeasurementHub>("Measurement");
     }
 
     #endregion

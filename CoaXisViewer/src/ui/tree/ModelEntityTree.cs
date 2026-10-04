@@ -601,13 +601,13 @@ public partial class ModelEntityTree : Tree
 
         if (!shouldHandleAsRange)
         {
-            Application.Pick.NotifyResult(PickUtility.PickByEntityId(entityId));
+            Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(entityId));
         }
         else
         {
             // Add/Removeモードでは範囲選択として扱い、複数実体の選択を通知する
             Guid[] entityIds = GetAllModelsInRange(_lastSelectedItem, item);
-            Application.Pick.NotifyResults(PickUtility.PickByEntityIds(entityIds));
+            Application.Model.Entity.Pick.NotifyResults(PickUtility.PickByEntityIds(entityIds));
         }
     }
 

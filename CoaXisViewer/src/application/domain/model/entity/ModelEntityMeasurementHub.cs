@@ -4,7 +4,7 @@ using Godot;
 /// <summary>
 /// 測定状態、測定結果、測定用ビジュアルを管理するハブ。
 /// </summary>
-public partial class MeasurementHub : BaseHub
+public partial class ModelEntityMeasurementHub : BaseHub
 {
     #region Fields
 
@@ -108,10 +108,10 @@ public partial class MeasurementHub : BaseHub
     /// </summary>
     private void SubscribeEvents()
     {
-        Application.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Pick.ResultNotified += OnPickResultNotified;
-        Application.Measurement.SetPointRequested += OnSetPointRequested;
-        Application.Measurement.ClearPointRequested += OnClearPointRequested;
+        Application.Model.Entity.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
+        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+        Application.Model.Entity.Measurement.SetPointRequested += OnSetPointRequested;
+        Application.Model.Entity.Measurement.ClearPointRequested += OnClearPointRequested;
         Application.Setting.SettingsNotified += ApplySettings;
     }
 
@@ -120,10 +120,10 @@ public partial class MeasurementHub : BaseHub
     /// </summary>
     private void UnsubscribeEvents()
     {
-        Application.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Pick.ResultNotified -= OnPickResultNotified;
-        Application.Measurement.SetPointRequested -= OnSetPointRequested;
-        Application.Measurement.ClearPointRequested -= OnClearPointRequested;
+        Application.Model.Entity.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
+        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Model.Entity.Measurement.SetPointRequested -= OnSetPointRequested;
+        Application.Model.Entity.Measurement.ClearPointRequested -= OnClearPointRequested;
         Application.Setting.SettingsNotified -= ApplySettings;
     }
 
@@ -141,8 +141,8 @@ public partial class MeasurementHub : BaseHub
 
         CurrentPointIndex = pointIndex;
         
-        Application.Pick.SetHandlingMode(PickHandlingMode.Measurement);
-        Application.Measurement.NotifyPoint(pointIndex);
+        Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Measurement);
+        Application.Model.Entity.Measurement.NotifyPoint(pointIndex);
     }
 
     /// <summary>
@@ -161,7 +161,7 @@ public partial class MeasurementHub : BaseHub
         _points[index] = new PickResult();
         RemovePointerLabel(index);
         UpdateMeasurementLine();
-        Application.Measurement.NotifyResult(GetCurrentResult());
+        Application.Model.Entity.Measurement.NotifyResult(GetCurrentResult());
     }
 
     /// <summary>
@@ -173,7 +173,7 @@ public partial class MeasurementHub : BaseHub
         if (mode != PickHandlingMode.Measurement)
         {
             CurrentPointIndex = 0;
-            Application.Measurement.NotifyPoint(0);
+            Application.Model.Entity.Measurement.NotifyPoint(0);
         }
     }
 
@@ -183,7 +183,7 @@ public partial class MeasurementHub : BaseHub
     /// <param name="pickResult">通知されたピック結果</param>
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (Application.Pick.HandlingMode != PickHandlingMode.Measurement)
+        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.Measurement)
         {
             return;
         }
@@ -205,7 +205,7 @@ public partial class MeasurementHub : BaseHub
         EnsureMeasurementVisuals();
         UpdatePointerLabel(index, pickResult);
         UpdateMeasurementLine();
-        Application.Measurement.NotifyResult(GetCurrentResult());
+        Application.Model.Entity.Measurement.NotifyResult(GetCurrentResult());
     }
 
     #endregion

@@ -32,7 +32,7 @@ public partial class MessageUi : PanelContainer
         UnsubscribeApplicationEvents();
 
         base._ExitTree();
-    }
+    } 
 
     #endregion
 
@@ -51,7 +51,7 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Log.MessageNotified += OnLogMessageNotified;
+        Application.Log.Logged += OnLogged;
         Application.Setting.SettingsNotified += OnSettingsNotified;
     }
 
@@ -60,7 +60,7 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Log.MessageNotified -= OnLogMessageNotified;
+        Application.Log.Logged -= OnLogged;
         Application.Setting.SettingsNotified -= OnSettingsNotified;
     }
 
@@ -68,7 +68,7 @@ public partial class MessageUi : PanelContainer
     /// ログ出力と同時に画面へログを表示する
     /// </summary>
     /// <param name="line">記録されたメッセージ</param>
-    private void OnLogMessageNotified(int level, string line)
+    private void OnLogged(int level, string line)
     {
         if (level < (int)LogLevel.Info)
         {

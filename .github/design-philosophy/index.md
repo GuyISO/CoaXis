@@ -11,6 +11,7 @@
 | ライフサイクル規約 | `.github/skills/godot-node-lifecycle-rules/SKILL.md` | Godot Node の Ready/ExitTree など |
 | 座標系境界規約 | `.github/instructions/coordinate-system.instructions.md` | 内部計算は Godot、UI/DB/IPC/ファイルI/O は CATIA |
 | モデル識別子運用規約 | `docs/guides/viewer/MODEL_ID_OPERATION_GUIDE.md` | モデル本体中心の Guid 運搬ルール |
+| ModelEntity操作機能の集約規約 | `.github/instructions/design-philosophy.instructions.md` | Pick/Measurement等をModelEntityHub配下に配置 |
 | 実装共通規約 | `.github/instructions/design-philosophy.instructions.md` | 全体的に効かせたい判断基準 |
 | コンテキストメニュー設計規約 | `.github/instructions/design-philosophy.instructions.md` | UI単位ではなく対象オブジェクト単位でMenuを作る方針 |
 | Viewport状態所有規約 | `.github/instructions/design-philosophy.instructions.md` | Camera/Interaction/Displayの各Hubへ状態を分離 |

@@ -10,7 +10,7 @@ public partial class UiWindowHub : BaseHub
 {
     #region Fields
 
-    // TODO: UiWindowのシーンパスをうまく管理する
+    // TODO: UiWindowのシーンパスをうまく管理する？むしろWindowを継承したUiWindowを動的に生成する
     private PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/ui/ui_window.tscn"); // UiWindowのシーンパス
     private readonly Dictionary<string, UiWindow> _windowCache = new(); // UIのキャッシュ
 

@@ -28,7 +28,7 @@ public partial class EmbededModelPropertyTree : ModelPropertyTree
     /// </summary>
     private void SubscribeEvents()
     {
-        Application.Pick.ResultNotified += OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
     }
 
     /// <summary>
@@ -36,7 +36,7 @@ public partial class EmbededModelPropertyTree : ModelPropertyTree
     /// </summary>
     private void UnsubscribeEvents()
     {
-        Application.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
     }
 
     /// <summary>

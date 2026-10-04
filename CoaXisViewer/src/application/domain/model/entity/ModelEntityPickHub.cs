@@ -2,9 +2,22 @@
 using Godot;
 
 /// <summary>
+/// 選択されたモデルの操作モードを表す列挙型
+/// </summary>
+public enum PickHandlingMode
+{
+    /// <summary>選択操作モード</summary>
+    Selection,
+    /// <summary>測定操作モード</summary>
+    Measurement,
+    /// <summary>面に垂直操作モード</summary>
+    NormalToFace,
+}
+
+/// <summary>
 /// ピック操作のモードと結果を管理するハブ。
 /// </summary>
-public partial class PickHub : BaseHub
+public partial class ModelEntityPickHub : BaseHub
 {
     #region Fields
 
@@ -90,7 +103,7 @@ public partial class PickHub : BaseHub
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Pick.AskHandlingModeRequested += OnAskHandlingModeRequested;
+        Application.Model.Entity.Pick.AskHandlingModeRequested += OnAskHandlingModeRequested;
     }
 
     /// <summary>
@@ -98,7 +111,7 @@ public partial class PickHub : BaseHub
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Pick.AskHandlingModeRequested -= OnAskHandlingModeRequested;
+        Application.Model.Entity.Pick.AskHandlingModeRequested -= OnAskHandlingModeRequested;
     }
 
     /// <summary>
@@ -106,7 +119,7 @@ public partial class PickHub : BaseHub
     /// </summary>
     private void OnAskHandlingModeRequested()
     {
-        Application.Pick.NotifyHandlingMode(HandlingMode);
+        Application.Model.Entity.Pick.NotifyHandlingMode(HandlingMode);
     }
 
     #endregion
@@ -124,7 +137,7 @@ public partial class PickHub : BaseHub
             HandlingMode = mode;
         }
 
-        Application.Pick.NotifyHandlingMode(HandlingMode);
+        Application.Model.Entity.Pick.NotifyHandlingMode(HandlingMode);
     }
 
     #endregion

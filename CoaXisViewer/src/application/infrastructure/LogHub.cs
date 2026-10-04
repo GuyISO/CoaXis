@@ -55,15 +55,15 @@ public partial class LogHub : BaseHub
 
     #region Events
 
-    [Signal] public delegate void MessageNotifiedEventHandler(int level, string message);
+    [Signal] public delegate void LoggedEventHandler(int level, string message);
     /// <summary>
     /// ログメッセージが通知されたときに発行されるシグナル。
     /// </summary>
     /// <param name="level">ログレベル</param>
     /// <param name="message">ログメッセージ</param>
-    private void NotifyMessage(int level, string message)
+    private void NotifyLogged(int level, string message)
     {
-        EmitSignal(SignalName.MessageNotified, level, message);
+        EmitSignal(SignalName.Logged, level, message);
     }
 
     #endregion
@@ -97,7 +97,7 @@ public partial class LogHub : BaseHub
         }
 
         // Signalの発行
-        NotifyMessage((int)level, message);
+        NotifyLogged((int)level, message);
     }
 
     /// <summary>

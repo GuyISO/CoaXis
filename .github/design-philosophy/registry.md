@@ -243,3 +243,16 @@
   - `docs/specification/specification_integrated.md`
   - `.github/instructions/design-philosophy.instructions.md`
 - Notes: 呼び出し側は `Application.Model.Entity.State` と `Application.Model.Entity.Visual` を使用する
+
+- Date: 2026-10-04
+- Trigger: PickとMeasurementの対象がModelEntityであることを踏まえたApplication Domain配置の整理
+- Decision: PickHubとMeasurementHubをModelEntityHub配下へ集約し、型名を `ModelEntityPickHub` / `ModelEntityMeasurementHub` に統一する。公開経路は `Application.Model.Entity.Pick` / `Application.Model.Entity.Measurement` とする
+- Scope: CoaXisViewerのModelEntity関連Domain機能
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/Application.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityPickHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityMeasurementHub.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `docs/specification/specification_integrated.md`
+- Notes: 既存の操作イベント契約・実行責務は維持し、Hubの構成上の所属と公開経路のみ変更する

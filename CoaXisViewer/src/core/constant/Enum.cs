@@ -28,19 +28,6 @@ public enum ViewportLayer
 }
 
 /// <summary>
-/// 選択されたモデルの操作モードを表す列挙型
-/// </summary>
-public enum PickHandlingMode
-{
-    /// <summary>選択操作モード</summary>
-    Selection,
-    /// <summary>測定操作モード</summary>
-    Measurement,
-    /// <summary>面に垂直操作モード</summary>
-    NormalToFace,
-}
-
-/// <summary>
 /// モデルの状態を表す列挙型
 /// </summary>
 public enum ModelStatus

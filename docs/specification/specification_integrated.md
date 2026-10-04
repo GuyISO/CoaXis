@@ -250,13 +250,13 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - UIツリー: ModelEventとPickEventの通知をTreeItemまたはModelPropertyTreeへ投影する。TreeItemはModel Domainで保持せず、UIをModelPresentationServiceへ参照登録しない
 
 Model中心DomainのFacade構成:
-- `application/domain` をViewerのModel中心領域とし、Model中核・ModelLoad・Selection・Measurementを能力ごとに構成する
+- `application/domain` をViewerのModel中心領域とし、Model中核・ModelLoad・Entity操作能力を責務ごとに構成する
 - `ModelHub` は `ModelEntityHub`、`ModelPropertyHub`、`ModelLoadHub` を公開する。Entityに関する状態・表示・選択・ツリー・Registryは `ModelEntityHub` 配下へ配置する
-- `ModelEntityHub` は `ModelEntityRegistryHub`、`ModelEntityStateHub`、`ModelEntityVisualHub`、Selection、Treeを構成する。StateとVisualの責務は独立したまま、ModelHub直下へは公開しない
+- `ModelEntityHub` は `ModelEntityRegistryHub`、`ModelEntityStateHub`、`ModelEntityVisualHub`、Selection、Tree、`ModelEntityPickHub`、`ModelEntityMeasurementHub` を構成する。PickとMeasurementはModelEntityを対象とするため、`Application.Model.Entity.Pick` / `Application.Model.Entity.Measurement` から公開し、Application直下には配置しない。StateとVisualの責務は独立したまま、ModelHub直下へは公開しない
 - PropertyのRegistryはModelEntityと並ぶ `ModelPropertyHub` が所有し、モデル識別と各論理階層をRegistryごとに管理する
 - `ModelLoadFacade` は `ModelLoadService` と `ModelSceneService` をまとめ、`Application.ModelLoad` 経由でモデル置換・属性ロード・Sceneロードを提供する
 - Entityの状態管理と表示反映はそれぞれ対応するHubが担当する。要求・通知契約を重複定義せず、Hubの配置によって責務や処理順を変更しない
-- SelectionとMeasurementはModelを利用する操作能力であり、Model配下へ移動しない。Model中核からSelection/Measurementへの依存を禁止し、PresentationからSelection通知を受ける依存は許容する
+- Selection、Pick、MeasurementはModelEntityを対象とする操作能力としてModelEntityHub配下に置く。各操作Hubの責務は独立させ、Model中核から操作能力への不要な依存・循環依存を禁止する
 - Facade分割は公開責務の境界であり、各Serviceの状態所有者や処理順を変更しない
 
 ### 4.8 CoaXisAnalyzer

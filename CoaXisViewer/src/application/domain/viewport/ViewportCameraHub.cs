@@ -68,7 +68,7 @@ public partial class ViewportCameraHub : BaseHub
     /// </summary>
     private void SubscribeEvents()
     {
-        Application.Pick.ResultNotified += OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
         MovePositionToRequested += OnMovePositionToRequested;
         MoveRotationToRequested += OnMoveRotationToRequested;
         SetDistanceRequested += OnSetDistanceRequested;
@@ -88,7 +88,7 @@ public partial class ViewportCameraHub : BaseHub
     /// </summary>
     private void UnsubscribeEvents()
     {
-        Application.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
         MovePositionToRequested -= OnMovePositionToRequested;
         MoveRotationToRequested -= OnMoveRotationToRequested;
         SetDistanceRequested -= OnSetDistanceRequested;
@@ -105,7 +105,7 @@ public partial class ViewportCameraHub : BaseHub
 
     private void OnPickResultNotified(PickResult pickResult)
     {
-        if (Application.Pick.HandlingMode != PickHandlingMode.NormalToFace || !pickResult.HasHit)
+        if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.NormalToFace || !pickResult.HasHit)
         {
             return;
         }
