@@ -134,7 +134,7 @@ public partial class VisualUi : PanelContainer
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 子ノードを解決し、フィールドに保持する

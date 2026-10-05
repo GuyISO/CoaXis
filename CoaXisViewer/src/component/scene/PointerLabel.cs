@@ -43,7 +43,7 @@ public partial class PointerLabel : Node3D
 
 	#endregion
 
-	#region Public Methods
+	#region public Methods
 
 	/// <summary>
 	/// ポインタの色を設定する

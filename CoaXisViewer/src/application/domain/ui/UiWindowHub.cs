@@ -53,7 +53,7 @@ public partial class UiWindowHub : BaseHub
     /// <remarks>
     /// コンテナは Container クラスを継承したUIである必要がある
     /// </remarks>
-    internal void Show(Container container)
+    public void Show(Container container)
     {
         if (container == null)
         {

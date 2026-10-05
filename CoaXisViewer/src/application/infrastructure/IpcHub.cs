@@ -48,7 +48,7 @@ public partial class IpcHub : BaseHub
     /// IPC サーバーの接続状態を通知する。
     /// </summary>
     /// <param name="isConnected">接続状態。接続されていれば true</param>
-    internal void NotifyConnectionStatus(bool isConnected)
+    public void NotifyConnectionStatus(bool isConnected)
     {
         EmitSignal(SignalName.ConnectionStatus, isConnected);
     }
@@ -59,7 +59,7 @@ public partial class IpcHub : BaseHub
     /// IPC メッセージを受信したことを通知する。
     /// </summary>
     /// <param name="eventType">受信したメッセージの eventType</param>
-    internal void NotifyMessageReceived(string eventType)
+    public void NotifyMessageReceived(string eventType)
     {
         EmitSignal(SignalName.MessageReceived, eventType);
     }
@@ -72,7 +72,7 @@ public partial class IpcHub : BaseHub
     /// <param name="eventType">処理したメッセージの eventType</param>
     /// <param name="ok">処理が成功した場合は true</param>
     /// <param name="errorCode">失敗時の標準化エラーコード</param>
-    internal void NotifyMessageHandled(string eventType, bool ok, string errorCode)
+    public void NotifyMessageHandled(string eventType, bool ok, string errorCode)
     {
         EmitSignal(SignalName.MessageHandled, eventType, ok, errorCode);
     }
@@ -120,7 +120,7 @@ public partial class IpcHub : BaseHub
     /// NamedPipe サーバーを起動する。
     /// </summary>
     /// <param name="pipeName">待ち受けるパイプ名</param>
-    internal void Start(string pipeName)
+    public void Start(string pipeName)
     {
         if (_listenTask != null && !_listenTask.IsCompleted)
         {
@@ -139,7 +139,7 @@ public partial class IpcHub : BaseHub
     /// <summary>
     /// NamedPipe サーバーを停止する。
     /// </summary>
-    internal void Stop()
+    public void Stop()
     {
         if (_cts == null)
         {
@@ -168,7 +168,7 @@ public partial class IpcHub : BaseHub
     /// <summary>
     /// IPC サーバーの接続状態を通知要求する。
     /// </summary>
-    internal void AskConnectionStatus()
+    public void AskConnectionStatus()
     {
         NotifyConnectionStatus(_pipeServer?.IsConnected ?? false);
     }

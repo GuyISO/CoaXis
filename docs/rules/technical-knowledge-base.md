@@ -92,7 +92,7 @@
 - 背景: ModelEntityMenu/PickResultMenu/AxisNavigatorMenu の3クラスが、ネイティブメニュー Rid の生成・解放・表示可否判定・Popup 呼び出しという同じ処理をそれぞれ個別に実装していた。
 - 問題: `_hasNativeMenu`/`EnsureNativeMenu`/`_ExitTree` での `FreeMenu` などが3箇所に重複しており、NativeMenu の契約（`Feature.PopupMenu` チェック、Rid ライフサイクル管理）を変更する際に修正漏れが発生しやすい。
 - 判断: 共通処理を抽象基底クラス `BaseMenu`（`Node` 継承）へ集約し、3クラスはこれを継承する。`BaseMenu` が Rid の生成・解放・`Popup` 呼び出しを担い、派生クラスは `BuildMenuItems(Rid nativeMenu)` をオーバーライドして項目定義のみ行う。
-- 判断理由: `_Ready`/`_ExitTree` のライフサイクルと `EnsureNativeMenu` の判定ロジックは3クラスで完全に同一であり、基底クラスに寄せても各メニュー固有のハンドラー実装には影響しない。`PickResultMenu` のようにサブメニューの Rid を必要とするケースは `internal TryGetNativeMenu` を基底に残すことで踏襲できる。
+- 判断理由: `_Ready`/`_ExitTree` のライフサイクルと `EnsureNativeMenu` の判定ロジックは3クラスで完全に同一であり、基底クラスに寄せても各メニュー固有のハンドラー実装には影響しない。`PickResultMenu` のようにサブメニューの Rid を必要とするケースは `public TryGetNativeMenu` を基底に残すことで踏襲できる。
 - 採用しなかった代替案: 共通処理を static ユーティリティクラスとして切り出す案は、各メニューが `_hasNativeMenu`/`_nativeMenu` フィールドをそれぞれ保持し続ける必要があり、重複そのものは解消できないため不採用。
 - 影響範囲: `ModelEntityMenu`/`PickResultMenu`/`AxisNavigatorMenu` の実装構造。`MenuService` からの呼び出し方法（`ShowForEntity`/`ShowForPickResult`/`ShowAtPosition`）や外部から見た振る舞いに変更はない。
 - 実装/運用手順: 新しいコンテキストメニューを追加する場合も `BaseMenu` を継承し、`BuildMenuItems(Rid nativeMenu)` でのみ項目追加を行う。表示は基底の `PopupNativeMenu(Vector2I)` を呼び出す。`PickResultMenu` のように子メニューを持つ場合は、`_Ready` をオーバーライドして子メニューを `AddChild` した後に `base._Ready()` を呼び、`BuildMenuItems` 内で子メニューの `TryGetNativeMenu` を参照する順序を守る。
@@ -196,7 +196,7 @@
 
 - 背景: PoC段階でクラス内の記述順・region名が揺れており、探索性とレビュー効率が低下していた。
 - 問題: 開発者ごとに `Event Handlers` / `Input Handling` / `State Management` など命名が分かれ、同種メソッドの所在を予測しづらい。
-- 判断: クラス内順序を `Signals -> Fields -> Properties -> Lifecycle -> Public Methods -> Internal Helpers` に統一し、region名も同名へ限定する。
+- 判断: クラス内順序を `Signals -> Fields -> Properties -> Lifecycle -> Public Methods -> Helpers` に統一し、region名も同名へ限定する。
 - 判断理由: Godot系/非Godot系を問わず共通運用でき、学習コストとレビューコストを下げられる。
 - 採用しなかった代替案: クラスごと自由命名は柔軟性が高いが、長期保守で認知負荷が上がるため不採用。
 - 影響範囲: `CoaXisViewer/src/**/*.cs` および `tests/**/*.cs` のクラス内構成。
@@ -224,13 +224,13 @@
 
 ### [2026-06-01] C#のregion運用をEvents中心へ統合
 
-- 背景: 既存規約ではイベント処理やユーザー操作起点の処理を `Internal Helpers` に集約しており、呼び出し起点の探索に時間がかかっていた。その後 `User Actions` / `Event Handlers` 分離、`Event Handlers` 一本化を経て、最終的に `Events` へ名称統一する段階的見直しを実施した。
+- 背景: 既存規約ではイベント処理やユーザー操作起点の処理を `Helpers` に集約しており、呼び出し起点の探索に時間がかかっていた。その後 `User Actions` / `Event Handlers` 分離、`Event Handlers` 一本化を経て、最終的に `Events` へ名称統一する段階的見直しを実施した。
 - 問題: region 名と責務の分け方が短期間で変遷し、履歴が分散したことで「現在の正」と「運用手順」が読み取りづらくなっていた。
-- 判断: 外部起点の処理（シグナル/イベント購読コールバック、ユーザー操作起点の直接呼び出し処理）は `Events` region へ統一し、標準順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public Methods -> Internal Helpers` とする。
+- 判断: 外部起点の処理（シグナル/イベント購読コールバック、ユーザー操作起点の直接呼び出し処理）は `Events` region へ統一し、標準順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public Methods -> Helpers` とする。
 - 判断理由: 名称と責務を一意にしつつ、呼び出し起点の処理を `Public Methods` より先に配置することで、イベント起点の流れを先に追える構成にできる。
 - 採用しなかった代替案: `User Actions` と `Event Handlers` の分離運用、および `Event Handlers` 名継続は、表現力はあるが配置判断と命名の揺れを生みやすいため不採用。
 - 影響範囲: `CoaXisViewer/src/**/*.cs` および `tests/**/*.cs` のクラス内region構成・命名。
-- 実装/運用手順: クラス更新時は `#region Events` を使用し、`#region User Actions` / `#region Event Handlers` は新規作成しない。順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public Methods -> Internal Helpers` を適用する。
+- 実装/運用手順: クラス更新時は `#region Events` を使用し、`#region User Actions` / `#region Event Handlers` は新規作成しない。順序は `Signals -> Fields -> Properties -> Lifecycle -> Events -> Public Methods -> Helpers` を適用する。
 - 検証方法: `#region User Actions` と `#region Event Handlers` の残存がないこと、`#region Events` が使用されていること、必要に応じて `dotnet build .\\CoaXis.sln` で整合確認する。
 - 関連ファイル/関連仕様: `docs/rules/implementation-conventions.md`
 - 備考: 同日付の「C#のregion運用へUser ActionsとEvent Handlersを正式追加」「C#のユーザー起点処理をEvent Handlersへ一本化」「C#の外部起点処理region名をEventsへ統一」は本ログへ統合した。
@@ -263,6 +263,17 @@
 - 実装/運用手順: カメラ状態・要求・通知はViewportCameraHubに追加する。副作用のない計算はViewportCameraUtilityのstatic関数へ置き、Tweenを含む要求処理はHubが実行する。CameraRigは通知購読とScene反映に限定し、Node/UIはイベント購読後の初期化処理でHub Propertyを反映してから変更通知に追従する。シーン上の値を状態初期値として読み込まない。
 - 検証方法: `dotnet build .\\CoaXis.sln` を実行し、カメラの初期状態通知、位置/回転/距離/サイズ/FOV/投影方式の各要求、Tween中の通知、CameraStateUiからの復元、および遅れて生成されたCameraRigへのHub状態反映を確認する。
 - 関連ファイル/関連仕様: `CoaXisViewer/src/application/domain/ViewportHub.cs`, `CoaXisViewer/src/application/domain/ViewportCameraHub.cs`, `CoaXisViewer/src/application/domain/ViewportCameraUtility.cs`, `CoaXisViewer/src/component/scene/CameraRig.cs`, `.github/instructions/design-philosophy.instructions.md`
+
+### [2026-10-05] カメラ計算をViewportCameraHubへ集約
+
+- 背景: カメラの状態・操作要求・通知・TweenをViewportCameraHubが所有する一方、副作用のない数値計算だけはViewportCameraUtilityに分かれていた。
+- 判断: カメラ状態に関わる計算もViewportCameraHub内のprivate helperへ集約し、専用static Utility型を設けない。
+- 判断理由: これらの計算はカメラHubの操作を成立させる内部実装であり、独立した利用者や責務境界を持たないため。Hub外へカメラ操作計算のAPIを増やさず、Hubがカメラ操作全体を一貫して所有する。
+- 採用しなかった代替案: 計算処理をViewportCameraUtilityに残す案は、操作処理とその不可欠な計算が別型に分かれるため採用しない。
+- 影響範囲: ViewportCameraHub内の平行移動、回転、ズーム、投影変換、Fit、法線整列の計算。CameraRigおよびUIの既存通知・操作契約は変更しない。
+- 実装/運用手順: カメラ状態を使う計算はViewportCameraHubのprivate helperとして追加し、外部参照が必要な新APIにしない。カメラ状態・Tween・通知と同じHub内で更新し、Godot内部座標系を維持する。
+- 検証方法: C#ソースに`ViewportCameraUtility`の型・参照が残っていないことを検索し、`dotnet build .\\CoaXis.sln`でビルドする。旧方針の記録は設計履歴として残す。平行移動、3種の座標系の回転、両投影方式のズーム/Fit、投影切替、法線整列の既存挙動を確認する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/application/domain/viewport/ViewportCameraHub.cs`, `CoaXisViewer/src/component/scene/CameraRig.cs`, `.github/instructions/design-philosophy.instructions.md`
 
 ### [2026-10-03] Viewport初期状態をPropertyから直接適用
 

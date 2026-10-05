@@ -71,7 +71,7 @@ public partial class AxisNavigatorMenu : BaseMenu
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	private void HandleViewMenuItemPressed(MenuItemId menuItemId)
 	{

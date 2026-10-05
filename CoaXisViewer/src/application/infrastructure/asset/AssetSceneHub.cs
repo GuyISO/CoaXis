@@ -46,7 +46,7 @@ public partial class AssetSceneHub : BaseHub
     /// </summary>
     /// <param name="path">シーンのリソースパス</param>
     /// <returns>キャッシュ済みシーン。未登録または res:// 外のパスの場合は null</returns>
-    internal PackedScene TryGetByPath(string path)
+    public PackedScene TryGetByPath(string path)
     {
         if (!IsResourcePath(path))
         {
@@ -61,7 +61,7 @@ public partial class AssetSceneHub : BaseHub
     /// </summary>
     /// <param name="path">シーンのリソースパス</param>
     /// <param name="packedScene">キャッシュするシーン</param>
-    internal void Cache(string path, PackedScene packedScene)
+    public void Cache(string path, PackedScene packedScene)
     {
         if (IsResourcePath(path) && packedScene != null)
         {
@@ -73,7 +73,7 @@ public partial class AssetSceneHub : BaseHub
     /// ポインターラベルのシーンを取得する。
     /// </summary>
     /// <returns>ポインターラベルのシーン</returns>
-    internal PointerLabel GetPointerLabel()
+    public PointerLabel GetPointerLabel()
     {
         return _pointerLabel.Instantiate<PointerLabel>();
     }

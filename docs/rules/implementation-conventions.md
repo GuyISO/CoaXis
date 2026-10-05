@@ -19,7 +19,7 @@ Godot C# / 非Godot C# の両方に適用します。
 4. `Lifecycle`
 5. `Events`（必要な場合のみ）
 6. `Public Methods`
-7. `Internal Helpers`
+7. `Helpers`
 
 補足:
 - `Signals` は Godot の `[Signal]` 宣言がある場合のみ使用する。
@@ -37,7 +37,7 @@ Godot C# / 非Godot C# の両方に適用します。
 - `Lifecycle`
 - `Events`
 - `Public Methods`
-- `Internal Helpers`
+- `Helpers`
 
 ### 3.1 EventHub クラスの例外
 

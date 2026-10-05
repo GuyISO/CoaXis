@@ -47,7 +47,7 @@ public class ModelProperty
     /// <summary>
     /// 親プロパティを取得する。親がモデル実体（ルートプロパティ）または未登録の場合は null を返す
     /// </summary>
-    public ModelProperty ParentProperty => ParentId != Guid.Empty ? Application.Model.Property.Registry.GetProperty(ParentId) : null;
+    public ModelProperty ParentProperty => ParentId != Guid.Empty ? Application.Model.Property.Registry.Get(ParentId) : null;
 
     /// <summary>
     /// 親プロパティの参照（ParentProperty のエイリアス）
@@ -57,7 +57,7 @@ public class ModelProperty
     /// <summary>
     /// 親がモデル実体である場合に、その親モデル実体を取得する。親がプロパティまたは未登録の場合は null を返す
     /// </summary>
-    public ModelEntity ParentEntity => ParentId != Guid.Empty ? Application.Model.Entity.Registry.GetEntity(ParentId) : null;
+    public ModelEntity ParentEntity => ParentId != Guid.Empty ? Application.Model.Entity.Registry.Get(ParentId) : null;
 
     /// <summary>
     /// このプロパティがモデル実体に直接紐づくルートプロパティかどうかを判定する
@@ -122,7 +122,7 @@ public class ModelProperty
     /// 子プロパティを登録する。同一 Id の重複追加は無視する。
     /// </summary>
     /// <param name="child">追加対象の子プロパティ</param>
-    internal void Attach(ModelProperty child)
+    public void Attach(ModelProperty child)
     {
         if (child == null)
         {
@@ -141,7 +141,7 @@ public class ModelProperty
     /// 子プロパティの登録を解除する
     /// </summary>
     /// <param name="child">解除対象の子プロパティ</param>
-    internal void Detach(ModelProperty child)
+    public void Detach(ModelProperty child)
     {
         if (child == null)
         {
@@ -154,7 +154,7 @@ public class ModelProperty
     /// <summary>
     /// 子プロパティ一覧をクリアする
     /// </summary>
-    internal void Clear()
+    public void Clear()
     {
         _children.Clear();
     }

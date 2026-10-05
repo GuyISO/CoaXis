@@ -57,7 +57,7 @@ public partial class RootModelNode : ModelNode
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     protected override ModelComponents CreateComponents()
     {

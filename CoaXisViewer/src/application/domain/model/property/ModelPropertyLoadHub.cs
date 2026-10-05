@@ -36,7 +36,7 @@ public partial class ModelPropertyLoadHub : BaseHub
     /// <param name="propertyDtos">読み込むモデル属性DTOの集合</param>
     /// <returns>登録されたModelPropertyの一覧</returns>
     /// <exception cref="ArgumentNullException">propertyDtosがnullの場合</exception>
-    public IReadOnlyList<ModelProperty> LoadProperties(IReadOnlyList<ModelPropertyDto> propertyDtos)
+    public IReadOnlyList<ModelProperty> FromDtos(IReadOnlyList<ModelPropertyDto> propertyDtos)
     {
         if (propertyDtos == null)
         {
@@ -47,7 +47,7 @@ public partial class ModelPropertyLoadHub : BaseHub
         // 全件を登録してから階層を解決し、入力順に依存せず親子関係を確定する。
         foreach (ModelProperty property in properties)
         {
-            Application.Model.Property.Registry.RegisterProperty(property);
+            Application.Model.Property.Registry.Register(property);
         }
 
         Application.Model.Property.Registry.ResolveHierarchy();

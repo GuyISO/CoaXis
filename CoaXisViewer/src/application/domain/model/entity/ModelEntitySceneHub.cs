@@ -124,7 +124,7 @@ public partial class ModelEntitySceneHub : BaseHub
 	/// </summary>
 	private void QueueSceneLoad(ModelEntity modelEntity)
 	{
-		if (modelEntity == null || !Application.Model.Entity.Registry.IsEntityRegistered(modelEntity.Id))
+		if (modelEntity == null || !Application.Model.Entity.Registry.IsRegistered(modelEntity.Id))
 		{
 			return;
 		}
@@ -270,7 +270,7 @@ public partial class ModelEntitySceneHub : BaseHub
 	{
 		return modelEntity != null
 			&& modelEntity.Status != ModelStatus.Disposed
-			&& Application.Model.Entity.Registry.IsEntityRegistered(modelEntity.Id)
+			&& Application.Model.Entity.Registry.IsRegistered(modelEntity.Id)
 			&& modelEntity.Node != null
 			&& IsInstanceValid(modelEntity.Node);
 	}

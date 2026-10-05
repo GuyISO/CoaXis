@@ -186,7 +186,7 @@ public partial class ViewportUi : PanelContainer
     /// </summary>
     private void OnButtonFitAllInPressed()
     {
-        Node3D targetNode = Application.Model.Entity.Registry.RootEntity.Node;
+        Node3D targetNode = Application.Model.Entity.Registry.Root.Node;
         if (targetNode == null)
         {
             Application.Log.Debug("ViewportUi: fit-all skipped (no root model).");

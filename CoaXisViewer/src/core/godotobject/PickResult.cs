@@ -54,7 +54,7 @@ public partial class PickResult : RefCounted
     /// <param name="position">ヒット位置</param>
     /// <param name="normal">ヒット法線</param>
     /// <param name="distance">ヒット距離</param>
-    internal PickResult(bool hasHit, Node3D collider, Rid rid, Guid entityId, Vector3 position, Vector3 normal, float distance)
+    public PickResult(bool hasHit, Node3D collider, Rid rid, Guid entityId, Vector3 position, Vector3 normal, float distance)
     {
         HasHit = hasHit;
         Collider = collider;

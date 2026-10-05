@@ -12,7 +12,7 @@ public partial class ViewportDisplayHub : BaseHub
     #region Properties
 
     /// <summary>有効なビューポートレイヤーのマスクを取得する。</summary>
-    internal uint ActiveLayers { get; private set; } = (uint)ViewportLayer.Default | (uint)ViewportLayer.Visible;
+    public uint ActiveLayers { get; private set; } = (uint)ViewportLayer.Default | (uint)ViewportLayer.Visible;
 
     #endregion
 
@@ -38,7 +38,7 @@ public partial class ViewportDisplayHub : BaseHub
     /// </summary>
     /// <param name="layer">状態を変更するレイヤー</param>
     /// <param name="isActive">有効にする場合は <see langword="true"/>、無効にする場合は <see langword="false"/></param>
-    internal void SetLayerActive(uint layer, bool isActive)
+    public void SetLayerActive(uint layer, bool isActive)
     {
         bool stateMatchesRequested = isActive
             ? (ActiveLayers & layer) == layer

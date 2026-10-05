@@ -6,7 +6,7 @@ using System;
 /// <summary>
 /// モデル実体DTOを内部座標系のModelEntityへ変換する
 /// </summary>
-internal static class ModelEntityMapper
+public static class ModelEntityMapper
 {
 	/// <summary>
 	/// DTOをModelEntityへ変換する
@@ -14,7 +14,7 @@ internal static class ModelEntityMapper
 	/// <param name="dto">変換元のモデル実体DTO</param>
 	/// <returns>Godot座標系へ変換済みのモデル実体</returns>
 	/// <exception cref="ArgumentNullException">dtoがnullの場合</exception>
-	internal static ModelEntity Map(ModelEntityDto dto)
+	public static ModelEntity Map(ModelEntityDto dto)
 	{
 		if (dto == null)
 		{

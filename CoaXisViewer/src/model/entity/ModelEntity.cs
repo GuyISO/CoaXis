@@ -47,22 +47,22 @@ public class ModelEntity
     /// <summary>
     /// 座標変換後の配置位置
     /// </summary>
-    public Vector3 Position { get; internal set; }
+    public Vector3 Position { get; set; }
 
     /// <summary>
     /// 座標変換後の回転
     /// </summary>
-    public Quaternion Rotation { get; internal set; }
+    public Quaternion Rotation { get; set; }
 
     /// <summary>
     /// 表示状態
     /// </summary>
-    public virtual ModelVisibility Visibility { get; internal set; }
+    public virtual ModelVisibility Visibility { get; set; }
 
     /// <summary>
     /// ツリー表示時の初期折り畳み状態
     /// </summary>
-    public virtual bool IsCollapsed { get; internal set; }
+    public virtual bool IsCollapsed { get; set; }
 
     /// <summary>
     /// アイコン画像のパス
@@ -82,17 +82,17 @@ public class ModelEntity
     /// <summary>
     /// ModelEntity の現在状態
     /// </summary>
-    public ModelStatus Status { get; internal set; } = ModelStatus.Unloaded;
+    public ModelStatus Status { get; set; } = ModelStatus.Unloaded;
 
     /// <summary>
     /// この実体に対応する描画用ノード
     /// </summary>
-    public ModelNode Node { get; internal set; } = null;
+    public ModelNode Node { get; set; } = null;
 
     /// <summary>
     /// 親実体を参照するためのプロパティ
     /// </summary>
-    public ModelEntity Parent => ParentId != Guid.Empty ? Application.Model.Entity.Registry.GetEntity(ParentId) : null;
+    public ModelEntity Parent => ParentId != Guid.Empty ? Application.Model.Entity.Registry.Get(ParentId) : null;
 
     /// <summary>
     /// 子実体の一覧を返す
@@ -164,7 +164,7 @@ public class ModelEntity
     /// 子モデル実体を登録する。同一 Id の重複登録は無視する。
     /// </summary>
     /// <param name="child">追加対象の子モデル実体</param>
-    internal void AttachEntity(ModelEntity childEntity)
+    public void AttachEntity(ModelEntity childEntity)
     {
         if (childEntity == null)
         {
@@ -183,7 +183,7 @@ public class ModelEntity
     /// 子モデル実体の登録を解除する
     /// </summary>
         /// <param name="childEntity">解除対象の子モデル実体</param>
-    internal void DetachEntity(ModelEntity childEntity)
+    public void DetachEntity(ModelEntity childEntity)
     {
         if (childEntity == null)
         {
@@ -197,7 +197,7 @@ public class ModelEntity
     /// プロパティをモデル実体に紐付ける
     /// </summary>
     /// <param name="property">追加対象のプロパティ</param>
-    internal void AttachProperty(ModelProperty property)
+    public void AttachProperty(ModelProperty property)
     {
         if (property == null)
         {
@@ -216,7 +216,7 @@ public class ModelEntity
     /// プロパティの紐付けを解除する
     /// </summary>
     /// <param name="property">解除対象のプロパティ</param>
-    internal void DetachProperty(ModelProperty property)
+    public void DetachProperty(ModelProperty property)
     {
         if (property == null)
         {
@@ -229,7 +229,7 @@ public class ModelEntity
     /// <summary>
     /// 子モデル一覧およびプロパティ一覧をクリアする
     /// </summary>
-    internal void Clear()
+    public void Clear()
     {
         // TODO: 子モデルおよびプロパティの参照などを解除する処理が必要な場合はここに追加する
         _children.Clear();

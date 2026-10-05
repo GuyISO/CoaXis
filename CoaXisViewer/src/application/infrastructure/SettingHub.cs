@@ -52,7 +52,7 @@ public partial class SettingHub : BaseHub
     /// <summary>
     /// 設定の再読み込みが完了したことを通知する。
     /// </summary>
-    internal void NotifySettings()
+    public void NotifySettings()
     {
         EmitSignal(SignalName.SettingsNotified);
     }

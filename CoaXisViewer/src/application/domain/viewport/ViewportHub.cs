@@ -12,13 +12,13 @@ public partial class ViewportHub : BaseHub
 	#region Properties
 
 	/// <summary>カメラ状態と操作を管理するHubを取得する。</summary>
-	internal ViewportCameraHub Camera { get; private set; } = null!;
+	public ViewportCameraHub Camera { get; private set; } = null!;
 
 	/// <summary>レイヤー表示状態を管理するHubを取得する。</summary>
-	internal ViewportDisplayHub Display { get; private set; } = null!;
+	public ViewportDisplayHub Display { get; private set; } = null!;
 
 	/// <summary>操作モードと操作補助表示を管理するHubを取得する。</summary>
-	internal ViewportInteractionHub Interaction { get; private set; } = null!;
+	public ViewportInteractionHub Interaction { get; private set; } = null!;
 
 	#endregion
 

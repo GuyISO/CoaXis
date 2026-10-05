@@ -139,7 +139,7 @@ public partial class CameraStateUi : PanelContainer
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	/// <summary>
 	/// 現在のカメラ状態一覧で Tree を再構築する

@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using CoaXis.Protocol.Viewer;
 using Godot;
 using System;
@@ -37,14 +36,19 @@ public partial class ModelEntityLoadHub : BaseHub
 	/// <param name="entityDtos">読み込むモデル実体DTOの集合</param>
 	/// <returns>登録およびシーン反映を開始したModelEntityの一覧</returns>
 	/// <exception cref="ArgumentNullException">entityDtosがnullの場合</exception>
-	public IReadOnlyList<ModelEntity> ReplaceEntities(IReadOnlyList<ModelEntityDto> entityDtos)
+	public IReadOnlyList<ModelEntity> Replace(IReadOnlyList<ModelEntityDto> entityDtos)
+	{
+		Clear();
+		return FromDtos(entityDtos);
+	}
+
+	public IReadOnlyList<ModelEntity> FromDtos(IReadOnlyList<ModelEntityDto> entityDtos)
 	{
 		if (entityDtos == null)
 		{
 			throw new ArgumentNullException(nameof(entityDtos));
 		}
 
-		ClearModels();
 		IReadOnlyList<ModelEntity> entities = ModelEntityFactory.Create(entityDtos);
 		ValidateAcyclicHierarchy(entities);
 
@@ -52,7 +56,7 @@ public partial class ModelEntityLoadHub : BaseHub
 		foreach (ModelEntity modelEntity in entities)
 		{
 			Application.Model.Entity.Scene.MarkInitialized(modelEntity);
-			Application.Model.Entity.Registry.RegisterEntity(modelEntity);
+			Application.Model.Entity.Registry.Register(modelEntity);
 		}
 		Application.Model.Entity.Registry.ResolveHierarchy();
 		Application.Model.Property.Registry.ResolveHierarchy();
@@ -65,7 +69,7 @@ public partial class ModelEntityLoadHub : BaseHub
 		Application.Model.Entity.Scene.PrepareLoads(entities);
 
 		// 全Entityと階層が確定してから一括通知し、Tree側に親先行の個別通知を要求しない。
-		Application.Model.Entity.Registry.NotifyModelSetReplaced();
+		Application.Model.Entity.Registry.NotifyReplaced();
 		Application.Model.Entity.Scene.StartPendingLoads();
 		return entities;
 	}
@@ -73,7 +77,7 @@ public partial class ModelEntityLoadHub : BaseHub
 	/// <summary>
 	/// 現在のモデル集合と保留中のシーンロードをクリアする。
 	/// </summary>
-	public void ClearModels()
+	public void Clear()
 	{
 		// 旧世代を先に無効化し、EntityとPropertyの両Registryをクリアして古いノードの更新を防ぐ。
 		Application.Model.Entity.Scene.CancelPendingLoads();
@@ -164,7 +168,7 @@ public partial class ModelEntityLoadHub : BaseHub
 		}
 		else
 		{
-			ModelNode rootNode = Application.Model.Entity.Registry.RootEntity?.Node;
+			ModelNode rootNode = Application.Model.Entity.Registry.Root?.Node;
 			if (rootNode != null)
 			{
 				rootNode.AddChild(node);
@@ -188,7 +192,7 @@ public partial class ModelEntityLoadHub : BaseHub
 			return null;
 		}
 
-		ModelEntity parentEntity = Application.Model.Entity.Registry.GetEntity(parentId);
+		ModelEntity parentEntity = Application.Model.Entity.Registry.Get(parentId);
 		if (parentEntity == null)
 		{
 			return null;

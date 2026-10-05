@@ -68,7 +68,7 @@ public static class WorldAabbUtility
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// AABB の 8 コーナーをワールド座標に変換して返す

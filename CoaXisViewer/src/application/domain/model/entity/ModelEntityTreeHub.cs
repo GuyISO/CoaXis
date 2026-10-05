@@ -1,7 +1,5 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// ModelEntity ツリー操作の要求を管理するハブ。
@@ -37,7 +35,7 @@ public partial class ModelEntityTreeHub : BaseHub
 	/// 指定したモデルをツリーの中央へ表示する操作をリクエストする。
 	/// </summary>
 	/// <param name="entityId">ツリーの中央へ表示するモデル実体の識別子</param>
-	internal void Centering(Guid entityId)
+	public void Centering(Guid entityId)
 	{
 		EmitSignal(SignalName.CenteringRequested, entityId.ToString());
 	}

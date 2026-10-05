@@ -115,7 +115,7 @@ public partial class AxisNavigator : Control
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	/// <summary>
 	/// 指定されたノードの名前を回転角度（度）として解釈しその向きにカメラを移動させ

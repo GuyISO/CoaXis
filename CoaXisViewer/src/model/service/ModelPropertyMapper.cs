@@ -5,7 +5,7 @@ using System;
 /// <summary>
 /// モデル属性DTOをModelPropertyへ変換する
 /// </summary>
-internal static class ModelPropertyMapper
+public static class ModelPropertyMapper
 {
     /// <summary>
     /// DTOをModelPropertyへ変換する
@@ -13,7 +13,7 @@ internal static class ModelPropertyMapper
     /// <param name="dto">変換元のモデル属性DTO</param>
     /// <returns>変換済みのModelProperty</returns>
     /// <exception cref="ArgumentNullException">dtoがnullの場合</exception>
-    internal static ModelProperty Map(ModelPropertyDto dto)
+    public static ModelProperty Map(ModelPropertyDto dto)
     {
         if (dto == null)
         {

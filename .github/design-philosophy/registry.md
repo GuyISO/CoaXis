@@ -219,6 +219,16 @@
   - `docs/rules/technical-knowledge-base.md`
 - Notes: 初期表示に必要なLayer状態はViewportDisplayHub、操作モード・アークボール・矩形選択状態はViewportInteractionHub、カメラ状態はViewportCameraHubが保持する。DisplayHubは表示モードや表示対象の絞り込みなど、表示/可視性制御の拡張先とする
 
+- Date: 2026-10-05
+- Trigger: 副作用のないカメラ計算もViewportCameraHubへ統合
+- Decision: カメラ状態・操作要求・通知・Tweenと、それらに必要なカメラ計算はViewportCameraHubに置く。計算処理はprivate helperとし、独立したViewportCameraUtilityを設けない。CameraRigはHub状態をSceneへ反映する
+- Scope: CoaXisViewerのViewportCameraHubとCameraRig
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/viewport/ViewportCameraHub.cs`
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `docs/rules/technical-knowledge-base.md`
+- Notes: カメラ計算をHubから独立した公開面として扱う必要がないため、状態操作と同じ責務境界に集約する。計算式と既存の操作結果は維持する
+
 - Date: 2026-10-04
 - Trigger: ModelEntityHubとModelPropertyHubの分離に合わせてRegistry責務を分離
 - Decision: Entity集合・Entity階層は`ModelEntityRegistryHub`、Property集合・Property階層は`ModelPropertyRegistryHub`がそれぞれ所有する。両Registryにまたがる階層解決とクリアの順序はModelLoadが調整し、統合Registryを再導入しない
@@ -304,7 +314,7 @@
   - `CoaXisViewer/src/application/domain/model/entity/ModelEntitySelectionHub.cs`
   - `CoaXisViewer/src/application/domain/model/entity/ModelEntityMeasurementHub.cs`
   - `.github/instructions/design-philosophy.instructions.md`
-- Notes: Display の LayerActivated(layer,isActive) は ActiveLayersNotified() に、Selection の Mode は引数なし通知にした。個々の ModelEntity を対象とする通知（Selected/Visibility/Status/Collapsed/Position/Rotation/Added）は entityId のみを payload とし、値は Registry.GetEntity や Selection.Contains 経由で参照する。折り畳みは State.SetCollapsed(Guid,bool) の直接呼び出しに統一し、ToggleModelVisibilityRequested 要求Signalは廃止した
+- Notes: Display の LayerActivated(layer,isActive) は ActiveLayersNotified() に、Selection の Mode は引数なし通知にした。個々の ModelEntity を対象とする通知（Selected/Visibility/Status/Collapsed/Position/Rotation/Added）は entityId のみを payload とし、値は Registry.Get や Selection.Contains 経由で参照する。折り畳みは State.SetCollapsed(Guid,bool) の直接呼び出しに統一し、ToggleModelVisibilityRequested 要求Signalは廃止した
 
 ## 2026-10-04 Hubのregion構成統一
 - Policy: Application配下の全Hubを Fields/Properties/Signals/Lifecycle/Events/Methods/Helpers の共通7regionに統一（Signalsを上位に配置、Lifecycle以外の全メンバーにXMLコメント必須）

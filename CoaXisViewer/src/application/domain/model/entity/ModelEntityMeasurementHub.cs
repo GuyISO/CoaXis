@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -77,8 +76,8 @@ public partial class ModelEntityMeasurementHub : BaseHub
     /// </summary>
     private void SubscribeEvents()
     {
-        Application.Model.Entity.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
-        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+        Application.Model.Entity.Pick.HandlingModeNotified += OnModelEntityPickHandlingModeNotified;
+        Application.Model.Entity.Pick.ResultNotified += OnModelEntityPickResultNotified;
         Application.Setting.SettingsNotified += ApplySettings;
     }
 
@@ -87,15 +86,15 @@ public partial class ModelEntityMeasurementHub : BaseHub
     /// </summary>
     private void UnsubscribeEvents()
     {
-        Application.Model.Entity.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
-        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+        Application.Model.Entity.Pick.HandlingModeNotified -= OnModelEntityPickHandlingModeNotified;
+        Application.Model.Entity.Pick.ResultNotified -= OnModelEntityPickResultNotified;
         Application.Setting.SettingsNotified -= ApplySettings;
     }
 
     /// <summary>
     /// ピック操作モードの変更通知を受け取ったときに呼び出されるイベントハンドラ。
     /// </summary>
-    private void OnPickHandlingModeNotified()
+    private void OnModelEntityPickHandlingModeNotified()
     {
         if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.Measurement)
         {
@@ -108,7 +107,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     /// ピック結果が通知されたときに呼び出されるイベントハンドラ。
     /// </summary>
     /// <param name="pickResult">通知されたピック結果</param>
-    private void OnPickResultNotified(PickResult pickResult)
+    private void OnModelEntityPickResultNotified(PickResult pickResult)
     {
         if (Application.Model.Entity.Pick.HandlingMode != PickHandlingMode.Measurement)
         {
@@ -143,7 +142,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     /// 測定ポイントのピックを開始する。
     /// </summary>
     /// <param name="pointIndex">設定するポイントのインデックス（1または2）</param>
-    internal void SetPoint(int pointIndex)
+    public void SetPoint(int pointIndex)
     {
         if (pointIndex is < 1 or > 2)
         {
@@ -161,7 +160,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     /// 測定ポイントをクリアする。
     /// </summary>
     /// <param name="pointIndex">クリアするポイントのインデックス（1または2）</param>
-    internal void ClearPoint(int pointIndex)
+    public void ClearPoint(int pointIndex)
     {
         if (pointIndex is < 1 or > 2)
         {
@@ -180,7 +179,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     /// 現在の測定結果を取得する。
     /// </summary>
     /// <returns>現在の測定結果</returns>
-    internal MeasurementResult GetCurrentResult()
+    public MeasurementResult GetCurrentResult()
     {
         return ComputeMeasurementResult();
     }

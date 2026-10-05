@@ -29,7 +29,7 @@ public class RootModelEntity : ModelEntity
     public override ModelVisibility Visibility
     {
         get => ModelVisibility.Visible;
-        internal set { }
+        set { }
     }
 
     /// <summary>
@@ -38,7 +38,7 @@ public class RootModelEntity : ModelEntity
     public override bool IsCollapsed
     {
         get => false;
-        internal set { }
+        set { }
     }
     
     #endregion
@@ -65,7 +65,7 @@ public class RootModelEntity : ModelEntity
         // Root は常に存在するため、初期化直後からロード済みとして扱う、Registryの制約上、Initialized状態で追加する必要がある
         Status = ModelStatus.Initialized;
 
-        Application.Model.Entity.Registry.RegisterEntity(this);
+        Application.Model.Entity.Registry.Register(this);
 
         // 登録後に最終状態へ更新する
         Status = ModelStatus.Loaded;

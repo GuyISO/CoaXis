@@ -19,7 +19,7 @@ public partial class ModelNode : Node3D
     /// <summary>
     /// このモデルに対応する ModelEntity を取得する
     /// </summary>
-    public ModelEntity Entity => EntityId == Guid.Empty ? null : Application.Model.Entity.Registry.GetEntity(EntityId);
+    public ModelEntity Entity => EntityId == Guid.Empty ? null : Application.Model.Entity.Registry.Get(EntityId);
 
     /// <summary>
     /// このモデルの内部構造を保持するコンポーネントルート
@@ -46,7 +46,7 @@ public partial class ModelNode : Node3D
     public ModelNode(Guid entityId)
     {
         // Registry に先に ModelEntity が存在していることを前提にノードを作る
-        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
         if (modelEntity == null)
         {
             throw new ArgumentException($"ModelNode: ModelEntity not found for entityId='{entityId}'");
@@ -100,12 +100,12 @@ public partial class ModelNode : Node3D
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// モデル配下のメッシュとコライダーへ表示レイヤーを適用する
     /// </summary>
-    internal void ApplyVisibilityLayer(bool isVisible)
+    public void ApplyVisibilityLayer(bool isVisible)
     {
         uint layer = (uint)(isVisible ? ViewportLayer.Visible : ViewportLayer.Invisible);
         ApplyVisibilityLayerRecursive(this, layer);

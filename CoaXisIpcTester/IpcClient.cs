@@ -12,7 +12,7 @@ namespace CoaXis.IpcTester;
 /// <summary>
 /// ViewerのNamed PipeへIPC要求を1件送信し、応答を受け取る。
 /// </summary>
-internal static class IpcClient
+public static class IpcClient
 {
     /// <summary>
     /// エンベロープをViewerへ送り、応答エンベロープを返す。

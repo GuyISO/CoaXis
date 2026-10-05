@@ -21,7 +21,7 @@ public partial class ModelEntityTree : Tree
     private Color _selectedColor;
 
     // ユーザー操作による選択か、内部的なプログラムによる選択かを判定するフラグ
-    private bool _isInternalSelection = false;
+    private bool _ispublicSelection = false;
 
     private const int VisibilityButtonId = 1;
 
@@ -100,14 +100,14 @@ public partial class ModelEntityTree : Tree
     private void SubscribeApplicationEvents()
     {
         Application.Setting.SettingsNotified += ApplySettings;
-        Application.Model.Entity.Selection.Selected += OnSelected;
-        Application.Model.Entity.Selection.ClearedNotified += OnClearedNotified;
-        Application.Model.Entity.Registry.Added += OnModelAdded;
-        Application.Model.Entity.Registry.ModelSetReplaced += OnModelSetReplaced;
-        Application.Model.Entity.State.VisibilityNotified += OnModelVisibilityNotified;
-        Application.Model.Entity.State.Collapsed += OnModelCollapsed;
-        Application.Model.Entity.State.StatusNotified += OnModelStatusNotified;
-        Application.Model.Entity.Registry.Cleared += OnEntityRegistryClearedNotified;
+        Application.Model.Entity.Selection.Selected += OnModelEntitySelected;
+        Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
+        Application.Model.Entity.Registry.Registered += OnModelEntityRegistered;
+        Application.Model.Entity.Registry.Replaced += OnModelEntityRegistryReplaced;
+        Application.Model.Entity.State.VisibilityNotified += OnModelEntityVisibilityNotified;
+        Application.Model.Entity.State.Collapsed += OnModelEntityCollapsed;
+        Application.Model.Entity.State.StatusNotified += OnModelEntityStatusNotified;
+        Application.Model.Entity.Registry.Cleared += OnModelEntityRegistryCleared;
         Application.Model.Entity.Tree.CenteringRequested += OnTreeCenteringRequested;
     }
 
@@ -117,14 +117,14 @@ public partial class ModelEntityTree : Tree
     private void UnsubscribeApplicationEvents()
     {
         Application.Setting.SettingsNotified -= ApplySettings;
-        Application.Model.Entity.Selection.Selected -= OnSelected;
-        Application.Model.Entity.Selection.ClearedNotified -= OnClearedNotified;
-        Application.Model.Entity.Registry.Added -= OnModelAdded;
-        Application.Model.Entity.Registry.ModelSetReplaced -= OnModelSetReplaced;
-        Application.Model.Entity.State.VisibilityNotified -= OnModelVisibilityNotified;
-        Application.Model.Entity.State.StatusNotified -= OnModelStatusNotified;
-        Application.Model.Entity.State.Collapsed -= OnModelCollapsed;
-        Application.Model.Entity.Registry.Cleared -= OnEntityRegistryClearedNotified;
+        Application.Model.Entity.Selection.Selected -= OnModelEntitySelected;
+        Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
+        Application.Model.Entity.Registry.Registered -= OnModelEntityRegistered;
+        Application.Model.Entity.Registry.Replaced -= OnModelEntityRegistryReplaced;
+        Application.Model.Entity.State.VisibilityNotified -= OnModelEntityVisibilityNotified;
+        Application.Model.Entity.State.StatusNotified -= OnModelEntityStatusNotified;
+        Application.Model.Entity.State.Collapsed -= OnModelEntityCollapsed;
+        Application.Model.Entity.Registry.Cleared -= OnModelEntityRegistryCleared;
         Application.Model.Entity.Tree.CenteringRequested -= OnTreeCenteringRequested;
     }
 
@@ -133,7 +133,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void OnCellSelected()
     {
-        if (_isInternalSelection)
+        if (_ispublicSelection)
         {
             return;
         }
@@ -195,7 +195,7 @@ public partial class ModelEntityTree : Tree
     /// モデルの選択状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">選択状態が変更された ModelEntity の識別子</param>
-    private void OnSelected(string entityId)
+    private void OnModelEntitySelected(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -221,7 +221,7 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// 選択がクリアされたことを通知されたときのイベントハンドラ
     /// </summary>
-    private void OnClearedNotified()
+    private void OnSelectionCleared()
     {
         _lastSelectedItem = null;
     }
@@ -230,7 +230,7 @@ public partial class ModelEntityTree : Tree
     /// モデルの追加がリクエストされたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">追加する子 ModelEntity の識別子</param>
-    private void OnModelAdded(string entityId)
+    private void OnModelEntityRegistered(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -238,7 +238,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        ModelEntity addedEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+        ModelEntity addedEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
         if (addedEntity == null)
         {
             return;
@@ -252,7 +252,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        if (!Application.Model.Entity.Registry.IsEntityRegistered(parsedParentEntityId) ||
+        if (!Application.Model.Entity.Registry.IsRegistered(parsedParentEntityId) ||
             !_entityIdToTreeItem.ContainsKey(parsedParentEntityId))
         {
             Application.Log.Warn($"ModelTree: parent TreeItem not found for added entity. entityId='{parsedEntityId}', parentEntityId='{parsedParentEntityId}'");
@@ -265,7 +265,7 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// モデル集合が置換されたとき、Registryの階層からツリーを再構築する
     /// </summary>
-    private void OnModelSetReplaced()
+    private void OnModelEntityRegistryReplaced()
     {
         RebuildTreeFromRegistry();
     }
@@ -274,14 +274,14 @@ public partial class ModelEntityTree : Tree
     /// モデルの表示状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
-    private void OnModelVisibilityNotified(string entityId)
+    private void OnModelEntityVisibilityNotified(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
             return;
         }
 
-        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
         if (modelEntity == null)
         {
             return;
@@ -303,7 +303,7 @@ public partial class ModelEntityTree : Tree
     /// モデルの折り畳み状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">折り畳み状態が変更された ModelEntity の識別子</param>
-    private void OnModelCollapsed(string entityId)
+    private void OnModelEntityCollapsed(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId))
         {
@@ -311,7 +311,7 @@ public partial class ModelEntityTree : Tree
         }
 
         TreeItem item = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem foundItem) ? foundItem : null;
-        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
         if (item == null || modelEntity == null)
         {
             return;
@@ -329,7 +329,7 @@ public partial class ModelEntityTree : Tree
     /// モデルのステータスが更新されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">ステータス更新対象の ModelEntity の識別子</param>
-    private void OnModelStatusNotified(string entityId)
+    private void OnModelEntityStatusNotified(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -337,7 +337,7 @@ public partial class ModelEntityTree : Tree
         }
 
         TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
-        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
         if (treeItem == null || modelEntity == null)
         {
             return;
@@ -347,9 +347,9 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
-    /// モデルレジストリがクリアされたことを通知されたときのイベントハンドラ
+    /// モデルエンティティレジストリがクリアされたことを通知されたときのイベントハンドラ
     /// </summary>
-    private void OnEntityRegistryClearedNotified()
+    private void OnModelEntityRegistryCleared()
     {
         RebuildTreeFromRegistry();
     }
@@ -362,17 +362,17 @@ public partial class ModelEntityTree : Tree
         _highlightedItems.Clear();
         _lastSelectedItem = null;
 
-        if (Application.Model.Entity.Registry.RootEntity == null)
+        if (Application.Model.Entity.Registry.Root == null)
         {
             return;
         }
 
-        if (Application.Model.Entity.Registry.GetEntity(Application.Model.Entity.Registry.RootEntity.Id) == null)
+        if (Application.Model.Entity.Registry.Get(Application.Model.Entity.Registry.Root.Id) == null)
         {
             return;
         }
 
-        AddToTree(Application.Model.Entity.Registry.RootEntity.Id, Guid.Empty);
+        AddToTree(Application.Model.Entity.Registry.Root.Id, Guid.Empty);
     }
 
     /// <summary>
@@ -396,9 +396,9 @@ public partial class ModelEntityTree : Tree
         ScrollToItem(treeItem, true);
         
         // 選択イベントを発火させず、ツリー選択状態ハイライトでユーザーに視覚的なフィードバックを与える
-        _isInternalSelection = true;
+        _ispublicSelection = true;
         treeItem.Select(0);
-        _isInternalSelection = false;
+        _ispublicSelection = false;
     }
 
     #endregion
@@ -406,7 +406,7 @@ public partial class ModelEntityTree : Tree
     #region public Methods
 
     // TODO: ちゃんとやる
-    internal void SetRootModelEntity(ModelEntity rootModelEntity)
+    public void SetRootModelEntity(ModelEntity rootModelEntity)
     {
         if (_rootModelEntity != null)
         {
@@ -420,7 +420,7 @@ public partial class ModelEntityTree : Tree
     
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 指定したモデルをツリーに追加する
@@ -443,7 +443,7 @@ public partial class ModelEntityTree : Tree
         }
 
         TreeItem parentTreeItem = _entityIdToTreeItem.TryGetValue(parentEntityId, out TreeItem item) ? item : null;
-        ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
         if (modelEntity == null)
         {
             return;
@@ -778,7 +778,7 @@ public partial class ModelEntityTree : Tree
             return null;
         }
 
-        return Application.Model.Entity.Registry.GetEntity(entityId)?.Node;
+        return Application.Model.Entity.Registry.Get(entityId)?.Node;
     }
 
     #endregion

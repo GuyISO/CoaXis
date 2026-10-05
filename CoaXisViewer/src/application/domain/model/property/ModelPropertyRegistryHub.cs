@@ -10,14 +10,14 @@ public partial class ModelPropertyRegistryHub : BaseHub
     #region Fields
 
     /// <summary>登録済みPropertyの識別子辞書。</summary>
-    private readonly Dictionary<Guid, ModelProperty> _properties = new();
+    private readonly Dictionary<Guid, ModelProperty> _items = new();
 
     #endregion
 
     #region Properties
 
     /// <summary>登録されている ModelProperty の集合を取得する。</summary>
-    public IReadOnlyDictionary<Guid, ModelProperty> Properties => _properties;
+    public IReadOnlyDictionary<Guid, ModelProperty> Items => _items;
 
     #endregion
 
@@ -40,9 +40,9 @@ public partial class ModelPropertyRegistryHub : BaseHub
     /// </summary>
     /// <param name="propertyId">取得対象の ModelProperty の Id</param>
     /// <returns>該当する ModelProperty。存在しない場合は null</returns>
-    public ModelProperty GetProperty(Guid propertyId)
+    public ModelProperty Get(Guid propertyId)
     {
-        return _properties.TryGetValue(propertyId, out ModelProperty property) ? property : null;
+        return _items.TryGetValue(propertyId, out ModelProperty property) ? property : null;
     }
 
     /// <summary>
@@ -52,18 +52,18 @@ public partial class ModelPropertyRegistryHub : BaseHub
     /// <returns>所属する ModelEntity。未登録または未解決の場合は null</returns>
     public ModelEntity GetOwningEntity(Guid propertyId)
     {
-        ModelProperty property = GetProperty(propertyId);
+        ModelProperty property = Get(propertyId);
         var visitedPropertyIds = new HashSet<Guid>();
 
         while (property != null && visitedPropertyIds.Add(property.Id))
         {
-            ModelEntity parentEntity = Application.Model.Entity.Registry.GetEntity(property.ParentId);
+            ModelEntity parentEntity = Application.Model.Entity.Registry.Get(property.ParentId);
             if (parentEntity != null)
             {
                 return parentEntity;
             }
 
-            property = GetProperty(property.ParentId);
+            property = Get(property.ParentId);
         }
 
         return null;
@@ -74,9 +74,9 @@ public partial class ModelPropertyRegistryHub : BaseHub
     /// </summary>
     /// <param name="propertyId">判定対象の ModelProperty の Id</param>
     /// <returns>登録済みの場合は true</returns>
-    public bool IsPropertyRegistered(Guid propertyId)
+    public bool IsRegistered(Guid propertyId)
     {
-        return _properties.ContainsKey(propertyId);
+        return _items.ContainsKey(propertyId);
     }
 
     /// <summary>
@@ -86,7 +86,7 @@ public partial class ModelPropertyRegistryHub : BaseHub
     /// <param name="property">登録対象の ModelProperty</param>
     /// <exception cref="ArgumentNullException">property が null の場合</exception>
     /// <exception cref="ArgumentException">property.Id が空の場合</exception>
-    public void RegisterProperty(ModelProperty property)
+    public void Register(ModelProperty property)
     {
         if (property == null)
         {
@@ -98,13 +98,13 @@ public partial class ModelPropertyRegistryHub : BaseHub
             throw new ArgumentException("ModelProperty id must not be empty.", nameof(property));
         }
 
-        if (IsPropertyRegistered(property.Id))
+        if (IsRegistered(property.Id))
         {
-            DisposeProperty(property.Id);
+            Dispose(property.Id);
         }
 
-        _properties.Add(property.Id, property);
-        LinkPropertyToParent(property);
+        _items.Add(property.Id, property);
+        LinkToParent(property);
     }
 
     /// <summary>
@@ -112,9 +112,9 @@ public partial class ModelPropertyRegistryHub : BaseHub
     /// </summary>
     /// <param name="propertyId">破棄対象の ModelProperty の Id</param>
     /// <returns>削除に成功した場合は true</returns>
-    public bool DisposeProperty(Guid propertyId)
+    public bool Dispose(Guid propertyId)
     {
-        if (!_properties.TryGetValue(propertyId, out ModelProperty property))
+        if (!_items.TryGetValue(propertyId, out ModelProperty property))
         {
             return false;
         }
@@ -126,18 +126,18 @@ public partial class ModelPropertyRegistryHub : BaseHub
 
         if (property.ParentId != Guid.Empty)
         {
-            ModelProperty parentProperty = GetProperty(property.ParentId);
+            ModelProperty parentProperty = Get(property.ParentId);
             if (parentProperty != null)
             {
                 parentProperty.Detach(property);
             }
             else
             {
-                Application.Model.Entity.Registry.GetEntity(property.ParentId)?.DetachProperty(property);
+                Application.Model.Entity.Registry.Get(property.ParentId)?.DetachProperty(property);
             }
         }
 
-        _properties.Remove(propertyId);
+        _items.Remove(propertyId);
         return true;
     }
 
@@ -147,9 +147,9 @@ public partial class ModelPropertyRegistryHub : BaseHub
     public void ResolveHierarchy()
     {
         // Entity再登録後にも親参照を復元できるよう、全Propertyの親を再確認する。
-        foreach (ModelProperty property in _properties.Values.ToList())
+        foreach (ModelProperty item in _items.Values.ToList())
         {
-            LinkPropertyToParent(property);
+            LinkToParent(item);
         }
     }
 
@@ -158,9 +158,9 @@ public partial class ModelPropertyRegistryHub : BaseHub
     /// </summary>
     public void Clear()
     {
-        foreach (Guid propertyId in new List<Guid>(_properties.Keys))
+        foreach (Guid propertyId in new List<Guid>(_items.Keys))
         {
-            DisposeProperty(propertyId);
+            Dispose(propertyId);
         }
     }
 
@@ -171,21 +171,21 @@ public partial class ModelPropertyRegistryHub : BaseHub
     /// <summary>
     /// Propertyを親Propertyの子として接続する。
     /// </summary>
-    private bool LinkPropertyToParent(ModelProperty property)
+    private bool LinkToParent(ModelProperty property)
     {
         if (property.ParentId == Guid.Empty)
         {
             return true;
         }
 
-        ModelProperty parentProperty = GetProperty(property.ParentId);
+        ModelProperty parentProperty = Get(property.ParentId);
         if (parentProperty != null)
         {
             parentProperty.Attach(property);
             return true;
         }
 
-        ModelEntity parentEntity = Application.Model.Entity.Registry.GetEntity(property.ParentId);
+        ModelEntity parentEntity = Application.Model.Entity.Registry.Get(property.ParentId);
         if (parentEntity != null)
         {
             parentEntity.AttachProperty(property);

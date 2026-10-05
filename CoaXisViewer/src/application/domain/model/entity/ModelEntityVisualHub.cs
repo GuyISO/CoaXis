@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -15,7 +14,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	#region Properties
 
 	/// <summary>モデルの透明度を取得する。</summary>
-	internal float Transparency { get; private set; } = 0.0f;
+	public float Transparency { get; private set; } = 0.0f;
 
 	#endregion
 
@@ -46,12 +45,12 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Model.Entity.State.PositionNotified += OnModelPositionNotified;
-		Application.Model.Entity.State.RotationNotified += OnModelRotationNotified;
-		Application.Model.Entity.State.VisibilityNotified += OnModelVisibilityNotified;
-		Application.Model.Entity.Registry.Added += OnModelAdded;
-		Application.Model.Entity.Registry.ModelSetReplaced += OnModelSetReplaced;
-		Application.Model.Entity.State.StatusNotified += OnModelStatusNotified;
+		Application.Model.Entity.State.PositionNotified += OnPositionNotified;
+		Application.Model.Entity.State.RotationNotified += OnRotationNotified;
+		Application.Model.Entity.State.VisibilityNotified += OnVisibilityNotified;
+		Application.Model.Entity.Registry.Registered += OnRegistered;
+		Application.Model.Entity.Registry.Replaced += OnReplaced;
+		Application.Model.Entity.State.StatusNotified += OnStatusNotified;
 		Application.Model.Entity.Selection.Selected += OnSelected;
 	}
 
@@ -60,12 +59,12 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Model.Entity.State.PositionNotified -= OnModelPositionNotified;
-		Application.Model.Entity.State.RotationNotified -= OnModelRotationNotified;
-		Application.Model.Entity.State.VisibilityNotified -= OnModelVisibilityNotified;
-		Application.Model.Entity.Registry.Added -= OnModelAdded;
-		Application.Model.Entity.Registry.ModelSetReplaced -= OnModelSetReplaced;
-		Application.Model.Entity.State.StatusNotified -= OnModelStatusNotified;
+		Application.Model.Entity.State.PositionNotified -= OnPositionNotified;
+		Application.Model.Entity.State.RotationNotified -= OnRotationNotified;
+		Application.Model.Entity.State.VisibilityNotified -= OnVisibilityNotified;
+		Application.Model.Entity.Registry.Registered -= OnRegistered;
+		Application.Model.Entity.Registry.Replaced -= OnReplaced;
+		Application.Model.Entity.State.StatusNotified -= OnStatusNotified;
 		Application.Model.Entity.Selection.Selected -= OnSelected;
 	}
 
@@ -73,7 +72,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// モデルの配置位置が通知されたときに呼び出されるイベントハンドラ。
 	/// </summary>
 	/// <param name="entityId">配置位置が変更された ModelEntity の識別子</param>
-	private void OnModelPositionNotified(string entityId)
+	private void OnPositionNotified(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
@@ -81,7 +80,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelEntityVisualHub: position target not found. entityId='{parsedEntityId}'");
@@ -99,7 +98,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// モデルの回転が通知されたときに呼び出されるイベントハンドラ。
 	/// </summary>
 	/// <param name="entityId">回転が変更された ModelEntity の識別子</param>
-	private void OnModelRotationNotified(string entityId)
+	private void OnRotationNotified(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
@@ -107,7 +106,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelEntityVisualHub: rotation target not found. entityId='{parsedEntityId}'");
@@ -125,7 +124,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// モデルの表示状態が変更されたときに呼び出されるイベントハンドラ。
 	/// </summary>
 	/// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
-	private void OnModelVisibilityNotified(string entityId)
+	private void OnVisibilityNotified(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
@@ -134,7 +133,7 @@ public partial class ModelEntityVisualHub : BaseHub
 		}
 
 		// Entityが保持する表示設定を描画ノードへ反映する
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelEntityVisualHub: visibility target not found. entityId='{parsedEntityId}'");
@@ -148,14 +147,14 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// 追加された部分木の初期表示状態を反映する。
 	/// </summary>
 	/// <param name="entityId">追加された部分木ルートの識別子</param>
-	private void OnModelAdded(string entityId)
+	private void OnRegistered(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
 		if (modelEntity == null)
 		{
 			return;
@@ -167,9 +166,9 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// <summary>
 	/// 全件置換後に登録済みモデルの初期表示状態を同期する。
 	/// </summary>
-	private void OnModelSetReplaced()
+	private void OnReplaced()
 	{
-		foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Entities.Values)
+		foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Items.Values)
 		{
 			if (modelEntity.Id != RootModelEntity.RootEntityId)
 			{
@@ -182,14 +181,14 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// モデルのロード完了通知を受けたときに透明度を適用する。
 	/// </summary>
 	/// <param name="entityId">ロード完了した ModelEntity の識別子</param>
-	private void OnModelStatusNotified(string entityId)
+	private void OnStatusNotified(string entityId)
 	{
 		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
 		{
 			return;
 		}
 
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(parsedEntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
 		if (modelEntity == null || modelEntity.Status != ModelStatus.Loaded)
 		{
 			return;
@@ -216,7 +215,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 
-		ModelNode modelNode = Application.Model.Entity.Registry.GetEntity(parsedEntityId)?.Node;
+		ModelNode modelNode = Application.Model.Entity.Registry.Get(parsedEntityId)?.Node;
 		if (modelNode == null)
 		{
 			Application.Log.Warn($"ModelEntityVisualHub: highlight target not found. entityId='{parsedEntityId}'");
@@ -239,7 +238,7 @@ public partial class ModelEntityVisualHub : BaseHub
 		Transparency = value;
 
 		// ルート ModelEntity 配下のすべてのノードに透明度を適用
-		RootModelEntity rootEntity = Application.Model.Entity.Registry.RootEntity;
+		RootModelEntity rootEntity = Application.Model.Entity.Registry.Root;
 		if (rootEntity?.Node != null && IsInstanceValid(rootEntity.Node))
 		{
 			ApplyModelTransparency(rootEntity.Node);
@@ -308,7 +307,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// <param name="enable">ハイライトを有効にする場合はtrue、無効にする場合はfalse</param>
 	private static void HighLightModel(ModelNode modelNode, bool enable = true)
 	{
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(modelNode.EntityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(modelNode.EntityId);
 		if (modelEntity == null)
 		{
 			return;
@@ -316,7 +315,7 @@ public partial class ModelEntityVisualHub : BaseHub
 
 		// 論理階層はRegistryで解決し、描画ノードへの反映だけをModelEntityVisualHubが担当する。
 		var modelEntities = new List<ModelEntity> { modelEntity };
-		modelEntities.AddRange(Application.Model.Entity.Registry.GetDescendantEntities(modelEntity.Id));
+		modelEntities.AddRange(Application.Model.Entity.Registry.GetDescendants(modelEntity.Id));
 		foreach (ModelEntity targetModelEntity in modelEntities)
 		{
 			if (targetModelEntity.Node != null && IsInstanceValid(targetModelEntity.Node))

@@ -66,7 +66,7 @@
 1. Lifecycle
 2. Events
 3. Public Methods
-4. Internal Helpers
+4. Helpers
 
 ## 5. PRセルフチェック
 - 仕様どおりに動くか

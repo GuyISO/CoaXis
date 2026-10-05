@@ -68,7 +68,7 @@ public partial class AssetMaterialHub : BaseHub
     /// ハイライト表示用のマテリアルを取得する。
     /// </summary>
     /// <returns>選択ハイライト用マテリアル。取得失敗時は null</returns>
-    internal Material GetSelected()
+    public Material GetSelected()
     {
         if (_selectedMaterial != null)
         {

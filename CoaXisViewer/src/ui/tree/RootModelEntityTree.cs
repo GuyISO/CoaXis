@@ -11,7 +11,7 @@ public partial class RootModelEntityTree : ModelEntityTree
         base._Ready();
 
         // 初期表示のためにルート ModelEntity を設定する
-        SetRootModelEntity(Application.Model.Entity.Registry.RootEntity);
+        SetRootModelEntity(Application.Model.Entity.Registry.Root);
     }
     
     #endregion

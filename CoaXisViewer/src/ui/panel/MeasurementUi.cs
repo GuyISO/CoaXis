@@ -219,7 +219,7 @@ public partial class MeasurementUi : PanelContainer
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 初期状態を SelectionService から同期する

@@ -26,7 +26,7 @@ public partial class ModelEntityPickHub : BaseHub
     #region Properties
 
     /// <summary>現在の選択操作モードを取得する。</summary>
-    internal PickHandlingMode HandlingMode { get; private set; } = PickHandlingMode.Selection;
+    public PickHandlingMode HandlingMode { get; private set; } = PickHandlingMode.Selection;
 
     #endregion
 
@@ -41,7 +41,7 @@ public partial class ModelEntityPickHub : BaseHub
     /// ピック結果の通知を行う。
     /// </summary>
     /// <param name="pickResult">ピック結果</param>
-    internal void NotifyResult(PickResult pickResult)
+    public void NotifyResult(PickResult pickResult)
     {
         EmitSignal(SignalName.ResultNotified, pickResult);
     }
@@ -53,7 +53,7 @@ public partial class ModelEntityPickHub : BaseHub
     /// </summary>
     /// <param name="pickResults">ピック結果の配列</param>
     /// <remarks>複数のピック結果を一括で通知する場合はレイキャストによる取得ではないので座標値などを持たない</remarks>
-    internal void NotifyResults(PickResult[] pickResults)
+    public void NotifyResults(PickResult[] pickResults)
     {
         EmitSignal(SignalName.ResultsNotified, pickResults);
     }

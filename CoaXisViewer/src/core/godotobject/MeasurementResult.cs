@@ -40,7 +40,7 @@ public partial class MeasurementResult : RefCounted
     /// <param name="distance">ポイント間距離</param>
     /// <param name="angle">法線角度</param>
     /// <param name="delta">ポイント間差分</param>
-    internal MeasurementResult(
+    public MeasurementResult(
         bool hasPoint1,
         bool hasPoint2,
         Vector3 position1,

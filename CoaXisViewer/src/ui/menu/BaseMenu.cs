@@ -68,7 +68,7 @@ public abstract partial class BaseMenu : Node
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	/// <summary>
 	/// 生成済みのネイティブメニュー Rid を取得する、未生成の場合は生成を試みる
@@ -76,7 +76,7 @@ public abstract partial class BaseMenu : Node
 	/// <param name="nativeMenu">取得できた場合はネイティブメニューの Rid</param>
 	/// <returns>取得できた場合は true</returns>
 	/// <remarks>PickResultMenu が ModelEntityMenu をサブメニューとして接続する場合など、子メニューの Rid を必要とする場面で使う。</remarks>
-	internal bool TryGetNativeMenu(out Rid nativeMenu)
+	public bool TryGetNativeMenu(out Rid nativeMenu)
 	{
 		if (!EnsureNativeMenu())
 		{

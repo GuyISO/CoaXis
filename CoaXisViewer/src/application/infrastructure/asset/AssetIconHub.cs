@@ -56,7 +56,7 @@ public partial class AssetIconHub : BaseHub
     /// <param name="isVisible">実際にモデルが表示されている場合は true</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    internal Texture2D GetVisibility(ModelVisibility visibility, bool isVisible, int size = 24)
+    public Texture2D GetVisibility(ModelVisibility visibility, bool isVisible, int size = 24)
     {
         string path = visibility switch
         {
@@ -72,7 +72,7 @@ public partial class AssetIconHub : BaseHub
     /// </summary>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    internal Texture2D GetDefaultEntity(int size = 16)
+    public Texture2D GetDefaultEntity(int size = 16)
     {
         return GetByPath(DefaultEntityIconPath, size);
     }
@@ -83,7 +83,7 @@ public partial class AssetIconHub : BaseHub
     /// <param name="path">アセットパス</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    internal Texture2D GetByPath(string path, int size = 16)
+    public Texture2D GetByPath(string path, int size = 16)
     {
         if (!IsInsideTree())
         {

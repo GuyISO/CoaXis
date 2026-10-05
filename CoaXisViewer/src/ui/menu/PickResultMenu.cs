@@ -75,7 +75,7 @@ public partial class PickResultMenu : BaseMenu
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	// NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る
 	private void HandleAlignNormalMenuItemPressed(Variant tag)

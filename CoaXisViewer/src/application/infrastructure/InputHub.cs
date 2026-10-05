@@ -74,7 +74,7 @@ public partial class InputHub : BaseHub
         
         if (Input.IsActionJustPressed("clear"))
         {
-            Application.Model.Entity.Load.ClearModels();
+            Application.Model.Entity.Load.Clear();
         }
         
         if (Input.IsActionJustPressed("undo"))

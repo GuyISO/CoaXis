@@ -1,5 +1,3 @@
-// TODO: リファクタリング確認後に削除
-
 using Godot;
 
 /// <summary>
@@ -14,28 +12,28 @@ public partial class ViewportCameraHub : BaseHub
     #region Properties
 
     /// <summary>カメラ注視点の位置を取得する。</summary>
-    internal Vector3 Position { get; private set; } = Vector3.Zero;
+    public Vector3 Position { get; private set; } = Vector3.Zero;
 
     /// <summary>カメラ注視点の回転を取得する。</summary>
-    internal Quaternion Rotation { get; private set; } = Quaternion.Identity;
+    public Quaternion Rotation { get; private set; } = Quaternion.Identity;
 
     /// <summary>カメラ距離を取得する。</summary>
-    internal float Distance { get; private set; } = 5f;
+    public float Distance { get; private set; } = 5f;
 
     /// <summary>正投影サイズを取得する。</summary>
-    internal float Size { get; private set; } = 1f;
+    public float Size { get; private set; } = 1f;
 
     /// <summary>カメラの視野角を取得する。</summary>
-    internal float Fov { get; private set; } = 35f;
+    public float Fov { get; private set; } = 35f;
 
     /// <summary>カメラ投影方式を取得する。</summary>
-    internal Camera3D.ProjectionType ProjectionType { get; private set; } = Camera3D.ProjectionType.Perspective;
+    public Camera3D.ProjectionType ProjectionType { get; private set; } = Camera3D.ProjectionType.Perspective;
 
     /// <summary>カメラのクリップ開始距離を取得する。</summary>
-    internal float Near { get; private set; } = 0.001f;
+    public float Near { get; private set; } = 0.001f;
 
     /// <summary>カメラのクリップ終了距離を取得する。</summary>
-    internal float Far { get; private set; } = 4000f;
+    public float Far { get; private set; } = 4000f;
 
     #endregion
 
@@ -128,7 +126,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 注視点位置を指定位置へ移動する。
     /// </summary>
-    internal void MovePositionTo(Vector3 position, bool useTween = false)
+    public void MovePositionTo(Vector3 position, bool useTween = false)
     {
         if (useTween)
         {
@@ -142,7 +140,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 注視点回転を指定回転へ変更する。
     /// </summary>
-    internal void MoveRotationTo(Quaternion rotation, bool useTween = false)
+    public void MoveRotationTo(Quaternion rotation, bool useTween = false)
     {
         if (useTween)
         {
@@ -156,7 +154,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// カメラ距離を設定する。
     /// </summary>
-    internal void SetDistance(float distance, bool useTween = false)
+    public void SetDistance(float distance, bool useTween = false)
     {
         if (useTween)
         {
@@ -170,7 +168,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 正投影サイズを設定する。
     /// </summary>
-    internal void SetSizeTo(float size, bool useTween = false)
+    public void SetSizeTo(float size, bool useTween = false)
     {
         if (useTween)
         {
@@ -184,7 +182,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 視野角を設定する。
     /// </summary>
-    internal void SetFov(float fov, bool useTween = false)
+    public void SetFov(float fov, bool useTween = false)
     {
         if (useTween)
         {
@@ -198,7 +196,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 投影方式を設定する。
     /// </summary>
-    internal void SetProjectionType(Camera3D.ProjectionType projectionType)
+    public void SetProjectionType(Camera3D.ProjectionType projectionType)
     {
         if (ProjectionType == projectionType)
         {
@@ -223,9 +221,9 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 注視点位置を相対移動する。
     /// </summary>
-    internal void Translate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
+    public void Translate(Vector3 translation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
     {
-        if (!ViewportCameraUtility.TryTranslate(Position, Rotation, translation, spaceMode, out Vector3 position))
+        if (!TryTranslate(Position, Rotation, translation, spaceMode, out Vector3 position))
         {
             return;
         }
@@ -236,12 +234,12 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 注視点回転を相対回転する。
     /// </summary>
-    internal void Rotate(Quaternion rotation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
+    public void Rotate(Quaternion rotation, SpaceMode spaceMode = SpaceMode.World, bool useTween = false)
     {
         float cameraDistance = ProjectionType == Camera3D.ProjectionType.Perspective
             ? Distance
-            : ViewportCameraUtility.GetPerspectiveDistance(Size, Fov);
-        if (!ViewportCameraUtility.TryRotate(
+            : GetPerspectiveDistance(Size, Fov);
+        if (!TryRotate(
             Position,
             Rotation,
             rotation,
@@ -264,10 +262,10 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 指数に応じて距離または正投影サイズを拡縮する。
     /// </summary>
-    internal void Zoom(float exponent, bool useTween = false)
+    public void Zoom(float exponent, bool useTween = false)
     {
         CameraSettings settings = Application.Setting.Current.Camera;
-        (float distance, float size) = ViewportCameraUtility.Zoom(
+        (float distance, float size) = CalculateZoomValues(
             exponent,
             settings.ZoomBase,
             settings.MinZoomValue,
@@ -286,7 +284,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 透視投影と正投影を切り替える。
     /// </summary>
-    internal void ToggleProjectionType()
+    public void ToggleProjectionType()
     {
         Camera3D.ProjectionType nextType = ProjectionType == Camera3D.ProjectionType.Perspective
             ? Camera3D.ProjectionType.Orthogonal
@@ -297,7 +295,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 対象ノード群が収まるようカメラを調整する。
     /// </summary>
-    internal void Fit(Node3D[] targetNodes, bool useTween = false)
+    public void Fit(Node3D[] targetNodes, bool useTween = false)
     {
         CameraSettings settings = Application.Setting.Current.Camera;
         if (!WorldAabbUtility.TryGetWorldAabb(targetNodes, out Aabb worldAabb))
@@ -327,7 +325,7 @@ public partial class ViewportCameraHub : BaseHub
         // 対象AABBをカメラ座標へ投影するため、対象Nodeが属するSubViewportの比率を使う。
         Rect2 viewportRect = targetViewport.GetVisibleRect();
         float aspect = Mathf.Max(viewportRect.Size.X / Mathf.Max(viewportRect.Size.Y, 1.0f), 0.01f);
-        float fitValue = ViewportCameraUtility.CalculateFitValue(
+        float fitValue = CalculateFitValue(
             worldAabb,
             Rotation,
             ProjectionType,
@@ -350,9 +348,9 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 指定法線方向からの視点へ揃える。
     /// </summary>
-    internal void AlignNormalTo(Vector3 normal, bool useTween = false)
+    public void AlignNormalTo(Vector3 normal, bool useTween = false)
     {
-        if (!ViewportCameraUtility.TryAlignNormal(Rotation, normal, out Quaternion targetRotation))
+        if (!TryAlignNormal(Rotation, normal, out Quaternion targetRotation))
         {
             return;
         }
@@ -360,10 +358,14 @@ public partial class ViewportCameraHub : BaseHub
         MoveRotationTo(targetRotation, useTween);
     }
 
+    #endregion
+
+    #region Helpers
+
     /// <summary>
     /// 注視点位置を即時に更新して通知する。
     /// </summary>
-    internal void UpdatePosition(Vector3 value)
+    private void UpdatePosition(Vector3 value)
     {
         Position = value;
         EmitSignal(SignalName.PositionNotified);
@@ -372,7 +374,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 注視点回転を即時に更新して通知する。
     /// </summary>
-    internal void UpdateRotation(Quaternion value)
+    private void UpdateRotation(Quaternion value)
     {
         Rotation = new Basis(value).GetRotationQuaternion();
         EmitSignal(SignalName.RotationNotified);
@@ -381,7 +383,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// カメラ距離を即時に更新して通知する。
     /// </summary>
-    internal void UpdateDistance(float value)
+    private void UpdateDistance(float value)
     {
         Distance = value;
         EmitSignal(SignalName.DistanceNotified);
@@ -390,7 +392,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 正投影サイズを即時に更新して通知する。
     /// </summary>
-    internal void UpdateSize(float value)
+    private void UpdateSize(float value)
     {
         Size = value;
         EmitSignal(SignalName.SizeNotified);
@@ -399,7 +401,7 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 視野角を即時に更新して通知する。
     /// </summary>
-    internal void UpdateFov(float value)
+    private void UpdateFov(float value)
     {
         Fov = value;
         EmitSignal(SignalName.FovNotified);
@@ -408,15 +410,11 @@ public partial class ViewportCameraHub : BaseHub
     /// <summary>
     /// 投影方式を即時に更新して通知する。
     /// </summary>
-    internal void UpdateProjectionType(Camera3D.ProjectionType value)
+    private void UpdateProjectionType(Camera3D.ProjectionType value)
     {
         ProjectionType = value;
         EmitSignal(SignalName.ProjectionTypeNotified);
     }
-
-    #endregion
-
-    #region Helpers
 
     /// <summary>
     /// 注視点位置をTweenで更新する。
@@ -488,7 +486,7 @@ public partial class ViewportCameraHub : BaseHub
     /// </summary>
     private float GetPerspectiveDistanceFromOrthographicSize()
     {
-        return ViewportCameraUtility.GetPerspectiveDistance(Size, Fov);
+        return GetPerspectiveDistance(Size, Fov);
     }
 
     /// <summary>
@@ -496,7 +494,186 @@ public partial class ViewportCameraHub : BaseHub
     /// </summary>
     private float GetOrthographicSizeFromPerspectiveDistance()
     {
-        return ViewportCameraUtility.GetOrthographicSize(Distance, Fov);
+        return GetOrthographicSize(Distance, Fov);
+    }
+
+    /// <summary>
+    /// 指定座標系で平行移動した注視点位置を計算する。
+    /// </summary>
+    private static bool TryTranslate(
+        Vector3 position,
+        Quaternion rotation,
+        Vector3 translation,
+        SpaceMode spaceMode,
+        out Vector3 targetPosition)
+    {
+        targetPosition = spaceMode switch
+        {
+            SpaceMode.World => position + translation,
+            SpaceMode.FocalPoint or SpaceMode.Camera => position + new Basis(rotation) * translation,
+            _ => default
+        };
+        return spaceMode is SpaceMode.World or SpaceMode.FocalPoint or SpaceMode.Camera;
+    }
+
+    /// <summary>
+    /// 指定座標系で回転した姿勢と、カメラ位置を維持する注視点位置を計算する。
+    /// </summary>
+    private static bool TryRotate(
+        Vector3 position,
+        Quaternion currentRotation,
+        Quaternion rotation,
+        SpaceMode spaceMode,
+        float cameraDistance,
+        out Quaternion targetRotation,
+        out Vector3 targetPosition)
+    {
+        targetRotation = currentRotation;
+        targetPosition = position;
+        switch (spaceMode)
+        {
+            case SpaceMode.World:
+                targetRotation = rotation * currentRotation;
+                return true;
+            case SpaceMode.FocalPoint:
+                targetRotation = currentRotation * rotation;
+                return true;
+            case SpaceMode.Camera:
+                targetRotation = currentRotation * rotation;
+                Vector3 distance = new Vector3(0, 0, cameraDistance);
+                Vector3 cameraPosition = position + currentRotation * distance;
+                targetPosition = cameraPosition - targetRotation * distance;
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>
+    /// 投影方式とズーム指数から距離または正投影サイズを計算する。
+    /// </summary>
+    private static (float Distance, float Size) CalculateZoomValues(
+        float exponent,
+        float zoomBase,
+        float minZoomValue,
+        Camera3D.ProjectionType projectionType,
+        float currentDistance,
+        float currentSize)
+    {
+        float scale = Mathf.Pow(zoomBase, exponent);
+        return projectionType == Camera3D.ProjectionType.Orthogonal
+            ? (currentDistance, Mathf.Max(currentSize * scale, minZoomValue))
+            : (Mathf.Max(currentDistance * scale, minZoomValue), currentSize);
+    }
+
+    /// <summary>
+    /// 正投影サイズから同じ見かけの透視投影距離を計算する。
+    /// </summary>
+    private static float GetPerspectiveDistance(float orthographicSize, float fov)
+    {
+        return orthographicSize / CalculateSizeAtZ1(fov);
+    }
+
+    /// <summary>
+    /// 透視投影距離から同じ見かけの正投影サイズを計算する。
+    /// </summary>
+    private static float GetOrthographicSize(float perspectiveDistance, float fov)
+    {
+        return Mathf.Abs(perspectiveDistance) * CalculateSizeAtZ1(fov);
+    }
+
+    /// <summary>
+    /// 対象AABBが画角内に収まる距離または正投影サイズを計算する。
+    /// </summary>
+    private static float CalculateFitValue(
+        Aabb worldAabb,
+        Quaternion cameraRotation,
+        Camera3D.ProjectionType projectionType,
+        float fov,
+        float aspect,
+        float near,
+        float fitPadding,
+        float minZoomValue)
+    {
+        Vector3 center = worldAabb.Position + worldAabb.Size * 0.5f;
+        Basis inverseBasis = new Basis(cameraRotation).Inverse();
+        if (projectionType == Camera3D.ProjectionType.Perspective)
+        {
+            float halfVerticalFov = Mathf.DegToRad(fov) * 0.5f;
+            float tanHalfY = Mathf.Max(Mathf.Tan(halfVerticalFov), 1e-5f);
+            float tanHalfX = Mathf.Max(tanHalfY * aspect, 1e-5f);
+            float maxZ = float.NegativeInfinity;
+            float requiredDistance = 0f;
+
+            // AABBの各頂点をカメラ座標へ移し、水平・垂直画角を満たす距離を求める。
+            foreach (Vector3 corner in WorldAabbUtility.GetAabbCorners(worldAabb))
+            {
+                Vector3 local = inverseBasis * (corner - center);
+                requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.X) / tanHalfX);
+                requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.Y) / tanHalfY);
+                maxZ = Mathf.Max(maxZ, local.Z);
+            }
+
+            requiredDistance = Mathf.Max(requiredDistance, maxZ + near * 1.5f);
+            return Mathf.Max(requiredDistance * fitPadding, minZoomValue);
+        }
+
+        float maxAbsX = 0f;
+        float maxAbsY = 0f;
+        foreach (Vector3 corner in WorldAabbUtility.GetAabbCorners(worldAabb))
+        {
+            Vector3 local = inverseBasis * (corner - center);
+            maxAbsX = Mathf.Max(maxAbsX, Mathf.Abs(local.X));
+            maxAbsY = Mathf.Max(maxAbsY, Mathf.Abs(local.Y));
+        }
+
+        float requiredHeight = 2f * Mathf.Max(maxAbsY, maxAbsX / aspect);
+        return Mathf.Max(requiredHeight * fitPadding, minZoomValue);
+    }
+
+    /// <summary>
+    /// 法線方向へ向ける回転を計算し、法線が無効なら false を返す。
+    /// </summary>
+    private static bool TryAlignNormal(Quaternion currentRotation, Vector3 normal, out Quaternion rotation)
+    {
+        rotation = currentRotation;
+        if (normal.LengthSquared() < Mathf.Epsilon)
+        {
+            return false;
+        }
+
+        Basis currentBasis = new Basis(currentRotation);
+        Vector3 targetBack = normal.Normalized();
+        Vector3 currentUp = currentBasis.Y.Normalized();
+        Vector3 projectedUp = currentUp - targetBack * currentUp.Dot(targetBack);
+        if (projectedUp.LengthSquared() < Mathf.Epsilon)
+        {
+            Vector3 currentRight = currentBasis.X.Normalized();
+            Vector3 projectedRight = currentRight - targetBack * currentRight.Dot(targetBack);
+            if (projectedRight.LengthSquared() < Mathf.Epsilon)
+            {
+                // 上方向が法線と平行な場合も姿勢を定義できるよう、別の基準軸を使う。
+                projectedRight = Mathf.Abs(targetBack.Dot(Vector3.Up)) < 0.999f
+                    ? Vector3.Up.Cross(targetBack)
+                    : Vector3.Right.Cross(targetBack);
+            }
+
+            projectedUp = targetBack.Cross(projectedRight.Normalized());
+        }
+
+        Vector3 up = projectedUp.Normalized();
+        Vector3 right = up.Cross(targetBack).Normalized();
+        up = targetBack.Cross(right).Normalized();
+        rotation = new Basis(right, up, targetBack).GetRotationQuaternion();
+        return true;
+    }
+
+    /// <summary>
+    /// 指定FOVにおけるカメラ距離1あたりの視野サイズを計算する。
+    /// </summary>
+    private static float CalculateSizeAtZ1(float fov)
+    {
+        return Mathf.Tan(Mathf.DegToRad(fov) / 2f) * 2f;
     }
 
     #endregion

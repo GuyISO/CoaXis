@@ -36,7 +36,7 @@ public static class ModelVisibilityResolver
             return false;
         }
 
-        foreach (ModelEntity ancestor in Application.Model.Entity.Registry.GetAncestorEntities(entity.Id))
+        foreach (ModelEntity ancestor in Application.Model.Entity.Registry.GetAncestors(entity.Id))
         {
             if (ancestor.Visibility == ModelVisibility.Visible)
             {

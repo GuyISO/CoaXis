@@ -215,7 +215,7 @@ public static class SceneAssetLoader
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     private static void AdvanceActiveLoadLocked()
     {

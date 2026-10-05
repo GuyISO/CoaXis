@@ -217,7 +217,7 @@ public static class PickUtility
     /// <returns>モデル情報を含む PickResult。対応する ModelNode が見つからない場合はヒットなしを返す</returns>
     public static PickResult PickByEntityId(Guid entityId)
     {
-        ModelNode modelNode = Application.Model.Entity.Registry.GetEntity(entityId)?.Node;
+        ModelNode modelNode = Application.Model.Entity.Registry.Get(entityId)?.Node;
         return PickByModel(modelNode);
     }
 
@@ -275,7 +275,7 @@ public static class PickUtility
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// コライダーの親階層から EntityId を取得する

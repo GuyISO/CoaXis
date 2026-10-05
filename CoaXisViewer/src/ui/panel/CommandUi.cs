@@ -176,7 +176,7 @@ public partial class CommandUi : PanelContainer
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// タイムラインツリー再構築を遅延キューへ積む

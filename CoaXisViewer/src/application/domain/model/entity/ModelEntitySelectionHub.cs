@@ -26,20 +26,20 @@ public partial class ModelEntitySelectionHub : BaseHub
     #region Fields
 
     /// <summary>選択中のEntity識別子集合。</summary>
-    private readonly HashSet<Guid> _ids = new();
+    private readonly HashSet<Guid> _selectedIds = new();
 
     #endregion
 
     #region Properties
 
     /// <summary>現在の選択モードを取得する。</summary>
-    internal ModelEntitySelectionMode Mode { get; private set; } = ModelEntitySelectionMode.Set;
+    public ModelEntitySelectionMode Mode { get; private set; } = ModelEntitySelectionMode.Set;
 
     /// <summary>現在の選択実体IDのコレクションの複製を取得する。</summary>
-    internal IReadOnlyCollection<Guid> EntityIds => _ids.ToList().AsReadOnly();
+    public IReadOnlyCollection<Guid> SelectedIds => _selectedIds.ToList().AsReadOnly();
 
     /// <summary>現在の選択モデル実体の数を取得する。</summary>
-    internal int Count => _ids.Count;
+    public int Count => _selectedIds.Count;
 
     #endregion
 
@@ -50,24 +50,9 @@ public partial class ModelEntitySelectionHub : BaseHub
 
     /// <summary>Entityの選択状態の変更通知。選択有無は Contains で参照する。</summary>
     [Signal] public delegate void SelectedEventHandler(string entityId);
-    /// <summary>
-    /// モデルの選択状態の通知を行う。
-    /// </summary>
-    /// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
-    private void NotifySelected(Guid entityId)
-    {
-        EmitSignal(SignalName.Selected, entityId.ToString());
-    }
 
     /// <summary>選択クリアの通知。</summary>
-    [Signal] public delegate void ClearedNotifiedEventHandler();
-    /// <summary>
-    /// 選択がクリアされたことを通知する。
-    /// </summary>
-    private void NotifyCleared()
-    {
-        EmitSignal(SignalName.ClearedNotified);
-    }
+    [Signal] public delegate void ClearedEventHandler();
 
     #endregion
 
@@ -222,7 +207,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// 選択モードを設定する。
     /// </summary>
     /// <param name="mode">設定する選択モード</param>
-    internal void SetMode(ModelEntitySelectionMode mode)
+    public void SetMode(ModelEntitySelectionMode mode)
     {
         if (Mode != mode)
         {
@@ -238,10 +223,10 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// </summary>
     /// <returns>選択中のモデルノード配列</returns>
     /// <remarks>選択モデルへのFit処理などに利用</remarks>
-    internal Node3D[] GetModelNodeArray()
+    public Node3D[] GetModelNodeArray()
     {
-        return EntityIds
-            .Select(entityId => Application.Model.Entity.Registry.GetEntity(entityId)?.Node)
+        return SelectedIds
+            .Select(entityId => Application.Model.Entity.Registry.Get(entityId)?.Node)
             .Where(node => node != null)
             .Cast<Node3D>()
             .ToArray();
@@ -252,13 +237,13 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// </summary>
     /// <param name="entityId">確認する実体ID</param>
     /// <returns>実体が選択されている場合はtrue、それ以外の場合はfalseを返す</returns>
-    internal bool Contains(Guid entityId) => entityId != Guid.Empty && _ids.Contains(entityId);
+    public bool Contains(Guid entityId) => entityId != Guid.Empty && _selectedIds.Contains(entityId);
 
     /// <summary>
     /// 指定した実体のみの選択状態にする、既存の選択はすべて解除される。
     /// </summary>
     /// <param name="entityId">選択する実体ID</param>
-    internal void Set(Guid entityId)
+    public void Set(Guid entityId)
     {
         Clear();
         Add(entityId);
@@ -268,7 +253,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// 指定した実体群のみの選択状態にする、既存の選択はすべて解除される。
     /// </summary>
     /// <param name="entityIds">選択する実体IDの配列</param>
-    internal void Set(Guid[] entityIds)
+    public void Set(Guid[] entityIds)
     {
         Clear();
         foreach (Guid entityId in entityIds)
@@ -283,16 +268,16 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="entityId">選択する実体ID</param>
     /// <returns>実体が新たに選択された場合はtrue、それ以外の場合はfalseを返す</returns>
     /// <remarks>実体がすでに選択されている場合は何も起こらない</remarks>
-    internal bool Add(Guid entityId)
+    public bool Add(Guid entityId)
     {
         if (entityId == Guid.Empty)
         {
             return false;
         }
 
-        if (_ids.Add(entityId))
+        if (_selectedIds.Add(entityId))
         {
-            NotifySelected(entityId);
+            EmitSignal(SignalName.Selected, entityId.ToString());
             Application.Log.Info($"Selected: {entityId}");
             return true;
         }
@@ -303,7 +288,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// 指定した実体群を選択対象に追加する。
     /// </summary>
     /// <param name="entityIds">選択する実体IDの配列</param>
-    internal void Add(Guid[] entityIds)
+    public void Add(Guid[] entityIds)
     {
         foreach (Guid entityId in entityIds)
         {
@@ -317,21 +302,21 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="entityId">選択から外す実体ID</param>
     /// <returns>実体が選択から外された場合はtrue、それ以外の場合はfalseを返す</returns>
     /// <remarks>実体が選択されていない場合は何も起こらない</remarks>
-    internal bool Remove(Guid entityId)
+    public bool Remove(Guid entityId)
     {
         if (entityId == Guid.Empty)
         {
             return false;
         }
 
-        if (_ids.Remove(entityId))
+        if (_selectedIds.Remove(entityId))
         {
-            NotifySelected(entityId);
+            EmitSignal(SignalName.Selected, entityId.ToString());
             Application.Log.Info($"Deselected: {entityId}");
             // 選択状態の実体がなくなった場合、クリア通知も行う
-            if (_ids.Count == 0)
+            if (_selectedIds.Count == 0)
             {
-                NotifyCleared();
+                EmitSignal(SignalName.Cleared);
             }
             return true;
         }
@@ -342,7 +327,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// 指定した実体群を選択対象から外す。
     /// </summary>
     /// <param name="entityIds">選択対象から外す実体IDの配列</param>
-    internal void Remove(Guid[] entityIds)
+    public void Remove(Guid[] entityIds)
     {
         foreach (Guid entityId in entityIds)
         {
@@ -354,9 +339,9 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// 指定した実体の選択状態を切り替える。
     /// </summary>
     /// <param name="entityId">切り替える実体ID</param>
-    internal void Toggle(Guid entityId)
+    public void Toggle(Guid entityId)
     {
-        if (_ids.Contains(entityId))
+        if (_selectedIds.Contains(entityId))
         {
             Remove(entityId);
         }
@@ -370,7 +355,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// 指定した実体群の選択状態を切り替える。
     /// </summary>
     /// <param name="entityIds">切り替える実体IDの配列</param>
-    internal void Toggle(Guid[] entityIds)
+    public void Toggle(Guid[] entityIds)
     {
         // 切り替える実体がない場合は何もしない
         if (entityIds == null || entityIds.Length == 0)
@@ -388,26 +373,26 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// すべての選択を解除する。
     /// </summary>
     /// <returns>選択状態が変更された場合はtrue、それ以外の場合はfalseを返す</returns>
-    internal bool Clear()
+    public bool Clear()
     {
-        if (_ids.Count == 0)
+        if (_selectedIds.Count == 0)
         {
             return false;
         }
 
-        Guid[] entityIdsToDeselect = _ids.ToArray();
+        Guid[] entityIdsToDeselect = _selectedIds.ToArray();
 
         // 先にクリアしてからシグナル発報することで、シグナルハンドラ内で選択状態確認した際の整合性を保つ
-        _ids.Clear();
+        _selectedIds.Clear();
 
         // 実体の選択解除シグナルとハイライト解除は個々に行う
         foreach (Guid entityId in entityIdsToDeselect)
         {
-            NotifySelected(entityId);
+            EmitSignal(SignalName.Selected, entityId.ToString());
             Application.Log.Info($"Deselected: {entityId}");
         }
 
-        NotifyCleared();
+        EmitSignal(SignalName.Cleared);
         return true;
     }
 

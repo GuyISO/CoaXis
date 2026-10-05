@@ -112,7 +112,7 @@ public partial class UiWindow : Window
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// ウィンドウサイズを子コンテナの最小サイズに合わせて調整し、コンテンツに適したサイズで表示できるようにする

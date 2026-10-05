@@ -12,7 +12,7 @@ namespace CoaXis.IpcTester;
 /// <summary>
 /// 入力ファイルを読み込み、LoadModel要求とViewerの応答を表示する。
 /// </summary>
-internal sealed class MainForm : Form
+public sealed class MainForm : Form
 {
     private readonly TextBox _pipeName = new() { Text = "CoaXisViewerPipe", Width = 220 };
     private readonly TextBox _entityPath = new() { ReadOnly = true, Dock = DockStyle.Fill };

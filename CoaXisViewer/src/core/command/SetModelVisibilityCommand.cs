@@ -50,7 +50,7 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
 
     #endregion
 
-    #region Public Methods
+    #region public Methods
 
     /// <summary>
     /// コマンドを実行する
@@ -96,12 +96,12 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
 
     private static ModelEntity ResolveModelEntity(Guid entityId)
     {
-        return entityId == Guid.Empty ? null : Application.Model.Entity.Registry.GetEntity(entityId);
+        return entityId == Guid.Empty ? null : Application.Model.Entity.Registry.Get(entityId);
     }
 
     private static void NotifyEffectiveVisibilityStates()
     {
-        foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Entities.Values)
+        foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Items.Values)
         {
             if (modelEntity.Node != null && GodotObject.IsInstanceValid(modelEntity.Node))
             {

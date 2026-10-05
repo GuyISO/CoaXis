@@ -25,7 +25,7 @@ public partial class ModelEntityStateHub : BaseHub
 	/// 配置位置の変更を通知する。
 	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	internal void NotifyPosition(Guid entityId)
+	public void NotifyPosition(Guid entityId)
 	{
 		EmitSignal(SignalName.PositionNotified, entityId.ToString());
 	}
@@ -37,7 +37,7 @@ public partial class ModelEntityStateHub : BaseHub
 	/// 回転の変更を通知する。
 	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	internal void NotifyRotation(Guid entityId)
+	public void NotifyRotation(Guid entityId)
 	{
 		EmitSignal(SignalName.RotationNotified, entityId.ToString());
 	}
@@ -49,7 +49,7 @@ public partial class ModelEntityStateHub : BaseHub
 	/// 表示設定の変更を通知する。
 	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	internal void NotifyVisibility(Guid entityId)
+	public void NotifyVisibility(Guid entityId)
 	{
 		EmitSignal(SignalName.VisibilityNotified, entityId.ToString());
 	}
@@ -65,7 +65,7 @@ public partial class ModelEntityStateHub : BaseHub
 	/// ロード状態の変更を通知する。
 	/// </summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	internal void NotifyStatus(Guid entityId)
+	public void NotifyStatus(Guid entityId)
 	{
 		EmitSignal(SignalName.StatusNotified, entityId.ToString());
 	}
@@ -75,7 +75,7 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>
 	/// 透明度の変更を通知する。
 	/// </summary>
-	internal void NotifyTransparency()
+	public void NotifyTransparency()
 	{
 		EmitSignal(SignalName.TransparencyNotified);
 	}
@@ -85,7 +85,7 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>
 	/// モデルレジストリがクリアされたことを通知する。
 	/// </summary>
-	internal void NotifyRegistryCleared()
+	public void NotifyRegistryCleared()
 	{
 		EmitSignal(SignalName.RegistryCleared);
 	}
@@ -106,9 +106,9 @@ public partial class ModelEntityStateHub : BaseHub
 	/// モデルの表示/非表示を切り替える。
 	/// </summary>
 	/// <param name="entityId">切替対象の ModelEntity の識別子</param>
-	internal void ToggleModelVisibility(Guid entityId)
+	public void ToggleModelVisibility(Guid entityId)
 	{
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelEntityStateHub: toggle target not found. entityId='{entityId}'");
@@ -126,9 +126,9 @@ public partial class ModelEntityStateHub : BaseHub
 	/// </summary>
 	/// <param name="entityId">対象 ModelEntity の識別子</param>
 	/// <param name="isCollapsed">折り畳む場合は true、展開する場合は false</param>
-	internal void SetCollapsed(Guid entityId, bool isCollapsed)
+	public void SetCollapsed(Guid entityId, bool isCollapsed)
 	{
-		ModelEntity modelEntity = Application.Model.Entity.Registry.GetEntity(entityId);
+		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
 		if (modelEntity == null)
 		{
 			Application.Log.Warn($"ModelEntityStateHub: collapse target not found. entityId='{entityId}'");

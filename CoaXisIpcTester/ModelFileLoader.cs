@@ -11,7 +11,7 @@ namespace CoaXis.IpcTester;
 /// <summary>
 /// テスターで選択されたJSON/CSVファイルをViewer Protocol DTOへ変換する。
 /// </summary>
-internal static class ModelFileLoader
+public static class ModelFileLoader
 {
     /// <summary>
     /// JSONまたはCSVからモデル実体一覧を読み込む。

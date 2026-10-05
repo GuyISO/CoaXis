@@ -15,7 +15,7 @@ public abstract partial class BaseCommand : RefCounted
 
     #endregion
 
-    #region Public Methods
+    #region public Methods
 
     /// <summary>
     /// コマンドを実行する
@@ -29,7 +29,7 @@ public abstract partial class BaseCommand : RefCounted
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     protected void LogDo(string detail = "")
     {

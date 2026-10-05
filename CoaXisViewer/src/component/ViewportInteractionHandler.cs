@@ -127,7 +127,7 @@ public partial class ViewportInteractionHandler : SubViewport
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 入力モードが None のときのマウス入力を処理する

@@ -56,7 +56,7 @@ public partial class ModelEntityMenu : BaseMenu
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	// NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る
 	private void HandleFitMenuItemPressed(Variant tag)
@@ -99,7 +99,7 @@ public partial class ModelEntityMenu : BaseMenu
 			return null;
 		}
 
-		return Application.Model.Entity.Registry.GetEntity(_targetEntityId)?.Node;
+		return Application.Model.Entity.Registry.Get(_targetEntityId)?.Node;
 	}
 
 	#endregion

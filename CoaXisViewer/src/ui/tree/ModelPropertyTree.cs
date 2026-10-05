@@ -66,7 +66,7 @@ public partial class ModelPropertyTree : Tree
 		Clear();
 		_rootItem = null;
 
-		ModelEntity entity = Application.Model.Entity.Registry.GetEntity(_entityId);
+		ModelEntity entity = Application.Model.Entity.Registry.Get(_entityId);
 		if (entity == null)
 		{
 			return;
@@ -85,7 +85,7 @@ public partial class ModelPropertyTree : Tree
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	/// <summary>
 	/// ModelProperty とその子プロパティをツリーへ追加する

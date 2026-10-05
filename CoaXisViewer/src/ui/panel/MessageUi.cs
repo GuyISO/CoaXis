@@ -88,7 +88,7 @@ public partial class MessageUi : PanelContainer
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 1行ログを画面へ追加する

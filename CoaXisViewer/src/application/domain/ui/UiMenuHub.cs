@@ -41,7 +41,7 @@ public partial class UiMenuHub : BaseHub
     /// 指定した ModelEntity を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="entityId">操作対象とする ModelEntity の識別子</param>
-    internal void ShowModelEntityMenu(Guid entityId)
+    public void ShowModelEntityMenu(Guid entityId)
     {
         _modelEntityMenu = EnsureMenu(_modelEntityMenu, "ModelEntityMenu");
         _modelEntityMenu.ShowForEntity(entityId);
@@ -51,7 +51,7 @@ public partial class UiMenuHub : BaseHub
     /// 指定した ModelProperty の値を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="value">操作対象とするプロパティ値</param>
-    internal void ShowModelPropertyMenu(string value)
+    public void ShowModelPropertyMenu(string value)
     {
         _modelPropertyMenu = EnsureMenu(_modelPropertyMenu, "ModelPropertyMenu");
         _modelPropertyMenu.ShowForValue(value);
@@ -61,7 +61,7 @@ public partial class UiMenuHub : BaseHub
     /// 指定した PickResult を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="pickResult">操作対象とする PickResult</param>
-    internal void ShowPickResultMenu(PickResult pickResult)
+    public void ShowPickResultMenu(PickResult pickResult)
     {
         _pickResultMenu = EnsureMenu(_pickResultMenu, "PickResultMenu");
         _pickResultMenu.ShowForPickResult(pickResult);
@@ -70,7 +70,7 @@ public partial class UiMenuHub : BaseHub
     /// <summary>
     /// AxisNavigator を対象にコンテキストメニューを表示する。
     /// </summary>
-    internal void ShowAxisNavigatorMenu()
+    public void ShowAxisNavigatorMenu()
     {
         _axisNavigatorMenu = EnsureMenu(_axisNavigatorMenu, "AxisNavigatorMenu");
         _axisNavigatorMenu.ShowAtPosition();

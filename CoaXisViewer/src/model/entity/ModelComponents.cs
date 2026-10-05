@@ -186,7 +186,7 @@ public partial class ModelComponents : Node3D
 
     #endregion
 
-    #region Internal Helpers
+    #region Helpers
 
     /// <summary>
     /// 派生クラス固有の内部構造を初期化する

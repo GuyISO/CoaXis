@@ -171,7 +171,7 @@ public partial class ViewportOverlay : Control
 
 	#endregion
 
-	#region Internal Helpers
+	#region Helpers
 
 	/// <summary>
 	/// アークボールの補助表示の円を描画する、円は指定した半径に基づいて構成する

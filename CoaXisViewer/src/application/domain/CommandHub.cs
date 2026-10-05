@@ -17,10 +17,10 @@ public partial class CommandHub : BaseHub
 	#region Properties
 
 	/// <summary>コマンド履歴の配列を取得する。</summary>
-	internal BaseCommand[] History => _history.ToArray();
+	public BaseCommand[] History => _history.ToArray();
 
 	/// <summary>現在のカーソル位置。</summary>
-	internal int Cursor { get; private set; } = 0;
+	public int Cursor { get; private set; } = 0;
 
 	#endregion
 
@@ -28,13 +28,6 @@ public partial class CommandHub : BaseHub
 
 	/// <summary>コマンド実行の完了通知。</summary>
 	[Signal] public delegate void ExecutedEventHandler();
-	/// <summary>
-	/// コマンドの実行を通知する。
-	/// </summary>
-	internal void NotifyExecuted()
-	{
-		EmitSignal(SignalName.Executed);
-	}
 
 	#endregion
 
@@ -51,7 +44,7 @@ public partial class CommandHub : BaseHub
 	/// <summary>
 	/// コマンドを実行し、Undoスタックに積む。
 	/// </summary>
-	internal void Execute(BaseCommand command)
+	public void Execute(BaseCommand command)
 	{
 		if (command == null)
 		{
@@ -66,13 +59,13 @@ public partial class CommandHub : BaseHub
 		_history.Add(command);
 		Cursor++;
 		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={Cursor}");
-		NotifyExecuted();
+		EmitSignal(SignalName.Executed);
 	}
 
 	/// <summary>
 	/// Undo 実行。
 	/// </summary>
-	internal void Undo()
+	public void Undo()
 	{
 		if (Cursor <= 0)
 		{
@@ -85,13 +78,13 @@ public partial class CommandHub : BaseHub
 		cmd.Undo();
 		Cursor--;
 		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={Cursor}");
-		NotifyExecuted();
+		EmitSignal(SignalName.Executed);
 	}
 
 	/// <summary>
 	/// Redo 実行。
 	/// </summary>
-	internal void Redo()
+	public void Redo()
 	{
 		if (Cursor >= _history.Count)
 		{
@@ -104,25 +97,25 @@ public partial class CommandHub : BaseHub
 		cmd.Do();
 		Cursor++;
 		Application.Log.Debug($"CommandService State: history={_history.Count}, cursor={Cursor}");
-		NotifyExecuted();
+		EmitSignal(SignalName.Executed);
 	}
 
 	/// <summary>
 	/// スタックのクリア（シーン切り替え時など）。
 	/// </summary>
-	internal void Clear()
+	public void Clear()
 	{
 		Application.Log.Info($"CommandService Clear: history={_history.Count}, cursor={Cursor}");
 		_history.Clear();
 		Cursor = 0;
-		NotifyExecuted();
+		EmitSignal(SignalName.Executed);
 	}
 
 	/// <summary>
 	/// カーソル位置を指定してタイムトラベルする。
 	/// </summary>
 	/// <param name="cursor">移動先カーソル</param>
-	internal void SetCursor(int cursor)
+	public void SetCursor(int cursor)
 	{
 		int clampedCursor = Math.Clamp(cursor, 0, _history.Count);
 		if (clampedCursor == Cursor)

@@ -40,17 +40,10 @@ public partial class LogHub : BaseHub
     #region Signals
 
     /// <summary>ログ出力の通知。</summary>
-    [Signal] public delegate void LoggedEventHandler(int level, string message);
-    /// <summary>
-    /// ログの出力を通知する。
-    /// </summary>
     /// <param name="level">ログレベル</param>
     /// <param name="message">ログメッセージ</param>
-    private void NotifyLogged(int level, string message)
-    {
-        EmitSignal(SignalName.Logged, level, message);
-    }
-
+    [Signal] public delegate void LoggedEventHandler(int level, string message);
+    
     #endregion
 
     #region Lifecycle
@@ -83,7 +76,7 @@ public partial class LogHub : BaseHub
     /// </summary>
     /// <param name="level">ログレベル</param>
     /// <param name="message">ログメッセージ</param> 
-    internal void Log(LogLevel level, string message)
+    public void Log(LogLevel level, string message)
     {
         string line = $"{DateTime.Now:yyyy/MM/dd HH:mm:ss} [{level}] {message}";
 
@@ -105,32 +98,32 @@ public partial class LogHub : BaseHub
         }
 
         // Signalの発行
-        NotifyLogged((int)level, message);
+        EmitSignal(SignalName.Logged, (int)level, message);
     }
 
     /// <summary>
     /// デバッグレベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal void Debug(string msg) => Log(LogLevel.Debug, msg);
+    public void Debug(string msg) => Log(LogLevel.Debug, msg);
 
     /// <summary>
     /// 情報レベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal void Info(string msg) => Log(LogLevel.Info, msg);
+    public void Info(string msg) => Log(LogLevel.Info, msg);
 
     /// <summary>
     /// 警告レベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal void Warn(string msg) => Log(LogLevel.Warn, msg);
+    public void Warn(string msg) => Log(LogLevel.Warn, msg);
 
     /// <summary>
     /// エラーレベルのログを出力する。
     /// </summary>
     /// <param name="msg">ログメッセージ</param>
-    internal void Error(string msg) => Log(LogLevel.Error, msg);
+    public void Error(string msg) => Log(LogLevel.Error, msg);
 
     #endregion
 
