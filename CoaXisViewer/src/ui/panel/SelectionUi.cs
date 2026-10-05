@@ -233,7 +233,7 @@ public partial class SelectionUi : PanelContainer
         UpdateModeButtons(Application.Model.Entity.Selection.Mode);
 
         _selectedEntityIds.Clear();
-        IReadOnlyCollection<Guid> selectedEntityIds = Application.Model.Entity.Selection.EntityIds;
+        IReadOnlyCollection<Guid> selectedEntityIds = Application.Model.Entity.Selection.SelectedIds;
         if (selectedEntityIds != null && selectedEntityIds.Count > 0)
         {
             _selectedEntityIds.AddRange(selectedEntityIds);

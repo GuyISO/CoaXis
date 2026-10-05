@@ -31,6 +31,22 @@ public partial class ModelEntityLoadHub : BaseHub
 	#region Methods
 
 	/// <summary>
+	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する。
+	/// </summary>
+	/// <param name="modelEntity">初期化するモデル実体</param>
+	/// <exception cref="ArgumentNullException">modelEntityがnullの場合</exception>
+	public void MarkInitialized(ModelEntity modelEntity)
+	{
+		if (modelEntity == null)
+		{
+			throw new ArgumentNullException(nameof(modelEntity));
+		}
+
+		// Registry登録前の一時状態なので、状態通知は置換完了通知に任せる。
+		modelEntity.Status = ModelStatus.Initialized;
+	}
+
+	/// <summary>
 	/// 現在のモデル集合をクリアし、指定したDTOからモデル集合を再構築する。
 	/// </summary>
 	/// <param name="entityDtos">読み込むモデル実体DTOの集合</param>
@@ -42,6 +58,13 @@ public partial class ModelEntityLoadHub : BaseHub
 		return FromDtos(entityDtos);
 	}
 
+	/// <summary>
+	/// DTOからEntityを生成してRegistryへ登録し、シーン反映を開始する。
+	/// </summary>
+	/// <param name="entityDtos">読み込むモデル実体DTOの集合</param>
+	/// <returns>登録およびシーン反映を開始したModelEntityの一覧</returns>
+	/// <exception cref="ArgumentNullException">entityDtosがnullの場合</exception>
+	/// <exception cref="ArgumentException">DTOが不正、またはEntity階層に循環がある場合</exception>
 	public IReadOnlyList<ModelEntity> FromDtos(IReadOnlyList<ModelEntityDto> entityDtos)
 	{
 		if (entityDtos == null)
@@ -55,7 +78,7 @@ public partial class ModelEntityLoadHub : BaseHub
 		// 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
 		foreach (ModelEntity modelEntity in entities)
 		{
-			Application.Model.Entity.Scene.MarkInitialized(modelEntity);
+			MarkInitialized(modelEntity);
 			Application.Model.Entity.Registry.Register(modelEntity);
 		}
 		Application.Model.Entity.Registry.ResolveHierarchy();

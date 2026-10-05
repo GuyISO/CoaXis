@@ -549,7 +549,7 @@ public partial class ModelEntityTree : Tree
     private void RefreshAllHighlights()
     {
         HashSet<TreeItem> nextHighlightedItems = new();
-        foreach (Guid entityId in Application.Model.Entity.Selection.EntityIds)
+        foreach (Guid entityId in Application.Model.Entity.Selection.SelectedIds)
         {
             if (entityId == Guid.Empty)
             {

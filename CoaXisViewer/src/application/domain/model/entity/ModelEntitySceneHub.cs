@@ -45,21 +45,6 @@ public partial class ModelEntitySceneHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する。
-	/// </summary>
-	/// <param name="modelEntity">初期化するモデル実体</param>
-	/// <exception cref="ArgumentNullException">modelEntityがnullの場合</exception>
-	public void MarkInitialized(ModelEntity modelEntity)
-	{
-		if (modelEntity == null)
-		{
-			throw new ArgumentNullException(nameof(modelEntity));
-		}
-
-		UpdateModelStatus(modelEntity, ModelStatus.Initialized);
-	}
-
-	/// <summary>
 	/// モデル集合のシーンロードを準備する。
 	/// </summary>
 	/// <param name="modelEntities">シーンロード対象のモデル集合</param>
