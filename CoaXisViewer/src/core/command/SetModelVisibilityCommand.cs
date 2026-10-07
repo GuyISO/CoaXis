@@ -1,7 +1,6 @@
 // TODO: リファクタリング確認後に削除
 using Godot;
 using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// ModelNode の表示状態を変更する Undo/Redo 対応コマンド、バッチで複数モデルの表示状態を変更することも可能
@@ -58,7 +57,6 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
     /// </summary>
     public override void Do()
     {
-        var changedEntityIds = new HashSet<Guid>();
         for (int i = 0; i < _entityIds.Length; i++)
         {
             ModelEntity modelEntity = ResolveModelEntity(_entityIds[i]);
@@ -74,11 +72,8 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
             }
 
             modelEntity.Visibility = _nextVisibility;
-            changedEntityIds.Add(modelEntity.Id);
             LogDo($"model='{modelEntity.Node.Name}', visibility={_nextVisibility}");
         }
-
-        NotifyAffectedVisibilityStates(changedEntityIds);
     }
 
     /// <summary>
@@ -86,7 +81,6 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
     /// </summary>
     public override void Undo()
     {
-        var changedEntityIds = new HashSet<Guid>();
         for (int i = 0; i < _entityIds.Length; i++)
         {
             ModelEntity modelEntity = ResolveModelEntity(_entityIds[i]);
@@ -102,37 +96,13 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
             }
 
             modelEntity.Visibility = _previousVisibilities[i];
-            changedEntityIds.Add(modelEntity.Id);
             LogUndo($"model='{modelEntity.Node.Name}', visibility={_previousVisibilities[i]}");
         }
-
-        NotifyAffectedVisibilityStates(changedEntityIds);
     }
 
     private static ModelEntity ResolveModelEntity(Guid entityId)
     {
         return entityId == Guid.Empty ? null : Application.Model.Entity.Registry.Get(entityId);
-    }
-
-    private static void NotifyAffectedVisibilityStates(HashSet<Guid> changedEntityIds)
-    {
-        var affectedEntityIds = new HashSet<Guid>();
-        foreach (Guid entityId in changedEntityIds)
-        {
-            foreach (ModelEntity descendant in Application.Model.Entity.Registry.GetDescendants(entityId))
-            {
-                if (descendant != null && !changedEntityIds.Contains(descendant.Id))
-                {
-                    affectedEntityIds.Add(descendant.Id);
-                }
-            }
-        }
-
-        foreach (Guid entityId in affectedEntityIds)
-        {
-            ModelEntity modelEntity = ResolveModelEntity(entityId);
-            modelEntity?.NotifyVisibilityChanged();
-        }
     }
 
     #endregion

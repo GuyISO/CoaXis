@@ -3,13 +3,8 @@
 [ext_resource type="PackedScene" uid="uid://xcbuelasn6jb" path="res://scenes/environments.tscn" id="1_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://dkq5ovq6ymdm" path="res://scenes/viewer/canvas.tscn" id="2_sugp2"]
 
-[sub_resource type="BoxMesh" id="BoxMesh_0wfyh"]
-
 [node name="Main" type="Node" unique_id=807387639]
 
 [node name="Environments" parent="." unique_id=732137435 instance=ExtResource("1_0wfyh")]
 
 [node name="Canvas" parent="." unique_id=1312684224 instance=ExtResource("2_sugp2")]
-
-[node name="MeshInstance3D" type="MeshInstance3D" parent="." unique_id=902065374]
-mesh = SubResource("BoxMesh_0wfyh")

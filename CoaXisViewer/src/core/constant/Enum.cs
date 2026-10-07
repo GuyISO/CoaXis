@@ -23,8 +23,10 @@ public enum ViewportLayer
     None = 0b_0000_0000_0000_0000_0000,
     Default = 0b_0000_0000_0000_0000_0001,
     AxisNavigator = 0b_0000_0000_0000_0000_0010,
-    Visible = 0b_0000_0000_0000_0000_0100,
-    Invisible = 0b_0000_0000_0000_0000_1000,
+    VisibleEntity = 0b_0000_0000_0000_0000_0100,
+    InvisibleEntity = 0b_0000_0000_0000_0000_1000,
+    VisibleProperty = 0b_0000_0000_0000_0001_0000,
+    InvisibleProperty = 0b_0000_0000_0000_0010_0000,
 }
 
 /// <summary>

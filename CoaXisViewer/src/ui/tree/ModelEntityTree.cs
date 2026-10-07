@@ -103,7 +103,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.Selected += OnModelEntitySelected;
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
         Application.Model.Entity.Registry.Registered += OnModelEntityRegistered;
-        Application.Model.Entity.Visual.IsVisibleNotified += OnModelEntityVisibilityResolved;
+        Application.Model.Entity.Visual.VisibilityResolved += OnModelEntityVisibilityResolved;
         Application.Model.Entity.State.Collapsed += OnModelEntityCollapsed;
         Application.Model.Entity.State.StatusNotified += OnModelEntityStatusNotified;
         Application.Model.Entity.Registry.Cleared += OnModelEntityRegistryCleared;
@@ -119,7 +119,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.Selected -= OnModelEntitySelected;
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
         Application.Model.Entity.Registry.Registered -= OnModelEntityRegistered;
-        Application.Model.Entity.Visual.IsVisibleNotified -= OnModelEntityVisibilityResolved;
+        Application.Model.Entity.Visual.VisibilityResolved -= OnModelEntityVisibilityResolved;
         Application.Model.Entity.State.StatusNotified -= OnModelEntityStatusNotified;
         Application.Model.Entity.State.Collapsed -= OnModelEntityCollapsed;
         Application.Model.Entity.Registry.Cleared -= OnModelEntityRegistryCleared;

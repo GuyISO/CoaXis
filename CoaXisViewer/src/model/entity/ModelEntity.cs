@@ -24,8 +24,6 @@ public class ModelEntity
     private bool _isCollapsed;
     /// <summary>モデルのロード状態</summary>
     private ModelStatus _status = ModelStatus.Unloaded;
-    /// <summary>Visibility設定と親階層から解決した実効表示状態</summary>
-    private bool _isVisible = true;
     /// <summary>この実体に対応する描画用ノード</summary>
     private ModelNode _node;
 
@@ -131,8 +129,8 @@ public class ModelEntity
     /// <summary>ModelEntityの現在状態を取得する。</summary>
     public ModelStatus Status => _status;
 
-    /// <summary>階層から解決した、このモデルが実際に表示される状態を取得する。</summary>
-    public bool IsVisible => _isVisible;
+    /// <summary>Visibility設定と親階層から導出した、このモデルの実効表示状態を取得する。</summary>
+    public bool IsVisible => ModelVisibilityResolver.ResolveIsVisible(this);
 
     /// <summary>この実体に対応する描画用ノード</summary>
     public ModelNode Node
@@ -263,13 +261,6 @@ public class ModelEntity
             ModelStatus.Loading,
             ModelStatus.Loaded,
             ModelStatus.LoadFailed);
-    }
-
-    /// <summary>VisualHubが解決した実効表示状態を更新する。</summary>
-    /// <param name="isVisible">親階層の設定を含めて実際に表示される場合はtrue</param>
-    internal void SetResolvedVisibility(bool isVisible)
-    {
-        _isVisible = isVisible;
     }
 
     /// <summary>

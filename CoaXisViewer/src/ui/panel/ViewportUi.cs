@@ -246,7 +246,7 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonLayerVisiblePressed()
     {
         Application.Viewport.Display.SetLayerActive(
-            (uint)ViewportLayer.Visible,
+            (uint)ViewportLayer.VisibleEntity,
             _buttonLayerVisible.ButtonPressed);
     }
 
@@ -256,7 +256,7 @@ public partial class ViewportUi : PanelContainer
     private void OnButtonLayerInvisiblePressed()
     {
         Application.Viewport.Display.SetLayerActive(
-            (uint)ViewportLayer.Invisible,
+            (uint)ViewportLayer.InvisibleEntity,
             _buttonLayerInvisible.ButtonPressed);
     }
 
@@ -342,8 +342,8 @@ public partial class ViewportUi : PanelContainer
     private void OnActiveLayersNotified()
     {
         uint activeLayers = Application.Viewport.Display.ActiveLayers;
-        _buttonLayerVisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.Visible) != 0;
-        _buttonLayerInvisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.Invisible) != 0;
+        _buttonLayerVisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.VisibleEntity) != 0;
+        _buttonLayerInvisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.InvisibleEntity) != 0;
     }
 
     #endregion

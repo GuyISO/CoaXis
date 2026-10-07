@@ -328,7 +328,7 @@
 
 - Date: 2026-10-07
 - Trigger: ModelEntity.Statusを許可されたライフサイクル順序に制限し、Visibility設定と実際の表示結果を区別する
-- Decision: Statusは読み取り専用にし、Unloaded→Initialized→Registered→Loading→LoadedまたはLoadFailed→Disposedの遷移を専用メソッドで制御する。ScenePathが空の場合はRegistered→Loaded、登録済み状態からの破棄遷移も許可し、それ以外は例外で拒否する。VisibilityはInheritを含む設定値、IsVisibleはVisualHubが階層から解決してModelEntityに記録する実効値とし、描画Layer反映もVisualHubに限定する
+- Decision: Statusは読み取り専用にし、Unloaded→Initialized→Registered→Loading→LoadedまたはLoadFailed→Disposedの遷移を専用メソッドで制御する。ScenePathが空の場合はRegistered→Loaded、登録済み状態からの破棄遷移も許可し、それ以外は例外で拒否する。VisibilityはInheritを含む設定値、IsVisibleは設定値と親階層から導出する読み取り専用値とし、解決値をキャッシュしない。Visibility設定変更時はVisualHubが対象と子孫を再解決し、Layer反映後に解決完了通知を発行する
 - Scope: CoaXisViewerのModelEntity状態管理、Visibility解決、Tree表示
 - Artifacts Updated:
   - `CoaXisViewer/src/model/entity/ModelEntity.cs`
@@ -338,7 +338,7 @@
   - `CoaXisViewer/src/ui/tree/ModelEntityTree.cs`
   - `docs/specification/specification_integrated.md`
   - `.github/instructions/design-philosophy.instructions.md`
-- Notes: Sceneロードの失敗・破棄中を含め、無効なStatus遷移を成功扱いで無視しない。VisualHubはIsVisibleNotified(entityId)で実効値の確定をUIへ伝え、Treeの表示アイコンはVisibility設定とIsVisibleを別々に参照する
+- Notes: Sceneロードの失敗・破棄中を含め、無効なStatus遷移を成功扱いで無視しない。VisualHubのVisibilityResolved(entityId)を購読するUIは、設定値と導出値をModelEntityから別々に参照する。コマンドは設定値だけを変更し、子孫の影響範囲解決を重複して実装しない
 
 ## 2026-10-04 Hubのregion構成統一
 - Policy: Application配下の全Hubを Fields/Properties/Signals/Lifecycle/Events/Methods/Helpers の共通7regionに統一（Signalsを上位に配置、Lifecycle以外の全メンバーにXMLコメント必須）

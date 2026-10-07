@@ -23,9 +23,9 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// <summary>モデルの透明度の変更通知。</summary>
 	[Signal] public delegate void TransparencyNotifiedEventHandler();
 
-	/// <summary>階層から実効表示IsVisibleを解決した通知。</summary>
-	/// <param name="entityId">解決したModelEntityの識別子</param>
-	[Signal] public delegate void IsVisibleNotifiedEventHandler(string entityId);
+	/// <summary>Visibility設定を受けて実効表示の再解決と描画反映が完了した通知。</summary>
+	/// <param name="entityId">解決・反映したModelEntityの識別子</param>
+	[Signal] public delegate void VisibilityResolvedEventHandler(string entityId);
 
 	#endregion
 
@@ -78,8 +78,7 @@ public partial class ModelEntityVisualHub : BaseHub
 		{
 			if (modelEntity.Id != RootModelEntity.RootEntityId)
 			{
-				ApplyVisibility(modelEntity);
-				EmitSignal(SignalName.IsVisibleNotified, modelEntity.Id.ToString());
+				ResolveAndApplyVisibility(modelEntity);
 			}
 		}
 	}
@@ -96,7 +95,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 
-		// 親子階層をまたぐ実効表示の解決とLayer切替はVisualHubに集約する。
+		// 設定変更の影響範囲をVisualHubが展開し、階層状態の再計算を一元化する。
 		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
 		if (modelEntity == null)
 		{
@@ -104,8 +103,11 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 		
-		ApplyVisibility(modelEntity);
-		EmitSignal(SignalName.IsVisibleNotified, modelEntity.Id.ToString());
+		ResolveAndApplyVisibility(modelEntity);
+		foreach (ModelEntity descendant in Application.Model.Entity.Registry.GetDescendants(modelEntity.Id))
+		{
+			ResolveAndApplyVisibility(descendant);
+		}
 	}
 
 	/// <summary>
@@ -130,8 +132,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 
-		ApplyVisibility(modelEntity);
-		EmitSignal(SignalName.IsVisibleNotified, modelEntity.Id.ToString());
+		ResolveAndApplyVisibility(modelEntity);
 
 		ModelNode modelNode = modelEntity.Node;
 		if (modelNode == null || !IsInstanceValid(modelNode))
@@ -196,21 +197,19 @@ public partial class ModelEntityVisualHub : BaseHub
 	#region Helpers
 
 	/// <summary>
-	/// ModelEntityの表示設定を階層から解決し、ModelNodeと配下の描画対象へLayerとして反映する。
+	/// ModelEntityの実効表示を導出し、描画Layerへ反映してUIへ通知する。
 	/// </summary>
-	private void ApplyVisibility(ModelEntity modelEntity)
+	private void ResolveAndApplyVisibility(ModelEntity modelEntity)
 	{
-		// Inheritを含む設定値の解決をResolverへ集約し、実効状態だけをEntityへ記録する。
-		bool isVisible = ModelVisibilityResolver.ResolveIsVisible(modelEntity);
-		modelEntity.SetResolvedVisibility(isVisible);
-
+		bool isVisible = modelEntity.IsVisible;
 		ModelNode modelNode = modelEntity.Node;
-		if (modelNode == null || !IsInstanceValid(modelNode))
+		if (modelNode != null && IsInstanceValid(modelNode))
 		{
-			return;
+			// 描画Layerは実効状態の投影であり、別の可視状態として読み戻さない。
+			modelNode.ApplyVisibilityLayer(isVisible);
 		}
 
-		modelNode.ApplyVisibilityLayer(modelEntity.IsVisible);
+		EmitSignal(SignalName.VisibilityResolved, modelEntity.Id.ToString());
 	}
 
 	/// <summary>

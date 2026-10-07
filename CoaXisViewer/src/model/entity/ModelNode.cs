@@ -107,7 +107,7 @@ public partial class ModelNode : Node3D
     /// </summary>
     public void ApplyVisibilityLayer(bool isVisible)
     {
-        uint layer = (uint)(isVisible ? ViewportLayer.Visible : ViewportLayer.Invisible);
+        uint layer = (uint)(isVisible ? ViewportLayer.VisibleEntity : ViewportLayer.InvisibleEntity);
         ApplyVisibilityLayerRecursive(this, layer);
     }
 

@@ -12,7 +12,7 @@ public partial class ViewportDisplayHub : BaseHub
     #region Properties
 
     /// <summary>有効なビューポートレイヤーのマスクを取得する。</summary>
-    public uint ActiveLayers { get; private set; } = (uint)ViewportLayer.Default | (uint)ViewportLayer.Visible;
+    public uint ActiveLayers { get; private set; } = (uint)ViewportLayer.Default | (uint)ViewportLayer.VisibleEntity | (uint)ViewportLayer.VisibleProperty;
 
     #endregion
 
