@@ -1,6 +1,7 @@
 // TODO: リファクタリング確認後に削除
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// ModelNode の表示状態を変更する Undo/Redo 対応コマンド、バッチで複数モデルの表示状態を変更することも可能
@@ -57,6 +58,7 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
     /// </summary>
     public override void Do()
     {
+        var changedEntityIds = new HashSet<Guid>();
         for (int i = 0; i < _entityIds.Length; i++)
         {
             ModelEntity modelEntity = ResolveModelEntity(_entityIds[i]);
@@ -66,11 +68,17 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
                 continue;
             }
 
+            if (modelEntity.Visibility == _nextVisibility)
+            {
+                continue;
+            }
+
             modelEntity.Visibility = _nextVisibility;
+            changedEntityIds.Add(modelEntity.Id);
             LogDo($"model='{modelEntity.Node.Name}', visibility={_nextVisibility}");
         }
 
-        NotifyEffectiveVisibilityStates();
+        NotifyAffectedVisibilityStates(changedEntityIds);
     }
 
     /// <summary>
@@ -78,6 +86,7 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
     /// </summary>
     public override void Undo()
     {
+        var changedEntityIds = new HashSet<Guid>();
         for (int i = 0; i < _entityIds.Length; i++)
         {
             ModelEntity modelEntity = ResolveModelEntity(_entityIds[i]);
@@ -87,11 +96,17 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
                 continue;
             }
 
+            if (modelEntity.Visibility == _previousVisibilities[i])
+            {
+                continue;
+            }
+
             modelEntity.Visibility = _previousVisibilities[i];
+            changedEntityIds.Add(modelEntity.Id);
             LogUndo($"model='{modelEntity.Node.Name}', visibility={_previousVisibilities[i]}");
         }
 
-        NotifyEffectiveVisibilityStates();
+        NotifyAffectedVisibilityStates(changedEntityIds);
     }
 
     private static ModelEntity ResolveModelEntity(Guid entityId)
@@ -99,14 +114,24 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
         return entityId == Guid.Empty ? null : Application.Model.Entity.Registry.Get(entityId);
     }
 
-    private static void NotifyEffectiveVisibilityStates()
+    private static void NotifyAffectedVisibilityStates(HashSet<Guid> changedEntityIds)
     {
-        foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Items.Values)
+        var affectedEntityIds = new HashSet<Guid>();
+        foreach (Guid entityId in changedEntityIds)
         {
-            if (modelEntity.Node != null && GodotObject.IsInstanceValid(modelEntity.Node))
+            foreach (ModelEntity descendant in Application.Model.Entity.Registry.GetDescendants(entityId))
             {
-                Application.Model.Entity.State.NotifyVisibility(modelEntity.Id);
+                if (descendant != null && !changedEntityIds.Contains(descendant.Id))
+                {
+                    affectedEntityIds.Add(descendant.Id);
+                }
             }
+        }
+
+        foreach (Guid entityId in affectedEntityIds)
+        {
+            ModelEntity modelEntity = ResolveModelEntity(entityId);
+            modelEntity?.NotifyVisibilityChanged();
         }
     }
 

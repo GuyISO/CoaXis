@@ -103,8 +103,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.Selected += OnModelEntitySelected;
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
         Application.Model.Entity.Registry.Registered += OnModelEntityRegistered;
-        Application.Model.Entity.Registry.Replaced += OnModelEntityRegistryReplaced;
-        Application.Model.Entity.State.VisibilityNotified += OnModelEntityVisibilityNotified;
+        Application.Model.Entity.Visual.IsVisibleNotified += OnModelEntityVisibilityResolved;
         Application.Model.Entity.State.Collapsed += OnModelEntityCollapsed;
         Application.Model.Entity.State.StatusNotified += OnModelEntityStatusNotified;
         Application.Model.Entity.Registry.Cleared += OnModelEntityRegistryCleared;
@@ -120,8 +119,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.Selected -= OnModelEntitySelected;
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
         Application.Model.Entity.Registry.Registered -= OnModelEntityRegistered;
-        Application.Model.Entity.Registry.Replaced -= OnModelEntityRegistryReplaced;
-        Application.Model.Entity.State.VisibilityNotified -= OnModelEntityVisibilityNotified;
+        Application.Model.Entity.Visual.IsVisibleNotified -= OnModelEntityVisibilityResolved;
         Application.Model.Entity.State.StatusNotified -= OnModelEntityStatusNotified;
         Application.Model.Entity.State.Collapsed -= OnModelEntityCollapsed;
         Application.Model.Entity.Registry.Cleared -= OnModelEntityRegistryCleared;
@@ -187,8 +185,16 @@ public partial class ModelEntityTree : Tree
         // 折り畳み/展開により「表示中の代替祖先」が変わりうるため、選択中モデル分のハイライトを全件見直して再描画する
         RefreshAllHighlights();
 
-        // モデルの折り畳み状態が変更されたことを通知
-        Application.Model.Entity.State.SetCollapsed(TryGetEntityId(item), item.IsCollapsed());
+        Guid entityId = TryGetEntityId(item);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
+        if (modelEntity == null)
+        {
+            Application.Log.Warn($"ModelEntityTree: collapsed target not found. entityId='{entityId}'");
+            return;
+        }
+
+        // TreeItemを正本にせず、ModelEntityのアクセサーから状態変更と通知を行う。
+        modelEntity.IsCollapsed = item.IsCollapsed();
     }
 
     /// <summary>
@@ -227,45 +233,9 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
-    /// モデルの追加がリクエストされたときのイベントハンドラ
-    /// </summary>
-    /// <param name="entityId">追加する子 ModelEntity の識別子</param>
-    private void OnModelEntityRegistered(string entityId)
-    {
-        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-        {
-            Application.Log.Warn($"ModelTree: failed to add entity. invalid child entityId='{entityId}'");
-            return;
-        }
-
-        ModelEntity addedEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
-        if (addedEntity == null)
-        {
-            return;
-        }
-
-        Guid parsedParentEntityId = addedEntity.ParentId;
-
-        if (parsedParentEntityId == Guid.Empty)
-        {
-            AddToTree(parsedEntityId, Guid.Empty);
-            return;
-        }
-
-        if (!Application.Model.Entity.Registry.IsRegistered(parsedParentEntityId) ||
-            !_entityIdToTreeItem.ContainsKey(parsedParentEntityId))
-        {
-            Application.Log.Warn($"ModelTree: parent TreeItem not found for added entity. entityId='{parsedEntityId}', parentEntityId='{parsedParentEntityId}'");
-            return;
-        }
-        
-        AddToTree(parsedEntityId, parsedParentEntityId);
-    }
-
-    /// <summary>
     /// モデル集合が置換されたとき、Registryの階層からツリーを再構築する
     /// </summary>
-    private void OnModelEntityRegistryReplaced()
+    private void OnModelEntityRegistered()
     {
         RebuildTreeFromRegistry();
     }
@@ -274,7 +244,7 @@ public partial class ModelEntityTree : Tree
     /// モデルの表示状態が通知されたときのイベントハンドラ
     /// </summary>
     /// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
-    private void OnModelEntityVisibilityNotified(string entityId)
+    private void OnModelEntityVisibilityResolved(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
@@ -291,12 +261,22 @@ public partial class ModelEntityTree : Tree
         TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
         if (treeItem != null)
         {
-            Texture2D buttonIcon = Application.Asset.Icon.GetVisibility(
-                modelEntity.Visibility,
-                ModelVisibilityResolver.IsVisible(modelEntity),
-                Constant.Ui.Tree.HierarchyVisibleIconSize);
-            treeItem.SetButton(0, 0, buttonIcon);
+            UpdateVisibilityButton(treeItem, modelEntity);
         }
+    }
+
+    /// <summary>
+    /// Visibility設定と解決済み実効表示を使って、TreeItemの表示ボタンを更新する。
+    /// </summary>
+    /// <param name="treeItem">表示ボタンを持つTreeItem</param>
+    /// <param name="modelEntity">表示状態の正本を持つModelEntity</param>
+    private static void UpdateVisibilityButton(TreeItem treeItem, ModelEntity modelEntity)
+    {
+        Texture2D buttonIcon = Application.Asset.Icon.GetVisibility(
+            modelEntity.Visibility,
+            modelEntity.IsVisible,
+            Constant.Ui.Tree.HierarchyVisibleIconSize);
+        treeItem.SetButton(0, 0, buttonIcon);
     }
 
     /// <summary>
@@ -342,7 +322,7 @@ public partial class ModelEntityTree : Tree
         {
             return;
         }
-
+        treeItem.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
         treeItem.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
     }
 
@@ -463,7 +443,7 @@ public partial class ModelEntityTree : Tree
         // --- 右側ボタン（表示切替・演出用） ---
         Texture2D btnIcon = Application.Asset.Icon.GetVisibility(
             modelEntity.Visibility,
-            ModelVisibilityResolver.IsVisible(modelEntity),
+            modelEntity.IsVisible,
             Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.AddButton(0, btnIcon, id: VisibilityButtonId);
 
@@ -745,8 +725,15 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        // モデル実体の表示状態を切り替える
-        Application.Model.Entity.State.ToggleModelVisibility(entityId);
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
+        if (modelEntity == null)
+        {
+            Application.Log.Warn($"ModelEntityTree: visibility target not found. entityId='{entityId}'");
+            return;
+        }
+
+        // 表示切替要求は対象ModelEntityへ直接渡し、変更と通知はEntityの状態アクセサーに集約する。
+        modelEntity.ToggleVisibility();
     }
 
     /// <summary>

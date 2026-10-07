@@ -1,9 +1,8 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
 /// <summary>
-/// モデルの論理状態の変更要求と変更通知を担当するハブ。
+/// ModelEntityが更新した論理状態の変更通知のみを担当するハブ。
 /// 通知は対象の entityId のみを運び、値は Registry 経由で ModelEntity から参照する。
 /// </summary>
 public partial class ModelEntityStateHub : BaseHub
@@ -21,38 +20,14 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルの配置位置の変更通知。値は ModelEntity.Position を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void PositionNotifiedEventHandler(string entityId);
-	/// <summary>
-	/// 配置位置の変更を通知する。
-	/// </summary>
-	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	public void NotifyPosition(Guid entityId)
-	{
-		EmitSignal(SignalName.PositionNotified, entityId.ToString());
-	}
 
 	/// <summary>モデルの回転の変更通知。値は ModelEntity.Rotation を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void RotationNotifiedEventHandler(string entityId);
-	/// <summary>
-	/// 回転の変更を通知する。
-	/// </summary>
-	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	public void NotifyRotation(Guid entityId)
-	{
-		EmitSignal(SignalName.RotationNotified, entityId.ToString());
-	}
 
 	/// <summary>モデルの表示設定の変更通知。値は ModelEntity.Visibility を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void VisibilityNotifiedEventHandler(string entityId);
-	/// <summary>
-	/// 表示設定の変更を通知する。
-	/// </summary>
-	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	public void NotifyVisibility(Guid entityId)
-	{
-		EmitSignal(SignalName.VisibilityNotified, entityId.ToString());
-	}
 
 	/// <summary>モデルツリーの折り畳み状態の変更通知。値は ModelEntity.IsCollapsed を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
@@ -61,34 +36,6 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <summary>モデルのロード状態の変更通知。値は ModelEntity.Status を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void StatusNotifiedEventHandler(string entityId);
-	/// <summary>
-	/// ロード状態の変更を通知する。
-	/// </summary>
-	/// <param name="entityId">変更された ModelEntity の識別子</param>
-	public void NotifyStatus(Guid entityId)
-	{
-		EmitSignal(SignalName.StatusNotified, entityId.ToString());
-	}
-
-	/// <summary>モデルの透明度の変更通知。値は ModelEntityVisualHub.Transparency を参照する。</summary>
-	[Signal] public delegate void TransparencyNotifiedEventHandler();
-	/// <summary>
-	/// 透明度の変更を通知する。
-	/// </summary>
-	public void NotifyTransparency()
-	{
-		EmitSignal(SignalName.TransparencyNotified);
-	}
-
-	/// <summary>Registryのクリア通知。</summary>
-	[Signal] public delegate void RegistryClearedEventHandler();
-	/// <summary>
-	/// モデルレジストリがクリアされたことを通知する。
-	/// </summary>
-	public void NotifyRegistryCleared()
-	{
-		EmitSignal(SignalName.RegistryCleared);
-	}
 
 	#endregion
 
@@ -103,63 +50,53 @@ public partial class ModelEntityStateHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// モデルの表示/非表示を切り替える。
+	/// 配置位置の変更を通知する。Fieldの変更に対して状態の反映はModelEntity自身が行うが、変更を周知するためにModelEntity自身から呼び出して使用する。
 	/// </summary>
-	/// <param name="entityId">切替対象の ModelEntity の識別子</param>
-	public void ToggleModelVisibility(Guid entityId)
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	public void NotifyPosition(Guid entityId)
 	{
-		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelEntityStateHub: toggle target not found. entityId='{entityId}'");
-			return;
-		}
-
-		var command = new SetModelVisibilityCommand(
-			[entityId],
-			GetNextVisibility(modelEntity.Visibility));
-		Application.Command.Execute(command);
+		EmitSignal(SignalName.PositionNotified, entityId.ToString());
 	}
 
 	/// <summary>
-	/// モデルの折り畳み状態を更新し、変更があった場合に通知する。
+	/// 回転の変更を通知する。Fieldの変更に対して状態の反映はModelEntity自身が行うが、変更を周知するためにModelEntity自身から呼び出して使用する。
 	/// </summary>
-	/// <param name="entityId">対象 ModelEntity の識別子</param>
-	/// <param name="isCollapsed">折り畳む場合は true、展開する場合は false</param>
-	public void SetCollapsed(Guid entityId, bool isCollapsed)
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	public void NotifyRotation(Guid entityId)
 	{
-		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelEntityStateHub: collapse target not found. entityId='{entityId}'");
-			return;
-		}
+		EmitSignal(SignalName.RotationNotified, entityId.ToString());
+	}
 
-		if (modelEntity.IsCollapsed == isCollapsed)
-		{
-			return;
-		}
+	/// <summary>
+	/// 表示設定の変更を通知する。Fieldの変更に対して状態の反映はModelEntity自身が行うが、変更を周知するためにModelEntity自身から呼び出して使用する。
+	/// </summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	public void NotifyVisibility(Guid entityId)
+	{
+		EmitSignal(SignalName.VisibilityNotified, entityId.ToString());
+	}
 
-		modelEntity.IsCollapsed = isCollapsed;
+	/// <summary>
+	/// ツリーの折り畳み状態の変更を通知する。Fieldの変更に対して状態の反映はModelEntity自身が行うが、変更を周知するためにModelEntity自身から呼び出して使用する。
+	/// </summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	public void NotifyCollapsed(Guid entityId)
+	{
 		EmitSignal(SignalName.Collapsed, entityId.ToString());
+	}
+
+	/// <summary>
+	/// ロード状態の変更を通知する。Fieldの変更に対して状態の反映はModelEntity自身が行うが、変更を周知するためにModelEntity自身から呼び出して使用する。
+	/// </summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	public void NotifyStatus(Guid entityId)
+	{
+		EmitSignal(SignalName.StatusNotified, entityId.ToString());
 	}
 
 	#endregion
 
 	#region Helpers
-
-	/// <summary>
-	/// 現在の表示設定から次の切替先を返す。
-	/// </summary>
-	private static ModelVisibility GetNextVisibility(ModelVisibility visibility)
-	{
-		return visibility switch
-		{
-			ModelVisibility.Inherit => ModelVisibility.Visible,
-			ModelVisibility.Visible => ModelVisibility.Invisible,
-			_ => ModelVisibility.Inherit,
-		};
-	}
 
 	#endregion
 }

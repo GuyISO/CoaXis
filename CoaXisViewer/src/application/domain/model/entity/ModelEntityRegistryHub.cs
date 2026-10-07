@@ -31,40 +31,11 @@ public partial class ModelEntityRegistryHub : BaseHub
 
     #region Signals
 
-    /// <summary>ModelEntity の追加通知。値は entityId から Registry を参照する。</summary>
-    /// <param name="entityId">追加された部分木ルートの識別子</param>
-    [Signal] public delegate void RegisteredEventHandler(string entityId);
-
-    /// <summary>
-    /// 登録済み部分木の追加を通知する。
-    /// </summary>
-    /// <param name="entityId">追加する部分木ルート ModelEntity の識別子</param>
-    public void NotifyRegistered(Guid entityId)
-    {
-        EmitSignal(SignalName.Registered, entityId.ToString());
-    }
-
-    /// <summary>モデル集合の置換通知。</summary>
-    [Signal] public delegate void ReplacedEventHandler();
-
-    /// <summary>
-    /// Registryのモデル集合が置換されたことを通知する。
-    /// </summary>
-    public void NotifyReplaced()
-    {
-        EmitSignal(SignalName.Replaced);
-    }
+    /// <summary>Registry に ModelEntity が追加されたことの通知。</summary>
+    [Signal] public delegate void RegisteredEventHandler();
 
     /// <summary>モデル集合のクリア通知。</summary>
     [Signal] public delegate void ClearedEventHandler();
-
-    /// <summary>
-    /// モデル集合全体がクリアされたことを通知する。
-    /// </summary>
-    public void NotifyCleared()
-    {
-        EmitSignal(SignalName.Cleared);
-    }
 
     #endregion
 
@@ -199,7 +170,7 @@ public partial class ModelEntityRegistryHub : BaseHub
         }
 
         _items.Add(entity.Id, entity);
-        entity.Status = ModelStatus.Registered;
+        entity.MarkRegistered();
         if (!LinkToParent(entity))
         {
             _unlinkedIds.Add(entity.Id);
@@ -237,7 +208,7 @@ public partial class ModelEntityRegistryHub : BaseHub
 
         _items.Remove(entityId);
         _unlinkedIds.Remove(entityId);
-        entity.Status = ModelStatus.Disposed;
+        entity.MarkDisposed();
         return true;
     }
 
@@ -253,6 +224,7 @@ public partial class ModelEntityRegistryHub : BaseHub
                 _unlinkedIds.Remove(id);
             }
         }
+        EmitSignal(SignalName.Registered);
     }
 
     /// <summary>
@@ -277,6 +249,8 @@ public partial class ModelEntityRegistryHub : BaseHub
         }
 
         Root.Clear();
+
+        EmitSignal(SignalName.Cleared);
     }
 
     #endregion

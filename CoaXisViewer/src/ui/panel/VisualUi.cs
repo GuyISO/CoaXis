@@ -70,7 +70,7 @@ public partial class VisualUi : PanelContainer
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Model.Entity.State.TransparencyNotified += OnTransparencyNotified;
+        Application.Model.Entity.Visual.TransparencyNotified += OnTransparencyNotified;
     }
 
     /// <summary>
@@ -78,7 +78,7 @@ public partial class VisualUi : PanelContainer
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Model.Entity.State.TransparencyNotified -= OnTransparencyNotified;
+        Application.Model.Entity.Visual.TransparencyNotified -= OnTransparencyNotified;
     }
 
     /// <summary>

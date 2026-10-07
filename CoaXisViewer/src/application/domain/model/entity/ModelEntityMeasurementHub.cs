@@ -19,6 +19,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     private Node3D _visualRoot = null!;
     /// <summary>計測線を描画するメッシュインスタンス。</summary>
     private MeshInstance3D _line = null!;
+
     /// <summary>計測線のマテリアル。</summary>
     private StandardMaterial3D _lineMaterial = null!;
 

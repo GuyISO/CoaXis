@@ -13,12 +13,19 @@ public partial class ModelEntityVisualHub : BaseHub
 
 	#region Properties
 
-	/// <summary>モデルの透明度を取得する。</summary>
+	/// <summary>モデル全体の透明度を取得する。</summary>
 	public float Transparency { get; private set; } = 0.0f;
 
 	#endregion
 
 	#region Signals
+
+	/// <summary>モデルの透明度の変更通知。</summary>
+	[Signal] public delegate void TransparencyNotifiedEventHandler();
+
+	/// <summary>階層から実効表示IsVisibleを解決した通知。</summary>
+	/// <param name="entityId">解決したModelEntityの識別子</param>
+	[Signal] public delegate void IsVisibleNotifiedEventHandler(string entityId);
 
 	#endregion
 
@@ -45,11 +52,8 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Model.Entity.State.PositionNotified += OnPositionNotified;
-		Application.Model.Entity.State.RotationNotified += OnRotationNotified;
-		Application.Model.Entity.State.VisibilityNotified += OnVisibilityNotified;
 		Application.Model.Entity.Registry.Registered += OnRegistered;
-		Application.Model.Entity.Registry.Replaced += OnReplaced;
+		Application.Model.Entity.State.VisibilityNotified += OnVisibilityNotified;
 		Application.Model.Entity.State.StatusNotified += OnStatusNotified;
 		Application.Model.Entity.Selection.Selected += OnSelected;
 	}
@@ -59,69 +63,29 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Model.Entity.State.PositionNotified -= OnPositionNotified;
-		Application.Model.Entity.State.RotationNotified -= OnRotationNotified;
-		Application.Model.Entity.State.VisibilityNotified -= OnVisibilityNotified;
 		Application.Model.Entity.Registry.Registered -= OnRegistered;
-		Application.Model.Entity.Registry.Replaced -= OnReplaced;
+		Application.Model.Entity.State.VisibilityNotified -= OnVisibilityNotified;
 		Application.Model.Entity.State.StatusNotified -= OnStatusNotified;
 		Application.Model.Entity.Selection.Selected -= OnSelected;
 	}
 
 	/// <summary>
-	/// モデルの配置位置が通知されたときに呼び出されるイベントハンドラ。
+	/// 登録済みモデルの初期表示状態を同期する。
 	/// </summary>
-	/// <param name="entityId">配置位置が変更された ModelEntity の識別子</param>
-	private void OnPositionNotified(string entityId)
+	private void OnRegistered()
 	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
+		foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Items.Values)
 		{
-			Application.Log.Warn($"ModelEntityVisualHub: invalid entityId for position notification. entityId='{entityId}'");
-			return;
-		}
-
-		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelEntityVisualHub: position target not found. entityId='{parsedEntityId}'");
-			return;
-		}
-
-		// Entityが保持する配置位置を描画ノードへ反映する。
-		if (modelEntity.Node != null && IsInstanceValid(modelEntity.Node))
-		{
-			modelEntity.Node.Position = modelEntity.Position;
+			if (modelEntity.Id != RootModelEntity.RootEntityId)
+			{
+				ApplyVisibility(modelEntity);
+				EmitSignal(SignalName.IsVisibleNotified, modelEntity.Id.ToString());
+			}
 		}
 	}
 
 	/// <summary>
-	/// モデルの回転が通知されたときに呼び出されるイベントハンドラ。
-	/// </summary>
-	/// <param name="entityId">回転が変更された ModelEntity の識別子</param>
-	private void OnRotationNotified(string entityId)
-	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-		{
-			Application.Log.Warn($"ModelEntityVisualHub: invalid entityId for rotation notification. entityId='{entityId}'");
-			return;
-		}
-
-		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
-		if (modelEntity == null)
-		{
-			Application.Log.Warn($"ModelEntityVisualHub: rotation target not found. entityId='{parsedEntityId}'");
-			return;
-		}
-
-		// Entityが保持する回転を描画ノードへ反映する。
-		if (modelEntity.Node != null && IsInstanceValid(modelEntity.Node))
-		{
-			modelEntity.Node.Quaternion = modelEntity.Rotation;
-		}
-	}
-
-	/// <summary>
-	/// モデルの表示状態が変更されたときに呼び出されるイベントハンドラ。
+	/// 表示状態の変更通知を受け、階層全体の実効表示を再解決してModelNodeへ反映する。
 	/// </summary>
 	/// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
 	private void OnVisibilityNotified(string entityId)
@@ -132,7 +96,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			return;
 		}
 
-		// Entityが保持する表示設定を描画ノードへ反映する
+		// 親子階層をまたぐ実効表示の解決とLayer切替はVisualHubに集約する。
 		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
 		if (modelEntity == null)
 		{
@@ -141,40 +105,7 @@ public partial class ModelEntityVisualHub : BaseHub
 		}
 		
 		ApplyVisibility(modelEntity);
-	}
-
-	/// <summary>
-	/// 追加された部分木の初期表示状態を反映する。
-	/// </summary>
-	/// <param name="entityId">追加された部分木ルートの識別子</param>
-	private void OnRegistered(string entityId)
-	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-		{
-			return;
-		}
-
-		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
-		if (modelEntity == null)
-		{
-			return;
-		}
-
-		ApplyVisibilitySubtree(modelEntity);
-	}
-
-	/// <summary>
-	/// 全件置換後に登録済みモデルの初期表示状態を同期する。
-	/// </summary>
-	private void OnReplaced()
-	{
-		foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Items.Values)
-		{
-			if (modelEntity.Id != RootModelEntity.RootEntityId)
-			{
-				ApplyVisibility(modelEntity);
-			}
-		}
+		EmitSignal(SignalName.IsVisibleNotified, modelEntity.Id.ToString());
 	}
 
 	/// <summary>
@@ -189,13 +120,26 @@ public partial class ModelEntityVisualHub : BaseHub
 		}
 
 		ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
-		if (modelEntity == null || modelEntity.Status != ModelStatus.Loaded)
+		if (modelEntity == null)
 		{
 			return;
 		}
 
+		if (modelEntity.Status == ModelStatus.Registered)
+		{
+			return;
+		}
+
+		ApplyVisibility(modelEntity);
+		EmitSignal(SignalName.IsVisibleNotified, modelEntity.Id.ToString());
+
 		ModelNode modelNode = modelEntity.Node;
 		if (modelNode == null || !IsInstanceValid(modelNode))
+		{
+			return;
+		}
+
+		if (modelEntity.Status != ModelStatus.Loaded)
 		{
 			return;
 		}
@@ -244,7 +188,7 @@ public partial class ModelEntityVisualHub : BaseHub
 			ApplyModelTransparency(rootEntity.Node);
 		}
 
-		Application.Model.Entity.State.NotifyTransparency();
+		EmitSignal(SignalName.TransparencyNotified);
 	}
 
 	#endregion
@@ -252,52 +196,21 @@ public partial class ModelEntityVisualHub : BaseHub
 	#region Helpers
 
 	/// <summary>
-	/// 部分木の各Entityへ初期表示状態を反映する。
-	/// </summary>
-	/// <param name="rootEntity">反映対象の部分木ルート</param>
-	private void ApplyVisibilitySubtree(ModelEntity rootEntity)
-	{
-		var pendingEntities = new Stack<ModelEntity>();
-		var visitedEntityIds = new HashSet<Guid>();
-		pendingEntities.Push(rootEntity);
-
-		while (pendingEntities.Count > 0)
-		{
-			ModelEntity modelEntity = pendingEntities.Pop();
-			if (modelEntity == null || !visitedEntityIds.Add(modelEntity.Id))
-			{
-				continue;
-			}
-
-			ApplyVisibility(modelEntity);
-			foreach (ModelEntity childEntity in modelEntity.Children)
-			{
-				pendingEntities.Push(childEntity);
-			}
-		}
-	}
-
-	/// <summary>
-	/// Entityの表示設定をModelNodeのレイヤーへ反映する。
+	/// ModelEntityの表示設定を階層から解決し、ModelNodeと配下の描画対象へLayerとして反映する。
 	/// </summary>
 	private void ApplyVisibility(ModelEntity modelEntity)
 	{
-		ModelVisibility visibility = modelEntity.Visibility;
+		// Inheritを含む設定値の解決をResolverへ集約し、実効状態だけをEntityへ記録する。
+		bool isVisible = ModelVisibilityResolver.ResolveIsVisible(modelEntity);
+		modelEntity.SetResolvedVisibility(isVisible);
+
 		ModelNode modelNode = modelEntity.Node;
 		if (modelNode == null || !IsInstanceValid(modelNode))
 		{
-			Application.Log.Warn($"ModelEntityVisualHub: visibility target not found. entityId='{modelEntity.Id}'");
 			return;
 		}
 
-		// Inherit は階層全体が確定した後に親の設定から実効状態を解決する。
-		bool isVisible = visibility switch
-		{
-			ModelVisibility.Visible => true,
-			ModelVisibility.Invisible => false,
-			_ => ModelVisibilityResolver.IsVisible(modelEntity),
-		};
-		modelNode.ApplyVisibilityLayer(isVisible);
+		modelNode.ApplyVisibilityLayer(modelEntity.IsVisible);
 	}
 
 	/// <summary>

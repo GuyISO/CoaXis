@@ -31,22 +31,6 @@ public partial class ModelEntityLoadHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する。
-	/// </summary>
-	/// <param name="modelEntity">初期化するモデル実体</param>
-	/// <exception cref="ArgumentNullException">modelEntityがnullの場合</exception>
-	public void MarkInitialized(ModelEntity modelEntity)
-	{
-		if (modelEntity == null)
-		{
-			throw new ArgumentNullException(nameof(modelEntity));
-		}
-
-		// Registry登録前の一時状態なので、状態通知は置換完了通知に任せる。
-		modelEntity.Status = ModelStatus.Initialized;
-	}
-
-	/// <summary>
 	/// 現在のモデル集合をクリアし、指定したDTOからモデル集合を再構築する。
 	/// </summary>
 	/// <param name="entityDtos">読み込むモデル実体DTOの集合</param>
@@ -91,8 +75,6 @@ public partial class ModelEntityLoadHub : BaseHub
 
 		Application.Model.Entity.Scene.PrepareLoads(entities);
 
-		// 全Entityと階層が確定してから一括通知し、Tree側に親先行の個別通知を要求しない。
-		Application.Model.Entity.Registry.NotifyReplaced();
 		Application.Model.Entity.Scene.StartPendingLoads();
 		return entities;
 	}
@@ -106,12 +88,27 @@ public partial class ModelEntityLoadHub : BaseHub
 		Application.Model.Entity.Scene.CancelPendingLoads();
 		Application.Model.Entity.Registry.Clear();
 		Application.Model.Property.Registry.Clear();
-		Application.Model.Entity.Registry.NotifyCleared();
 	}
 
 	#endregion
 
 	#region Helpers
+
+	/// <summary>
+	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する。
+	/// </summary>
+	/// <param name="modelEntity">初期化するモデル実体</param>
+	/// <exception cref="ArgumentNullException">modelEntityがnullの場合</exception>
+	private void MarkInitialized(ModelEntity modelEntity)
+	{
+		if (modelEntity == null)
+		{
+			throw new ArgumentNullException(nameof(modelEntity));
+		}
+
+		// Registry登録前の一時状態なので、状態通知は置換完了通知に任せる。
+		modelEntity.InitializeForRegistration();
+	}
 
 	/// <summary>
 	/// Entity階層に循環がないことを検証する。
@@ -181,8 +178,6 @@ public partial class ModelEntityLoadHub : BaseHub
 		var node = new ModelNode(modelEntity.Id);
 		modelEntity.Node = node;
 		node.Name = modelEntity.Id.ToString();
-		node.Position = modelEntity.Position;
-		node.Quaternion = modelEntity.Rotation;
 
 		ModelNode parentNode = ResolveParentNode(modelEntity.ParentId);
 		if (parentNode != null)

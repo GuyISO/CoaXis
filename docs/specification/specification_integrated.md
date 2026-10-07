@@ -245,9 +245,10 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - `ModelEntityLoadHub`: Entity/Property両Registryの階層解決と集合クリアを調整する。Registryは相手の集合全体を所有しない
 - `ModelPropertyLoadHub`: Property DTOからModelPropertyを生成し、Property Registryへの登録と階層解決を担う
 - `ModelEntityFactory`: Entity登録とModelNodeの親子構築を担う
-- `ModelEntitySceneHub`: シーンロードキュー、ロード世代、フレーム予算、ロード状態遷移、およびロード済みシーンのModelNode反映を担う
-- `ModelEntityStateHub`: 表示状態切替要求とツリー折畳み通知を論理ModelEntityの状態変更へ変換する。ModelNodeやUIを直接操作しない
-- `ModelEntityVisualHub`: 位置・回転・Visibility・選択強調・透明度をModelNodeへ反映する。論理状態の変更要求やUI参照を保持しない
+- `ModelEntitySceneHub`: シーンロードキュー、ロード世代、フレーム予算を管理し、ModelEntityの専用状態遷移を通じてロード状態を進める
+- `ModelEntityStateHub`: ModelEntityの状態変更通知だけを担当し、Fieldの更新やModelNodeの直接操作は行わない
+- `ModelEntity`: 専用メソッドまたはアクセサーでFieldを更新し、Position・Rotationを対応するModelNodeへ同期する。Statusは `Unloaded→Initialized→Registered→Loading→(Loaded|LoadFailed)` の許可遷移だけを専用メソッドで実行し、ScenePathが空の場合は `Registered→Loaded`、破棄は `Registered|Loading|Loaded|LoadFailed→Disposed` のみ許可する
+- `ModelEntityVisualHub`: ModelEntityのVisibility変更通知を受け、親子階層をまたぐ実効表示を `IsVisible` として解決して該当ModelNode配下の描画Layerを切り替える。`Visibility` はInheritを含む設定値として別に保持し、解決後はUI向け通知を発行する。選択強調・透明度も反映し、ModelEntityのField更新やPosition・Rotationの直接同期は行わない
 - UIツリー: ModelEventとPickEventの通知をTreeItemまたはModelPropertyTreeへ投影する。TreeItemはModel Domainで保持せず、UIをModelPresentationServiceへ参照登録しない
 
 Model中心DomainのFacade構成:
@@ -256,7 +257,7 @@ Model中心DomainのFacade構成:
 - `ModelEntityHub` は `ModelEntityRegistryHub`、`ModelEntityStateHub`、`ModelEntityVisualHub`、Selection、Tree、`ModelEntityPickHub`、`ModelEntityMeasurementHub`、`ModelEntityLoadHub`、`ModelEntitySceneHub` を構成する。PickとMeasurementはModelEntityを対象とするため、`Application.Model.Entity.Pick` / `Application.Model.Entity.Measurement` から公開し、Entityの置換ロードとSceneロードもそれぞれ `Application.Model.Entity.Load` / `Application.Model.Entity.Scene` から公開する。StateとVisualの責務は独立したまま、ModelHub直下へは公開しない
 - PropertyのRegistryとロードはModelEntityと並ぶ `ModelPropertyHub` が所有し、`Application.Model.Property.Load` から属性ロードを提供する。Entity/Propertyの識別子集合と論理階層はRegistryごとに管理する
 - `ModelEntityLoadHub` はEntity置換ロードの過程でEntity/Property双方のRegistryの階層解決・クリア順序を調整し、個々のScene読込は `ModelEntitySceneHub` へ委譲する
-- Entityの状態管理と表示反映はそれぞれ対応するHubが担当する。要求・通知契約を重複定義せず、Hubの配置によって責務や処理順を変更しない
+- ModelEntityの状態FieldはModelEntity自身のアクセサーで更新し、Position・Rotationは対応Nodeへ同期してからStateHubへ識別子のみの変更通知を依頼する。Statusは専用メソッドが許可遷移のみを実行し、他の順序は例外で拒否する。Visibility設定値と解決済みの実効値IsVisibleを分離し、Visibility変更通知を受けたVisualHubが親子階層を解決してLayer切替を行い、IsVisibleの解決通知をUIへ発行する。StateHubはFieldを更新せず通知だけを行う
 - Selection、Pick、MeasurementはModelEntityを対象とする操作能力としてModelEntityHub配下に置く。各操作Hubの責務は独立させ、Model中核から操作能力への不要な依存・循環依存を禁止する
 - Facade分割は公開責務の境界であり、各Serviceの状態所有者や処理順を変更しない
 

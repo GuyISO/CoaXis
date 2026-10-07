@@ -316,6 +316,30 @@
   - `.github/instructions/design-philosophy.instructions.md`
 - Notes: Display の LayerActivated(layer,isActive) は ActiveLayersNotified() に、Selection の Mode は引数なし通知にした。個々の ModelEntity を対象とする通知（Selected/Visibility/Status/Collapsed/Position/Rotation/Added）は entityId のみを payload とし、値は Registry.Get や Selection.Contains 経由で参照する。折り畳みは State.SetCollapsed(Guid,bool) の直接呼び出しに統一し、ToggleModelVisibilityRequested 要求Signalは廃止した
 
+- Date: 2026-10-07
+- Trigger: ModelEntityの状態Field更新、対応するModelNodeへの反映、および更新通知の責務を明確にする
+- Decision: ModelEntityのField更新は呼び出し側から直接代入せず、専用メソッドまたはアクセサー経由で値を渡す。ModelEntity自身がFieldを更新し、対応するModelNodeの状態（Position等）を同期した後、ModelEntityStateHubを通じて対象entityIdのみの変更通知を発行する。ModelEntityStateHubは値を変更せず通知のみを担い、ModelEntityVisualHubは同じField更新・Node同期を重複して実装しない
+- Scope: CoaXisViewerのModelEntity状態Fieldと対応するModelNode
+- Artifacts Updated:
+  - `.github/instructions/design-philosophy.instructions.md`
+  - `.github/design-philosophy/index.md`
+  - `.github/design-philosophy/registry.md`
+- Notes: 選択強調・透明度など、ModelEntityの状態Field更新を伴わない表示専用効果のNode反映は引き続きModelEntityVisualHubが担当する
+
+- Date: 2026-10-07
+- Trigger: ModelEntity.Statusを許可されたライフサイクル順序に制限し、Visibility設定と実際の表示結果を区別する
+- Decision: Statusは読み取り専用にし、Unloaded→Initialized→Registered→Loading→LoadedまたはLoadFailed→Disposedの遷移を専用メソッドで制御する。ScenePathが空の場合はRegistered→Loaded、登録済み状態からの破棄遷移も許可し、それ以外は例外で拒否する。VisibilityはInheritを含む設定値、IsVisibleはVisualHubが階層から解決してModelEntityに記録する実効値とし、描画Layer反映もVisualHubに限定する
+- Scope: CoaXisViewerのModelEntity状態管理、Visibility解決、Tree表示
+- Artifacts Updated:
+  - `CoaXisViewer/src/model/entity/ModelEntity.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityVisualHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntityRegistryHub.cs`
+  - `CoaXisViewer/src/application/domain/model/entity/ModelEntitySceneHub.cs`
+  - `CoaXisViewer/src/ui/tree/ModelEntityTree.cs`
+  - `docs/specification/specification_integrated.md`
+  - `.github/instructions/design-philosophy.instructions.md`
+- Notes: Sceneロードの失敗・破棄中を含め、無効なStatus遷移を成功扱いで無視しない。VisualHubはIsVisibleNotified(entityId)で実効値の確定をUIへ伝え、Treeの表示アイコンはVisibility設定とIsVisibleを別々に参照する
+
 ## 2026-10-04 Hubのregion構成統一
 - Policy: Application配下の全Hubを Fields/Properties/Signals/Lifecycle/Events/Methods/Helpers の共通7regionに統一（Signalsを上位に配置、Lifecycle以外の全メンバーにXMLコメント必須）
 - Notes: Notifications/Actions regionを廃止。Signal宣言と NotifyXxx は Signals、On*/Subscribe*/Unsubscribe* は Events へ移動（旧Helpers/Lifecycle内のものも含む）

@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -236,7 +235,6 @@ public partial class ModelEntitySceneHub : BaseHub
 				ModelMeshCenterAligner.AlignPivotToMeshCenter(modelNode);
 			}
 
-			modelNode.ApplyVisibilityLayer(ModelVisibilityResolver.IsVisible(modelEntity));
 			UpdateModelStatus(modelEntity, sceneLoaded ? ModelStatus.Loaded : ModelStatus.LoadFailed);
 			return true;
 		}
@@ -265,13 +263,25 @@ public partial class ModelEntitySceneHub : BaseHub
 	/// </summary>
 	private static void UpdateModelStatus(ModelEntity modelEntity, ModelStatus nextStatus)
 	{
-		if (modelEntity == null || (modelEntity.Status == ModelStatus.Disposed && nextStatus != ModelStatus.Disposed))
+		if (modelEntity == null || modelEntity.Status == ModelStatus.Disposed)
 		{
 			return;
 		}
 
-		modelEntity.Status = nextStatus;
-		Application.Model.Entity.State.NotifyStatus(modelEntity.Id);
+		switch (nextStatus)
+		{
+			case ModelStatus.Loading:
+				modelEntity.BeginLoading();
+				break;
+			case ModelStatus.Loaded:
+				modelEntity.MarkLoaded();
+				break;
+			case ModelStatus.LoadFailed:
+				modelEntity.MarkLoadFailed();
+				break;
+			default:
+				throw new ArgumentOutOfRangeException(nameof(nextStatus), nextStatus, "Unsupported scene-load status transition.");
+		}
 	}
 
 	/// <summary>

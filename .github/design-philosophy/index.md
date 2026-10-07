@@ -12,6 +12,7 @@
 | 座標系境界規約 | `.github/instructions/coordinate-system.instructions.md` | 内部計算は Godot、UI/DB/IPC/ファイルI/O は CATIA |
 | モデル識別子運用規約 | `docs/guides/viewer/MODEL_ID_OPERATION_GUIDE.md` | モデル本体中心の Guid 運搬ルール |
 | ModelEntity操作機能の集約規約 | `.github/instructions/design-philosophy.instructions.md` | Pick/Measurement等をModelEntityHub配下に配置 |
+| ModelEntity状態更新規約 | `.github/instructions/design-philosophy.instructions.md` | Field更新・Status遷移・実効VisibilityをModelEntityと各Hubの責務に分ける |
 | 実装共通規約 | `.github/instructions/design-philosophy.instructions.md` | 全体的に効かせたい判断基準 |
 | Hub状態所有・初期同期規約 | `.github/instructions/design-philosophy.instructions.md` | Node/UIはHub状態を重複保持せず、購読後は現在値を直接読む |
 | コンテキストメニュー設計規約 | `.github/instructions/design-philosophy.instructions.md` | UI単位ではなく対象オブジェクト単位でMenuを作る方針 |

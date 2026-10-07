@@ -19,7 +19,7 @@ public static class ModelVisibilityResolver
     /// <summary>
     /// 親の設定をたどってモデルの実効表示状態を返す。
     /// </summary>
-    public static bool IsVisible(ModelEntity entity)
+    public static bool ResolveIsVisible(ModelEntity entity)
     {
         if (entity == null)
         {

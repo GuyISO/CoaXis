@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -37,26 +36,9 @@ public partial class ModelEntityPickHub : BaseHub
 
     /// <summary>単一ピック結果の通知。</summary>
     [Signal] public delegate void ResultNotifiedEventHandler(PickResult pickResult);
-    /// <summary>
-    /// ピック結果の通知を行う。
-    /// </summary>
-    /// <param name="pickResult">ピック結果</param>
-    public void NotifyResult(PickResult pickResult)
-    {
-        EmitSignal(SignalName.ResultNotified, pickResult);
-    }
 
     /// <summary>複数ピック結果の通知。</summary>
     [Signal] public delegate void ResultsNotifiedEventHandler(PickResult[] pickResults);
-    /// <summary>
-    /// 複数一括ピック結果の通知を行う。
-    /// </summary>
-    /// <param name="pickResults">ピック結果の配列</param>
-    /// <remarks>複数のピック結果を一括で通知する場合はレイキャストによる取得ではないので座標値などを持たない</remarks>
-    public void NotifyResults(PickResult[] pickResults)
-    {
-        EmitSignal(SignalName.ResultsNotified, pickResults);
-    }
 
     #endregion
 
@@ -82,6 +64,25 @@ public partial class ModelEntityPickHub : BaseHub
         }
 
         EmitSignal(SignalName.HandlingModeNotified);
+    }
+
+    /// <summary>
+    /// ピック結果の通知を行う。
+    /// </summary>
+    /// <param name="pickResult">ピック結果</param>
+    public void NotifyResult(PickResult pickResult)
+    {
+        EmitSignal(SignalName.ResultNotified, pickResult);
+    }
+
+    /// <summary>
+    /// 複数一括ピック結果の通知を行う。
+    /// </summary>
+    /// <param name="pickResults">ピック結果の配列</param>
+    /// <remarks>複数のピック結果を一括で通知する場合はレイキャストによる取得ではないので座標値などを持たない</remarks>
+    public void NotifyResults(PickResult[] pickResults)
+    {
+        EmitSignal(SignalName.ResultsNotified, pickResults);
     }
 
     #endregion
