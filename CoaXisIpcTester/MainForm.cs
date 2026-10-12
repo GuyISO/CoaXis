@@ -33,6 +33,8 @@ public sealed class MainForm : Form
         MinimumSize = new Size(860, 580);
         Size = new Size(1120, 760);
         StartPosition = FormStartPosition.CenterScreen;
+        _entityPath.Text = FindSamplePath("modelentity.csv");
+        _propertyPath.Text = FindSamplePath("modelproperty.csv");
 
         var root = new TableLayoutPanel
         {
@@ -57,6 +59,23 @@ public sealed class MainForm : Form
 
         _sendButton.Click += async (_, _) => await SendLoadModelAsync();
         _history.SelectedIndexChanged += (_, _) => ShowSelectedExchange();
+    }
+
+    private static string FindSamplePath(string fileName)
+    {
+        DirectoryInfo directory = new(AppContext.BaseDirectory);
+        while (directory != null)
+        {
+            string candidate = Path.Combine(directory.FullName, "samples", fileName);
+            if (File.Exists(candidate))
+            {
+                return candidate;
+            }
+
+            directory = directory.Parent;
+        }
+
+        return string.Empty;
     }
 
     private Control BuildConnectionPanel()

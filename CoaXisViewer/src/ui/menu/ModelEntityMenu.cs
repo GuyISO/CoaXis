@@ -52,6 +52,8 @@ public partial class ModelEntityMenu : BaseMenu
 		NativeMenu.Singleton.AddItem(nativeMenu, "Emphasize", Callable.From<Variant>(HandleEmphasizeMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "Spin", Callable.From<Variant>(HandleSpinMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "TreeCentering", Callable.From<Variant>(HandleTreeCenteringMenuItemPressed));
+		NativeMenu.Singleton.AddItem(nativeMenu, "Show Property", Callable.From<Variant>(HandleShowPropertyMenuItemPressed));
+		NativeMenu.Singleton.AddItem(nativeMenu, "Hide Property", Callable.From<Variant>(HandleHidePropertyMenuItemPressed));
 	}
 
 	#endregion
@@ -90,6 +92,28 @@ public partial class ModelEntityMenu : BaseMenu
 		}
 
 		Application.Model.Entity.Tree.Centering(modelNode.EntityId);
+	}
+
+	private void HandleShowPropertyMenuItemPressed(Variant tag)
+	{
+		if (_targetEntityId == Guid.Empty)
+		{
+			Application.Log.Warn("ModelEntityMenu: show-property requested without a target entity.");
+			return;
+		}
+
+		Application.Ui.Property.ShowModelEntityProperties(_targetEntityId);
+	}
+
+	private void HandleHidePropertyMenuItemPressed(Variant tag)
+	{
+		if (_targetEntityId == Guid.Empty)
+		{
+			Application.Log.Warn("ModelEntityMenu: hide-property requested without a target entity.");
+			return;
+		}
+
+		Application.Ui.Property.HideModelEntityProperties(_targetEntityId);
 	}
 
 	private ModelNode GetModelNode()

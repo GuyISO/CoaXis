@@ -9,7 +9,7 @@ Viewer内のテストコードによるJSON/CSV直接読込をなくし、実運
 1. `dotnet build .\CoaXis.sln` を実行する。
 2. CoaXisViewerを起動する。Viewerは既定で `CoaXisViewerPipe` を待ち受ける。
 3. `dotnet run --project .\CoaXisIpcTester\CoaXis.IpcTester.csproj` を実行する。
-4. モデル実体JSONまたはCSVを選ぶ。属性が必要な場合は属性CSVも選び、「LoadModelを送信」を押す。
+4. リポジトリ内の `samples` フォルダーを検出できた場合、モデル実体に `modelentity.csv`、属性に `modelproperty.csv` が初期表示される。別の入力を使う場合は「選択...」から変更し、「LoadModelを送信」を押す。
 5. 左側の通信履歴から要求を選ぶと、送信JSONと応答JSONを確認できる。
 
 ## 入力形式

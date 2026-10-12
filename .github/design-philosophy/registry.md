@@ -343,3 +343,16 @@
 ## 2026-10-04 Hubのregion構成統一
 - Policy: Application配下の全Hubを Fields/Properties/Signals/Lifecycle/Events/Methods/Helpers の共通7regionに統一（Signalsを上位に配置、Lifecycle以外の全メンバーにXMLコメント必須）
 - Notes: Notifications/Actions regionを廃止。Signal宣言と NotifyXxx は Signals、On*/Subscribe*/Unsubscribe* は Events へ移動（旧Helpers/Lifecycle内のものも含む）
+
+- Date: 2026-10-12
+- Trigger: Viewport上でModelEntityに紐づくModelPropertyTreeを表示するUIを追加
+- Decision: ModelEntityMenuは表示対象entityIdをUiPropertyHubへ通知するだけにし、ViewportPropertyOverlayは通知を受けてModelPropertyTreeを直接子として生成・保持・投影する。MenuからOverlayを直接参照することを禁止する
+- Scope: ModelEntityのコンテキストメニュー、プロパティ表示要求、Viewport上のModelProperty UI
+- Artifacts Updated:
+  - `CoaXisViewer/src/application/domain/ui/UiPropertyHub.cs`
+  - `CoaXisViewer/src/application/domain/ui/UiHub.cs`
+  - `CoaXisViewer/src/ui/menu/ModelEntityMenu.cs`
+  - `CoaXisViewer/src/component/ViewportPropertyOverlay.cs`
+  - `CoaXisViewer/scenes/model_property_tree.tscn`
+  - `.github/design-philosophy/registry.md`
+- Notes: 表示位置はViewportCameraHubの投影APIで解決し、OverlayはEntity位置・実効可視性・カメラ状態の通知に追従する

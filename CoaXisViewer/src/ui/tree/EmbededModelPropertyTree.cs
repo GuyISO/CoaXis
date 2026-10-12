@@ -4,50 +4,50 @@ using System;
 
 public partial class EmbededModelPropertyTree : ModelPropertyTree
 {
-    #region Lifecycle
+	#region Lifecycle
 
-    public override void _Ready()
-    {
-        base._Ready();
-        SubscribeEvents();
-    }
+	public override void _Ready()
+	{
+		base._Ready();
+		SubscribeEvents();
+	}
 
-    public override void _ExitTree()
-    {
-        UnsubscribeEvents();
+	public override void _ExitTree()
+	{
+		UnsubscribeEvents();
 
-        base._ExitTree();
-    }
+		base._ExitTree();
+	}
 
-    #endregion
+	#endregion
 
-    #region Events
+	#region Events
 
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
-    }
+	/// <summary>
+	/// Applicationイベントの購読を開始する
+	/// </summary>
+	private void SubscribeEvents()
+	{
+		Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+	}
 
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeEvents()
-    {
-        Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
-    }
+	/// <summary>
+	/// Applicationイベントの購読を解除する
+	/// </summary>
+	private void UnsubscribeEvents()
+	{
+		Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+	}
 
-    /// <summary>
-    /// ピック結果の通知を受け取り、EntityIdで表示を更新する
-    /// </summary>
-    /// <param name="pickResult">通知されたピック結果（複数一括のResultsNotifiedは対象外）</param>
-    private void OnPickResultNotified(PickResult pickResult)
-    {
-        // 実体がない場合、ShowはEntity未取得のままツリーをクリアするだけになる
-        Show(pickResult != null ? pickResult.EntityId : Guid.Empty);
-    }
+	/// <summary>
+	/// ピック結果の通知を受け取り、EntityIdで表示を更新する
+	/// </summary>
+	/// <param name="pickResult">通知されたピック結果（複数一括のResultsNotifiedは対象外）</param>
+	private void OnPickResultNotified(PickResult pickResult)
+	{
+		// 実体がない場合、ShowはEntity未取得のままツリーをクリアするだけになる
+		Show(pickResult != null ? pickResult.EntityId : Guid.Empty);
+	}
 
-    #endregion
+	#endregion
 }

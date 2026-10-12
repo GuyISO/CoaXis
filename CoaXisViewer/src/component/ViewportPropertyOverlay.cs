@@ -1,45 +1,36 @@
 using Godot;
+using System;
+using System.Collections.Generic;
 
 /// <summary>
-/// ModelPropertyの対象位置をビューポート上のラベルとして表示する。
+/// ModelEntityに紐づくModelPropertyTreeをビューポート上に表示する。
 /// </summary>
 public partial class ViewportPropertyOverlay : Control
 {
     #region Fields
 
-    private Camera3D _camera = null!;
-    private Label _label = null!;
-
-    #endregion
-
-    #region Properties
-
-    /// <summary>
-    /// 表示対象のCATIA座標を取得または設定する。
-    /// </summary>
-    [Export]
-    public Vector3 TargetPositionCatia { get; set; } = Vector3.Zero;
+    private readonly PackedScene _modelPropertyTreeScene = ResourceLoader.Load<PackedScene>("res://scenes/model_property_tree.tscn");
+    private readonly Dictionary<Guid, ModelPropertyTree> _propertyTrees = new();
 
     #endregion
 
     #region Lifecycle
 
     /// <summary>
-    /// 子ノードを解決し、カメラ状態と表示サイズの変更を購読する。
+    /// 表示要求、カメラ状態、ModelEntity状態の変更を購読する。
     /// </summary>
     public override void _Ready()
     {
-        EnsureChildNodes();
         SubscribeEvents();
-        UpdateLabelPosition();
     }
 
     /// <summary>
-    /// 購読中のイベントを解除する。
+    /// 購読中のイベントを解除し、生成済みツリーの参照を解放する。
     /// </summary>
     public override void _ExitTree()
     {
         UnsubscribeEvents();
+        _propertyTrees.Clear();
 
         base._ExitTree();
     }
@@ -49,20 +40,13 @@ public partial class ViewportPropertyOverlay : Control
     #region Events
 
     /// <summary>
-    /// 子ノードを解決する。
-    /// </summary>
-    private void EnsureChildNodes()
-    {
-        _camera = GetNode<Camera3D>("../FocalPoint/Camera3D");
-        _label = GetNode<Label>("Label");
-    }
-
-    /// <summary>
-    /// 表示位置の再計算が必要なイベントの購読を開始する。
+    /// 表示要求と表示位置の再計算が必要なイベントの購読を開始する。
     /// </summary>
     private void SubscribeEvents()
     {
         Resized += OnResized;
+        Application.Ui.Property.ShowRequested += OnShowRequested;
+        Application.Ui.Property.HideRequested += OnHideRequested;
         Application.Viewport.Camera.PositionNotified += OnCameraChanged;
         Application.Viewport.Camera.RotationNotified += OnCameraChanged;
         Application.Viewport.Camera.DistanceNotified += OnCameraChanged;
@@ -71,14 +55,19 @@ public partial class ViewportPropertyOverlay : Control
         Application.Viewport.Camera.ProjectionTypeNotified += OnCameraChanged;
         Application.Viewport.Camera.CameraNearNotified += OnCameraChanged;
         Application.Viewport.Camera.CameraFarNotified += OnCameraChanged;
+        Application.Model.Entity.State.PositionNotified += OnEntityPositionNotified;
+        Application.Model.Entity.State.RotationNotified += OnEntityRotationNotified;
+        Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
     }
 
     /// <summary>
-    /// 表示位置の再計算が必要なイベントの購読を解除する。
+    /// 表示要求と表示位置の再計算が必要なイベントの購読を解除する。
     /// </summary>
     private void UnsubscribeEvents()
     {
         Resized -= OnResized;
+        Application.Ui.Property.ShowRequested -= OnShowRequested;
+        Application.Ui.Property.HideRequested -= OnHideRequested;
         Application.Viewport.Camera.PositionNotified -= OnCameraChanged;
         Application.Viewport.Camera.RotationNotified -= OnCameraChanged;
         Application.Viewport.Camera.DistanceNotified -= OnCameraChanged;
@@ -87,22 +76,84 @@ public partial class ViewportPropertyOverlay : Control
         Application.Viewport.Camera.ProjectionTypeNotified -= OnCameraChanged;
         Application.Viewport.Camera.CameraNearNotified -= OnCameraChanged;
         Application.Viewport.Camera.CameraFarNotified -= OnCameraChanged;
+        Application.Model.Entity.State.PositionNotified -= OnEntityPositionNotified;
+        Application.Model.Entity.State.RotationNotified -= OnEntityRotationNotified;
+        Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
     }
 
     /// <summary>
-    /// オーバーレイの表示領域が変化したとき、ラベル位置を再計算する。
+    /// ModelEntityのプロパティ表示要求を受け、対応するツリーを表示する。
+    /// </summary>
+    /// <param name="entityId">表示対象のModelEntity識別子。</param>
+    private void OnShowRequested(string entityId)
+    {
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
+        {
+            Application.Log.Warn($"ViewportPropertyOverlay: invalid property display target. entityId='{entityId}'");
+            return;
+        }
+
+        ShowPropertyTree(parsedEntityId);
+    }
+
+    /// <summary>
+    /// ModelEntityのプロパティ非表示要求を受け、対応するツリーを破棄する。
+    /// </summary>
+    /// <param name="entityId">非表示対象のModelEntity識別子。</param>
+    private void OnHideRequested(string entityId)
+    {
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
+        {
+            Application.Log.Warn($"ViewportPropertyOverlay: invalid property hide target. entityId='{entityId}'");
+            return;
+        }
+
+        HidePropertyTree(parsedEntityId);
+    }
+
+    /// <summary>
+    /// オーバーレイの表示領域が変化したとき、すべてのツリー位置を再計算する。
     /// </summary>
     private void OnResized()
     {
-        UpdateLabelPosition();
+        UpdateAllTreePositions();
     }
 
     /// <summary>
-    /// カメラ状態が変化したとき、ラベル位置を再計算する。
+    /// カメラ状態が変化したとき、すべてのツリー位置を再計算する。
     /// </summary>
     private void OnCameraChanged()
     {
-        UpdateLabelPosition();
+        UpdateAllTreePositions();
+    }
+
+    /// <summary>
+    /// ModelEntityの位置が変化したとき、すべてのツリー位置を再計算する。
+    /// </summary>
+    /// <param name="entityId">位置が変化したModelEntity識別子。</param>
+    private void OnEntityPositionNotified(string entityId)
+    {
+        // 親Entityの移動は子Entityのグローバル座標にも影響するため、表示済み全Treeを更新する。
+        UpdateAllTreePositions();
+    }
+
+    /// <summary>
+    /// ModelEntityの回転が変化したとき、すべてのツリー位置を再計算する。
+    /// </summary>
+    /// <param name="entityId">回転が変化したModelEntity識別子。</param>
+    private void OnEntityRotationNotified(string entityId)
+    {
+        // 親Entityの回転は子Entityのグローバル座標にも影響するため、表示済み全Treeを更新する。
+        UpdateAllTreePositions();
+    }
+
+    /// <summary>
+    /// ModelEntityの実効可視性が更新されたとき、対応するツリー表示を更新する。
+    /// </summary>
+    /// <param name="entityId">可視性が更新されたModelEntity識別子。</param>
+    private void OnEntityVisibilityResolved(string entityId)
+    {
+        UpdateTreePositionByEntityId(entityId);
     }
 
     #endregion
@@ -110,29 +161,120 @@ public partial class ViewportPropertyOverlay : Control
     #region Helpers
 
     /// <summary>
-    /// 対象位置をカメラ座標へ投影し、画面内の場合だけラベルを表示する。
+    /// 指定したModelEntityのModelPropertyTreeを生成または再利用して表示する。
     /// </summary>
-    private void UpdateLabelPosition()
+    /// <param name="entityId">表示対象のModelEntity識別子。</param>
+    private void ShowPropertyTree(Guid entityId)
     {
-        Vector3 targetPosition = CoordinateSystemUtility.CatiaToGodot(TargetPositionCatia);
-
-        // カメラ背面または視錐台外の対象は、投影座標が不正になるため表示しない。
-        if (_camera.IsPositionBehind(targetPosition) || !_camera.IsPositionInFrustum(targetPosition))
+        ModelEntity entity = Application.Model.Entity.Registry.Get(entityId);
+        if (entity == null)
         {
-            _label.Hide();
+            Application.Log.Warn($"ViewportPropertyOverlay: property display target not found. entityId='{entityId}'");
             return;
         }
 
-        Vector2 screenPosition = _camera.UnprojectPosition(targetPosition);
-        if (screenPosition.X < 0.0f || screenPosition.Y < 0.0f
-            || screenPosition.X > Size.X || screenPosition.Y > Size.Y)
+        if (!_propertyTrees.TryGetValue(entityId, out ModelPropertyTree propertyTree)
+            || !GodotObject.IsInstanceValid(propertyTree))
         {
-            _label.Hide();
+            propertyTree = CreatePropertyTree(entityId);
+            if (propertyTree == null)
+            {
+                return;
+            }
+
+            _propertyTrees[entityId] = propertyTree;
+        }
+
+        propertyTree.Show(entityId);
+        UpdateTreePosition(entityId, propertyTree);
+    }
+
+    /// <summary>
+    /// 指定したModelEntityに対応するModelPropertyTreeを破棄する。
+    /// </summary>
+    /// <param name="entityId">非表示対象のModelEntity識別子。</param>
+    private void HidePropertyTree(Guid entityId)
+    {
+        if (!_propertyTrees.TryGetValue(entityId, out ModelPropertyTree propertyTree))
+        {
             return;
         }
 
-        _label.Position = screenPosition;
-        _label.Show();
+        _propertyTrees.Remove(entityId);
+        if (GodotObject.IsInstanceValid(propertyTree))
+        {
+            propertyTree.QueueFree();
+        }
+    }
+
+    /// <summary>
+    /// 生成済みのすべてのModelPropertyTree位置を再計算する。
+    /// </summary>
+    private void UpdateAllTreePositions()
+    {
+        foreach ((Guid entityId, ModelPropertyTree propertyTree) in _propertyTrees)
+        {
+            if (GodotObject.IsInstanceValid(propertyTree))
+            {
+                UpdateTreePosition(entityId, propertyTree);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 文字列で通知されたModelEntity識別子に対応するツリー位置を再計算する。
+    /// </summary>
+    /// <param name="entityId">位置を再計算するModelEntity識別子。</param>
+    private void UpdateTreePositionByEntityId(string entityId)
+    {
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId)
+            || !_propertyTrees.TryGetValue(parsedEntityId, out ModelPropertyTree propertyTree)
+            || !GodotObject.IsInstanceValid(propertyTree))
+        {
+            return;
+        }
+
+        UpdateTreePosition(parsedEntityId, propertyTree);
+    }
+
+    /// <summary>
+    /// ModelEntityの位置をスクリーン座標へ投影して、対応するツリー表示を更新する。
+    /// </summary>
+    /// <param name="entityId">表示対象のModelEntity識別子。</param>
+    /// <param name="propertyTree">更新対象のModelPropertyTree。</param>
+    private void UpdateTreePosition(Guid entityId, ModelPropertyTree propertyTree)
+    {
+        ModelEntity entity = Application.Model.Entity.Registry.Get(entityId);
+        ModelNode modelNode = entity?.Node;
+        if (entity == null || modelNode == null || !GodotObject.IsInstanceValid(modelNode)
+            || !entity.IsVisible
+            || !Application.Viewport.Camera.TryProjectToScreen(modelNode.GlobalPosition, Size, out Vector2 screenPosition))
+        {
+            propertyTree.Hide();
+            return;
+        }
+
+        propertyTree.Position = screenPosition;
+        propertyTree.Show();
+    }
+
+    /// <summary>
+    /// ModelPropertyTreeをインスタンス化してOverlayの直接子に追加する。
+    /// </summary>
+    /// <param name="entityId">表示対象のModelEntity識別子。</param>
+    /// <returns>生成したModelPropertyTree。シーンを読み込めない場合は null。</returns>
+    private ModelPropertyTree CreatePropertyTree(Guid entityId)
+    {
+        if (_modelPropertyTreeScene == null)
+        {
+            Application.Log.Error("ViewportPropertyOverlay: ModelPropertyTree scene could not be loaded.");
+            return null;
+        }
+
+        ModelPropertyTree propertyTree = _modelPropertyTreeScene.Instantiate<ModelPropertyTree>();
+        propertyTree.Name = $"ModelPropertyTree-{entityId}";
+        AddChild(propertyTree);
+        return propertyTree;
     }
 
     #endregion

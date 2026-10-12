@@ -13,9 +13,4 @@ size_flags_horizontal = 4
 size_flags_vertical = 4
 mouse_filter = 2
 script = ExtResource("1_1wpwh")
-
-[node name="Label" type="Label" parent="." unique_id=1649371077]
-layout_mode = 0
-offset_right = 40.0
-offset_bottom = 23.0
-text = "Origin"
+TargetPositionCatia = Vector3(1000, 0, 0)

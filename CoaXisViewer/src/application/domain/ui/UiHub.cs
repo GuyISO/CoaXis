@@ -11,6 +11,8 @@ public partial class UiHub : BaseHub
 
 	/// <summary>メニューハブを取得する。</summary>
 	public UiMenuHub Menu { get; }
+	/// <summary>ModelEntityプロパティの表示要求を管理するハブを取得する。</summary>
+	public UiPropertyHub Property { get; }
 	/// <summary>ウィンドウハブを取得する。</summary>
 	public UiWindowHub Window { get; }
 
@@ -28,6 +30,7 @@ public partial class UiHub : BaseHub
 	public UiHub()
 	{
 		Menu = AddModule<UiMenuHub>("Menu");
+		Property = AddModule<UiPropertyHub>("Property");
 		Window = AddModule<UiWindowHub>("Window");
 	}
 

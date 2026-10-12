@@ -141,7 +141,6 @@ theme_override_constants/v_separation = 2
 columns = 2
 allow_reselect = true
 allow_search = false
-auto_tooltip = false
 script = ExtResource("12_bn6oc")
 
 [node name="Blank" type="Control" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer" unique_id=1196475229]

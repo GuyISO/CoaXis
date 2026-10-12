@@ -8,6 +8,10 @@ SettingもFacadeにして、各種設定を管理するHub
 IPCの状態確認UI作成する
 Fitでモデルを画面に収める機能で非表示レイヤーを除外する
 
+三面図などの複数Viewportに対応できるように、各Viewportごとに独立したカメラやオーバーレイを管理する仕組みを検討する
+ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介してカメラを表示できるようにする、各Viewportごとに独立したカメラ制御を可能にする
+FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
+
 ## 3D表示関係
 点群座標へのVFX配置
     GodotのVFX Graphを使用して、点群座標にエフェクトを配置する機能を実装する

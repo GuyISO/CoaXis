@@ -293,6 +293,59 @@ public partial class ViewportCameraHub : BaseHub
     }
 
     /// <summary>
+    /// Godot座標系の対象位置をビューポート内のスクリーン座標へ投影する。
+    /// </summary>
+    /// <param name="targetPosition">投影対象のGodotワールド座標。</param>
+    /// <param name="viewportSize">投影先ビューポートのピクセルサイズ。</param>
+    /// <param name="screenPosition">投影に成功した場合のビューポートローカル座標。</param>
+    /// <returns>対象がカメラの視錐台内にあり、投影に成功した場合は true。</returns>
+    public bool TryProjectToScreen(Vector3 targetPosition, Vector2 viewportSize, out Vector2 screenPosition)
+    {
+        screenPosition = Vector2.Zero;
+        if (viewportSize.X <= 0.0f || viewportSize.Y <= 0.0f)
+        {
+            return false;
+        }
+
+        // CameraRigと同じく、注視点の姿勢・位置にカメラ距離を加えた座標系で投影する。
+        Basis inverseCameraBasis = new Basis(Rotation).Inverse();
+        Vector3 cameraLocalPosition = inverseCameraBasis * (targetPosition - Position)
+            - new Vector3(0.0f, 0.0f, Distance);
+        float depth = -cameraLocalPosition.Z;
+        if (depth < Near || depth > Far)
+        {
+            return false;
+        }
+
+        float aspect = viewportSize.X / viewportSize.Y;
+        float halfHeight;
+        switch (ProjectionType)
+        {
+            case Camera3D.ProjectionType.Perspective:
+                halfHeight = depth * Mathf.Tan(Mathf.DegToRad(Fov) * 0.5f);
+                break;
+            case Camera3D.ProjectionType.Orthogonal:
+                halfHeight = Size * 0.5f;
+                break;
+            default:
+                return false;
+        }
+
+        float halfWidth = halfHeight * aspect;
+        if (halfHeight <= Mathf.Epsilon || halfWidth <= Mathf.Epsilon
+            || Mathf.Abs(cameraLocalPosition.X) > halfWidth
+            || Mathf.Abs(cameraLocalPosition.Y) > halfHeight)
+        {
+            return false;
+        }
+
+        screenPosition = new Vector2(
+            (cameraLocalPosition.X + halfWidth) / (halfWidth * 2.0f) * viewportSize.X,
+            (halfHeight - cameraLocalPosition.Y) / (halfHeight * 2.0f) * viewportSize.Y);
+        return true;
+    }
+
+    /// <summary>
     /// 対象ノード群が収まるようカメラを調整する。
     /// </summary>
     public void Fit(Node3D[] targetNodes, bool useTween = false)
