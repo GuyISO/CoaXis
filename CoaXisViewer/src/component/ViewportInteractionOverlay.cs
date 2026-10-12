@@ -7,7 +7,7 @@ using Godot;
 /// <remarks>
 /// 描画対象のオブジェクトは常に保持しているため描画更新はイベント駆動で行い、ビューポート状態の変化イベントを受け取ったときに表示状態へ反映する
 /// </remarks>
-public partial class ViewportOverlay : Control
+public partial class ViewportInteractionOverlay : Control
 {
 	#region Fields
 

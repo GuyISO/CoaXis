@@ -2,7 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bpjsx6b8uoiei" path="res://src/component/ViewportInteractionHandler.cs" id="1_wls6u"]
 [ext_resource type="Script" uid="uid://cyvjuop81lmmm" path="res://src/component/scene/CameraRig.cs" id="2_woemn"]
-[ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/viewport_overlay.tscn" id="3_uud5i"]
+[ext_resource type="PackedScene" uid="uid://ccpqmkhlbgs87" path="res://scenes/viewport/viewport_property_overlay.tscn" id="3_2ve0l"]
+[ext_resource type="PackedScene" uid="uid://cf06e5oyn7g2i" path="res://scenes/viewport/viewport_interaction_overlay.tscn" id="3_uud5i"]
 [ext_resource type="PackedScene" uid="uid://clg4ivxpqifho" path="res://scenes/viewport/axis_navigator.tscn" id="4_o0c0q"]
 
 [node name="ViewportContainer" type="SubViewportContainer" unique_id=999195544]
@@ -30,6 +31,8 @@ current = true
 fov = 35.0
 near = 0.001
 
-[node name="ViewportOverlay" parent="Viewport" unique_id=440684067 instance=ExtResource("3_uud5i")]
+[node name="ViewportPropertyOverlay" parent="Viewport" unique_id=1306453739 instance=ExtResource("3_2ve0l")]
+
+[node name="ViewportInteractionOverlay" parent="Viewport" unique_id=732884935 instance=ExtResource("3_uud5i")]
 
 [node name="AxisNavigator" parent="Viewport" unique_id=1990463361 instance=ExtResource("4_o0c0q")]
