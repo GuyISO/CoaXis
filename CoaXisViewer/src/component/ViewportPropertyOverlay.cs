@@ -11,6 +11,7 @@ public partial class ViewportPropertyOverlay : Control
 
     private readonly PackedScene _modelPropertyTreeScene = ResourceLoader.Load<PackedScene>("res://scenes/model_property_tree.tscn");
     private readonly Dictionary<Guid, ModelPropertyTree> _propertyTrees = new();
+    private readonly Dictionary<Guid, Vector3> _localAabbCenters = new();
 
     #endregion
 
@@ -31,6 +32,7 @@ public partial class ViewportPropertyOverlay : Control
     {
         UnsubscribeEvents();
         _propertyTrees.Clear();
+        _localAabbCenters.Clear();
 
         base._ExitTree();
     }
@@ -58,6 +60,7 @@ public partial class ViewportPropertyOverlay : Control
         Application.Model.Entity.State.PositionNotified += OnEntityPositionNotified;
         Application.Model.Entity.State.RotationNotified += OnEntityRotationNotified;
         Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
+        Application.Model.Entity.State.StatusNotified += OnEntityStatusNotified;
     }
 
     /// <summary>
@@ -79,6 +82,7 @@ public partial class ViewportPropertyOverlay : Control
         Application.Model.Entity.State.PositionNotified -= OnEntityPositionNotified;
         Application.Model.Entity.State.RotationNotified -= OnEntityRotationNotified;
         Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
+        Application.Model.Entity.State.StatusNotified -= OnEntityStatusNotified;
     }
 
     /// <summary>
@@ -201,6 +205,7 @@ public partial class ViewportPropertyOverlay : Control
         }
 
         _propertyTrees.Remove(entityId);
+        _localAabbCenters.Remove(entityId);
         if (GodotObject.IsInstanceValid(propertyTree))
         {
             propertyTree.QueueFree();
@@ -247,8 +252,15 @@ public partial class ViewportPropertyOverlay : Control
         ModelEntity entity = Application.Model.Entity.Registry.Get(entityId);
         ModelNode modelNode = entity?.Node;
         if (entity == null || modelNode == null || !GodotObject.IsInstanceValid(modelNode)
-            || !entity.IsVisible
-            || !Application.Viewport.Camera.TryProjectToScreen(modelNode.GlobalPosition, Size, out Vector2 screenPosition))
+            || !entity.IsVisible)
+        {
+            propertyTree.Hide();
+            return;
+        }
+
+        Vector3 anchor = modelNode.GlobalTransform * GetLocalAabbCenter(entityId, modelNode);
+
+        if (!Application.Viewport.Camera.TryProjectToScreen(anchor, Size, out Vector2 screenPosition))
         {
             propertyTree.Hide();
             return;
@@ -256,6 +268,46 @@ public partial class ViewportPropertyOverlay : Control
 
         propertyTree.Position = screenPosition;
         propertyTree.Show();
+    }
+
+    /// <summary>
+    /// ModelNodeローカル空間のAABB中心を返す。メッシュ走査は高コストなためEntityごとにキャッシュし、移動・回転・カメラ変化ではグローバル変換のみ再適用する。
+    /// </summary>
+    /// <param name="entityId">対象のModelEntity識別子。</param>
+    /// <param name="modelNode">対象のModelNode。</param>
+    /// <returns>ModelNodeローカル空間のAABB中心。メッシュが無い場合は原点。</returns>
+    private Vector3 GetLocalAabbCenter(Guid entityId, ModelNode modelNode)
+    {
+        if (_localAabbCenters.TryGetValue(entityId, out Vector3 cached))
+        {
+            return cached;
+        }
+
+        Vector3 localCenter = WorldAabbUtility.TryGetWorldAabb(new[] { modelNode }, out Aabb worldAabb)
+            ? modelNode.ToLocal(worldAabb.GetCenter())
+            : Vector3.Zero;
+
+        // シーン読み込み前はメッシュが無く原点フォールバックとなるため、キャッシュせず次回再計算する。
+        if (worldAabb.Size != Vector3.Zero)
+        {
+            _localAabbCenters[entityId] = localCenter;
+        }
+
+        return localCenter;
+    }
+
+    /// <summary>
+    /// ModelEntityの状態（ロード完了など）が変化したとき、AABB中心キャッシュを破棄して位置を再計算する。
+    /// </summary>
+    /// <param name="entityId">状態が変化したModelEntity識別子。</param>
+    private void OnEntityStatusNotified(string entityId)
+    {
+        if (Guid.TryParse(entityId, out Guid parsedEntityId))
+        {
+            _localAabbCenters.Remove(parsedEntityId);
+        }
+
+        UpdateTreePositionByEntityId(entityId);
     }
 
     /// <summary>

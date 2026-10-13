@@ -1,5 +1,12 @@
 # Viewer
 
+EntityがPropertyを保有していることがわかるよう保有数をボタンで表示する
+PropertyTreeにもアイコンを表示する
+ModelEntityに対してAABBの空間にエフェクトを配置する
+
+Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする
+ModelProertyTreeは、Containerの中に配置する形で使用する
+
 AssetHubをFacadeにし、Material,Icon,Sceneなど各Asset種類別のHubを持たせる
 SettingもFacadeにして、各種設定を管理するHub
 
@@ -15,8 +22,6 @@ FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
 ## 3D表示関係
 点群座標へのVFX配置
     GodotのVFX Graphを使用して、点群座標にエフェクトを配置する機能を実装する
-3Dから2Dに投影してテキストを表示
-    3D空間の特定の位置にテキストを表示するために、カメラ投影を使用して2Dスクリーン座標に変換し、UI上にテキストを配置する機能を実装する
 レイヤー管理
     表示非表示以外のレイヤーを用意、分類は未決定
         Model、VFXでわけるか？
