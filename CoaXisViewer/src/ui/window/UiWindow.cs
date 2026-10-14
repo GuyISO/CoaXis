@@ -1,5 +1,4 @@
-﻿// TODO: リファクタリング確認後に削除
-using Godot;
+﻿using Godot;
 using System;
 
 /// <summary>
@@ -67,7 +66,7 @@ public partial class UiWindow : Window
 
     #endregion
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// ウィンドウのコンテンツを指定されたコンテナに置き換え、ウィンドウ内の UI を新しいコンテナ内容へ更新する

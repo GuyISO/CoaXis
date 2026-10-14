@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System.Globalization;
 
@@ -26,7 +25,7 @@ public partial class AxisNavigator : Control
 	{
 		EnsureChildNodes();
 		SubscribeApplicationEvents();
-		InitializeFromHub();
+		SyncInitialState();
 	}
 
 	public override void _ExitTree()
@@ -103,7 +102,7 @@ public partial class AxisNavigator : Control
 	/// <summary>
 	/// Hubが保持するカメラ回転を軸ナビゲータへ初期反映する。
 	/// </summary>
-	private void InitializeFromHub()
+	private void SyncInitialState()
 	{
 		OnRotationNotified();
 	}

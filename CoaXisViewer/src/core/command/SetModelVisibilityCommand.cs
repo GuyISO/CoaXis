@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
@@ -50,7 +49,7 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
 
     #endregion
 
-    #region public Methods
+    #region Methods
 
     /// <summary>
     /// コマンドを実行する

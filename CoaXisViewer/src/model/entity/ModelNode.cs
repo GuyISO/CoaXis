@@ -67,7 +67,7 @@ public partial class ModelNode : Node3D
 
     #endregion
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// モデルをスケール反復アニメーションで一時的に目立たせる

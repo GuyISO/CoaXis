@@ -30,7 +30,7 @@ public static class SceneAssetLoader
     private static readonly object _loadStatesLock = new();
     private static string _activeLoadPath;
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// 完了済みまたは失敗済みのロード状態を破棄する（AssetHubのres://シーンキャッシュは維持する）

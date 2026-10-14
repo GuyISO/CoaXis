@@ -18,7 +18,7 @@ Godot C# / 非Godot C# の両方に適用します。
 3. `Properties`
 4. `Lifecycle`
 5. `Events`（必要な場合のみ）
-6. `Public Methods`
+6. `Methods`
 7. `Helpers`
 
 補足:
@@ -36,7 +36,7 @@ Godot C# / 非Godot C# の両方に適用します。
 - `Properties`
 - `Lifecycle`
 - `Events`
-- `Public Methods`
+- `Methods`
 - `Helpers`
 
 ### 3.1 EventHub クラスの例外

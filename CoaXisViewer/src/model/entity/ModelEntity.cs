@@ -276,7 +276,7 @@ public class ModelEntity
 
     #endregion
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// 子モデル実体を登録する。同一 Id の重複登録は無視する。

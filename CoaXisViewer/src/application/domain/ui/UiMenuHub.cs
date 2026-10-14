@@ -12,8 +12,8 @@ public partial class UiMenuHub : BaseHub
     private ModelEntityMenu _modelEntityMenu;
     /// <summary>ModelProperty用コンテキストメニュー。</summary>
     private ModelPropertyMenu _modelPropertyMenu;
-    /// <summary>ピック結果用コンテキストメニュー。</summary>
-    private PickResultMenu _pickResultMenu;
+    /// <summary>Viewportでのピック結果用コンテキストメニュー。</summary>
+    private ViewportMenu _viewportMenu;
     /// <summary>軸ナビゲーター用コンテキストメニュー。</summary>
     private AxisNavigatorMenu _axisNavigatorMenu;
 
@@ -44,7 +44,7 @@ public partial class UiMenuHub : BaseHub
     public void ShowModelEntityMenu(Guid entityId)
     {
         _modelEntityMenu = EnsureMenu(_modelEntityMenu, "ModelEntityMenu");
-        _modelEntityMenu.ShowForEntity(entityId);
+        _modelEntityMenu.Show(entityId);
     }
 
     /// <summary>
@@ -54,17 +54,17 @@ public partial class UiMenuHub : BaseHub
     public void ShowModelPropertyMenu(string value)
     {
         _modelPropertyMenu = EnsureMenu(_modelPropertyMenu, "ModelPropertyMenu");
-        _modelPropertyMenu.ShowForValue(value);
+        _modelPropertyMenu.Show(value);
     }
 
     /// <summary>
-    /// 指定した PickResult を対象にコンテキストメニューを表示する。
+    /// 指定した Viewport 上のピック結果を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="pickResult">操作対象とする PickResult</param>
-    public void ShowPickResultMenu(PickResult pickResult)
+    public void ShowViewportMenu(PickResult pickResult)
     {
-        _pickResultMenu = EnsureMenu(_pickResultMenu, "PickResultMenu");
-        _pickResultMenu.ShowForPickResult(pickResult);
+        _viewportMenu = EnsureMenu(_viewportMenu, "ViewportMenu");
+        _viewportMenu.Show(pickResult);
     }
 
     /// <summary>
@@ -73,7 +73,7 @@ public partial class UiMenuHub : BaseHub
     public void ShowAxisNavigatorMenu()
     {
         _axisNavigatorMenu = EnsureMenu(_axisNavigatorMenu, "AxisNavigatorMenu");
-        _axisNavigatorMenu.ShowAtPosition();
+        _axisNavigatorMenu.Show();
     }
 
     #endregion

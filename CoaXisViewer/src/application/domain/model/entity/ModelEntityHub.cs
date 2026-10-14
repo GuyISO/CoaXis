@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// ModelEntity 関連モジュールの構成を管理するハブ。
 /// </summary>

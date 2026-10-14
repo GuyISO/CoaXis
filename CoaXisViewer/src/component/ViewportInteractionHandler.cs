@@ -1,7 +1,4 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
-using System;
-using System.Collections.Generic;
 
 /// <summary>
 /// アタッチされている3Dビューの入力を受け取り、ViewportEvent へ中継する
@@ -25,7 +22,6 @@ public partial class ViewportInteractionHandler : SubViewport
 
         // 派生する半径をHubへ登録し、表示側が現在値から初期化できるようにする。
         RefreshArcballParameters();
-        Application.Log.Info("ViewportInteractionHandler initialized.");
     }
 
     public override void _ExitTree()
@@ -158,13 +154,9 @@ public partial class ViewportInteractionHandler : SubViewport
         else if (button.Pressed && button.ButtonIndex == MouseButton.Right)
         {
             PickResult pickResult = PickUtility.PickByRay(GetCamera3D(), button.Position);
-            // 何もヒットしない空間での右クリックは対象不明のメニュー表示になり紛らわしいため表示しない
-            if (!pickResult.HasHit)
-            {
-                return;
-            }
 
-            Application.Ui.Menu.ShowPickResultMenu(pickResult);
+            // 何もヒットしない空間での右クリックは対象不明のメニューが表示される
+            Application.Ui.Menu.ShowViewportMenu(pickResult);
         }
     }
 

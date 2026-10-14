@@ -20,7 +20,7 @@ public partial class CameraRig : Node3D
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
-        InitializeFromHub();
+        SyncInitialState();
     }
 
     /// <summary>
@@ -80,7 +80,7 @@ public partial class CameraRig : Node3D
     /// <summary>
     /// Hubが保持する現在状態を読み取り、シーン上のカメラへ初期反映する。
     /// </summary>
-    private void InitializeFromHub()
+    private void SyncInitialState()
     {
         OnPositionNotified();
         OnRotationNotified();

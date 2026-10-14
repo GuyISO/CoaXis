@@ -97,7 +97,7 @@ public class ModelProperty
 
     #endregion
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// このプロパティが所属する ModelEntity を再帰的に探索して取得する。

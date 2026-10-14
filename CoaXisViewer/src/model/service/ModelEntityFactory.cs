@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using CoaXis.Protocol.Viewer;
 using System;
 using System.Collections.Generic;
@@ -8,7 +7,7 @@ using System.Collections.Generic;
 /// </summary>
 public static class ModelEntityFactory
 {
-    #region Public API
+    #region Methods
 
     /// <summary>
     /// ModelEntityDto の集合から ModelEntity を一括生成する。

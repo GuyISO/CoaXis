@@ -383,7 +383,7 @@ public partial class ModelEntityTree : Tree
 
     #endregion
 
-    #region public Methods
+    #region Methods
 
     // TODO: ちゃんとやる
     public void SetRootModelEntity(ModelEntity rootModelEntity)

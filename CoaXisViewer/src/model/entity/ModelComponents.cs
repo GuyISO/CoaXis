@@ -62,7 +62,7 @@ public partial class ModelComponents : Node3D
 
     #endregion
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// 内部構造を初期化する

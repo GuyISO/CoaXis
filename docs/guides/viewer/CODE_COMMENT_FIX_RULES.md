@@ -65,7 +65,7 @@
 
 1. Lifecycle
 2. Events
-3. Public Methods
+3. Methods
 4. Helpers
 
 ## 5. PRセルフチェック

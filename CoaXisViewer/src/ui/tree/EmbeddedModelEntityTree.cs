@@ -1,8 +1,7 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// 自動的にルート ModelEntity からの階層ツリーの表示と操作を行う UI コンポーネント
 /// </summary>
-public partial class RootModelEntityTree : ModelEntityTree
+public partial class EmbeddedModelEntityTree : ModelEntityTree
 {
     #region Lifecycle
 

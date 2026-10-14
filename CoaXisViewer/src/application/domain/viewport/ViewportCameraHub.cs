@@ -659,9 +659,9 @@ public partial class ViewportCameraHub : BaseHub
             float requiredDistance = 0f;
 
             // AABBの各頂点をカメラ座標へ移し、水平・垂直画角を満たす距離を求める。
-            foreach (Vector3 corner in WorldAabbUtility.GetAabbCorners(worldAabb))
+            for (int i = 0; i < 8; i++)
             {
-                Vector3 local = inverseBasis * (corner - center);
+                Vector3 local = inverseBasis * (worldAabb.GetEndpoint(i) - center);
                 requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.X) / tanHalfX);
                 requiredDistance = Mathf.Max(requiredDistance, local.Z + Mathf.Abs(local.Y) / tanHalfY);
                 maxZ = Mathf.Max(maxZ, local.Z);
@@ -673,9 +673,9 @@ public partial class ViewportCameraHub : BaseHub
 
         float maxAbsX = 0f;
         float maxAbsY = 0f;
-        foreach (Vector3 corner in WorldAabbUtility.GetAabbCorners(worldAabb))
+        for (int i = 0; i < 8; i++)
         {
-            Vector3 local = inverseBasis * (corner - center);
+            Vector3 local = inverseBasis * (worldAabb.GetEndpoint(i) - center);
             maxAbsX = Mathf.Max(maxAbsX, Mathf.Abs(local.X));
             maxAbsY = Mathf.Max(maxAbsY, Mathf.Abs(local.Y));
         }

@@ -1,5 +1,4 @@
-﻿// TODO: リファクタリング確認後に削除
-using Godot;
+﻿using Godot;
 using System.Collections.Generic;
 
 /// <summary>
@@ -7,7 +6,7 @@ using System.Collections.Generic;
 /// </summary>
 public static class WorldAabbUtility
 {
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// 指定ノード群からワールド空間の AABB を合算して取得する
@@ -44,28 +43,6 @@ public static class WorldAabbUtility
         return hasMeshAabb;
     }
 
-    /// <summary>
-    /// AABB の 8 コーナーを返す
-    /// </summary>
-    /// <param name="aabb">対象 AABB </param>
-    /// <returns>8 コーナーの配列</returns>
-    public static Vector3[] GetAabbCorners(Aabb aabb)
-    {
-        Vector3 p = aabb.Position;
-        Vector3 s = aabb.Size;
-        return new[]
-        {
-            new Vector3(p.X, p.Y, p.Z),
-            new Vector3(p.X + s.X, p.Y, p.Z),
-            new Vector3(p.X, p.Y + s.Y, p.Z),
-            new Vector3(p.X, p.Y, p.Z + s.Z),
-            new Vector3(p.X + s.X, p.Y + s.Y, p.Z),
-            new Vector3(p.X + s.X, p.Y, p.Z + s.Z),
-            new Vector3(p.X, p.Y + s.Y, p.Z + s.Z),
-            new Vector3(p.X + s.X, p.Y + s.Y, p.Z + s.Z)
-        };
-    }
-
     #endregion
 
     #region Helpers
@@ -98,7 +75,8 @@ public static class WorldAabbUtility
 
         if (node is MeshInstance3D meshInstance && meshInstance.Mesh != null)
         {
-            Aabb meshAabb = BuildWorldAabb(meshInstance, meshInstance.Mesh.GetAabb());
+            // Transform3D * Aabb は 8 コーナー変換と再構築を Godot 側で行う
+            Aabb meshAabb = meshInstance.GlobalTransform * meshInstance.Mesh.GetAabb();
             if (!hasMeshAabb)
             {
                 aabb = meshAabb;
@@ -114,27 +92,6 @@ public static class WorldAabbUtility
         {
             GetWorldAabbRecursive(child, ref aabb, ref hasMeshAabb);
         }
-    }
-
-    /// <summary>
-    /// MeshInstance3D のローカル AABB をワールド AABB に変換する
-    /// </summary>
-    /// <param name="meshInstance">対象の MeshInstance3D</param>
-    /// <param name="localAabb">対象のローカル AABB</param>
-    /// <returns>ワールド AABB</returns>
-    private static Aabb BuildWorldAabb(MeshInstance3D meshInstance, Aabb localAabb)
-    {
-        Vector3 min = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
-        Vector3 max = new Vector3(float.NegativeInfinity, float.NegativeInfinity, float.NegativeInfinity);
-
-        foreach (Vector3 corner in GetAabbCorners(localAabb))
-        {
-            Vector3 world = meshInstance.ToGlobal(corner);
-            min = new Vector3(Mathf.Min(min.X, world.X), Mathf.Min(min.Y, world.Y), Mathf.Min(min.Z, world.Z));
-            max = new Vector3(Mathf.Max(max.X, world.X), Mathf.Max(max.Y, world.Y), Mathf.Max(max.Z, world.Z));
-        }
-
-        return new Aabb(min, max - min);
     }
 
     #endregion

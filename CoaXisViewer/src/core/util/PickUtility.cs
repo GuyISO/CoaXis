@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using Godot.Collections;
 using System;
@@ -9,7 +8,7 @@ using System.Collections.Generic;
 /// </summary>
 public static class PickUtility
 {
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// 指定したカメラからスクリーン座標に向けてレイキャストを行い、ヒット情報を返す

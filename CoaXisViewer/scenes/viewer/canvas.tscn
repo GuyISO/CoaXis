@@ -10,8 +10,8 @@
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/selection_ui.tscn" id="6_npq5x"]
 [ext_resource type="PackedScene" uid="uid://bfdie23q7sox" path="res://scenes/ui/camera_state_ui.tscn" id="7_57r0r"]
 [ext_resource type="PackedScene" uid="uid://djb751h7aic7h" path="res://scenes/ui/visual_ui.tscn" id="7_xrtxh"]
-[ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/RootModelEntityTree.cs" id="10_57r0r"]
-[ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbededModelPropertyTree.cs" id="12_bn6oc"]
+[ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/EmbeddedModelEntityTree.cs" id="10_57r0r"]
+[ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbeddedModelPropertyTree.cs" id="12_bn6oc"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -123,7 +123,7 @@ layout_mode = 2
 split_offsets = PackedInt32Array(-200)
 split_offset = -200
 
-[node name="RootModelEntityTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=119731503]
+[node name="EmbeddedModelEntityTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=119731503]
 layout_mode = 2
 size_flags_vertical = 3
 theme_override_colors/font_color = Color(1, 1, 1, 1)
@@ -134,7 +134,7 @@ hide_root = true
 auto_tooltip = false
 script = ExtResource("10_57r0r")
 
-[node name="EmbededModelPropertyTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=316986411]
+[node name="EmbeddedModelPropertyTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=316986411]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/v_separation = 2

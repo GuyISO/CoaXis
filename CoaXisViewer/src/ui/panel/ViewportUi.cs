@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
@@ -40,7 +39,7 @@ public partial class ViewportUi : PanelContainer
         EnsureChildNodes();
         SubscribeUiEvents();
         SubscribeApplicationEvents();
-        InitializeFromHub();
+        SyncInitialState();
     }
 
     public override void _ExitTree()
@@ -150,7 +149,7 @@ public partial class ViewportUi : PanelContainer
     /// <summary>
     /// Hubが保持する現在状態を読み取り、UIへ初期反映する。
     /// </summary>
-    private void InitializeFromHub()
+    private void SyncInitialState()
     {
         OnPickHandlingModeNotified();
         OnInteractionModeNotified();

@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using CoaXis.Protocol.Viewer;
 using Godot;
 using System;
@@ -8,6 +7,8 @@ using System;
 /// </summary>
 public static class ModelEntityMapper
 {
+	#region Methods
+
 	/// <summary>
 	/// DTOをModelEntityへ変換する
 	/// </summary>
@@ -72,4 +73,6 @@ public static class ModelEntityMapper
 		Basis godotBasis = CoordinateSystemUtility.CatiaToGodot(catiaBasis);
 		return godotBasis.GetRotationQuaternion();
 	}
+	
+	#endregion
 }

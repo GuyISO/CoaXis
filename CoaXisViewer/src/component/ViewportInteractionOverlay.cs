@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -17,7 +16,7 @@ public partial class ViewportInteractionOverlay : Control
 	private const float CenterAxisLength = 32.0f;
 	private const float CenterAxisGap = 16.0f;
 	private const float ArcballCrossAngularSize = 0.24f;
-	private const int ArcballCrossCurveSegments = 12;
+	private const int ArcballCrossCurveSegments = 8;
 
 	// オーバーレイの線の色、設定から読み込み　_Ready 後に ApplySettings() で初期化する
 	private Color _lineColor;
@@ -48,7 +47,7 @@ public partial class ViewportInteractionOverlay : Control
 		EnsureChildNodes();
 		SubscribeApplicationEvents();
 		ApplySettings();
-		InitializeFromHub();
+		SyncInitialState();
 	}
 
 	public override void _ExitTree()
@@ -93,7 +92,7 @@ public partial class ViewportInteractionOverlay : Control
 		Application.Viewport.Camera.RotationNotified += OnRotationNotified;
 		Application.Viewport.Interaction.ModeNotified += OnInteractionModeNotified;
 		Application.Viewport.Interaction.ArcballRadiusNotified += OnArcballRadiusNotified;
-		Application.Viewport.Interaction.ArcballHandleRotationNotified += OnArcballHandleRotationNotified;
+		Application.Viewport.Interaction.ArcballHandleNotified += OnArcballHandleNotified;
 		Application.Viewport.Interaction.PickRectNotified += OnPickRectNotified;
 	}
 
@@ -106,19 +105,19 @@ public partial class ViewportInteractionOverlay : Control
 		Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
 		Application.Viewport.Interaction.ModeNotified -= OnInteractionModeNotified;
 		Application.Viewport.Interaction.ArcballRadiusNotified -= OnArcballRadiusNotified;
-		Application.Viewport.Interaction.ArcballHandleRotationNotified -= OnArcballHandleRotationNotified;
+		Application.Viewport.Interaction.ArcballHandleNotified -= OnArcballHandleNotified;
 		Application.Viewport.Interaction.PickRectNotified -= OnPickRectNotified;
 	}
 
 	/// <summary>
 	/// Hubが保持する現在状態を読み取り、初回描画へ反映する。
 	/// </summary>
-	private void InitializeFromHub()
+	private void SyncInitialState()
 	{
 		OnRotationNotified();
 		OnInteractionModeNotified();
 		OnArcballRadiusNotified();
-		OnArcballHandleRotationNotified();
+		OnArcballHandleNotified();
 		OnPickRectNotified();
 	}
 
@@ -149,16 +148,16 @@ public partial class ViewportInteractionOverlay : Control
 	{
 		ViewportInteractionHub interaction = Application.Viewport.Interaction;
 		DrawArcballOutline(interaction.ArcballRadius);
-		DrawArcballCross(interaction.ArcballHandleRotation, interaction.ArcballRadius);
+		DrawArcballCross(interaction.ArcballHandle, interaction.ArcballRadius);
 	}
 
 	/// <summary>
 	/// アークボール補助表示の回転が通知されたときに呼び出されるイベントハンドラ。
 	/// </summary>
-	private void OnArcballHandleRotationNotified()
+	private void OnArcballHandleNotified()
 	{
 		ViewportInteractionHub interaction = Application.Viewport.Interaction;
-		DrawArcballCross(interaction.ArcballHandleRotation, interaction.ArcballRadius);
+		DrawArcballCross(interaction.ArcballHandle, interaction.ArcballRadius);
 	}
 
 	/// <summary>
@@ -431,7 +430,7 @@ public partial class ViewportInteractionOverlay : Control
 
 		DrawArcballOutline(Application.Viewport.Interaction.ArcballRadius);
 		DrawArcballCross(
-			Application.Viewport.Interaction.ArcballHandleRotation,
+			Application.Viewport.Interaction.ArcballHandle,
 			Application.Viewport.Interaction.ArcballRadius);
 	}
 

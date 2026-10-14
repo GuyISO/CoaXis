@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System.Collections.Generic;
 
@@ -39,21 +38,24 @@ public partial class AxisNavigatorMenu : BaseMenu
 		{ MenuItemId.ViewBack, new Vector3(0, 0, 0) },
 	};
 
-	#region Public Methods
+	#region Methods
 
 	/// <summary>
 	/// 現在のマウス位置にネイティブコンテキストメニューを表示する
 	/// </summary>
-	public void ShowAtPosition()
+	public void Show()
 	{
 		PopupNativeMenu();
 	}
 
 	#endregion
 
-	#region Protected API
+	#region Helpers
 
-	/// <inheritdoc/>
+	/// <summary>
+	/// AxisNavigatorMenu のネイティブメニュー項目を構築する
+	/// </summary>
+	/// <param name="nativeMenu">ネイティブメニューの Rid</param>
 	protected override void BuildMenuItems(Rid nativeMenu)
 	{
 		NativeMenu.Singleton.AddItem(nativeMenu, "Top", Callable.From<Variant>(_ => HandleViewMenuItemPressed(MenuItemId.ViewTop)));
@@ -69,10 +71,10 @@ public partial class AxisNavigatorMenu : BaseMenu
 		NativeMenu.Singleton.AddItem(nativeMenu, "ToggleProjection", Callable.From<Variant>(HandleToggleProjectionMenuItemPressed));
 	}
 
-	#endregion
-
-	#region Helpers
-
+	/// <summary>
+	/// 指定された視点方向のメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="menuItemId">選択された視点方向のメニュー項目のID</param>
 	private void HandleViewMenuItemPressed(MenuItemId menuItemId)
 	{
 		if (!ViewRotationDegrees.TryGetValue(menuItemId, out Vector3 rotationDegrees))
@@ -84,13 +86,20 @@ public partial class AxisNavigatorMenu : BaseMenu
 		Application.Viewport.Camera.MoveRotationTo(rotation, true);
 	}
 
+	/// <summary>
+	/// 指定された角度でカメラをロールさせる
+	/// </summary>
+	/// <param name="degrees">カメラをロールさせる角度（度）</param>
 	private void HandleRollMenuItemPressed(float degrees)
 	{
 		Quaternion rotation = new Quaternion(Vector3.Forward, Mathf.DegToRad(degrees));
 		Application.Viewport.Camera.Rotate(rotation, SpaceMode.FocalPoint, true);
 	}
 
-	// NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る
+	/// <summary>
+	/// カメラの投影タイプを切り替える
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleToggleProjectionMenuItemPressed(Variant tag)
 	{
 		Application.Viewport.Camera.ToggleProjectionType();

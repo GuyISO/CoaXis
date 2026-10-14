@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
@@ -25,7 +24,7 @@ public partial class ModelEntityMenu : BaseMenu
 	/// 指定した ModelEntity を対象にネイティブコンテキストメニューを表示する
 	/// </summary>
 	/// <param name="entityId">操作対象とする ModelEntity の識別子</param>
-	public void ShowForEntity(Guid entityId)
+	public void Show(Guid entityId)
 	{
 		SetTargetEntity(entityId);
 		PopupNativeMenu();
@@ -43,9 +42,12 @@ public partial class ModelEntityMenu : BaseMenu
 
 	#endregion
 
-	#region Protected API
+	#region Helpers
 
-	/// <inheritdoc/>
+	/// <summary>
+	/// ModelEntityMenu のネイティブメニュー項目を構築する
+	/// </summary>
+	/// <param name="nativeMenu">ネイティブメニューの Rid</param>
 	protected override void BuildMenuItems(Rid nativeMenu)
 	{
 		NativeMenu.Singleton.AddItem(nativeMenu, "Fit", Callable.From<Variant>(HandleFitMenuItemPressed));
@@ -56,11 +58,10 @@ public partial class ModelEntityMenu : BaseMenu
 		NativeMenu.Singleton.AddItem(nativeMenu, "Hide Property", Callable.From<Variant>(HandleHidePropertyMenuItemPressed));
 	}
 
-	#endregion
-
-	#region Helpers
-
-	// NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る
+	/// <summary>
+	/// カメラを対象の ModelEntity にフィットさせるメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleFitMenuItemPressed(Variant tag)
 	{
 		ModelNode modelNode = GetModelNode();
@@ -73,16 +74,28 @@ public partial class ModelEntityMenu : BaseMenu
 		Application.Viewport.Camera.Fit(fitTargetNodes, true);
 	}
 
+	/// <summary>
+	/// 対象の ModelEntity を強調表示するメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleEmphasizeMenuItemPressed(Variant tag)
 	{
 		GetModelNode()?.Emphasize();
 	}
 
+	/// <summary>
+	/// 対象の ModelEntity を回転させるメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleSpinMenuItemPressed(Variant tag)
 	{
 		GetModelNode()?.SpinAppeal();
 	}
 
+	/// <summary>
+	/// 対象の ModelEntity をツリー上で中央に配置するメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleTreeCenteringMenuItemPressed(Variant tag)
 	{
 		ModelNode modelNode = GetModelNode();
@@ -94,6 +107,10 @@ public partial class ModelEntityMenu : BaseMenu
 		Application.Model.Entity.Tree.Centering(modelNode.EntityId);
 	}
 
+	/// <summary>
+	/// 対象の ModelEntity のプロパティを表示するメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleShowPropertyMenuItemPressed(Variant tag)
 	{
 		if (_targetEntityId == Guid.Empty)
@@ -105,6 +122,10 @@ public partial class ModelEntityMenu : BaseMenu
 		Application.Ui.Property.ShowModelEntityProperties(_targetEntityId);
 	}
 
+	/// <summary>
+	/// 対象の ModelEntity のプロパティを非表示にするメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleHidePropertyMenuItemPressed(Variant tag)
 	{
 		if (_targetEntityId == Guid.Empty)
@@ -116,6 +137,10 @@ public partial class ModelEntityMenu : BaseMenu
 		Application.Ui.Property.HideModelEntityProperties(_targetEntityId);
 	}
 
+	/// <summary>
+	/// 対象の ModelEntity の ModelNode を取得するヘルパーメソッド
+	/// </summary>
+	/// <returns>対象の ModelEntity に対応する ModelNode。存在しない場合は null。</returns>
 	private ModelNode GetModelNode()
 	{
 		if (_targetEntityId == Guid.Empty)

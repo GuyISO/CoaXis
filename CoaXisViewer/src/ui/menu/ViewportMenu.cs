@@ -1,16 +1,15 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
 /// <summary>
-/// PickResult（ビューポート上のレイキャスト結果）を操作対象とするネイティブコンテキストメニュー
+/// Viewport 上のピック結果（PickResult）を操作対象とするネイティブコンテキストメニュー
 /// </summary>
 /// <remarks>
 /// ModelEntityMenu をネイティブサブメニューとして内包し、対象モデルへの操作はそちらへ委譲する。
 /// 本メニュー自身は PickResult 由来の操作（法線方向へのカメラ整列など）のみを扱う。
 /// ネイティブメニュー Rid の生成・解放は基底クラスの <see cref="BaseMenu"/> が担う。
 /// </remarks>
-public partial class PickResultMenu : BaseMenu
+public partial class ViewportMenu : BaseMenu
 {
 	#region Fields
 
@@ -34,13 +33,13 @@ public partial class PickResultMenu : BaseMenu
 
 	#endregion
 
-	#region Public API
+	#region Methods
 
 	/// <summary>
 	/// 指定した PickResult を対象にネイティブコンテキストメニューを表示する
 	/// </summary>
 	/// <param name="pickResult">右クリック位置で PickByRay したピック結果</param>
-	public void ShowForPickResult(PickResult pickResult)
+	public void Show(PickResult pickResult)
 	{
 		if (!TryGetNativeMenu(out Rid nativeMenu))
 		{
@@ -58,9 +57,12 @@ public partial class PickResultMenu : BaseMenu
 
 	#endregion
 
-	#region Protected API
+	#region Helpers
 
-	/// <inheritdoc/>
+	/// <summary>
+	/// ViewportMenu のネイティブメニュー項目を構築する
+	/// </summary>
+	/// <param name="nativeMenu">ネイティブメニューの Rid</param>
 	protected override void BuildMenuItems(Rid nativeMenu)
 	{
 		if (_modelEntityMenu == null || !_modelEntityMenu.TryGetNativeMenu(out Rid modelEntityNativeMenu))
@@ -73,11 +75,10 @@ public partial class PickResultMenu : BaseMenu
 		_alignNormalMenuItemIndex = NativeMenu.Singleton.AddItem(nativeMenu, "AlignNormal", Callable.From<Variant>(HandleAlignNormalMenuItemPressed));
 	}
 
-	#endregion
-
-	#region Helpers
-
-	// NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る
+	/// <summary>
+	/// 法線方向にカメラを整列させるメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleAlignNormalMenuItemPressed(Variant tag)
 	{
 		if (_pickResult == null || !_pickResult.HasHit)

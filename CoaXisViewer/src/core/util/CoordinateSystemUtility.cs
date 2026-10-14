@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -18,7 +17,7 @@ public static class CoordinateSystemUtility
     private static readonly Basis CatiaToGodotCoordinateBasis = new Basis(Vector3.Back, Vector3.Right, Vector3.Up);
     private static readonly Basis GodotToCatiaCoordinateBasis = new Basis(Vector3.Up, Vector3.Back, Vector3.Right);
 
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// CATIA(mm) の位置ベクトルを Godot(m) の位置ベクトルへ変換する。

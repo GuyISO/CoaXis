@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -17,13 +16,13 @@ public partial class ModelPropertyMenu : BaseMenu
 
 	#endregion
 
-	#region Public API
+	#region Methods
 
 	/// <summary>
 	/// 指定した値を対象にネイティブコンテキストメニューを表示する
 	/// </summary>
 	/// <param name="value">操作対象とするプロパティ値</param>
-	public void ShowForValue(string value)
+	public void Show(string value)
 	{
 		_targetValue = value ?? string.Empty;
 		PopupNativeMenu();
@@ -31,19 +30,21 @@ public partial class ModelPropertyMenu : BaseMenu
 
 	#endregion
 
-	#region Protected API
+	#region Helpers
 
-	/// <inheritdoc/>
+	/// <summary>
+	/// ModelPropertyMenu のネイティブメニュー項目を構築する
+	/// </summary>
+	/// <param name="nativeMenu">ネイティブメニューの Rid</param>
 	protected override void BuildMenuItems(Rid nativeMenu)
 	{
 		NativeMenu.Singleton.AddItem(nativeMenu, "CopyValueToClipboard", Callable.From<Variant>(HandleCopyValueToClipboardMenuItemPressed));
 	}
 
-	#endregion
-
-	#region Helpers
-
-	// NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る
+	/// <summary>
+	/// クリップボードに値をコピーするメニュー項目が選択された際の処理
+	/// </summary>
+	/// <param name="tag">NativeMenuのcallbackはtagに渡した値をVariantとして1引数で受け取る契約のため、未使用でも引数を受け取る</param>
 	private void HandleCopyValueToClipboardMenuItemPressed(Variant tag)
 	{
 		DisplayServer.ClipboardSet(_targetValue);

@@ -1,5 +1,7 @@
 # Viewer
 
+非表示レイヤーのアイテムもFITに含まれる？
+
 EntityがPropertyを保有していることがわかるよう保有数をボタンで表示する
 PropertyTreeにもアイコンを表示する
 ModelEntityに対してAABBの空間にエフェクトを配置する

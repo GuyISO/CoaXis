@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -15,7 +14,7 @@ public abstract partial class BaseCommand : RefCounted
 
     #endregion
 
-    #region public Methods
+    #region Methods
 
     /// <summary>
     /// コマンドを実行する

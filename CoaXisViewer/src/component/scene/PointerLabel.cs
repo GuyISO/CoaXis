@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
@@ -43,7 +42,7 @@ public partial class PointerLabel : Node3D
 
 	#endregion
 
-	#region public Methods
+	#region Methods
 
 	/// <summary>
 	/// ポインタの色を設定する

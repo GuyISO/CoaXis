@@ -1,8 +1,7 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
-public partial class EmbededModelPropertyTree : ModelPropertyTree
+public partial class EmbeddedModelPropertyTree : ModelPropertyTree
 {
 	#region Lifecycle
 

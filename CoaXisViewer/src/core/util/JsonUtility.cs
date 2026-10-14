@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Globalization;
@@ -8,7 +7,7 @@ using System.Globalization;
 /// </summary>
 public static class JsonUtility
 {
-    #region Public Methods
+    #region Methods
 
     /// <summary>
     /// 指定されたキーに対応する Vector3 を取得する

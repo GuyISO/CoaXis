@@ -1,5 +1,4 @@
-﻿// TODO: リファクタリング確認後に削除
-using Godot;
+﻿using Godot;
 using System;
 
 /// <summary>

@@ -37,7 +37,7 @@ public partial class ViewportInteractionHub : BaseHub
     public float ArcballRadius { get; private set; }
 
     /// <summary>アークボールの補助表示の現在回転を取得する。</summary>
-    public Quaternion ArcballHandleRotation { get; private set; } = Quaternion.Identity;
+    public Quaternion ArcballHandle { get; private set; } = Quaternion.Identity;
 
     /// <summary>矩形選択の開始位置を取得する。</summary>
     public Vector2 PickRectStart { get; private set; }
@@ -56,7 +56,7 @@ public partial class ViewportInteractionHub : BaseHub
     [Signal] public delegate void ArcballRadiusNotifiedEventHandler();
 
     /// <summary>アークボール補助表示の回転変更通知。</summary>
-    [Signal] public delegate void ArcballHandleRotationNotifiedEventHandler();
+    [Signal] public delegate void ArcballHandleNotifiedEventHandler();
 
     /// <summary>矩形選択範囲の変更通知。</summary>
     [Signal] public delegate void PickRectNotifiedEventHandler();
@@ -104,8 +104,8 @@ public partial class ViewportInteractionHub : BaseHub
     /// <param name="position">球面上の操作点</param>
     public void SetArcballHandle(Vector3 position)
     {
-        ArcballHandleRotation = CalculateArcballHandleRotation(position);
-        EmitSignal(SignalName.ArcballHandleRotationNotified);
+        ArcballHandle = CalculateArcballHandle(position);
+        EmitSignal(SignalName.ArcballHandleNotified);
     }
 
     /// <summary>
@@ -115,8 +115,8 @@ public partial class ViewportInteractionHub : BaseHub
     public void RotateArcball(Quaternion rotation)
     {
         // 補助表示はカメラの回転と逆向きに追従させる。
-        ArcballHandleRotation = rotation.Inverse() * ArcballHandleRotation;
-        EmitSignal(SignalName.ArcballHandleRotationNotified);
+        ArcballHandle = rotation.Inverse() * ArcballHandle;
+        EmitSignal(SignalName.ArcballHandleNotified);
     }
 
     /// <summary>
@@ -138,7 +138,7 @@ public partial class ViewportInteractionHub : BaseHub
     /// <summary>
     /// アークボールハンドル位置から回転を算出する。
     /// </summary>
-    private static Quaternion CalculateArcballHandleRotation(Vector3 handlePosition)
+    private static Quaternion CalculateArcballHandle(Vector3 handlePosition)
     {
         if (handlePosition.LengthSquared() <= Mathf.Epsilon * Mathf.Epsilon)
         {
