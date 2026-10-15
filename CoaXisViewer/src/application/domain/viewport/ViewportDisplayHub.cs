@@ -1,6 +1,20 @@
 using Godot;
 
 /// <summary>
+/// Viewportのレイヤーを表す列挙型、Raycast用のビットマスクとしても使用される
+/// </summary>
+public enum ViewportLayer
+{
+    None = 0b_0000_0000_0000_0000_0000,
+    Default = 0b_0000_0000_0000_0000_0001,
+    AxisNavigator = 0b_0000_0000_0000_0000_0010,
+    VisibleEntity = 0b_0000_0000_0000_0000_0100,
+    InvisibleEntity = 0b_0000_0000_0000_0000_1000,
+    VisibleProperty = 0b_0000_0000_0000_0001_0000,
+    InvisibleProperty = 0b_0000_0000_0000_0010_0000,
+}
+
+/// <summary>
 /// Viewportのレイヤー表示状態を保持し、表示状態の変更を通知する。
 /// </summary>
 public partial class ViewportDisplayHub : BaseHub

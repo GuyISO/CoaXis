@@ -2,6 +2,37 @@ using Godot;
 using System;
 
 /// <summary>
+/// モデルの状態を表す列挙型
+/// </summary>
+public enum ModelStatus
+{
+    /// <summary> モデルがまだロードされていない状態、初期値 </summary>
+    Unloaded,
+    /// <summary> モデルが初期化された状態 </summary>
+    Initialized,
+    /// <summary> モデルがレジストリに登録された状態 </summary>
+    Registered,
+    /// <summary> モデルの読み込み処理中の状態 </summary>
+    Loading,
+    /// <summary> モデルのロードが完了した状態 </summary>
+    Loaded,
+    /// <summary> モデルのロードが失敗した状態 </summary>
+    LoadFailed,
+    /// <summary> モデルが破棄された状態 </summary>
+    Disposed,
+}
+
+public enum ModelVisibility
+{
+    /// <summary> 上位モデルを継承、初期値 </summary>
+    Inherit,
+    /// <summary> モデルが表示 </summary>
+    Visible,
+    /// <summary> モデルが非表示 </summary>
+    Invisible,
+}
+
+/// <summary>
 /// ModelEntityが更新した論理状態の変更通知のみを担当するハブ。
 /// 通知は対象の entityId のみを運び、値は Registry 経由で ModelEntity から参照する。
 /// </summary>

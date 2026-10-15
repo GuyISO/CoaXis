@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using CoaXis.Protocol.Viewer;
 using System;
 using System.Collections.Generic;
@@ -14,10 +13,16 @@ public static class IpcCommandDispatcher
 {
     private delegate IpcResultPayload Handler(object payload);
 
+    #region Fields
+
     private static readonly Dictionary<string, Handler> Handlers = new()
     {
         [IpcEventType.ToViewer.LoadModel] = HandleLoadModel
     };
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// eventType に対応するハンドラを実行し、結果を返す
@@ -50,6 +55,9 @@ public static class IpcCommandDispatcher
             return IpcResultPayload.Failure(envelope.EventType, IpcErrorCode.InternalError, ex.Message);
         }
     }
+    #endregion
+
+    #region Helpers
 
     /// <summary>
     /// LoadModel: payloadに含まれるモデル実体と属性をRegistryへ登録する
@@ -77,4 +85,6 @@ public static class IpcCommandDispatcher
             IpcEventType.ToViewer.LoadModel,
             $"Loaded {modelSetPayload.Entities.Count} models and {modelSetPayload.Properties.Count} properties.");
     }
+
+    #endregion
 }

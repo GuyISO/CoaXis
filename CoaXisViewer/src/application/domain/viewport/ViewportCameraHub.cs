@@ -1,6 +1,19 @@
 using Godot;
 
 /// <summary>
+/// 座標系の基準を表す列挙型
+/// </summary>
+public enum SpaceMode
+{
+    /// <summary>ワールド座標系</summary>
+    World,
+    /// <summary>注視点基準の座標系</summary>
+    FocalPoint,
+    /// <summary>カメラ基準の座標系</summary>
+    Camera,
+}
+
+/// <summary>
 /// カメラ状態を保持し、カメラ操作と状態通知を管理する。
 /// </summary>
 public partial class ViewportCameraHub : BaseHub

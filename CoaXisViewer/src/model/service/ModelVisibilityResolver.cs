@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 
 /// <summary>
@@ -6,6 +5,8 @@ using System;
 /// </summary>
 public static class ModelVisibilityResolver
 {
+    #region Methods
+
     /// <summary>
     /// JSON の表示設定文字列を ModelVisibility に変換する。
     /// </summary>
@@ -51,4 +52,21 @@ public static class ModelVisibilityResolver
 
         return true;
     }
+
+    /// <summary>
+    /// 現在の表示設定から次の切替先を返す。
+    /// </summary>
+    /// <param name="visibility">現在の表示設定</param>
+    /// <returns>次の表示設定</returns>
+    public static ModelVisibility GetNextVisibility(ModelVisibility visibility)
+    {
+        return visibility switch
+        {
+            ModelVisibility.Inherit => ModelVisibility.Visible,
+            ModelVisibility.Visible => ModelVisibility.Invisible,
+            _ => ModelVisibility.Inherit,
+        };
+    }
+
+    #endregion
 }

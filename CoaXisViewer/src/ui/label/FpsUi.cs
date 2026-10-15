@@ -1,8 +1,7 @@
-﻿// TODO: リファクタリング確認後に削除
-using Godot;
+﻿using Godot;
 
 /// <summary>
-/// FPS 表示用の UI 
+/// FPS 表示用の UI、主に 開発中のパフォーマンス確認に使用する
 /// </summary>
 public partial class FpsUi : Label
 {
@@ -13,6 +12,7 @@ public partial class FpsUi : Label
     /// </summary>
     public override void _Ready()
     {
+        Text = "fps: -";
     }
 
     /// <summary>
@@ -21,7 +21,7 @@ public partial class FpsUi : Label
     /// <param name="delta">前フレームからの経過秒</param>
     public override void _Process(double delta)
     {
-        Text = $"Frame: {Engine.GetFramesPerSecond()}";
+        Text = $"fps: {Engine.GetFramesPerSecond()}";
     }
 
     #endregion

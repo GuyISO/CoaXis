@@ -1,11 +1,10 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 
 /// <summary>
-/// ModelNode はモデル階層を管理するクラスで、内部構造は ModelComponents に委譲する
+/// ModelNode はモデル階層を管理するクラスで、ロードしたシーンを直下に保持する
 /// </summary>
 public partial class ModelNode : Node3D
 {
@@ -22,10 +21,24 @@ public partial class ModelNode : Node3D
     public ModelEntity Entity => EntityId == Guid.Empty ? null : Application.Model.Entity.Registry.Get(EntityId);
 
     /// <summary>
-    /// このモデルの内部構造を保持するコンポーネントルート
+    /// ロードしたシーンのルート、未ロードまたは Node3D 以外の場合は null
     /// </summary>
-    /// <returns>内部構造を保持する ModelComponents</returns>
-    public ModelComponents Components { get; private set; }
+    public Node3D SceneRoot { get; private set; }
+
+    /// <summary>
+    /// アニメーション用の Pivot、Emphasize/SpinAppeal 初回実行時にのみ生成する
+    /// </summary>
+    private Node3D _pivot;
+
+    /// <summary>
+    /// 実行中の Emphasize Tween、多重実行時に前回分を停止するために保持する
+    /// </summary>
+    private Tween _pulseTween;
+
+    /// <summary>
+    /// 実行中の SpinAppeal Tween、多重実行時に前回分を停止するために保持する
+    /// </summary>
+    private Tween _spinTween;
 
     /// <summary>
     /// このモデルの親モデルを取得する、親モデルが存在しない場合は null を返す
@@ -55,19 +68,19 @@ public partial class ModelNode : Node3D
         EntityId = entityId;
     }
 
-    /// <summary>
-    /// Godot のツリーに入った後で内部コンポーネントを初期化する
-    /// </summary>
-    public override void _Ready()
-    {
-        Components = CreateComponents();
-        Components.Initialize();
-        AddChild(Components);
-    }
-
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// ロードしたシーンのインスタンスをこのモデル直下へ追加する
+    /// </summary>
+    /// <param name="instance">インスタンス化済みのシーンルート</param>
+    public void AttachScene(Node instance)
+    {
+        AddChild(instance);
+        SceneRoot = instance as Node3D;
+    }
 
     /// <summary>
     /// モデルをスケール反復アニメーションで一時的に目立たせる
@@ -81,7 +94,27 @@ public partial class ModelNode : Node3D
     /// <param name="stepDuration">1回の拡大または縮小にかける秒数、デフォルトは0.5秒</param>
     public void Emphasize(int repeatCount = 3, float peakScale = 1.15f, float stepDuration = 0.5f)
     {
-        Components?.PulseScale(repeatCount, peakScale, stepDuration);
+        Node3D pivot = EnsurePivot();
+        if (pivot == null)
+        {
+            return;
+        }
+
+        // Kill() は途中経過のスケールで止まるため、毎回基準姿勢から開始する
+        _pulseTween?.Kill();
+        pivot.Scale = Vector3.One;
+
+        Vector3 peak = Vector3.One * peakScale;
+        _pulseTween = CreateTween();
+        for (int i = 0; i < repeatCount; i++)
+        {
+            _pulseTween.TweenProperty(pivot, "scale", peak, stepDuration)
+                .SetTrans(Tween.TransitionType.Sine)
+                .SetEase(Tween.EaseType.InOut);
+            _pulseTween.TweenProperty(pivot, "scale", Vector3.One, stepDuration)
+                .SetTrans(Tween.TransitionType.Sine)
+                .SetEase(Tween.EaseType.InOut);
+        }
     }
 
     /// <summary>
@@ -95,7 +128,23 @@ public partial class ModelNode : Node3D
     /// <param name="duration">1回転あたりにかける秒数、デフォルトは3.0秒</param>
     public void SpinAppeal(int rotationCount = 1, float duration = 3.0f)
     {
-        Components?.SpinAppeal(rotationCount, duration);
+        Node3D pivot = EnsurePivot();
+        if (pivot == null)
+        {
+            return;
+        }
+
+        // Kill() は途中経過の回転で止まるため、Y軸だけ0へ戻してから開始する（X/Zは維持する）
+        _spinTween?.Kill();
+        Vector3 rotation = pivot.Rotation;
+        rotation.Y = 0f;
+        pivot.Rotation = rotation;
+
+        _spinTween = CreateTween();
+        _spinTween.TweenProperty(pivot, "rotation:y", Mathf.Tau * rotationCount, duration)
+            .AsRelative()
+            .SetTrans(Tween.TransitionType.Cubic)
+            .SetEase(Tween.EaseType.InOut);
     }
 
     #endregion
@@ -135,12 +184,34 @@ public partial class ModelNode : Node3D
     }
 
     /// <summary>
-    /// このモデルに追加する内部構造を生成する
+    /// アニメーション用 Pivot を取得する、未生成ならここでシーンルートを Pivot 配下へ付け替えて生成する
     /// </summary>
-    /// <returns>内部構造のルートコンポーネント</returns>
-    protected virtual ModelComponents CreateComponents()
+    /// <remarks>
+    /// 常時ノードを増やさないため遅延生成する。子 ModelNode は巻き込まず SceneRoot のみ付け替える。
+    /// </remarks>
+    /// <returns>Pivot、シーン未ロードの場合は null</returns>
+    private Node3D EnsurePivot()
     {
-        return new ModelComponents();
+        if (_pivot != null && IsInstanceValid(_pivot))
+        {
+            return _pivot;
+        }
+
+        if (SceneRoot == null || !IsInstanceValid(SceneRoot))
+        {
+            return null;
+        }
+
+        _pivot = new Node3D { Name = "Pivot" };
+        AddChild(_pivot);
+        SceneRoot.Reparent(_pivot, false);
+
+        if (Entity != null && Entity.AlignToAabbCenter)
+        {
+            ModelMeshCenterAligner.Pivot(_pivot);
+        }
+
+        return _pivot;
     }
 
     #endregion

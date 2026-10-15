@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
@@ -57,5 +56,4 @@ public partial class ShowContainerButton : Button
     }
 
     #endregion
-
 }

@@ -1,9 +1,10 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// IPC サービスに適用する設定値。
 /// </summary>
 public sealed class IpcSettings
 {
+    #region Properties
+
     /// <summary>
     /// NamedPipe 名。Editor 側と一致させる必要がある。
     /// </summary>
@@ -14,6 +15,10 @@ public sealed class IpcSettings
     /// </summary>
     public bool StartPipeServerOnReady { get; set; } = Constant.Ipc.StartPipeServerOnReady;
 
+    #endregion
+    
+    #region Methods
+
     /// <summary>
     /// IPC 設定の不正値を補正する。
     /// </summary>
@@ -23,4 +28,6 @@ public sealed class IpcSettings
         PipeName = Constant.Ipc.PipeName;
         StartPipeServerOnReady = Constant.Ipc.StartPipeServerOnReady;
     }
+
+    #endregion
 }

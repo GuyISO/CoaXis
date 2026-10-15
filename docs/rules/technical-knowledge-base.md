@@ -247,7 +247,6 @@
 - 影響範囲: `PickUtility.PickByShape` の返却結果は同一モデルにつき1件となる。形状クエリで位置・法線・距離が取得できない制約は変更しない。
 - 実装/運用手順: バッチサイズは現在32。大量モデルの実シーンで処理時間、クエリ回数、取得した entityId 集合を計測し、必要に応じてサイズを調整する。無効RIDを含む結果は無限ループ防止のため、そのバッチで処理を終了する。
 - 検証方法: 複数モデル、同一モデルの複数Collider、バッチ上限超過、初期除外RID、ヒットなし、至近距離の矩形選択を確認し、`check: mojibake` と `dotnet build .\\CoaXis.sln` を実行する。
-- 関連ファイル/関連仕様: `CoaXisViewer/src/core/util/PickUtility.cs`, `CoaXisViewer/scenes/viewport/ViewportInteractionHandler.cs`, `CoaXisViewer/src/application/domain/selection/SelectionService.cs`, `TODO.md`
 - 備考: `SelectionService` の既存 `Distinct` は防御的処理として残す。
 
 ---

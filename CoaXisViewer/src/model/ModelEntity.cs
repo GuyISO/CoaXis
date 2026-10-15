@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 using Godot;
 using System.Collections.Generic;
@@ -97,7 +96,7 @@ public class ModelEntity
             }
 
             _visibility = value;
-            NotifyVisibilityChanged();
+            Application.Model.Entity.State.NotifyVisibility(Id);
         }
     }
 
@@ -213,29 +212,37 @@ public class ModelEntity
 
     #endregion
 
-    #region State Transitions
+    #region Methods
 
-    /// <summary>Registry登録前の初期化状態へ遷移する。</summary>
-    internal void InitializeForRegistration()
+    /// <summary>
+    /// Registry登録前の初期化状態へ遷移する。
+    /// </summary>
+    public void InitializeForRegistration()
     {
         TransitionStatus(ModelStatus.Initialized, ModelStatus.Unloaded);
     }
 
-    /// <summary>初期化済みEntityをRegistry登録状態へ遷移する。</summary>
-    internal void MarkRegistered()
+    /// <summary>
+    /// 初期化済みEntityをRegistry登録状態へ遷移する。
+    /// </summary>
+    public void MarkRegistered()
     {
         TransitionStatus(ModelStatus.Registered, ModelStatus.Initialized);
     }
 
-    /// <summary>Sceneロード開始状態へ遷移する。</summary>
-    internal void BeginLoading()
+    /// <summary>
+    /// Sceneロード開始状態へ遷移する。
+    /// </summary>
+    public void BeginLoading()
     {
         TransitionStatus(ModelStatus.Loading, ModelStatus.Registered);
     }
 
-    /// <summary>Sceneロード完了状態へ遷移する。</summary>
+    /// <summary>
+    /// Sceneロード完了状態へ遷移する。
+    /// </summary>
     /// <exception cref="InvalidOperationException">ScenePathが設定されているのにLoadingを経由せず完了しようとした場合</exception>
-    internal void MarkLoaded()
+    public void MarkLoaded()
     {
         if (_status == ModelStatus.Registered && !string.IsNullOrWhiteSpace(ScenePath))
         {
@@ -246,14 +253,18 @@ public class ModelEntity
         TransitionStatus(ModelStatus.Loaded, ModelStatus.Registered, ModelStatus.Loading);
     }
 
-    /// <summary>Sceneロード失敗状態へ遷移する。</summary>
-    internal void MarkLoadFailed()
+    /// <summary>
+    /// Sceneロード失敗状態へ遷移する。
+    /// </summary>
+    public void MarkLoadFailed()
     {
         TransitionStatus(ModelStatus.LoadFailed, ModelStatus.Loading);
     }
 
-    /// <summary>登録済みEntityを破棄状態へ遷移する。</summary>
-    internal void MarkDisposed()
+    /// <summary>
+    /// 登録済みEntityを破棄状態へ遷移する。
+    /// </summary>
+    public void MarkDisposed()
     {
         TransitionStatus(
             ModelStatus.Disposed,
@@ -262,21 +273,6 @@ public class ModelEntity
             ModelStatus.Loaded,
             ModelStatus.LoadFailed);
     }
-
-    /// <summary>
-    /// Visibility設定変更または祖先変更による実効表示再解決を通知する。
-    /// </summary>
-    internal void NotifyVisibilityChanged()
-    {
-        if (Application.Model.Entity.Registry.IsRegistered(Id))
-        {
-            Application.Model.Entity.State.NotifyVisibility(Id);
-        }
-    }
-
-    #endregion
-
-    #region Methods
 
     /// <summary>
     /// 子モデル実体を登録する。同一 Id の重複登録は無視する。
@@ -298,7 +294,8 @@ public class ModelEntity
     }
 
     /// <summary>
-    /// <summary>子モデル実体の登録を解除する</summary>
+    /// 子モデル実体の登録を解除する。
+    /// </summary>
     /// <param name="childEntity">解除対象の子モデル実体</param>
     public void DetachEntity(ModelEntity childEntity)
     {
@@ -348,7 +345,6 @@ public class ModelEntity
     /// </summary>
     public void Clear()
     {
-        // TODO: 子モデルおよびプロパティの参照などを解除する処理が必要な場合はここに追加する
         _children.Clear();
         _properties.Clear();
     }
@@ -366,7 +362,7 @@ public class ModelEntity
 
 		var command = new SetModelVisibilityCommand(
 			[Id],
-			GetNextVisibility(Visibility));
+			ModelVisibilityResolver.GetNextVisibility(Visibility));
 		Application.Command.Execute(command);
 	}
 
@@ -399,19 +395,6 @@ public class ModelEntity
             Application.Model.Entity.State.NotifyStatus(Id);
         }
     }
-
-	/// <summary>
-	/// 現在の表示設定から次の切替先を返す。
-	/// </summary>
-	private static ModelVisibility GetNextVisibility(ModelVisibility visibility)
-	{
-		return visibility switch
-		{
-			ModelVisibility.Inherit => ModelVisibility.Visible,
-			ModelVisibility.Visible => ModelVisibility.Invisible,
-			_ => ModelVisibility.Inherit,
-		};
-	}
 
     #endregion
 }

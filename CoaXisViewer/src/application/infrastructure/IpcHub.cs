@@ -36,7 +36,7 @@ public partial class IpcHub : BaseHub
 
     #region Properties
 
-    // TODO: IsConnected プロパティを追加するが名称が重複するため適切か検討する
+    // TODO: IsConnected プロパティを追加したいが名称が重複するため適切か検討する
 
     #endregion
 

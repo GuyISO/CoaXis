@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using CoaXis.Protocol.Viewer;
 using System;
 
@@ -7,6 +6,8 @@ using System;
 /// </summary>
 public static class ModelPropertyMapper
 {
+    #region Methods
+
     /// <summary>
     /// DTOをModelPropertyへ変換する
     /// </summary>
@@ -28,4 +29,6 @@ public static class ModelPropertyMapper
             dto.ValueType,
             dto.Value);
     }
+    
+    #endregion
 }

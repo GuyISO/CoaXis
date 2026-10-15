@@ -1,34 +1,33 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
 
 /// <summary>
-/// メッシュのAABB中心を基準に ModelComponents.Pivot の原点補正を行うヘルパー
+/// メッシュのAABB中心を基準に ModelNode の Pivot の原点補正を行うヘルパー
 /// </summary>
 public static class ModelMeshCenterAligner
 {
+    #region Methods
+
     /// <summary>
     /// メッシュのAABB中心を Pivot の原点へ合わせ、Pivot配下の各ノードは逆方向へ補正することで
     /// 見た目の位置を変えずに Emphasize/SpinAppeal のスケール・回転の基準点をメッシュ中心へ揃える
     /// </summary>
     /// <remarks>
     /// シーン(scn/tscn)の原点は作成元ツール依存で任意の点になりやすく、
-    /// 原点のまま ModelComponents を拡縮・回転させると見た目の中心がずれて見える。
+    /// 原点のまま Pivot を拡縮・回転させると見た目の中心がずれて見える。
     /// このメソッドは ModelEntityDto.AlignToAabbCenter が true の場合にのみ呼び出す想定。
     /// ModelNode/ModelEntity の位置は CSV 由来の値と常に一致させる必要があるため、ここでは一切変更しない。
     /// </remarks>
-    /// <param name="modelNode">補正対象のモデルノード</param>
-    public static void AlignPivotToMeshCenter(ModelNode modelNode)
+    /// <param name="pivot">補正対象の Pivot ノード（原点位置のままであること）</param>
+    public static void Pivot(Node3D pivot)
     {
-        if (modelNode == null)
+        if (pivot == null)
         {
-            throw new ArgumentNullException(nameof(modelNode));
+            throw new ArgumentNullException(nameof(pivot));
         }
 
-        ModelComponents components = modelNode.Components;
-        Node3D pivot = components?.Pivot;
-        if (pivot == null || pivot.GetChildCount() == 0)
+        if (pivot.GetChildCount() == 0)
         {
             return;
         }
@@ -72,6 +71,10 @@ public static class ModelMeshCenterAligner
         pivot.Position = center;
     }
 
+    #endregion
+
+    #region Helpers
+
     private static void CollectVisuals(Node node, List<VisualInstance3D> list)
     {
         if (node is VisualInstance3D visual)
@@ -103,4 +106,6 @@ public static class ModelMeshCenterAligner
 
         return result;
     }
+
+    #endregion
 }

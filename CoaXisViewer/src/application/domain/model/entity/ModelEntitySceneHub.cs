@@ -230,11 +230,6 @@ public partial class ModelEntitySceneHub : BaseHub
 			}
 
 			bool sceneLoaded = result == SceneLoadResult.Loaded;
-			if (sceneLoaded && modelEntity.AlignToAabbCenter)
-			{
-				ModelMeshCenterAligner.AlignPivotToMeshCenter(modelNode);
-			}
-
 			UpdateModelStatus(modelEntity, sceneLoaded ? ModelStatus.Loaded : ModelStatus.LoadFailed);
 			return true;
 		}

@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -6,6 +5,8 @@ using Godot;
 /// </summary>
 public partial class CameraState : RefCounted
 {
+    #region Properties
+
     /// <summary>
     /// 注視点のワールド座標。
     /// </summary>
@@ -36,6 +37,10 @@ public partial class CameraState : RefCounted
     /// </summary>
     public string ProjectionType { get; private set; } = "Perspective";
 
+    #endregion
+
+    #region Lifecycle
+
     /// <summary>
     /// 既定値を返す。
     /// </summary>
@@ -43,6 +48,10 @@ public partial class CameraState : RefCounted
     {
         return new CameraState();
     }
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// Godot 内部状態からカメラ状態を生成する。
@@ -93,4 +102,5 @@ public partial class CameraState : RefCounted
         if (Fov <= 0f || Fov > 180f) Fov = 35f;
         if (string.IsNullOrWhiteSpace(ProjectionType)) ProjectionType = "Perspective";
     }
+    #endregion
 }

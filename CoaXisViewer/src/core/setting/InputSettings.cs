@@ -1,9 +1,10 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// 入力操作の感度に適用する設定値。
 /// </summary>
 public sealed class InputSettings
 {
+    #region Properties
+    
     /// <summary>
     /// キーボード平行移動速度（m/s）。
     /// </summary>
@@ -40,4 +41,6 @@ public sealed class InputSettings
         if (ZoomFactor <= 0f) ZoomFactor = 1.0f;
         if (PointerRotationSpeedDeg < 0f) PointerRotationSpeedDeg = 90.0f;
     }
+
+    #endregion
 }

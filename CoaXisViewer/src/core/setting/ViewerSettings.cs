@@ -1,10 +1,11 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// ビューア全体の設定ルート。
 /// セクション単位でプロパティを増やして拡張する。
 /// </summary>
 public sealed class ViewerSettings
 {
+    #region Properties
+
     /// <summary>
     /// IPC 関連の設定セクション。
     /// </summary>
@@ -29,6 +30,10 @@ public sealed class ViewerSettings
     /// UI一般の挙動に関する設定セクション。
     /// </summary>
     public UiSettings Ui { get; set; } = new UiSettings();
+
+    #endregion
+
+    #region Methods
 
     /// <summary>
     /// 既定設定を生成する。
@@ -66,4 +71,6 @@ public sealed class ViewerSettings
         Ui ??= new UiSettings();
         Ui.Normalize();
     }
+
+    #endregion
 }

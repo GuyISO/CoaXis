@@ -1,9 +1,10 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// カメラ操作に適用する設定値。
 /// </summary>
 public sealed class CameraSettings
 {
+    #region Properties
+
     /// <summary>
     /// ズーム倍率変更時の底。exponent 1 あたりの拡大倍率。
     /// </summary>
@@ -24,6 +25,10 @@ public sealed class CameraSettings
     /// </summary>
     public float TweenDuration { get; set; } = 0.5f;
 
+    #endregion
+    
+    #region Methods
+
     /// <summary>
     /// カメラ設定の不正値を補正する。
     /// </summary>
@@ -34,4 +39,6 @@ public sealed class CameraSettings
         if (FitPadding < 1.0f) FitPadding = 1.0f;
         if (TweenDuration < 0f) TweenDuration = 0.5f;
     }
+
+    #endregion
 }

@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -38,7 +37,29 @@ public abstract partial class BaseMenu : Node
 
 	#endregion
 
-	#region Protected API
+	#region Methods
+
+	/// <summary>
+	/// 生成済みのネイティブメニュー Rid を取得する、未生成の場合は生成を試みる
+	/// </summary>
+	/// <param name="nativeMenu">取得できた場合はネイティブメニューの Rid</param>
+	/// <returns>取得できた場合は true</returns>
+	/// <remarks>PickResultMenu が ModelEntityMenu をサブメニューとして接続する場合など、子メニューの Rid を必要とする場面で使う。</remarks>
+	public bool TryGetNativeMenu(out Rid nativeMenu)
+	{
+		if (!EnsureNativeMenu())
+		{
+			nativeMenu = default;
+			return false;
+		}
+
+		nativeMenu = _nativeMenu;
+		return true;
+	}
+
+	#endregion
+
+	#region Helpers
 
 	/// <summary>
 	/// 派生クラス固有のメニュー項目を構築する
@@ -64,28 +85,6 @@ public abstract partial class BaseMenu : Node
 		Vector2I mousePosition = DisplayServer.MouseGetPosition();
 		Vector2I primaryScreenOrigin = DisplayServer.ScreenGetPosition(DisplayServer.GetPrimaryScreen());
 		NativeMenu.Singleton.Popup(_nativeMenu, mousePosition - primaryScreenOrigin);
-	}
-
-	#endregion
-
-	#region Helpers
-
-	/// <summary>
-	/// 生成済みのネイティブメニュー Rid を取得する、未生成の場合は生成を試みる
-	/// </summary>
-	/// <param name="nativeMenu">取得できた場合はネイティブメニューの Rid</param>
-	/// <returns>取得できた場合は true</returns>
-	/// <remarks>PickResultMenu が ModelEntityMenu をサブメニューとして接続する場合など、子メニューの Rid を必要とする場面で使う。</remarks>
-	public bool TryGetNativeMenu(out Rid nativeMenu)
-	{
-		if (!EnsureNativeMenu())
-		{
-			nativeMenu = default;
-			return false;
-		}
-
-		nativeMenu = _nativeMenu;
-		return true;
 	}
 
 	private bool EnsureNativeMenu()

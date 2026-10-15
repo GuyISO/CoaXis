@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 
@@ -26,42 +25,11 @@ public partial class RootModelNode : ModelNode
     public override void _Ready()
     {
         base._Ready();
-
-        SubscribeApplicationEvents();
     }
 
     public override void _ExitTree()
     {
-        UnsubscribeApplicationEvents();
-
         base._ExitTree();
-    }
-
-    #endregion
-
-    #region Events
-
-    /// <summary>
-    /// Applicationイベントの購読を開始する
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-    }
-
-    /// <summary>
-    /// Applicationイベントの購読を解除する
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-    }
-
-    #endregion
-
-    #region Helpers
-
-    protected override ModelComponents CreateComponents()
-    {
-        return new RootComponents();
     }
 
     #endregion

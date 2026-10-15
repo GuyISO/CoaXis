@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -22,6 +21,8 @@ public enum SceneLoadResult
 /// </summary>
 public static class SceneAssetLoader
 {
+    #region Fields
+
     /// <summary>
     /// Godotのスレッドロード要求と取得済みリソースをパス単位で一元管理する
     /// </summary>
@@ -29,6 +30,8 @@ public static class SceneAssetLoader
     private static readonly Queue<string> _pendingLoadPaths = new();
     private static readonly object _loadStatesLock = new();
     private static string _activeLoadPath;
+
+    #endregion
 
     #region Methods
 
@@ -171,20 +174,9 @@ public static class SceneAssetLoader
             }
         }
 
-        ModelComponents components = modelNode.Components;
-        if (!IsValidAndNotQueuedForDeletion(modelNode)
-            || components == null
-            || !IsValidAndNotQueuedForDeletion(components))
+        if (!IsValidAndNotQueuedForDeletion(modelNode))
         {
             Application.Log.Warn($"SceneAssetLoader: model node is no longer available. path='{path}'");
-            ReleaseUncachedConsumer(resolvedPath);
-            return SceneLoadResult.Failed;
-        }
-
-        Node3D contentContainer = components.EnsureContent();
-        if (!IsValidAndNotQueuedForDeletion(contentContainer))
-        {
-            Application.Log.Warn($"SceneAssetLoader: content container is no longer available. path='{path}'");
             ReleaseUncachedConsumer(resolvedPath);
             return SceneLoadResult.Failed;
         }
@@ -192,7 +184,7 @@ public static class SceneAssetLoader
         try
         {
             Node instance = packedScene.Instantiate();
-            contentContainer.AddChild(instance);
+            modelNode.AttachScene(instance);
 
             Application.Log.Info($"SceneAssetLoader: loaded scene '{path}'.");
             return SceneLoadResult.Loaded;

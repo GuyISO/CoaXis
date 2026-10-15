@@ -1,9 +1,10 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// UI 表示に適用する設定値。
 /// </summary>
 public sealed class UiSettings
 {
+    #region Properties
+    
     public const int DefaultMessageMaxLines = 50;
     public const int MinMessageMaxLines = 1;
 
@@ -11,6 +12,10 @@ public sealed class UiSettings
     /// メッセージパネルに保持する最大行数。
     /// </summary>
     public int MessageMaxLines { get; set; } = DefaultMessageMaxLines;
+
+    #endregion
+    
+    #region Methods
 
     /// <summary>
     /// UI 設定の不正値を補正する。
@@ -22,4 +27,6 @@ public sealed class UiSettings
             MessageMaxLines = DefaultMessageMaxLines;
         }
     }
+
+    #endregion
 }

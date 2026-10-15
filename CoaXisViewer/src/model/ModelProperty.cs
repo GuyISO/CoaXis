@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 using System.Collections.Generic;
 
@@ -71,7 +70,7 @@ public class ModelProperty
 
     #endregion
 
-    #region Constructors
+    #region Lifecycle
 
     /// <summary>
     /// プロパティデータを生成する

@@ -1,10 +1,11 @@
-// TODO: リファクタリング確認後に削除
 /// <summary>
 /// UI・描画に適用する色設定値。
 /// JSON 上は "#RRGGBBAA" 形式の文字列で管理し、読み込み時に Godot の Color へ変換する。
 /// </summary>
 public sealed class ColorSettings
 {
+    #region Properties
+
     /// <summary>
     /// WorldEnvironment の背景色。
     /// </summary>
@@ -30,6 +31,10 @@ public sealed class ColorSettings
     /// </summary>
     public string MeasurementLineColor { get; set; } = "#FAD11FFF";
 
+    #endregion
+
+    #region Methods
+
     /// <summary>
     /// 色設定の不正値を補正する。
     /// </summary>
@@ -41,4 +46,6 @@ public sealed class ColorSettings
         if (string.IsNullOrWhiteSpace(SelectedMaterialColor)) SelectedMaterialColor = "#E7B1F6FF";
         if (string.IsNullOrWhiteSpace(MeasurementLineColor)) MeasurementLineColor = "#FAD11FFF";
     }
+
+    #endregion
 }

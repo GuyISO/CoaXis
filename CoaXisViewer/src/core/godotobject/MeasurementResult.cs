@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 
 /// <summary>
@@ -6,6 +5,8 @@ using Godot;
 /// </summary>
 public partial class MeasurementResult : RefCounted
 {
+    #region Properties
+
     public bool HasPoint1 { get; }
     public bool HasPoint2 { get; }
 
@@ -19,6 +20,10 @@ public partial class MeasurementResult : RefCounted
     public float Angle { get; }
 
     public Vector3 Delta { get; }
+
+    #endregion
+
+    #region Lifecycle
 
     /// <summary>
     /// 未測定状態を表す MeasurementResult を初期化する
@@ -61,4 +66,6 @@ public partial class MeasurementResult : RefCounted
         Angle = angle;
         Delta = delta;
     }
+    
+    #endregion
 }
