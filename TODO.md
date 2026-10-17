@@ -11,6 +11,7 @@ ModelProertyTreeは、Containerの中に配置する形で使用する
 
 AssetHubをFacadeにし、Material,Icon,Sceneなど各Asset種類別のHubを持たせる
 SettingもFacadeにして、各種設定を管理するHub
+Settingで設定可能にする必要のない項目が多すぎる、Settingは全体的に見直す
 
 ユーザー可変値はSettingでの一元管理でなく、各Hubが持つものを正とし、Settingはあくまで初期値やデフォルト値をHubに提供する役割にする
 

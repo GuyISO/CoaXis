@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using System;
 using Godot;
 
@@ -54,7 +53,7 @@ public partial class ModelPropertyTree : Tree
 
 	#endregion
 
-	#region Public API
+	#region Methods
 
 	/// <summary>
 	/// 表示対象の ModelEntity 識別子を設定し、紐づく ModelProperty をツリーに表示する

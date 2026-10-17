@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using CoaXis.Protocol.Viewer;
 using Godot;
 using System;
@@ -20,6 +19,9 @@ public partial class IpcHub : BaseHub
     /// <summary>受信スレッドからメインスレッドへ処理を引き渡すためのキュー Godot の Node/Signal API はメインスレッドでのみ安全に呼べるため、実際のディスパッチは _Process 側で行う。</summary>
     private readonly ConcurrentQueue<PendingRequest> _pendingRequests = new();
 
+    /// <summary>受信タスクで検出した状態・受信通知をメインスレッドへ渡すキュー。</summary>
+    private readonly ConcurrentQueue<PendingNotification> _pendingNotifications = new();
+
     /// <summary>メインスレッド処理の待機タイムアウト（ミリ秒）。</summary>
     private const int MainThreadTimeoutMilliseconds = 2000;
     /// <summary>IPCメッセージの送信元名。</summary>
@@ -36,46 +38,49 @@ public partial class IpcHub : BaseHub
 
     #region Properties
 
-    // TODO: IsConnected プロパティを追加したいが名称が重複するため適切か検討する
+    /// <summary>
+    /// NamedPipeサーバーが稼働中かどうかを取得する。
+    /// </summary>
+    public bool IsPipeServerRunning =>
+        _cts != null &&
+        !_cts.IsCancellationRequested &&
+        _listenTask is { IsCompleted: false };
+
+    /// <summary>
+    /// NamedPipeクライアントが現在接続中かどうかを取得する。
+    /// </summary>
+    public bool IsClientConnected => _pipeServer?.IsConnected ?? false;
 
     #endregion
 
     #region Signals
 
-    /// <summary>IPC接続状態の変更通知。</summary>
-    [Signal] public delegate void ConnectionStatusEventHandler(bool isConnected);
     /// <summary>
-    /// IPC サーバーの接続状態を通知する。
+    /// NamedPipeサーバー稼働状態の通知。
     /// </summary>
-    /// <param name="isConnected">接続状態。接続されていれば true</param>
-    public void NotifyConnectionStatus(bool isConnected)
-    {
-        EmitSignal(SignalName.ConnectionStatus, isConnected);
-    }
-    
-    /// <summary>IPCメッセージ受信の通知。</summary>
-    [Signal] public delegate void MessageReceivedEventHandler(string eventType);
+    /// <param name="isRunning">サーバーが稼働中の場合は true</param>
+    [Signal] public delegate void PipeServerStatusEventHandler(bool isRunning);
+
     /// <summary>
-    /// IPC メッセージを受信したことを通知する。
+    /// NamedPipeサーバーへのクライアントの接続状態の通知。
+    /// </summary>
+    /// <param name="isConnected">クライアントが接続中の場合は true</param>
+    [Signal] public delegate void ClientStatusEventHandler(bool isConnected);
+
+
+    /// <summary>
+    /// IPCメッセージ受信の通知。
     /// </summary>
     /// <param name="eventType">受信したメッセージの eventType</param>
-    public void NotifyMessageReceived(string eventType)
-    {
-        EmitSignal(SignalName.MessageReceived, eventType);
-    }
+    [Signal] public delegate void MessageReceivedEventHandler(string eventType);
 
-    /// <summary>IPCメッセージ処理結果の通知。</summary>
-    [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
     /// <summary>
     /// IPC メッセージの処理結果を通知する。
     /// </summary>
     /// <param name="eventType">処理したメッセージの eventType</param>
     /// <param name="ok">処理が成功した場合は true</param>
     /// <param name="errorCode">失敗時の標準化エラーコード</param>
-    public void NotifyMessageHandled(string eventType, bool ok, string errorCode)
-    {
-        EmitSignal(SignalName.MessageHandled, eventType, ok, errorCode);
-    }
+    [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
 
     #endregion
 
@@ -86,24 +91,36 @@ public partial class IpcHub : BaseHub
         IpcSettings settings = Application.Setting.Current.Ipc;
         if (settings.StartPipeServerOnReady)
         {
-            Start(settings.PipeName);
+            StartPipeServer(settings.PipeName);
         }
     }
 
     public override void _Process(double delta)
     {
+        while (_pendingNotifications.TryDequeue(out PendingNotification notification))
+        {
+            if (notification.Type == PendingNotificationType.ClientStatus)
+            {
+                EmitSignal(SignalName.ClientStatus, notification.IsConnected);
+            }
+            else
+            {
+                EmitSignal(SignalName.MessageReceived, notification.EventType);
+            }
+        }
+
         // 受信スレッドが溜めたリクエストを、メインスレッド上で順番にドメイン層へ振り分ける
         while (_pendingRequests.TryDequeue(out PendingRequest request))
         {
             IpcResultPayload result = IpcCommandDispatcher.Dispatch(request.Envelope);
-            Application.Ipc.NotifyMessageHandled(request.Envelope.EventType, result.Ok, result.ErrorCode);
+            EmitSignal(SignalName.MessageHandled, request.Envelope.EventType, result.Ok, result.ErrorCode);
             request.CompletionSource.TrySetResult(result);
         }
     }
 
     public override void _ExitTree()
     {
-        Stop();
+        StopPipeServer();
 
         base._ExitTree();
     }
@@ -120,7 +137,7 @@ public partial class IpcHub : BaseHub
     /// NamedPipe サーバーを起動する。
     /// </summary>
     /// <param name="pipeName">待ち受けるパイプ名</param>
-    public void Start(string pipeName)
+    public void StartPipeServer(string pipeName)
     {
         if (_listenTask != null && !_listenTask.IsCompleted)
         {
@@ -133,13 +150,13 @@ public partial class IpcHub : BaseHub
 
         Application.Log.Info($"Ipc: server started on pipe '{pipeName}'.");
         
-        NotifyConnectionStatus(true);
+        EmitSignal(SignalName.PipeServerStatus, true);
     }
 
     /// <summary>
     /// NamedPipe サーバーを停止する。
     /// </summary>
-    public void Stop()
+    public void StopPipeServer()
     {
         if (_cts == null)
         {
@@ -162,15 +179,7 @@ public partial class IpcHub : BaseHub
 
         Application.Log.Info("Ipc: server stopped.");
 
-        NotifyConnectionStatus(false);
-    }
-
-    /// <summary>
-    /// IPC サーバーの接続状態を通知要求する。
-    /// </summary>
-    public void AskConnectionStatus()
-    {
-        NotifyConnectionStatus(_pipeServer?.IsConnected ?? false);
+        EmitSignal(SignalName.PipeServerStatus, false);
     }
 
     #endregion
@@ -196,7 +205,15 @@ public partial class IpcHub : BaseHub
                 _pipeServer = pipe;
 
                 await pipe.WaitForConnectionAsync(token).ConfigureAwait(false);
-                await HandleConnectionAsync(pipe, token).ConfigureAwait(false);
+                _pendingNotifications.Enqueue(PendingNotification.ClientStatusChanged(true));
+                try
+                {
+                    await HandleConnectionAsync(pipe, token).ConfigureAwait(false);
+                }
+                finally
+                {
+                    _pendingNotifications.Enqueue(PendingNotification.ClientStatusChanged(false));
+                }
             }
             catch (OperationCanceledException)
             {
@@ -246,6 +263,7 @@ public partial class IpcHub : BaseHub
     {
         if (string.IsNullOrWhiteSpace(line))
         {
+            _pendingNotifications.Enqueue(PendingNotification.MessageReceived(string.Empty));
             return BuildResponse(null, IpcResultPayload.Failure(string.Empty, IpcErrorCode.EmptyMessage, "Received an empty message."));
         }
 
@@ -256,13 +274,17 @@ public partial class IpcHub : BaseHub
         }
         catch (JsonException ex)
         {
+            _pendingNotifications.Enqueue(PendingNotification.MessageReceived(string.Empty));
             return BuildResponse(null, IpcResultPayload.Failure(string.Empty, IpcErrorCode.InvalidJson, ex.Message));
         }
 
         if (envelope == null)
         {
+            _pendingNotifications.Enqueue(PendingNotification.MessageReceived(string.Empty));
             return BuildResponse(null, IpcResultPayload.Failure(string.Empty, IpcErrorCode.InvalidJson, "Message payload could not be parsed."));
         }
+
+        _pendingNotifications.Enqueue(PendingNotification.MessageReceived(envelope.EventType ?? string.Empty));
 
         if (string.IsNullOrWhiteSpace(envelope.EventType))
         {
@@ -317,6 +339,40 @@ public partial class IpcHub : BaseHub
         }
     }
 
+    /// <summary>メインスレッドで発火するIPC通知の種類。</summary>
+    private enum PendingNotificationType
+    {
+        ClientStatus,
+        MessageReceived
+    }
+
+    /// <summary>受信タスクからメインスレッドへ渡すIPC通知。</summary>
+    private readonly struct PendingNotification
+    {
+        /// <summary>通知の種類。</summary>
+        public PendingNotificationType Type { get; }
+        /// <summary>クライアント接続通知の値。</summary>
+        public bool IsConnected { get; }
+        /// <summary>受信メッセージのイベント種別。</summary>
+        public string EventType { get; }
+
+        private PendingNotification(PendingNotificationType type, bool isConnected, string eventType)
+        {
+            Type = type;
+            IsConnected = isConnected;
+            EventType = eventType;
+        }
+
+        /// <summary>クライアント接続状態通知を生成する。</summary>
+        /// <param name="isConnected">接続中の場合は true</param>
+        public static PendingNotification ClientStatusChanged(bool isConnected) =>
+            new(PendingNotificationType.ClientStatus, isConnected, string.Empty);
+
+        /// <summary>受信メッセージ通知を生成する。</summary>
+        /// <param name="eventType">イベント種別。解析できない場合は空文字列</param>
+        public static PendingNotification MessageReceived(string eventType) =>
+            new(PendingNotificationType.MessageReceived, false, eventType);
+    }
+
     #endregion
 }
-

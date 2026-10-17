@@ -1,5 +1,3 @@
-// TODO: リファクタリング確認後に削除
-
 using Godot;
 using System;
 using System.IO;
@@ -47,15 +45,10 @@ public partial class SettingHub : BaseHub
 
     #region Signals
 
-    /// <summary>設定変更の通知。</summary>
-    [Signal] public delegate void SettingsNotifiedEventHandler();
     /// <summary>
-    /// 設定の再読み込みが完了したことを通知する。
+    /// 設定変更の通知。
     /// </summary>
-    public void NotifySettings()
-    {
-        EmitSignal(SignalName.SettingsNotified);
-    }
+    [Signal] public delegate void SettingsNotifiedEventHandler();
 
     #endregion
 
@@ -100,6 +93,7 @@ public partial class SettingHub : BaseHub
             {
                 Current = loaded;
                 Application.Log.Info($"Settings: loaded from '{path}'.");
+                EmitSignal(SignalName.SettingsNotified);
                 return true;
             }
         }
@@ -119,6 +113,7 @@ public partial class SettingHub : BaseHub
             Application.Log.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
         }
 
+        EmitSignal(SignalName.SettingsNotified);
         return false;
     }
 
