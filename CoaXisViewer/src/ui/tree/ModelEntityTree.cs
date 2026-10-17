@@ -1,4 +1,3 @@
-// TODO: リファクタリング確認後に削除
 using Godot;
 using System;
 using System.Collections.Generic;
@@ -385,8 +384,7 @@ public partial class ModelEntityTree : Tree
 
     #region Methods
 
-    // TODO: ちゃんとやる
-    public void SetRootModelEntity(ModelEntity rootModelEntity)
+    public void SetRoot(ModelEntity rootModelEntity)
     {
         if (_rootModelEntity != null)
         {

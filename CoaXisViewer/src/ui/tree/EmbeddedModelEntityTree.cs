@@ -10,7 +10,7 @@ public partial class EmbeddedModelEntityTree : ModelEntityTree
         base._Ready();
 
         // 初期表示のためにルート ModelEntity を設定する
-        SetRootModelEntity(Application.Model.Entity.Registry.Root);
+        SetRoot(Application.Model.Entity.Registry.Root);
     }
     
     #endregion
