@@ -9,9 +9,6 @@ public partial class UiWindowHub : BaseHub
 {
     #region Fields
 
-    // TODO: UiWindowのシーンパスをうまく管理する？むしろWindowを継承したUiWindowを動的に生成する
-    /// <summary>UiWindowのシーン。</summary>
-    private PackedScene _uiWindow = GD.Load<PackedScene>("res://scenes/ui/ui_window.tscn");
     /// <summary>生成済みUiWindowのキャッシュ。</summary>
     private readonly Dictionary<string, UiWindow> _windowCache = new();
 
@@ -61,13 +58,6 @@ public partial class UiWindowHub : BaseHub
             return;
         }
 
-        if (_uiWindow == null)
-        {
-            Application.Log.Warn("UiWindowHub: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
-            container.QueueFree();
-            return;
-        }
-
         string cacheKey = GetContainerCacheKey(container);
         if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow))
         {
@@ -95,20 +85,15 @@ public partial class UiWindowHub : BaseHub
     /// <param name="container">表示するコンテナ</param>
     private void ShowWindow(Container container, string cacheKey)
     {
-        if (container == null)
+        UiWindow window = new()
         {
-            Application.Log.Warn("UiWindowHub: container is null.");
-            return;
-        }
-
-        if (_uiWindow == null)
-        {
-            Application.Log.Warn("UiWindowHub: _uiWindow is null. Please ensure the UiWindow scene is loaded correctly.");
-            container.QueueFree();
-            return;
-        }
-
-        UiWindow window = _uiWindow.Instantiate<UiWindow>();
+            OversamplingOverride = 1.0f,
+            InitialPosition = Window.WindowInitialPosition.CenterMainWindowScreen,
+            AlwaysOnTop = true,
+            Unfocusable = true,
+            MinimizeDisabled = true,
+            MaximizeDisabled = true
+        };
         _windowCache[cacheKey] = window;
         window.TreeExited += () => OnWindowTreeExited(cacheKey, window);
 
