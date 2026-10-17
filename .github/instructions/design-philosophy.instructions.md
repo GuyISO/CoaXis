@@ -1,42 +1,20 @@
 ---
-description: "Use when: 設計思想・実装方針・責務分割・命名規約に関する依頼を受け、再利用可能な規約として残す必要があるとき"
+description: "Use when changing CoaXis architecture, state ownership, layer boundaries, or reusable implementation rules."
 ---
 
-# Design Philosophy Instruction
+# 設計方針
 
-## Objective
+## 方針の記録
 
-設計思想に関する依頼を、都度の回答で終わらせず、プロジェクト資産として蓄積する。
+設計方針は適用条件を含む判定可能なルールとして本ファイルへ追加し、既存の正本に重ねて記載しない。未反映の判断だけを`.github/design-philosophy/registry.md`へ短く記録する。
 
-## Required Actions
+## 実装上の不変条件
 
-1. 依頼内容を「方針1行」に要約する。
-2. 方針の保存先を次で選ぶ。
-   - 常時ルール: `.github/instructions/`
-   - タスク手順: `.github/skills/`
-   - 履歴: `.github/design-philosophy/registry.md`
-3. `registry.md` に日付付きエントリを追記する。
-4. 必要なら `index.md` のカテゴリ対応表を更新する。
-
-## Quality Gate
-
-- 曖昧な抽象論で終わらず、判定可能なルール文にする。
-- ルールは「適用条件」と「禁止/必須」を明記する。
-- 既存規約と衝突する場合は、優先順位または適用範囲を記載する。
-
-## Current Rules
-
-- Godot の Signal 引数に渡す自前の参照型は `RefCounted` を継承する。`GodotObject` の直継承は避け、signal payload として安全に受け渡せる型に限定する。
-- 設定値参照の方針: `Constant` 由来の値はキャッシュしない。`SettingService` 由来の値は「高頻度参照（毎フレーム/入力処理/大量ループ）」の場合のみキャッシュし、低頻度参照は都度取得する。
-- 即時反映の方針: `SettingsNotified` を購読するコンポーネントは、値更新だけで終わらせず、必要な再描画/再構築（例: `QueueRedraw`, `Rebuild`, `Draw*` 再実行）を同一ハンドラ内で必須実施する。
-- 状態所有と初期同期の方針: 状態Hubの購読者は通知購読後にHubの現在状態を直接読み、以降は状態変更通知に追従する。Node/UIはHubが所有する正本状態を重複して保持せず、状態再要求Signalで通知を再送させない。
-- モデル識別の方針: Model 系の Signal/Event/Pick/UI payload は ModelNode 参照を直接運ばず ModelId を運ぶ。Godot Signal 層では `string modelId` を使い、受信直後に `Guid.TryParse` でドメイン層の Guid へ変換する。
-- コンテキストメニューの方針: PopupMenu は「表示元 UI（Tree/Viewport等）」単位ではなく「操作対象オブジェクト（例: ModelEntity）」単位で作成する。呼び出し側（Tree/Viewport等）は TreeItem や PickResult から対象の識別子（Guid）を解決してから `ShowForEntity(Guid, Vector2I)` 相当の対象単位APIを呼び出す。同じ対象を扱うUIコンポーネント間でメニュー実装を重複させない。
-- メニューの保持場所の方針: PopupMenu は呼び出し元 Node（ModelEntityTree や ViewportInteractionHandler 等）の子としてシーンに直接配置しない。`Application.Ui.Menu` がメニュー実体を保持・生成し、呼び出し側は `Application.Ui.Menu.ShowXxxMenu(...)` を呼ぶだけにする。新規メニューを追加する場合も MenuService に `ShowXxxMenu` メソッドを追加し、.tscn に PopupMenu ノードを直接並べない。
-- Model中心Domainの構成方針: `ModelHub` は `ModelEntityHub` と `ModelPropertyHub` を構成する。ModelEntityに関するRegistry/State/Visual/Selection/Tree/Pick/Measurement/Load/Sceneは `ModelEntityHub` 配下へ置き、PropertyのRegistry/Loadは `ModelPropertyHub` に置く。Pick/MeasurementはModelEntityを対象とするため、公開経路も `Application.Model.Entity.Pick` / `Application.Model.Entity.Measurement` とし、`Application` 直下には配置しない。Entity置換ロードは `Application.Model.Entity.Load`、Propertyロードは `Application.Model.Property.Load`、Entity Sceneロードは `Application.Model.Entity.Scene` から公開する。Entityに属するHub型名・ファイル名には `ModelEntity` を、Propertyに属するHub型名・ファイル名には `ModelProperty` を付け、所属対象を明示する。親Hubへの集約は構成上の所属を表し、子Hub間の責務境界や依存方向を曖昧にしない。ModelEntity/Propertyの識別子集合と論理階層はそれぞれのRegistryが個別に所有し、両方をまたぐ階層解決・集合クリアの順序はModelEntityLoadHubが調整する。ModelEntityの状態Fieldを変更するときは、呼び出し側がFieldを直接変更せず専用メソッドまたはアクセサー経由で値を渡し、ModelEntity自身がFieldを更新する。対応するModelNodeの直接対応状態（Position/Rotation等）もModelEntity自身が同期し、その後にModelEntityStateHubを通じて対象entityIdのみの変更通知を発行する。ModelEntityStateHubは値を変更せず通知のみを担い、ModelEntityVisualHubはField更新やPosition/Rotation同期を重複実装しない。階層をまたぐ実効Visibilityの解決だけはModelEntityVisualHubがVisibility変更通知を受けて担当し、該当ModelNodeの描画Layer切替を含めて反映する。選択強調・透明度などField更新を伴わない表示効果もModelEntityVisualHubが担当し、TreeItem/PropertyTree投影はUIが唯一の所有者となる。Entity内の各操作Hub間は必要なイベント連携を許容するが、Model中核のRegistry/State/VisualからPick/Measurement/Load/Sceneへの不要な依存や循環依存を禁止する。RegistryからSceneロードを操作したり、VisualHubが状態変更・UI参照を保持したり、UIがModel Domainの保持状態になることを禁止する。
-- ModelEntity状態・実効可視性の方針: `ModelEntity.Status` は読み取り専用とし、状態変更は専用遷移メソッドだけから行う。通常遷移は `Unloaded→Initialized→Registered→Loading→(Loaded|LoadFailed)`、ScenePathが空の場合は `Registered→Loaded` とする。破棄は `Registered|Loading|Loaded|LoadFailed→Disposed` のみ許可し、それ以外の遷移は例外として拒否する。`Visibility` は `Inherit/Visible/Invisible` の設定値とし、`IsVisible` は設定値と親階層から導出する読み取り専用値にして別フィールドへキャッシュしない。Visibility変更通知を受けたModelEntityVisualHubが対象と子孫の実効表示を再解決してNodeのLayerへ反映し、完了通知を発行する。UIはこの解決完了通知を購読し、設定値と実効値をそれぞれModelEntityから読む。
-- IPCのレイヤ境界: Protocolはwire契約DTOとpayload/envelopeの組み立てを担当し、DTOからViewerドメインモデルへの変換（Mapper）はViewerに置く。単純なpayload生成はpayloadクラス内のstatic factoryに置き、複数payloadにまたがる複雑な組み立てが必要な場合を除き、payload専用Builderクラスを増やさない。Protocolの生成処理はViewer固有の型や振る舞いに依存させない。
-- Viewport状態の所有方針: カメラの注視点位置・回転、距離、正投影サイズ、FOV、投影方式の正本・要求・通知とカメラ操作計算は`ViewportCameraHub`が保持・実行し、操作モード・アークボール・矩形選択状態は`ViewportInteractionHub`、Layer表示状態は`ViewportDisplayHub`がそれぞれ保持する。`ViewportHub`は各状態Hubの構成のみを担当する。`ViewportDisplayHub`はLayer切替を現在の責務とし、将来の表示・可視性制御（表示モード、表示対象の絞り込みなど）もこの責務の範囲で扱う。`CameraRig`はCameraHubの状態通知をSceneへ反映する役に限定する。状態購読者は購読開始後に該当HubのPropertyを読む初期化処理を行い、状態再要求イベント（AskState）による初期同期を設けない。Node/UIがHubと重複する正本状態を持つこと、また初期状態をシーン上のCamera/NodeからHubへ逆流させることを禁止する。
-
-- Hub通知の方針: Application層のHubは状態を所有する場合に値を保持し、UI等は公開メソッドを直接呼んで要求する（要求用SignalやAskStateは設けない）。Hubは必要に応じてUtilityを併用して値を更新し、更新があったことだけをSignalで通知する（payloadに値を載せない）。個々のModelEntityなど対象を明示する必要がある通知は、対象のentityIdのみをpayloadとし（isSelected/position/visibility/status等の値は運ばない）、購読者はRegistry（Get）やSelection.Containsで対象の値を参照する。購読者は通知受信時に正本状態の所有者（状態HubまたはModelEntity）のPropertyを直接読む。ModelEntityStateHubのField更新通知ではModelEntityが値の所有者・更新主体となり、StateHubは通知のみを担う。保持状態を持たない一過性イベント（ピック結果等）のみpayload付きを許容する。
-- Hubのregion構成の方針: Application配下の全Hubは Fields / Properties / Signals / Lifecycle / Events / Methods / Helpers の7regionをこの順で必ず持つ（空でも残す。Signalsを上に置き通知を先に把握できるようにする）。Lifecycle以外の全メンバー（Field/Property/Signal/メソッド/内部型）にXMLコメント（`/// <summary>`）を必須とする。[Signal] 宣言とその発火用 NotifyXxx は Signals、OnXxx ハンドラと SubscribeXxx/UnsubscribeXxx は Events、公開・内部の操作メソッドは Methods、それ以外の補助は Helpers に置く。Actions/Notifications regionは使わない。
+- **Signal payload:** 自作の参照型は `RefCounted` を継承する。状態変更通知は値を載せず、対象を示す場合もIDのみ。一過性イベントは必要なpayloadを許容する。
+- **状態所有:** 状態Hubが正本を所有し、購読者は購読後にPropertyを読み、その後は通知に追従する。要求はHubの公開メソッドを呼び、AskState等で再通知させない。Node/UIに状態を複製しない。
+- **設定・描画:** `Constant` 値はキャッシュしない。`SettingService` 値は高頻度参照時だけキャッシュする。`SettingsNotified` で表示が変わる場合、同じハンドラで再描画・再構築する。
+- **モデル:** ドメインIDは`Guid entityId` / `propertyId`とし、Signal/Event/Pick/UI間ではModelNode参照でなくIDを渡す。Godot Signalのstring IDは受信直後に `Guid.TryParse` する。`ModelHub` はEntity/Propertyを分け、各Registryが識別子と階層を所有する。Entity更新はModelEntityが値と対応Nodeを同期し、StateHubは通知のみ、VisualHubは実効Visibilityと表示効果、UIはTree投影を担う。Status遷移はModelEntityの専用メソッドに限定し、`IsVisible` はVisibilityと親階層から導出する。
+- **モデル操作・UI:** Pick/Measurement/Load/SceneはEntity配下、Property LoadはProperty配下に置く。Hub間は責務・依存方向を保ち循環させない。PopupMenuはUIごとに複製せず、対象IDを受けるApplication UI Menuから表示する。
+- **Viewport:** Camera状態・操作は`ViewportCameraHub`、操作状態は`ViewportInteractionHub`、Layer状態は`ViewportDisplayHub`が所有する。`ViewportHub`は構成、`CameraRig`は状態のScene反映に限る。
+- **IPC:** Protocolはwire DTOとenvelopeを扱い、ViewerがDTOからドメインへ変換する。単純なpayload factoryはpayload自身に置き、専用Builderを増やさない。
+- **Application Hub:** 7 region（`Fields / Properties / Signals / Lifecycle / Events / Methods / Helpers`）をこの順で必ず置く。`[Signal]` と`NotifyXxx`はSignals、購読処理・`OnXxx`はEvents、操作はMethods、補助はHelpers。Lifecycle以外の全メンバーにXML summaryを付け、Actions/Notifications regionは使わない。

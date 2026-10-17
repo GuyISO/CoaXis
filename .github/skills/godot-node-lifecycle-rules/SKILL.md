@@ -1,27 +1,18 @@
 ---
 name: godot-node-lifecycle-rules
-description: "Use when: Godot C# の Node 継承クラスで _Ready/_ExitTree の実装・修正、イベント購読解除、base._ExitTree() 追加、Lifecycle/Events/Public API の並びをそろえるとき"
+description: "Use when: Godot C# Node の _Ready/_ExitTree、購読解除、base 呼び出しを実装・修正するとき"
 ---
 
 # Godot Node Lifecycle Rules
 
-このスキルは、Godot C# の Node 継承クラスにおけるライフサイクル実装を統一するための規約。
-
-## Scope
-
-- 対象: `Node` を継承する C# クラス
-- 主眼: `_Ready()` と `_ExitTree()` の対称性、イベント購読解除漏れ防止、終了処理の順序統一
+Godot C# Node のライフサイクル規約。Application Hubのregion構成は `.github/instructions/design-philosophy.instructions.md` を優先する。
 
 ## Rules
 
 1. `_Ready()` で開始した購読は `_ExitTree()` で必ず解除する。
-2. `_ExitTree()` の最後の実行文は必ず `base._ExitTree();` にする。
-3. `_ExitTree()` では、独自の解放・解除処理を先に実行し、`base._ExitTree();` は末尾に1回だけ置く。
-4. region の順序は `Lifecycle -> Events -> Public API` を基本とする。
-5. イベントハンドラ本体は `Events` region にまとめる。
-6. `SubscribeEvents` / `UnsubscribeEvents`（または同等の購読開始/解除メソッド）は `Events` region の最上部に配置する。
-7. `SubscribeUiEvents` / `UnsubscribeUiEvents` など、UI入力・通知向けの類似購読/解除メソッドも `Events` region の最上部に配置する。
-8. `EnsureChildNodes` など、ノード参照の確立を行う初期化メソッドも `Events` region の最上部に配置する。
+2. `_ExitTree()` は独自の解除・解放を先に行い、最後に `base._ExitTree();` を1回呼ぶ。
+3. ハンドラーと購読開始・解除は `Events` に置く。購読・Node参照確立メソッドを先頭にまとめる。
+4. Nodeでは `Lifecycle` を `Events` より前に置く。Application Hubは専用の7-region規約に従う。
 
 ## Method Template
 
@@ -43,14 +34,8 @@ public override void _ExitTree()
 #endregion
 ```
 
-## Review Checklist
+## 確認
 
 - `_Ready()` 内で `+=` したものが `_ExitTree()` で `-=` されているか
 - `_ExitTree()` の末尾が `base._ExitTree();` になっているか
 - `base._ExitTree();` が重複していないか
-- region 構成が `Lifecycle -> Events -> Public API` の順序か
-
-## Maintenance
-
-- この規約を追加・変更した場合は、同日に `.github/design-philosophy/registry.md` へ履歴を追記する。
-- 新しいカテゴリ名を導入した場合は `.github/design-philosophy/index.md` の対応表も更新する。
