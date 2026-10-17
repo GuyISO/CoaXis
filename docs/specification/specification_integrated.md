@@ -249,6 +249,7 @@ CATIA V5のMBD情報を起点に、工程計画・作業情報・リソース情
 - `ModelEntityStateHub`: ModelEntityの状態変更通知だけを担当し、Fieldの更新やModelNodeの直接操作は行わない
 - `ModelEntity`: 専用メソッドまたはアクセサーでFieldを更新し、Position・Rotationを対応するModelNodeへ同期する。Statusは `Unloaded→Initialized→Registered→Loading→(Loaded|LoadFailed)` の許可遷移だけを専用メソッドで実行し、ScenePathが空の場合は `Registered→Loaded`、破棄は `Registered|Loading|Loaded|LoadFailed→Disposed` のみ許可する
 - `ModelEntityVisualHub`: ModelEntityのVisibility変更通知を受け、対象と子孫の実効表示を `IsVisible` として導出し、ModelNode配下の描画Layerを切り替えてからUI向け解決完了通知を発行する。`IsVisible` は `Visibility` 設定値と親階層から導出する読み取り専用値であり、ModelEntityにキャッシュしない。選択強調・透明度も反映し、ModelEntityのField更新やPosition・Rotationの直接同期は行わない
+- カメラFit: Node階層の可視状態に加えて、各MeshInstance3Dの描画Layerと `ViewportDisplayHub.ActiveLayers` の積集合を対象にAABBを計算する。表示対象メッシュがない場合はカメラ状態を変更しない。レイヤーマスクを指定しないAABB取得は既存の全レイヤー対象を維持する
 - UIツリー: ModelEventとPickEventの通知をTreeItemまたはModelPropertyTreeへ投影する。TreeItemはModel Domainで保持せず、UIをModelPresentationServiceへ参照登録しない
 
 Model中心DomainのFacade構成:
@@ -450,6 +451,8 @@ ViewerからEditor:
 - OnLoaded
 - OnError
 - Result（要求への処理結果応答）
+
+メインスレッド要求の待機は2秒を上限とする。タイムアウト時に要求がまだキュー待ちであれば実行前に取り消し、`MAIN_THREAD_TIMEOUT` を返して副作用が発生しないことを保証する。すでにメインスレッドで実行を開始している要求は中断せず、同じエラーコードと「結果不明」の説明を返す。送信側は結果不明の要求を無条件に再送せず、状態照会などで結果を確認する。
 
 イベント種別は送信方向ごとに `IpcEventType.ToViewer`（Viewerが受信）と `IpcEventType.FromViewer`（Viewerが送信）の文字列定数で定義する。JSON上の値は引き続き文字列とし、契約上の定義と各イベントの実装状況は区別する。
 

@@ -112,9 +112,14 @@ public partial class IpcHub : BaseHub
         // 受信スレッドが溜めたリクエストを、メインスレッド上で順番にドメイン層へ振り分ける
         while (_pendingRequests.TryDequeue(out PendingRequest request))
         {
+            if (!request.TryStart())
+            {
+                continue;
+            }
+
             IpcResultPayload result = IpcCommandDispatcher.Dispatch(request.Envelope);
             EmitSignal(SignalName.MessageHandled, request.Envelope.EventType, result.Ok, result.ErrorCode);
-            request.CompletionSource.TrySetResult(result);
+            request.Complete(result);
         }
     }
 
@@ -173,6 +178,8 @@ public partial class IpcHub : BaseHub
         {
             // 停止処理は継続するため、切断済みパイプの Dispose 例外は無視する
         }
+
+        CancelPendingRequests();
 
         _cts.Dispose();
         _cts = null;
@@ -298,16 +305,61 @@ public partial class IpcHub : BaseHub
 
         var request = new PendingRequest(envelope);
         _pendingRequests.Enqueue(request);
+        if (token.IsCancellationRequested)
+        {
+            request.TryCancelBeforeExecution();
+        }
 
         Task<IpcResultPayload> completion = request.CompletionSource.Task;
         Task timeoutTask = Task.Delay(MainThreadTimeoutMilliseconds, token);
         Task completed = await Task.WhenAny(completion, timeoutTask).ConfigureAwait(false);
 
-        IpcResultPayload result = completed == completion
-            ? await completion.ConfigureAwait(false)
-            : IpcResultPayload.Failure(envelope.EventType, IpcErrorCode.MainThreadTimeout, "Main thread did not respond in time.");
+        if (completed == completion || completion.IsCompleted)
+        {
+            return BuildResponse(envelope, await completion.ConfigureAwait(false));
+        }
+
+        if (token.IsCancellationRequested)
+        {
+            request.TryCancelBeforeExecution();
+            throw new OperationCanceledException(token);
+        }
+
+        IpcResultPayload result;
+        if (request.TryCancelBeforeExecution())
+        {
+            result = IpcResultPayload.Failure(
+                envelope.EventType,
+                IpcErrorCode.MainThreadTimeout,
+                "Main-thread processing did not start before the timeout; the request was not executed.");
+        }
+        else
+        {
+            // 実行開始後はメインスレッド処理を中断できないため、結果不明として返す。
+            result = IpcResultPayload.Failure(
+                envelope.EventType,
+                IpcErrorCode.MainThreadTimeout,
+                "Main-thread processing started but did not finish before the timeout; the outcome is unknown.");
+        }
 
         return BuildResponse(envelope, result);
+    }
+
+    /// <summary>
+    /// 停止時にキュー内の未実行要求を無効化する。
+    /// </summary>
+    private void CancelPendingRequests()
+    {
+        while (_pendingRequests.TryDequeue(out PendingRequest request))
+        {
+            if (request.TryCancelBeforeExecution())
+            {
+                request.CompletionSource.TrySetResult(IpcResultPayload.Failure(
+                    request.Envelope.EventType,
+                    IpcErrorCode.MainThreadTimeout,
+                    "The IPC server stopped before the request was executed."));
+            }
+        }
     }
 
     /// <summary>
@@ -329,9 +381,48 @@ public partial class IpcHub : BaseHub
     /// </summary>
     private sealed class PendingRequest
     {
+        private const int Queued = 0;
+        private const int Executing = 1;
+        private const int Cancelled = 2;
+        private const int Completed = 3;
+
+        private int _state = Queued;
+
         public IpcEnvelope Envelope { get; }
         public TaskCompletionSource<IpcResultPayload> CompletionSource { get; }
 
+        /// <summary>
+        /// 要求がキュー待ちの場合に限り、メインスレッドでの実行権を取得する。
+        /// </summary>
+        /// <returns>実行を開始できる場合は true</returns>
+        public bool TryStart()
+        {
+            return Interlocked.CompareExchange(ref _state, Executing, Queued) == Queued;
+        }
+
+        /// <summary>
+        /// 要求がまだ開始されていない場合に限り、実行前に取り消す。
+        /// </summary>
+        /// <returns>実行前の取り消しに成功した場合は true</returns>
+        public bool TryCancelBeforeExecution()
+        {
+            return Interlocked.CompareExchange(ref _state, Cancelled, Queued) == Queued;
+        }
+
+        /// <summary>
+        /// 実行済みの要求結果を待機中の受信処理へ通知する。
+        /// </summary>
+        /// <param name="result">要求の処理結果</param>
+        public void Complete(IpcResultPayload result)
+        {
+            CompletionSource.TrySetResult(result);
+            Interlocked.Exchange(ref _state, Completed);
+        }
+
+        /// <summary>
+        /// 受信エンベロープからメインスレッド処理要求を作成する。
+        /// </summary>
+        /// <param name="envelope">処理対象のIPCエンベロープ</param>
         public PendingRequest(IpcEnvelope envelope)
         {
             Envelope = envelope;

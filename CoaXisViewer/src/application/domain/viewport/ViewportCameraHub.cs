@@ -364,7 +364,8 @@ public partial class ViewportCameraHub : BaseHub
     public void Fit(Node3D[] targetNodes, bool useTween = false)
     {
         CameraSettings settings = Application.Setting.Current.Camera;
-        if (!WorldAabbUtility.TryGetWorldAabb(targetNodes, out Aabb worldAabb))
+        uint activeLayers = Application.Viewport.Display.ActiveLayers;
+        if (!WorldAabbUtility.TryGetWorldAabb(targetNodes, activeLayers, out Aabb worldAabb))
         {
             return;
         }

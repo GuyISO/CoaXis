@@ -16,6 +16,18 @@ public static class WorldAabbUtility
     /// <returns>有効な MeshInstance3D が存在した場合は true を返す</returns>
     public static bool TryGetWorldAabb(IEnumerable<Node3D> nodes, out Aabb aabb)
     {
+        return TryGetWorldAabb(nodes, uint.MaxValue, out aabb);
+    }
+
+    /// <summary>
+    /// 指定ノード群から指定レイヤーに属するメッシュのワールド空間 AABB を合算して取得する。
+    /// </summary>
+    /// <param name="nodes">AABB を取得する対象ノード群</param>
+    /// <param name="layerMask">対象に含めるレイヤーのビットマスク</param>
+    /// <param name="aabb">合算されたワールド AABB</param>
+    /// <returns>指定レイヤーに属する有効な MeshInstance3D が存在した場合は true</returns>
+    public static bool TryGetWorldAabb(IEnumerable<Node3D> nodes, uint layerMask, out Aabb aabb)
+    {
         aabb = default;
         bool hasMeshAabb = false;
 
@@ -31,7 +43,7 @@ public static class WorldAabbUtility
                 continue;
             }
 
-            if (!TryGetWorldAabb(node, out Aabb nodeAabb))
+            if (!TryGetWorldAabb(node, layerMask, out Aabb nodeAabb))
             {
                 continue;
             }
@@ -52,11 +64,11 @@ public static class WorldAabbUtility
     /// </summary>
     /// <param name="node">対象ノード</param>
     /// <param name="aabb">対象 AABB</param>
-    private static bool TryGetWorldAabb(Node node, out Aabb aabb)
+    private static bool TryGetWorldAabb(Node node, uint layerMask, out Aabb aabb)
     {
         aabb = default;
         bool hasMeshAabb = false;
-        GetWorldAabbRecursive(node, ref aabb, ref hasMeshAabb);
+        GetWorldAabbRecursive(node, layerMask, ref aabb, ref hasMeshAabb);
         return hasMeshAabb;
     }
 
@@ -64,16 +76,19 @@ public static class WorldAabbUtility
     /// ノードの階層を再帰的に探索してワールド AABB を取得する
     /// </summary>
     /// <param name="node">対象ノード</param>
+    /// <param name="layerMask">対象に含めるレイヤーのビットマスク</param>
     /// <param name="aabb">取得した AABB</param>
     /// <param name="hasMeshAabb">有効な MeshInstance3D が存在するかどうか</param>
-    private static void GetWorldAabbRecursive(Node node, ref Aabb aabb, ref bool hasMeshAabb)
+    private static void GetWorldAabbRecursive(Node node, uint layerMask, ref Aabb aabb, ref bool hasMeshAabb)
     {
         if (node is Node3D node3D && !node3D.IsVisibleInTree())
         {
             return;
         }
 
-        if (node is MeshInstance3D meshInstance && meshInstance.Mesh != null)
+        if (node is MeshInstance3D meshInstance &&
+            meshInstance.Mesh != null &&
+            (meshInstance.Layers & layerMask) != 0)
         {
             // Transform3D * Aabb は 8 コーナー変換と再構築を Godot 側で行う
             Aabb meshAabb = meshInstance.GlobalTransform * meshInstance.Mesh.GetAabb();
@@ -90,7 +105,7 @@ public static class WorldAabbUtility
 
         foreach (Node child in node.GetChildren())
         {
-            GetWorldAabbRecursive(child, ref aabb, ref hasMeshAabb);
+            GetWorldAabbRecursive(child, layerMask, ref aabb, ref hasMeshAabb);
         }
     }
 

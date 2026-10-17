@@ -1,7 +1,5 @@
 # Viewer
 
-非表示レイヤーのアイテムもFITに含まれる？
-
 EntityがPropertyを保有していることがわかるよう保有数をボタンで表示する
 PropertyTreeにもアイコンを表示する
 ModelEntityに対してAABBの空間にエフェクトを配置する
@@ -9,15 +7,12 @@ ModelEntityに対してAABBの空間にエフェクトを配置する
 Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする
 ModelProertyTreeは、Containerの中に配置する形で使用する
 
-AssetHubをFacadeにし、Material,Icon,Sceneなど各Asset種類別のHubを持たせる
 SettingもFacadeにして、各種設定を管理するHub
 Settingで設定可能にする必要のない項目が多すぎる、Settingは全体的に見直す
 
 ユーザー可変値はSettingでの一元管理でなく、各Hubが持つものを正とし、Settingはあくまで初期値やデフォルト値をHubに提供する役割にする
 
 IPCの状態確認UI作成する
-Fitでモデルを画面に収める機能で非表示レイヤーを除外する
-
 三面図などの複数Viewportに対応できるように、各Viewportごとに独立したカメラやオーバーレイを管理する仕組みを検討する
 ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介してカメラを表示できるようにする、各Viewportごとに独立したカメラ制御を可能にする
 FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する

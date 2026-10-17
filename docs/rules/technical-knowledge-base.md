@@ -42,6 +42,21 @@
 
 ---
 
+### [2026-10-18] Fit対象レイヤーとIPCメインスレッドタイムアウト
+
+- 背景: FitのAABB計算がNodeの可視状態しか参照せず、ViewportがCullMaskで隠しているモデルの範囲もカメラ調整に含めていた。また、IPCのメインスレッド待機がタイムアウトしても、キューに残った要求が後から実行される可能性があった。
+- 問題: 表示内容とFit範囲が一致せず、IPC要求がタイムアウト応答後に副作用を起こす可能性があった。
+- 判断: FitではActiveLayersとMeshInstance3D.Layersの共通ビットがあるメッシュだけをAABBに含める。IPC要求にはキュー待ち/実行中/取消済みの原子的状態を持たせ、タイムアウト時に未実行なら取り消す。実行開始後は同期的なメインスレッド処理を強制中断せず、結果不明を返す。
+- 判断理由: 描画可否を決める同じレイヤーマスクをFitにも使用すればカメラ範囲が表示状態と一致する。キュー待ち状態の取消しと実行開始はInterlockedの比較交換で排他し、タイムアウト後の遅延実行を防げる。一方、Godotのメインスレッド上で既に実行中の処理は安全に中断できない。
+- 採用しなかった代替案: AABB共通処理を常に現在レイヤーに限定すると、Property OverlayなどFit以外の用途の既存挙動を変えるため不採用。開始済み要求を途中で強制停止する案はドメイン更新の途中状態を作るおそれがあるため不採用。
+- 影響範囲: `WorldAabbUtility`、`ViewportCameraHub`、`IpcHub`、Viewer仕様、TODO。
+- 実装/運用手順: Fitでは `Application.Viewport.Display.ActiveLayers` をレイヤーマスク引数として渡す。AABBの他用途は既存の全レイヤー overload を利用する。IPCクライアントは `MAIN_THREAD_TIMEOUT` と「結果不明」の応答を受けた場合、非冪等要求を確認なしで再送しない。停止時は未実行要求を取り消す。
+- 検証方法: 全体ソリューションのDebug/Releaseビルドを行う。実行時確認では、表示レイヤーだけのFit範囲、非表示レイヤーのみの対象でカメラが動かないこと、メインスレッド停滞中に未開始要求が応答後に実行されないこと、開始済み要求が結果不明を返すことを確認する。
+- 関連ファイル/関連仕様: `CoaXisViewer/src/core/util/WorldAabbUtility.cs`、`CoaXisViewer/src/application/domain/viewport/ViewportCameraHub.cs`、`CoaXisViewer/src/application/infrastructure/IpcHub.cs`、`docs/specification/specification_integrated.md`
+- 備考: Fit外のAABB用途は引き続きNodeの可視状態を反映し、レイヤーについては全レイヤーを対象とする。
+
+---
+
 ### [2026-10-01] シーンリソースのパス別キャッシュ方針
 
 - 背景: 複数モデルで同じ `res://` シーンを使う場合、ロード済み `PackedScene` を再利用したい。一方、外部ファイル由来のシーンは再利用頻度が低く、キャッシュ参照を長期保持するとメモリ使用量が増える。
