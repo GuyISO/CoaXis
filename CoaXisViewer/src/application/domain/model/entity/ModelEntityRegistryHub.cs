@@ -141,6 +141,28 @@ public partial class ModelEntityRegistryHub : BaseHub
     }
 
     /// <summary>
+    /// Entityの親参照をたどり、シーンルートへ接続されているかを判定する。
+    /// </summary>
+    /// <param name="entityId">判定対象のEntity識別子</param>
+    /// <returns>登録済みEntityから親参照が途切れずRootへ到達する場合はtrue</returns>
+    public bool IsRootConnected(Guid entityId)
+    {
+        ModelEntity entity = Get(entityId);
+        var visitedEntityIds = new HashSet<Guid>();
+        while (entity != null && visitedEntityIds.Add(entity.Id))
+        {
+            if (entity.ParentId == Guid.Empty)
+            {
+                return true;
+            }
+
+            entity = Get(entity.ParentId);
+        }
+
+        return false;
+    }
+
+    /// <summary>
     /// ModelEntity を登録する。親が未登録の場合は、親が登録されるまでリンク待機する。
     /// すでに同じ Id の ModelEntity が登録されている場合は、既存の ModelEntity を置き換える。
     /// </summary>

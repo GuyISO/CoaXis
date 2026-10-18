@@ -2,14 +2,14 @@
 
 ## 目的
 
-Viewerの現行 `LoadModel` IPC契約を使ってモデルを読み込み、送信内容とViewer応答を確認する。プロトコル上の他イベントは、Viewer側に処理が実装されるまでテスト対象ではない。
+IPC Testerの現行 `ReplaceModelSet` IPC契約を使ってモデル集合を置換し、送信内容とViewer応答を確認する。Viewerは部分追加・削除のIPC要求も処理するが、このテスターのUIはそれらの送信に対応していない。要求へのResultを待つ間に先着した非同期通知は通信履歴に記録し、要求への応答は`correlationId`が一致する`Result`として識別する。Result受信後は接続を閉じるため、継続的な通知購読には対応しない。
 
 ## 起動
 
 1. `dotnet build .\CoaXis.sln` を実行する。
 2. CoaXisViewerを起動する。Viewerは既定で `CoaXisViewerPipe` を待ち受ける。
 3. `dotnet run --project .\CoaXisIpcTester\CoaXis.IpcTester.csproj` を実行する。
-4. リポジトリ内の `samples` フォルダーを検出できた場合、モデル実体に `modelentity.csv`、属性に `modelproperty.csv` が初期表示される。別の入力を使う場合は「選択...」から変更し、「LoadModelを送信」を押す。
+4. リポジトリ内の `samples` フォルダーを検出できた場合、モデル実体に `modelentity.csv`、属性に `modelproperty.csv` が初期表示される。別の入力を使う場合は「選択...」から変更し、「ReplaceModelSetを送信」を押す。
 5. 左側の通信履歴から要求を選ぶと、送信JSONと応答JSONを確認できる。
 
 ## 入力形式

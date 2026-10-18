@@ -254,6 +254,18 @@ public class ModelEntity
     }
 
     /// <summary>
+    /// Sceneを再ロードできるよう、登録済みEntityのロード状態を初期化する。
+    /// </summary>
+    public void ResetLoadState()
+    {
+        TransitionStatus(
+            ModelStatus.Registered,
+            ModelStatus.Loading,
+            ModelStatus.Loaded,
+            ModelStatus.LoadFailed);
+    }
+
+    /// <summary>
     /// Sceneロード失敗状態へ遷移する。
     /// </summary>
     public void MarkLoadFailed()

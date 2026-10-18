@@ -2,15 +2,18 @@ using CoaXis.Protocol.Viewer;
 using Godot;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 
 /// <summary>
-/// IPC メッセージの受信、振り分け、結果応答を管理するハブ。
+/// IPC メッセージの受信、振り分け、結果応答、およびViewer発通知を管理するハブ。
 /// </summary>
 public partial class IpcHub : BaseHub
 {
@@ -33,6 +36,10 @@ public partial class IpcHub : BaseHub
     private CancellationTokenSource _cts;
     /// <summary>受信待機タスク。</summary>
     private Task _listenTask;
+    /// <summary>現在接続中のクライアントへ書き込む送信セッション。</summary>
+    private ConnectionSession _activeConnection;
+    /// <summary>選択状態通知イベントを購読済みかどうか。</summary>
+    private bool _selectionEventsSubscribed;
 
     #endregion
 
@@ -97,6 +104,8 @@ public partial class IpcHub : BaseHub
 
     public override void _Process(double delta)
     {
+        SubscribeSelectionEvents();
+
         while (_pendingNotifications.TryDequeue(out PendingNotification notification))
         {
             if (notification.Type == PendingNotificationType.ClientStatus)
@@ -125,6 +134,7 @@ public partial class IpcHub : BaseHub
 
     public override void _ExitTree()
     {
+        UnsubscribeSelectionEvents();
         StopPipeServer();
 
         base._ExitTree();
@@ -133,6 +143,62 @@ public partial class IpcHub : BaseHub
     #endregion
 
     #region Events
+
+    /// <summary>
+    /// 選択状態変更イベントの購読を開始する。
+    /// ModelHubはIpcHubより後に構築されるため、Process開始後に一度だけ購読する。
+    /// </summary>
+    private void SubscribeSelectionEvents()
+    {
+        if (_selectionEventsSubscribed)
+        {
+            return;
+        }
+
+        Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
+        _selectionEventsSubscribed = true;
+    }
+
+    /// <summary>
+    /// 選択状態変更イベントの購読を解除する。
+    /// </summary>
+    private void UnsubscribeSelectionEvents()
+    {
+        if (!_selectionEventsSubscribed)
+        {
+            return;
+        }
+
+        Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
+        _selectionEventsSubscribed = false;
+    }
+
+    /// <summary>
+    /// 選択状態が変わった場合、接続中のIPCクライアントへ最新の選択ID一覧を通知する。
+    /// </summary>
+    private void OnSelectionChanged()
+    {
+        ConnectionSession connection = Volatile.Read(ref _activeConnection);
+        if (connection == null)
+        {
+            return;
+        }
+
+        var payload = new ModelEntitySelectedPayload
+        {
+            EntityIds = Application.Model.Entity.Selection.SelectedIds
+                .OrderBy(entityId => entityId)
+                .ToList()
+        };
+        IpcEnvelope notification = IpcEnvelopeBuilder.Create(
+            IpcEventType.FromViewer.ModelEntitySelected,
+            ViewerSourceName,
+            payload);
+        if (!connection.TryEnqueue(notification))
+        {
+            Application.Log.Warn("Ipc: unable to queue ModelEntitySelected notification.");
+        }
+    }
 
     #endregion
 
@@ -249,17 +315,28 @@ public partial class IpcHub : BaseHub
             NewLine = "\n"
         };
 
-        while (pipe.IsConnected && !token.IsCancellationRequested)
+        var connection = new ConnectionSession(writer);
+        Volatile.Write(ref _activeConnection, connection);
+        Task writeTask = connection.WriteLoopAsync(token);
+        try
         {
-            string line = await reader.ReadLineAsync().ConfigureAwait(false);
-            if (line == null)
+            while (pipe.IsConnected && !token.IsCancellationRequested)
             {
-                break;
-            }
+                string line = await reader.ReadLineAsync().ConfigureAwait(false);
+                if (line == null)
+                {
+                    break;
+                }
 
-            IpcEnvelope response = await ProcessLineAsync(line, token).ConfigureAwait(false);
-            string json = JsonSerializer.Serialize(response, IpcJsonOptions.Default);
-            await writer.WriteLineAsync(json).ConfigureAwait(false);
+                IpcEnvelope response = await ProcessLineAsync(line, token).ConfigureAwait(false);
+                await connection.SendAndWaitAsync(response, token).ConfigureAwait(false);
+            }
+        }
+        finally
+        {
+            Interlocked.CompareExchange(ref _activeConnection, null, connection);
+            connection.Complete();
+            await writeTask.ConfigureAwait(false);
         }
     }
 
@@ -374,6 +451,130 @@ public partial class IpcHub : BaseHub
             ViewerSourceName,
             payload,
             request?.EventId);
+    }
+
+    /// <summary>
+    /// 接続中クライアントへの応答と通知を直列化して書き込むセッション。
+    /// </summary>
+    private sealed class ConnectionSession
+    {
+        /// <summary>接続先の書き込みストリーム。</summary>
+        private readonly StreamWriter _writer;
+        /// <summary>応答と通知を順番に送るキュー。</summary>
+        private readonly Channel<OutboundMessage> _outgoing = Channel.CreateUnbounded<OutboundMessage>(
+            new UnboundedChannelOptions
+            {
+                SingleReader = true,
+                SingleWriter = false
+            });
+
+        /// <summary>
+        /// 接続セッションの書き込み先を設定する。
+        /// </summary>
+        /// <param name="writer">接続に対応するストリームライター</param>
+        public ConnectionSession(StreamWriter writer)
+        {
+            _writer = writer;
+        }
+
+        /// <summary>
+        /// 応答または非同期通知を送信キューへ追加する。
+        /// </summary>
+        /// <param name="envelope">送信するIPCエンベロープ</param>
+        /// <returns>キューへ追加できた場合はtrue</returns>
+        public bool TryEnqueue(IpcEnvelope envelope)
+        {
+            return _outgoing.Writer.TryWrite(new OutboundMessage(envelope, null));
+        }
+
+        /// <summary>
+        /// IPC応答を送信キューへ追加し、書き込み完了を待機する。
+        /// </summary>
+        /// <param name="envelope">送信する応答エンベロープ</param>
+        /// <param name="token">接続の取消しトークン</param>
+        public async Task SendAndWaitAsync(IpcEnvelope envelope, CancellationToken token)
+        {
+            var completion = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+            await _outgoing.Writer.WriteAsync(new OutboundMessage(envelope, completion), token).ConfigureAwait(false);
+            await completion.Task.WaitAsync(token).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// 送信キューを順次ストリームへ書き込む。
+        /// </summary>
+        /// <param name="token">接続の取消しトークン</param>
+        public async Task WriteLoopAsync(CancellationToken token)
+        {
+            try
+            {
+                await foreach (OutboundMessage message in _outgoing.Reader.ReadAllAsync(token).ConfigureAwait(false))
+                {
+                    try
+                    {
+                        string json = JsonSerializer.Serialize(message.Envelope, IpcJsonOptions.Default);
+                        await _writer.WriteLineAsync(json).ConfigureAwait(false);
+                        message.Completion?.TrySetResult(true);
+                    }
+                    catch (Exception exception) when (exception is IOException or ObjectDisposedException)
+                    {
+                        message.Completion?.TrySetException(exception);
+                        FailPending(exception);
+                        Application.Log.Warn($"Ipc: client disconnected during message write. {exception.Message}");
+                        return;
+                    }
+                }
+            }
+            catch (OperationCanceledException) when (token.IsCancellationRequested)
+            {
+                FailPending(new IOException("IPC connection was cancelled."));
+            }
+            finally
+            {
+                _outgoing.Writer.TryComplete();
+                FailPending(new IOException("IPC connection was closed."));
+            }
+        }
+
+        /// <summary>
+        /// 新しい書き込みを停止し、キュー済みメッセージの送信を終える。
+        /// </summary>
+        public void Complete()
+        {
+            _outgoing.Writer.TryComplete();
+        }
+
+        /// <summary>
+        /// 書き込みに失敗した場合、キュー内の応答待機を失敗させる。
+        /// </summary>
+        private void FailPending(Exception exception)
+        {
+            while (_outgoing.Reader.TryRead(out OutboundMessage message))
+            {
+                message.Completion?.TrySetException(exception);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 送信エンベロープと、必要に応じて応答書き込みの完了通知を保持する。
+    /// </summary>
+    private sealed class OutboundMessage
+    {
+        /// <summary>送信するIPCエンベロープ。</summary>
+        public IpcEnvelope Envelope { get; }
+        /// <summary>応答書き込み完了通知。非同期通知ではnull。</summary>
+        public TaskCompletionSource<bool> Completion { get; }
+
+        /// <summary>
+        /// 送信エンベロープと完了通知を設定する。
+        /// </summary>
+        /// <param name="envelope">送信するIPCエンベロープ</param>
+        /// <param name="completion">書き込み完了通知</param>
+        public OutboundMessage(IpcEnvelope envelope, TaskCompletionSource<bool> completion)
+        {
+            Envelope = envelope;
+            Completion = completion;
+        }
     }
 
     /// <summary>

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 
 /// <summary>
 /// ModelProperty の識別子と階層を管理するハブ。
@@ -22,6 +23,9 @@ public partial class ModelPropertyRegistryHub : BaseHub
     #endregion
 
     #region Signals
+
+    /// <summary>Property集合の変更通知。</summary>
+    [Signal] public delegate void ChangedEventHandler();
 
     #endregion
 
@@ -151,6 +155,8 @@ public partial class ModelPropertyRegistryHub : BaseHub
         {
             LinkToParent(item);
         }
+
+        EmitSignal(SignalName.Changed);
     }
 
     /// <summary>

@@ -57,6 +57,14 @@ public partial class ModelEntitySceneHub : BaseHub
 
 		foreach (ModelEntity modelEntity in modelEntities)
 		{
+			if (modelEntity == null ||
+				!Application.Model.Entity.Registry.IsRootConnected(modelEntity.Id) ||
+				modelEntity.Node == null ||
+				!GodotObject.IsInstanceValid(modelEntity.Node))
+			{
+				continue;
+			}
+
 			if (string.IsNullOrWhiteSpace(modelEntity.ScenePath))
 			{
 				UpdateModelStatus(modelEntity, ModelStatus.Loaded);
@@ -97,6 +105,41 @@ public partial class ModelEntitySceneHub : BaseHub
 		}
 
 		SceneAssetLoader.ClearCompletedCache();
+	}
+
+	/// <summary>
+	/// 指定Entityの保留中ロードを取り消し、外部シーンの利用枠を解放する。
+	/// </summary>
+	/// <param name="entityIds">ロードを取り消すEntity識別子</param>
+	public void CancelLoads(IReadOnlyCollection<Guid> entityIds)
+	{
+		if (entityIds == null || entityIds.Count == 0)
+		{
+			return;
+		}
+
+		var cancelledIds = new HashSet<Guid>(entityIds);
+		var retainedItems = new Queue<SceneLoadQueueItem>();
+		lock (_sceneLoadQueueLock)
+		{
+			while (_sceneLoadQueue.Count > 0)
+			{
+				SceneLoadQueueItem item = _sceneLoadQueue.Dequeue();
+				if (cancelledIds.Contains(item.ModelEntity.Id))
+				{
+					SceneAssetLoader.ReleaseLoad(item.ModelEntity.ScenePath);
+				}
+				else
+				{
+					retainedItems.Enqueue(item);
+				}
+			}
+
+			while (retainedItems.Count > 0)
+			{
+				_sceneLoadQueue.Enqueue(retainedItems.Dequeue());
+			}
+		}
 	}
 
 	#endregion
@@ -248,7 +291,8 @@ public partial class ModelEntitySceneHub : BaseHub
 	{
 		return modelEntity != null
 			&& modelEntity.Status != ModelStatus.Disposed
-			&& Application.Model.Entity.Registry.IsRegistered(modelEntity.Id)
+			&& ReferenceEquals(Application.Model.Entity.Registry.Get(modelEntity.Id), modelEntity)
+			&& Application.Model.Entity.Registry.IsRootConnected(modelEntity.Id)
 			&& modelEntity.Node != null
 			&& IsInstanceValid(modelEntity.Node);
 	}

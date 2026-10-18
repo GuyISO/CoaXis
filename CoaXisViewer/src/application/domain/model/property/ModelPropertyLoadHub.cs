@@ -1,6 +1,6 @@
-using CoaXis.Protocol.Viewer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// ModelPropertyの生成と登録を管理するハブ。
@@ -30,32 +30,94 @@ public partial class ModelPropertyLoadHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// 指定したDTOからモデル属性を生成し、Property Registryへ登録して階層を解決する。
+    /// 検証済みPropertyを追加し、同じ識別子がある場合は置換する。
     /// </summary>
-    /// <param name="propertyDtos">読み込むモデル属性DTOの集合</param>
-    /// <returns>登録されたModelPropertyの一覧</returns>
-    /// <exception cref="ArgumentNullException">propertyDtosがnullの場合</exception>
-    public IReadOnlyList<ModelProperty> FromDtos(IReadOnlyList<ModelPropertyDto> propertyDtos)
+    /// <param name="properties">追加または置換するProperty</param>
+    internal void AddOrReplacePrepared(IReadOnlyList<ModelProperty> properties)
     {
-        if (propertyDtos == null)
+        RegisterPrepared(properties);
+        Application.Model.Property.Registry.ResolveHierarchy();
+    }
+
+    /// <summary>
+    /// 指定Propertyとその子孫を削除する。
+    /// </summary>
+    /// <param name="propertyIds">削除対象のProperty識別子</param>
+    /// <returns>削除したProperty識別子</returns>
+    internal IReadOnlyCollection<Guid> DeleteCascade(IReadOnlyCollection<Guid> propertyIds)
+    {
+        if (propertyIds == null)
         {
-            throw new ArgumentNullException(nameof(propertyDtos));
+            throw new ArgumentNullException(nameof(propertyIds));
         }
 
-        IReadOnlyList<ModelProperty> properties = ModelPropertyFactory.Create(propertyDtos);
-        // 全件を登録してから階層を解決し、入力順に依存せず親子関係を確定する。
-        foreach (ModelProperty property in properties)
+        var idsToDelete = new HashSet<Guid>(propertyIds);
+        bool added;
+        do
         {
-            Application.Model.Property.Registry.Register(property);
+            added = false;
+            foreach (ModelProperty property in Application.Model.Property.Registry.Items.Values)
+            {
+                if (idsToDelete.Contains(property.ParentId) && idsToDelete.Add(property.Id))
+                {
+                    added = true;
+                }
+            }
+        }
+        while (added);
+
+        foreach (Guid propertyId in idsToDelete.OrderByDescending(GetDepth))
+        {
+            Application.Model.Property.Registry.Dispose(propertyId);
         }
 
         Application.Model.Property.Registry.ResolveHierarchy();
-        return properties;
+        return idsToDelete;
     }
 
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// 指定Propertyの親階層の深さを取得する。
+    /// </summary>
+    private static int GetDepth(Guid propertyId)
+    {
+        int depth = 0;
+        ModelProperty property = Application.Model.Property.Registry.Get(propertyId);
+        var visited = new HashSet<Guid>();
+        while (property != null && property.ParentId != Guid.Empty && visited.Add(property.Id))
+        {
+            depth++;
+            property = Application.Model.Property.Registry.Get(property.ParentId);
+        }
+
+        return depth;
+    }
+
+    /// <summary>
+    /// 事前生成済みのPropertyをRegistryへ登録する。
+    /// </summary>
+    /// <param name="properties">登録する検証済みモデル属性</param>
+    private void RegisterPrepared(IReadOnlyList<ModelProperty> properties)
+    {
+        if (properties == null)
+        {
+            throw new ArgumentNullException(nameof(properties));
+        }
+
+        // 全件を登録してから階層を解決し、入力順に依存せず親子関係を確定する。
+        foreach (ModelProperty property in properties)
+        {
+            if (property == null)
+            {
+                throw new ArgumentException("ModelProperty must not be null.", nameof(properties));
+            }
+
+            Application.Model.Property.Registry.Register(property);
+        }
+    }
 
     #endregion
 }

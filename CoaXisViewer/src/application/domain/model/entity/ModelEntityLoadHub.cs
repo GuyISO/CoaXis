@@ -1,10 +1,10 @@
-using CoaXis.Protocol.Viewer;
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
-/// ModelEntityの置換ロードと登録を管理するハブ。
+/// 検証済みModelEntityの登録、置換、削除を管理するハブ。
 /// </summary>
 public partial class ModelEntityLoadHub : BaseHub
 {
@@ -31,63 +31,137 @@ public partial class ModelEntityLoadHub : BaseHub
 	#region Methods
 
 	/// <summary>
-	/// 現在のモデル集合をクリアし、指定したDTOからモデル集合を再構築する。
-	/// </summary>
-	/// <param name="entityDtos">読み込むモデル実体DTOの集合</param>
-	/// <returns>登録およびシーン反映を開始したModelEntityの一覧</returns>
-	/// <exception cref="ArgumentNullException">entityDtosがnullの場合</exception>
-	public IReadOnlyList<ModelEntity> Replace(IReadOnlyList<ModelEntityDto> entityDtos)
-	{
-		Clear();
-		return FromDtos(entityDtos);
-	}
-
-	/// <summary>
-	/// DTOからEntityを生成してRegistryへ登録し、シーン反映を開始する。
-	/// </summary>
-	/// <param name="entityDtos">読み込むモデル実体DTOの集合</param>
-	/// <returns>登録およびシーン反映を開始したModelEntityの一覧</returns>
-	/// <exception cref="ArgumentNullException">entityDtosがnullの場合</exception>
-	/// <exception cref="ArgumentException">DTOが不正、またはEntity階層に循環がある場合</exception>
-	public IReadOnlyList<ModelEntity> FromDtos(IReadOnlyList<ModelEntityDto> entityDtos)
-	{
-		if (entityDtos == null)
-		{
-			throw new ArgumentNullException(nameof(entityDtos));
-		}
-
-		IReadOnlyList<ModelEntity> entities = ModelEntityFactory.Create(entityDtos);
-		ValidateAcyclicHierarchy(entities);
-
-		// 全件を登録してから階層を解決することで、入力順に依存せず親子関係を確定する。
-		foreach (ModelEntity modelEntity in entities)
-		{
-			MarkInitialized(modelEntity);
-			Application.Model.Entity.Registry.Register(modelEntity);
-		}
-		Application.Model.Entity.Registry.ResolveHierarchy();
-		Application.Model.Property.Registry.ResolveHierarchy();
-
-		foreach (ModelEntity modelEntity in entities)
-		{
-			modelEntity.Node = EnsureNode(modelEntity);
-		}
-
-		Application.Model.Entity.Scene.PrepareLoads(entities);
-
-		Application.Model.Entity.Scene.StartPendingLoads();
-		return entities;
-	}
-
-	/// <summary>
-	/// 現在のモデル集合と保留中のシーンロードをクリアする。
+	/// 現在のEntityをクリアする。
 	/// </summary>
 	public void Clear()
 	{
-		// 旧世代を先に無効化し、EntityとPropertyの両Registryをクリアして古いノードの更新を防ぐ。
+		// 旧世代を先に無効化し、古いノードのロード完了による状態更新を防ぐ。
 		Application.Model.Entity.Scene.CancelPendingLoads();
 		Application.Model.Entity.Registry.Clear();
-		Application.Model.Property.Registry.Clear();
+	}
+
+	/// <summary>
+	/// 検証済みEntityを追加し、同じ識別子がある場合はEntityを置換する。
+	/// </summary>
+	/// <param name="entities">追加または置換するEntity</param>
+	/// <exception cref="ArgumentNullException">entitiesがnullの場合</exception>
+	/// <exception cref="ArgumentException">Root Entityが含まれる場合</exception>
+	internal void AddOrReplacePrepared(IReadOnlyList<ModelEntity> entities)
+	{
+		if (entities == null)
+		{
+			throw new ArgumentNullException(nameof(entities));
+		}
+
+		var entityIds = new HashSet<Guid>();
+		foreach (ModelEntity entity in entities)
+		{
+			if (entity == null)
+			{
+				throw new ArgumentException("ModelEntity must not be null.", nameof(entities));
+			}
+
+			if (entity.Id == RootModelEntity.RootEntityId)
+			{
+				throw new ArgumentException("The root ModelEntity cannot be added or replaced.", nameof(entities));
+			}
+
+			if (!entityIds.Add(entity.Id))
+			{
+				throw new ArgumentException($"Duplicate ModelEntity id '{entity.Id}'.", nameof(entities));
+			}
+		}
+
+		Application.Model.Entity.Scene.CancelLoads(entityIds);
+		foreach (Guid entityId in entityIds)
+		{
+			ModelEntity existingEntity = Application.Model.Entity.Registry.Get(entityId);
+			if (existingEntity == null)
+			{
+				continue;
+			}
+
+			DetachChildNodes(existingEntity);
+			if (Application.Model.Entity.Selection.Contains(entityId))
+			{
+				Application.Model.Entity.Selection.Remove(entityId);
+			}
+
+			if (existingEntity.Node != null && IsInstanceValid(existingEntity.Node))
+			{
+				existingEntity.Node.QueueFree();
+			}
+
+			Application.Model.Entity.Registry.Dispose(entityId);
+		}
+
+		foreach (ModelEntity entity in entities)
+		{
+			entity.InitializeForRegistration();
+			Application.Model.Entity.Registry.Register(entity);
+		}
+
+		Application.Model.Entity.Registry.ResolveHierarchy();
+		List<ModelEntity> registeredEntities = Application.Model.Entity.Registry.Items.Values.ToList();
+		List<ModelEntity> rootConnectedEntities = registeredEntities
+			.Where(entity =>
+				entity.Id != RootModelEntity.RootEntityId &&
+				Application.Model.Entity.Registry.IsRootConnected(entity.Id))
+			.ToList();
+		List<ModelEntity> disconnectedEntities = registeredEntities
+			.Where(entity =>
+				entity.Id != RootModelEntity.RootEntityId &&
+				!Application.Model.Entity.Registry.IsRootConnected(entity.Id))
+			.ToList();
+		RemoveNodesFromDisconnectedEntities(disconnectedEntities);
+
+		var entitiesToLoad = new List<ModelEntity>();
+		foreach (ModelEntity entity in rootConnectedEntities.OrderBy(entity => GetDepth(entity.Id)))
+		{
+			bool needsLoad = entity.Node == null || !GodotObject.IsInstanceValid(entity.Node);
+			EnsureNode(entity);
+			if (needsLoad)
+			{
+				entitiesToLoad.Add(entity);
+			}
+		}
+
+		ReparentRegisteredNodes(rootConnectedEntities);
+		Application.Model.Entity.Scene.PrepareLoads(entitiesToLoad);
+		Application.Model.Entity.Scene.StartPendingLoads();
+	}
+
+	/// <summary>
+	/// 事前に展開されたEntity識別子を削除する。
+	/// </summary>
+	/// <param name="entityIds">削除するEntity識別子</param>
+	internal void DeletePrepared(IReadOnlyCollection<Guid> entityIds)
+	{
+		if (entityIds == null)
+		{
+			throw new ArgumentNullException(nameof(entityIds));
+		}
+
+		Application.Model.Entity.Scene.CancelLoads(entityIds);
+		Application.Model.Entity.Selection.Remove(new List<Guid>(entityIds).ToArray());
+
+		foreach (ModelEntity entity in Application.Model.Entity.Registry.Items.Values)
+		{
+			if (entityIds.Contains(entity.Id) &&
+				!entityIds.Contains(entity.ParentId) &&
+				entity.Node != null &&
+				IsInstanceValid(entity.Node))
+			{
+				entity.Node.QueueFree();
+			}
+		}
+
+		foreach (Guid entityId in entityIds.OrderByDescending(GetDepth))
+		{
+			Application.Model.Entity.Registry.Dispose(entityId);
+		}
+
+		Application.Model.Entity.Registry.ResolveHierarchy();
 	}
 
 	#endregion
@@ -95,68 +169,69 @@ public partial class ModelEntityLoadHub : BaseHub
 	#region Helpers
 
 	/// <summary>
-	/// 新規に生成したモデルをRegistry登録可能な初期状態へ遷移する。
+	/// 置換されるEntity配下の子Entity Nodeを親Nodeから切り離し、置換後も再利用できるようにする。
 	/// </summary>
-	/// <param name="modelEntity">初期化するモデル実体</param>
-	/// <exception cref="ArgumentNullException">modelEntityがnullの場合</exception>
-	private void MarkInitialized(ModelEntity modelEntity)
+	private static void DetachChildNodes(ModelEntity entity)
 	{
-		if (modelEntity == null)
-		{
-			throw new ArgumentNullException(nameof(modelEntity));
-		}
-
-		// Registry登録前の一時状態なので、状態通知は置換完了通知に任せる。
-		modelEntity.InitializeForRegistration();
-	}
-
-	/// <summary>
-	/// Entity階層に循環がないことを検証する。
-	/// </summary>
-	private static void ValidateAcyclicHierarchy(IReadOnlyList<ModelEntity> entities)
-	{
-		var entityById = new Dictionary<Guid, ModelEntity>(entities.Count);
-		foreach (ModelEntity modelEntity in entities)
-		{
-			entityById[modelEntity.Id] = modelEntity;
-		}
-
-		var visiting = new HashSet<Guid>();
-		var visited = new HashSet<Guid>();
-		foreach (ModelEntity modelEntity in entities)
-		{
-			VisitHierarchy(modelEntity, entityById, visiting, visited);
-		}
-	}
-
-	/// <summary>
-	/// Entity階層を再帰的にたどり、循環を検出する。
-	/// </summary>
-	private static void VisitHierarchy(
-		ModelEntity modelEntity,
-		IReadOnlyDictionary<Guid, ModelEntity> entityById,
-		ISet<Guid> visiting,
-		ISet<Guid> visited)
-	{
-		if (visited.Contains(modelEntity.Id))
+		ModelNode parentNode = entity.Node;
+		if (parentNode == null || !IsInstanceValid(parentNode))
 		{
 			return;
 		}
 
-		// 循環階層は階層解決やNode配置を壊すため、通知順序とは独立して登録前に拒否する。
-		if (!visiting.Add(modelEntity.Id))
+		foreach (ModelEntity child in Application.Model.Entity.Registry.Items.Values)
 		{
-			throw new ArgumentException($"Circular model hierarchy detected at '{modelEntity.Id}'.", nameof(entityById));
+			if (child.ParentId == entity.Id &&
+				child.Node != null &&
+				IsInstanceValid(child.Node) &&
+				child.Node.GetParent() == parentNode)
+			{
+				parentNode.RemoveChild(child.Node);
+			}
+		}
+	}
+
+	/// <summary>
+	/// 登録済みEntity Nodeを現在のEntity階層に合わせて接続する。
+	/// </summary>
+	private static void ReparentRegisteredNodes(IReadOnlyCollection<ModelEntity> entities)
+	{
+		foreach (ModelEntity entity in entities)
+		{
+			ModelNode node = entity.Node;
+			if (node == null || !IsInstanceValid(node))
+			{
+				continue;
+			}
+
+			ModelNode parentNode = ResolveParentNode(entity.ParentId);
+			if (parentNode == null || node.GetParent() == parentNode)
+			{
+				continue;
+			}
+
+			node.GetParent()?.RemoveChild(node);
+			parentNode.AddChild(node);
+			node.Position = entity.Position;
+			node.Quaternion = entity.Rotation;
+		}
+	}
+
+	/// <summary>
+	/// 指定Entityの親階層の深さを取得する。
+	/// </summary>
+	private static int GetDepth(Guid entityId)
+	{
+		int depth = 0;
+		ModelEntity entity = Application.Model.Entity.Registry.Get(entityId);
+		var visited = new HashSet<Guid>();
+		while (entity != null && entity.ParentId != Guid.Empty && visited.Add(entity.Id))
+		{
+			depth++;
+			entity = Application.Model.Entity.Registry.Get(entity.ParentId);
 		}
 
-		if (modelEntity.ParentId != Guid.Empty &&
-			entityById.TryGetValue(modelEntity.ParentId, out ModelEntity parentEntity))
-		{
-			VisitHierarchy(parentEntity, entityById, visiting, visited);
-		}
-
-		visiting.Remove(modelEntity.Id);
-		visited.Add(modelEntity.Id);
+		return depth;
 	}
 
 	/// <summary>
@@ -169,34 +244,28 @@ public partial class ModelEntityLoadHub : BaseHub
 			throw new ArgumentNullException(nameof(modelEntity));
 		}
 
+		if (!Application.Model.Entity.Registry.IsRootConnected(modelEntity.Id))
+		{
+			return null;
+		}
+
 		// 既存ノードが有効なら再利用し、再読込時の重複生成を防ぐ。
 		if (modelEntity.Node != null && GodotObject.IsInstanceValid(modelEntity.Node))
 		{
 			return modelEntity.Node;
 		}
 
+		ModelNode parentNode = ResolveParentNode(modelEntity.ParentId);
+		if (parentNode == null)
+		{
+			throw new InvalidOperationException(
+				$"Root-connected ModelEntity '{modelEntity.Id}' has no resolvable parent node.");
+		}
+
 		var node = new ModelNode(modelEntity.Id);
 		modelEntity.Node = node;
 		node.Name = modelEntity.Id.ToString();
-
-		ModelNode parentNode = ResolveParentNode(modelEntity.ParentId);
-		if (parentNode != null)
-		{
-			parentNode.AddChild(node);
-		}
-		else
-		{
-			ModelNode rootNode = Application.Model.Entity.Registry.Root?.Node;
-			if (rootNode != null)
-			{
-				rootNode.AddChild(node);
-			}
-			else
-			{
-				Application.Log.Warn($"ModelEntityLoadHub: parent node not found for entityId='{modelEntity.Id}'.");
-			}
-		}
-
+		parentNode.AddChild(node);
 		return node;
 	}
 
@@ -207,7 +276,7 @@ public partial class ModelEntityLoadHub : BaseHub
 	{
 		if (parentId == Guid.Empty)
 		{
-			return null;
+			return Application.Model.Entity.Registry.Root?.Node;
 		}
 
 		ModelEntity parentEntity = Application.Model.Entity.Registry.Get(parentId);
@@ -216,12 +285,44 @@ public partial class ModelEntityLoadHub : BaseHub
 			return null;
 		}
 
-		if (parentEntity.Node != null && GodotObject.IsInstanceValid(parentEntity.Node))
+		return parentEntity.Node != null && GodotObject.IsInstanceValid(parentEntity.Node)
+			? parentEntity.Node
+			: null;
+	}
+
+	/// <summary>
+	/// Root未接続EntityのNodeとSceneロード状態を破棄し、後からRootへ接続された場合に再生成可能にする。
+	/// </summary>
+	private static void RemoveNodesFromDisconnectedEntities(IReadOnlyCollection<ModelEntity> entities)
+	{
+		if (entities.Count == 0)
 		{
-			return parentEntity.Node;
+			return;
 		}
 
-		return EnsureNode(parentEntity);
+		Application.Model.Entity.Scene.CancelLoads(entities.Select(entity => entity.Id).ToList());
+		var disconnectedNodes = new HashSet<ModelNode>(
+			entities
+				.Select(entity => entity.Node)
+				.Where(node => node != null && IsInstanceValid(node)));
+
+		foreach (ModelEntity entity in entities)
+		{
+			ModelNode node = entity.Node;
+			if (node != null &&
+				IsInstanceValid(node) &&
+				!disconnectedNodes.Contains(node.GetParent() as ModelNode))
+			{
+				node.GetParent()?.RemoveChild(node);
+				node.QueueFree();
+			}
+
+			entity.Node = null;
+			if (entity.Status != ModelStatus.Registered)
+			{
+				entity.ResetLoadState();
+			}
+		}
 	}
 
 	#endregion

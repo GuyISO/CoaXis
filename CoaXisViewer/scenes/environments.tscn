@@ -10,7 +10,7 @@ ambient_light_color = Color(1, 1, 1, 1)
 ambient_light_energy = 0.2
 reflected_light_source = 1
 
-[node name="Environments" type="Node3D" unique_id=732137435]
+[node name="Environments" type="Node" unique_id=98385259]
 
 [node name="WorldEnvironment" type="WorldEnvironment" parent="." unique_id=1313416679]
 environment = SubResource("Environment_elqb8")

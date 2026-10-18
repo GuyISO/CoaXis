@@ -11,11 +11,12 @@ public static class IpcPayloadTypeMap
     private static readonly IReadOnlyDictionary<string, Type> PayloadTypes = new Dictionary<string, Type>(StringComparer.Ordinal)
     {
         // ToViewerイベントのpayload型
-        [IpcEventType.ToViewer.LoadModel] = typeof(ModelSetPayload),
-        
-        // FromViewerイベントのpayload型
-        // 未定義
-        
+        [IpcEventType.ToViewer.ReplaceModelSet] = typeof(ModelSetPayload),
+        [IpcEventType.ToViewer.AddOrReplaceModelEntities] = typeof(ModelEntitiesPayload),
+        [IpcEventType.ToViewer.AddOrReplaceModelProperties] = typeof(ModelPropertiesPayload),
+        [IpcEventType.ToViewer.DeleteModelEntities] = typeof(ModelIdsPayload),
+        [IpcEventType.ToViewer.DeleteModelProperties] = typeof(ModelIdsPayload),
+        [IpcEventType.FromViewer.ModelEntitySelected] = typeof(ModelEntitySelectedPayload),
         // Commonイベントのpayload型
         [IpcEventType.Common.Result] = typeof(IpcResultPayload)
     };

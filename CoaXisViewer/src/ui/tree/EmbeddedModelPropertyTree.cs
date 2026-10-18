@@ -28,6 +28,9 @@ public partial class EmbeddedModelPropertyTree : ModelPropertyTree
 	private void SubscribeEvents()
 	{
 		Application.Model.Entity.Pick.ResultNotified += OnPickResultNotified;
+		Application.Model.Entity.Registry.Registered += OnModelSetChanged;
+		Application.Model.Entity.Registry.Cleared += OnModelSetChanged;
+		Application.Model.Property.Registry.Changed += OnModelSetChanged;
 	}
 
 	/// <summary>
@@ -36,6 +39,9 @@ public partial class EmbeddedModelPropertyTree : ModelPropertyTree
 	private void UnsubscribeEvents()
 	{
 		Application.Model.Entity.Pick.ResultNotified -= OnPickResultNotified;
+		Application.Model.Entity.Registry.Registered -= OnModelSetChanged;
+		Application.Model.Entity.Registry.Cleared -= OnModelSetChanged;
+		Application.Model.Property.Registry.Changed -= OnModelSetChanged;
 	}
 
 	/// <summary>
@@ -46,6 +52,14 @@ public partial class EmbeddedModelPropertyTree : ModelPropertyTree
 	{
 		// 実体がない場合、ShowはEntity未取得のままツリーをクリアするだけになる
 		Show(pickResult != null ? pickResult.EntityId : Guid.Empty);
+	}
+
+	/// <summary>
+	/// EntityまたはProperty集合の変更後に表示内容を更新する。
+	/// </summary>
+	private void OnModelSetChanged()
+	{
+		Refresh();
 	}
 
 	#endregion

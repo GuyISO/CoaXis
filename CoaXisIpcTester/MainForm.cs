@@ -10,14 +10,14 @@ using System.Windows.Forms;
 namespace CoaXis.IpcTester;
 
 /// <summary>
-/// 入力ファイルを読み込み、LoadModel要求とViewerの応答を表示する。
+/// 入力ファイルを読み込み、ReplaceModelSet要求とViewerの応答を表示する。
 /// </summary>
 public sealed class MainForm : Form
 {
     private readonly TextBox _pipeName = new() { Text = "CoaXisViewerPipe", Width = 220 };
     private readonly TextBox _entityPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
     private readonly TextBox _propertyPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
-    private readonly Button _sendButton = new() { Text = "LoadModelを送信", AutoSize = true };
+    private readonly Button _sendButton = new() { Text = "ReplaceModelSetを送信", AutoSize = true };
     private readonly ListBox _history = new() { Dock = DockStyle.Fill, IntegralHeight = false };
     private readonly TextBox _requestJson = CreateJsonView();
     private readonly TextBox _responseJson = CreateJsonView();
@@ -57,7 +57,7 @@ public sealed class MainForm : Form
         Controls.Add(statusStrip);
         statusStrip.Dock = DockStyle.Bottom;
 
-        _sendButton.Click += async (_, _) => await SendLoadModelAsync();
+        _sendButton.Click += async (_, _) => await SendReplaceModelSetAsync();
         _history.SelectedIndexChanged += (_, _) => ShowSelectedExchange();
     }
 
@@ -189,7 +189,7 @@ public sealed class MainForm : Form
         }
     }
 
-    private async Task SendLoadModelAsync()
+    private async Task SendReplaceModelSetAsync()
     {
         if (string.IsNullOrWhiteSpace(_entityPath.Text))
         {
@@ -204,13 +204,16 @@ public sealed class MainForm : Form
             List<ModelEntityDto> entities = ModelFileLoader.LoadEntities(_entityPath.Text);
             List<ModelPropertyDto> properties = ModelFileLoader.LoadProperties(_propertyPath.Text);
             ModelSetPayload payload = ModelSetPayload.Create(entities, properties);
-            IpcEnvelope request = IpcEnvelopeBuilder.Create(IpcEventType.ToViewer.LoadModel, "CoaXisIpcTester", payload);
+            IpcEnvelope request = IpcEnvelopeBuilder.Create(IpcEventType.ToViewer.ReplaceModelSet, "CoaXisIpcTester", payload);
             string requestJson = JsonSerializer.Serialize(request, IpcJsonOptions.Default);
             _requestJson.Text = JsonSerializer.Serialize(request, new JsonSerializerOptions(IpcJsonOptions.Default) { WriteIndented = true });
             _responseJson.Clear();
             _status.Text = $"送信中: {entities.Count} models / {properties.Count} properties";
 
-            string responseJson = await IpcClient.SendAsync(_pipeName.Text.Trim(), request);
+            string responseJson = await IpcClient.SendAsync(
+                _pipeName.Text.Trim(),
+                request,
+                RecordNotification);
             if (string.IsNullOrWhiteSpace(responseJson))
             {
                 throw new IOException("Viewerから応答がありませんでした。");
@@ -226,7 +229,7 @@ public sealed class MainForm : Form
         {
             string errorJson = JsonSerializer.Serialize(new { error = exception.Message }, new JsonSerializerOptions { WriteIndented = true });
             _responseJson.Text = errorJson;
-            AddExchange(IpcEventType.ToViewer.LoadModel, "失敗", _requestJson.Text, errorJson, exception.Message);
+            AddExchange(IpcEventType.ToViewer.ReplaceModelSet, "失敗", _requestJson.Text, errorJson, exception.Message);
             _status.Text = $"失敗: {exception.Message}";
         }
         finally
@@ -241,6 +244,32 @@ public sealed class MainForm : Form
         _records.Add(record);
         _history.Items.Add(record);
         _history.SelectedIndex = _history.Items.Count - 1;
+    }
+
+    private void RecordNotification(string notificationJson)
+    {
+        IpcEnvelope notification = JsonSerializer.Deserialize<IpcEnvelope>(
+            notificationJson,
+            IpcJsonOptions.Default);
+        if (notification == null)
+        {
+            throw new InvalidDataException("Viewerから空の非同期通知を受信しました。");
+        }
+
+        string detail = notification.EventType;
+        if (notification.EventType == IpcEventType.FromViewer.ModelEntitySelected &&
+            notification.Payload.TryGetProperty("entityIds", out JsonElement entityIds) &&
+            entityIds.ValueKind == JsonValueKind.Array)
+        {
+            detail = $"選択中のModelEntity: {entityIds.GetArrayLength()}件";
+        }
+
+        AddExchange(
+            notification.EventType,
+            "通知",
+            string.Empty,
+            FormatJson(notificationJson),
+            detail);
     }
 
     private void ShowSelectedExchange()

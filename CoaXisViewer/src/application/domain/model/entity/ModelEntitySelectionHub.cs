@@ -54,6 +54,9 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <summary>選択クリアの通知。</summary>
     [Signal] public delegate void ClearedEventHandler();
 
+    /// <summary>選択集合の変更通知。</summary>
+    [Signal] public delegate void SelectionChangedEventHandler();
+
     #endregion
 
     #region Lifecycle
@@ -245,8 +248,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="entityId">選択する実体ID</param>
     public void Set(Guid entityId)
     {
-        Clear();
-        Add(entityId);
+        Set(new[] { entityId });
     }
 
     /// <summary>
@@ -255,11 +257,46 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="entityIds">選択する実体IDの配列</param>
     public void Set(Guid[] entityIds)
     {
-        Clear();
-        foreach (Guid entityId in entityIds)
+        if (entityIds == null)
         {
-            Add(entityId);
+            throw new ArgumentNullException(nameof(entityIds));
         }
+
+        var newSelectedIds = new HashSet<Guid>(entityIds.Where(entityId => entityId != Guid.Empty));
+        if (_selectedIds.SetEquals(newSelectedIds))
+        {
+            return;
+        }
+
+        Guid[] previousSelectedIds = _selectedIds.ToArray();
+        var previousSelectedIdSet = new HashSet<Guid>(previousSelectedIds);
+        _selectedIds.Clear();
+        if (previousSelectedIds.Length > 0)
+        {
+            EmitSignal(SignalName.Cleared);
+        }
+
+        _selectedIds.UnionWith(newSelectedIds);
+
+        foreach (Guid entityId in previousSelectedIds)
+        {
+            if (!newSelectedIds.Contains(entityId))
+            {
+                EmitSignal(SignalName.Selected, entityId.ToString());
+                Application.Log.Info($"Deselected: {entityId}");
+            }
+        }
+
+        foreach (Guid entityId in newSelectedIds)
+        {
+            if (!previousSelectedIdSet.Contains(entityId))
+            {
+                EmitSignal(SignalName.Selected, entityId.ToString());
+                Application.Log.Info($"Selected: {entityId}");
+            }
+        }
+
+        EmitSignal(SignalName.SelectionChanged);
     }
 
     /// <summary>
@@ -275,10 +312,9 @@ public partial class ModelEntitySelectionHub : BaseHub
             return false;
         }
 
-        if (_selectedIds.Add(entityId))
+        if (AddCore(entityId))
         {
-            EmitSignal(SignalName.Selected, entityId.ToString());
-            Application.Log.Info($"Selected: {entityId}");
+            EmitSignal(SignalName.SelectionChanged);
             return true;
         }
         return false;
@@ -290,9 +326,20 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="entityIds">選択する実体IDの配列</param>
     public void Add(Guid[] entityIds)
     {
+        if (entityIds == null)
+        {
+            throw new ArgumentNullException(nameof(entityIds));
+        }
+
+        bool changed = false;
         foreach (Guid entityId in entityIds)
         {
-            Add(entityId);
+            changed |= AddCore(entityId);
+        }
+
+        if (changed)
+        {
+            EmitSignal(SignalName.SelectionChanged);
         }
     }
 
@@ -309,15 +356,10 @@ public partial class ModelEntitySelectionHub : BaseHub
             return false;
         }
 
-        if (_selectedIds.Remove(entityId))
+        if (RemoveCore(entityId))
         {
-            EmitSignal(SignalName.Selected, entityId.ToString());
-            Application.Log.Info($"Deselected: {entityId}");
-            // 選択状態の実体がなくなった場合、クリア通知も行う
-            if (_selectedIds.Count == 0)
-            {
-                EmitSignal(SignalName.Cleared);
-            }
+            NotifyEmptySelection();
+            EmitSignal(SignalName.SelectionChanged);
             return true;
         }
         return false;
@@ -329,9 +371,21 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="entityIds">選択対象から外す実体IDの配列</param>
     public void Remove(Guid[] entityIds)
     {
+        if (entityIds == null)
+        {
+            throw new ArgumentNullException(nameof(entityIds));
+        }
+
+        bool changed = false;
         foreach (Guid entityId in entityIds)
         {
-            Remove(entityId);
+            changed |= RemoveCore(entityId);
+        }
+
+        if (changed)
+        {
+            NotifyEmptySelection();
+            EmitSignal(SignalName.SelectionChanged);
         }
     }
 
@@ -341,13 +395,10 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <param name="entityId">切り替える実体ID</param>
     public void Toggle(Guid entityId)
     {
-        if (_selectedIds.Contains(entityId))
+        if (ToggleCore(entityId))
         {
-            Remove(entityId);
-        }
-        else
-        {
-            Add(entityId);
+            NotifyEmptySelection();
+            EmitSignal(SignalName.SelectionChanged);
         }
     }
 
@@ -363,9 +414,16 @@ public partial class ModelEntitySelectionHub : BaseHub
             return;
         }
 
+        bool changed = false;
         foreach (Guid entityId in entityIds)
         {
-            Toggle(entityId);
+            changed |= ToggleCore(entityId);
+        }
+
+        if (changed)
+        {
+            NotifyEmptySelection();
+            EmitSignal(SignalName.SelectionChanged);
         }
     }
 
@@ -393,12 +451,64 @@ public partial class ModelEntitySelectionHub : BaseHub
         }
 
         EmitSignal(SignalName.Cleared);
+        EmitSignal(SignalName.SelectionChanged);
         return true;
     }
 
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// 選択対象へ追加し、Entity単位の変更通知を発行する。
+    /// </summary>
+    private bool AddCore(Guid entityId)
+    {
+        if (entityId == Guid.Empty || !_selectedIds.Add(entityId))
+        {
+            return false;
+        }
+
+        EmitSignal(SignalName.Selected, entityId.ToString());
+        Application.Log.Info($"Selected: {entityId}");
+        return true;
+    }
+
+    /// <summary>
+    /// 選択対象から解除し、Entity単位の変更通知を発行する。
+    /// </summary>
+    private bool RemoveCore(Guid entityId)
+    {
+        if (entityId == Guid.Empty || !_selectedIds.Remove(entityId))
+        {
+            return false;
+        }
+
+        EmitSignal(SignalName.Selected, entityId.ToString());
+        Application.Log.Info($"Deselected: {entityId}");
+        return true;
+    }
+
+    /// <summary>
+    /// 指定Entityの選択状態を切り替える。
+    /// </summary>
+    private bool ToggleCore(Guid entityId)
+    {
+        return _selectedIds.Contains(entityId)
+            ? RemoveCore(entityId)
+            : AddCore(entityId);
+    }
+
+    /// <summary>
+    /// 選択解除後に選択対象がなくなった場合の通知を発行する。
+    /// </summary>
+    private void NotifyEmptySelection()
+    {
+        if (_selectedIds.Count == 0)
+        {
+            EmitSignal(SignalName.Cleared);
+        }
+    }
 
     #endregion
 }

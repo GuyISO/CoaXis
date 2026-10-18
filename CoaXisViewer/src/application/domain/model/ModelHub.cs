@@ -13,6 +13,8 @@ public partial class ModelHub : BaseHub
     public ModelEntityHub Entity { get; }
     /// <summary>ModelProperty 機能を取得する。</summary>
     public ModelPropertyHub Property { get; }
+    /// <summary>EntityとPropertyにまたがるモデル集合操作を取得する。</summary>
+    public ModelSetHub ModelSet { get; }
 
     #endregion
 
@@ -29,6 +31,7 @@ public partial class ModelHub : BaseHub
     {
         Entity = AddModule<ModelEntityHub>("Entity");
         Property = AddModule<ModelPropertyHub>("Property");
+        ModelSet = AddModule<ModelSetHub>("Set");
     }
 
     #endregion

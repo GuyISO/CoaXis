@@ -82,6 +82,14 @@ public partial class ModelPropertyTree : Tree
 		}
 	}
 
+	/// <summary>
+	/// 現在表示中のEntityに紐づくPropertyを再表示する。
+	/// </summary>
+	public void Refresh()
+	{
+		Show(_entityId);
+	}
+
 	#endregion
 
 	#region Helpers

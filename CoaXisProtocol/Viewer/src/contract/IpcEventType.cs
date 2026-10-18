@@ -10,32 +10,20 @@ public static class IpcEventType
     /// </summary>
     public static class ToViewer
     {
-        /// <summary>モデル読み込み要求</summary>
-        public const string LoadModel = "LoadModel";
+        /// <summary>モデル集合置換要求</summary>
+        public const string ReplaceModelSet = "ReplaceModelSet";
 
-        /// <summary>ハイライト要求</summary>
-        public const string Highlight = "Highlight";
+        /// <summary>モデル実体の追加または置換要求</summary>
+        public const string AddOrReplaceModelEntities = "AddOrReplaceModelEntities";
 
-        /// <summary>選択要求</summary>
-        public const string Select = "Select";
+        /// <summary>モデル属性の追加または置換要求</summary>
+        public const string AddOrReplaceModelProperties = "AddOrReplaceModelProperties";
 
-        /// <summary>表示プリセット適用要求</summary>
-        public const string ApplyViewPreset = "ApplyViewPreset";
+        /// <summary>モデル実体の削除要求</summary>
+        public const string DeleteModelEntities = "DeleteModelEntities";
 
-        /// <summary>カメラプリセット適用要求</summary>
-        public const string ApplyCameraPreset = "ApplyCameraPreset";
-
-        /// <summary>ハイライト解除要求</summary>
-        public const string ClearHighlight = "ClearHighlight";
-
-        /// <summary>対象へのフォーカス要求</summary>
-        public const string Focus = "Focus";
-
-        /// <summary>表示要求</summary>
-        public const string Show = "Show";
-
-        /// <summary>非表示要求</summary>
-        public const string Hide = "Hide";
+        /// <summary>モデル属性の削除要求</summary>
+        public const string DeleteModelProperties = "DeleteModelProperties";
     }
 
     /// <summary>
@@ -44,16 +32,7 @@ public static class IpcEventType
     public static class FromViewer
     {
         /// <summary>選択通知</summary>
-        public const string OnSelect = "OnSelect";
-
-        /// <summary>ホバー通知</summary>
-        public const string OnHover = "OnHover";
-
-        /// <summary>読み込み完了通知</summary>
-        public const string OnLoaded = "OnLoaded";
-
-        /// <summary>エラー通知</summary>
-        public const string OnError = "OnError";
+        public const string ModelEntitySelected = "ModelEntitySelected";
     }
 
     /// <summary>
