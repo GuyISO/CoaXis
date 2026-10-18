@@ -2,9 +2,15 @@
 
 [ext_resource type="PackedScene" uid="uid://xcbuelasn6jb" path="res://scenes/environments.tscn" id="1_0wfyh"]
 [ext_resource type="PackedScene" uid="uid://dkq5ovq6ymdm" path="res://scenes/viewer/canvas.tscn" id="2_sugp2"]
+[ext_resource type="PackedScene" uid="uid://b5t1q7cjit2c0" path="res://assets/vfx/emit.tscn" id="3_jyhfs"]
+[ext_resource type="PackedScene" uid="uid://0c7swhnrhn1k" path="res://assets/vfx/box.tscn" id="4_tbgi4"]
 
 [node name="Main" type="Node" unique_id=807387639]
 
 [node name="Environments" parent="." unique_id=732137435 instance=ExtResource("1_0wfyh")]
 
 [node name="Canvas" parent="." unique_id=1312684224 instance=ExtResource("2_sugp2")]
+
+[node name="GPUParticles3D2" parent="." unique_id=962775518 instance=ExtResource("3_jyhfs")]
+
+[node name="GPUParticles3D" parent="." unique_id=1122339365 instance=ExtResource("4_tbgi4")]

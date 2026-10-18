@@ -41,7 +41,7 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 
 - Named PipeでUTF-8の1行1JSONメッセージを送受信する。
 - `IpcHub`はNamed Pipeの接続・受信・送信、メインスレッドへの要求振り分け、応答エンベロープ生成を担う。ドメイン状態は所有せず、ModelEntity選択通知ではSelectionHubの変更通知を受けて現在のID集合をProtocol payloadへ変換する。
-- Protocolの現行バージョンは`2.1.0`。`LoadModel`を`ReplaceModelSet`へ改名した際にメジャーバージョンを更新し、選択状態通知の追加に伴いマイナーバージョンを更新した。Viewerは各要求のバージョンが空でないことと、メジャーバージョン一致を検査する。起動時のバージョン照会は行わない。
+- Viewerは各要求のバージョンが空でないことと、メジャーバージョン一致を検査する。起動時のバージョン照会は行わない。
 - Viewerが処理する要求は`ReplaceModelSet`、`AddOrReplaceModelEntities`、`AddOrReplaceModelProperties`、`DeleteModelEntities`、`DeleteModelProperties`。その他の未対応要求には`UNSUPPORTED_EVENT_TYPE`を返す。
 - 接続中のIPCクライアントがある状態で選択ID集合が実際に変わると、Viewerは`ModelEntitySelected`を送信する。payloadの`entityIds`は変更後の全選択IDを昇順で含み、全解除時は空配列となる。同じ選択集合を再指定した場合は通知しない。接続開始時点の選択状態は別途通知しない。
 - `ModelEntitySelected`は要求への応答ではないため`correlationId`はnull。Viewerは応答と通知を同一接続上の単一送信キューから直列に書き込む。IPCクライアントは`Result`の`correlationId`で要求応答を識別し、非同期通知と区別する。

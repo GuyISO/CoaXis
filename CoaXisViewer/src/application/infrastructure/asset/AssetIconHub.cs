@@ -148,6 +148,16 @@ public partial class AssetIconHub : BaseHub
             return source;
         }
 
+        if (image.IsCompressed())
+        {
+            Error decompressError = image.Decompress();
+            if (decompressError != Error.Ok)
+            {
+                Application.Log.Warn($"AssetService: icon decompression failed. path='{path}', error={decompressError}");
+                return null;
+            }
+        }
+
         image.Resize(size, size, Image.Interpolation.Lanczos);
         Texture2D resized = ImageTexture.CreateFromImage(image);
         _iconCache[key] = resized;
