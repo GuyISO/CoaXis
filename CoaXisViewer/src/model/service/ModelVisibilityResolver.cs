@@ -54,6 +54,31 @@ public static class ModelVisibilityResolver
     }
 
     /// <summary>
+    /// 親プロパティ、所属モデルの順に設定をたどってPropertyの実効表示状態を返す。
+    /// </summary>
+    public static bool ResolveIsVisible(ModelProperty property)
+    {
+        var visited = new System.Collections.Generic.HashSet<Guid>();
+        ModelProperty current = property;
+        while (current != null && visited.Add(current.Id))
+        {
+            if (current.Visibility == ModelVisibility.Visible)
+            {
+                return true;
+            }
+
+            if (current.Visibility == ModelVisibility.Invisible)
+            {
+                return false;
+            }
+
+            current = current.ParentProperty;
+        }
+
+        return ResolveIsVisible(property?.GetEntity());
+    }
+
+    /// <summary>
     /// 現在の表示設定から次の切替先を返す。
     /// </summary>
     /// <param name="visibility">現在の表示設定</param>

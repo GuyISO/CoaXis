@@ -16,7 +16,7 @@ IPC Testerの現行 `ReplaceModelSet` IPC契約を使ってモデル集合を置
 
 - JSON: `ModelEntityDto` の配列。現在の `samples/modelentity.json` 形式。
 - 実体CSV: ヘッダー付き16列。`Id,ParentId,Type,Name,PositionX,PositionY,PositionZ,RotationX,RotationY,RotationZ,RotationW,Visibility,IsCollapsed,IconPath,ScenePath,AlignToAabbCenter`。
-- 属性CSV: ヘッダー付き5列。`Id,ParentId,PropertyType,ValueType,Value`。未指定の場合は空配列を送る。
+- 属性CSV: ヘッダー付き5列（`Id,ParentId,PropertyType,ValueType,Value`）、または表示設定とパーティクル指定を含む10列（`Id,ParentId,PropertyType,ValueType,Value,Visibility,IconPath,ParticleType,ParticleTexturePath,ParticleColor`）。10列の空欄は既定値（`Inherit`・`None`・星画像・白）として扱う。未指定の場合は空配列を送る。
 - 数値はカルチャに依存しない小数点表記とする。CSVは引用符内のカンマと二重引用符を扱う。
 
 ## 切り分け

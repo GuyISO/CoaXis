@@ -1,3 +1,6 @@
+ModelPropertyにもParticle追加したかのステータス管理が必要
+ModelPropertyのフォールバック値や色の初期値を見直す
+
 # Viewer
 
 EntityがPropertyを保有していることがわかるよう保有数をボタンで表示する

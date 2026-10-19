@@ -72,6 +72,7 @@ public partial class ModelSetHub : BaseHub
         EnsureRootEntityIsNotIncluded(entities);
         Application.Model.Entity.Load.AddOrReplacePrepared(entities);
         Application.Model.Property.Registry.ResolveHierarchy();
+        Application.Model.Property.Load.SyncParticles();
         return entities.Count;
     }
 

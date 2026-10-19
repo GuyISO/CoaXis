@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Godot;
 
 /// <summary>
 /// ModelPropertyの生成と登録を管理するハブ。
@@ -21,9 +22,48 @@ public partial class ModelPropertyLoadHub : BaseHub
 
     #region Lifecycle
 
+    public override void _Ready()
+    {
+        Application.Model.Entity.State.StatusNotified += OnEntityStatusNotified;
+    }
+
+    public override void _ExitTree()
+    {
+        Application.Model.Entity.State.StatusNotified -= OnEntityStatusNotified;
+
+        base._ExitTree();
+    }
+
     #endregion
 
     #region Events
+
+    /// <summary>
+    /// Entityのシーンロード完了通知を受け、AABBが確定したため所属Propertyのパーティクルを再配置する。
+    /// </summary>
+    /// <param name="entityId">状態が変化したEntity識別子</param>
+    private void OnEntityStatusNotified(string entityId)
+    {
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId))
+        {
+            return;
+        }
+
+        ModelEntity entity = Application.Model.Entity.Registry.Get(parsedEntityId);
+        if (entity == null || entity.Status != ModelStatus.Loaded)
+        {
+            return;
+        }
+
+        SyncParticles();
+        foreach (ModelProperty property in Application.Model.Property.Registry.Items.Values)
+        {
+            if (property.GetEntity() == entity)
+            {
+                property.ParticleNode?.Refresh();
+            }
+        }
+    }
 
     #endregion
 
@@ -37,6 +77,50 @@ public partial class ModelPropertyLoadHub : BaseHub
     {
         RegisterPrepared(properties);
         Application.Model.Property.Registry.ResolveHierarchy();
+        SyncParticles();
+    }
+
+    /// <summary>
+    /// 登録済みPropertyのパーティクルを所属Entityの描画Nodeへ同期する。
+    /// </summary>
+    /// <remarks>
+    /// Entityの置換でNodeが作り直された場合も、現在のNode配下へ再生成する。
+    /// </remarks>
+    internal void SyncParticles()
+    {
+        foreach (ModelProperty property in Application.Model.Property.Registry.Items.Values)
+        {
+            ModelEntity entity = property.GetEntity();
+            ModelNode entityNode = entity?.Node;
+            bool canAttach = property.ParticleType != ModelParticleType.None
+                && entityNode != null
+                && GodotObject.IsInstanceValid(entityNode)
+                && Application.Model.Entity.Registry.IsRootConnected(entity.Id);
+
+            ModelParticle existing = property.ParticleNode;
+            if (existing != null && (!canAttach || existing.GetParent() != entityNode))
+            {
+                property.DetachParticle();
+                existing = null;
+            }
+
+            if (!canAttach || existing != null)
+            {
+                continue;
+            }
+
+            ModelParticle particle = ModelParticle.Create(property.ParticleType);
+            if (particle == null)
+            {
+                continue;
+            }
+
+            particle.Name = property.Id.ToString();
+            entityNode.AddChild(particle);
+            particle.Bind(property.Id);
+            property.AttachParticle(particle);
+            Application.Model.Property.Visual.ResolveAndApply(property);
+        }
     }
 
     /// <summary>

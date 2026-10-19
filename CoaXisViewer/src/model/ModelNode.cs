@@ -162,7 +162,7 @@ public partial class ModelNode : Node3D
 
     private static void ApplyVisibilityLayerRecursive(Node node, uint layer)
     {
-        if (node is GeometryInstance3D geometryInstance)
+        if (node is GeometryInstance3D geometryInstance && node is not ModelParticle)
         {
             geometryInstance.Layers = layer;
         }

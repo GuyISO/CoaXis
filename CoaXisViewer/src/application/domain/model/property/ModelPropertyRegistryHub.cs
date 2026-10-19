@@ -142,6 +142,7 @@ public partial class ModelPropertyRegistryHub : BaseHub
         }
 
         _items.Remove(propertyId);
+        property.DetachParticle();
         return true;
     }
 

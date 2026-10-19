@@ -48,6 +48,7 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 - 要求への応答は`Result`イベントで返し、`correlationId`に要求の`eventId`を設定する。payloadは`ok`、`request`、`errorCode`、`message`を持つ。
 - `ReplaceModelSet`のpayloadには`entities`と`properties`が必須。`entities`は1件以上、`properties`は空配列を許可する。両方を検証してから現在のモデル集合を置換する。
 - Entity・Propertyの生成と階層検証は既存モデルの置換前に完了する。不正なpayloadには`INVALID_PAYLOAD`を返し、現在のモデル集合は変更しない。Entityの`position`は有限値3要素、`rotation`は有限値4要素かつゼロでないクォータニオンとする。DTOで省略した値は既定値を使うが、明示的な`null`や不正な配列は拒否する。
+- Propertyの`iconPath`はツリー表示用アイコン（空ならなし）。`particleType`は`None`（既定）/`Point`/`Box`。`None`以外では所属Entityの描画Node配下に`ModelParticle`を生成し、`ModelProperty`が対応するパーティクルを所有する。`particleTexturePath`は粒子画像の`res://`パス（空なら`res://assets/icon/particle/star.png`、読み込めない場合も星画像で代替しWarnログを出す）。`particleColor`は`#RRGGBB`形式、空なら白（Point/Box共通。指定色には固定の発光倍率を掛ける）。`visibility`は`Inherit`（既定）/`Visible`/`Invisible`で、Inheritは親Property、所属Entityの順に継承し、実効表示でパーティクルの描画Layerを切り替える（Entityと同様にTreeのボタンで切替・Undo/Redo可能）。不正値は`INVALID_PAYLOAD`とする。パーティクルは所属Entityの描画NodeのAABB中心に置き、AABBをその対角線長の10%だけ全方向へ広げた範囲に収める（薄いモデルでも見えるようにするため）。シーンのロード完了時に再配置する。Entity置換でNodeが作り直された場合は、同期時に現在のNode配下へ再生成する。
 - `AddOrReplaceModelEntities`は`entities` DTO配列、`AddOrReplaceModelProperties`は`properties` DTO配列を受け取る。同一IDが登録済みならDTOの値で置換する。各要求の配列全体を検証してから反映する。
 - `DeleteModelEntities`と`DeleteModelProperties`は`ids` Guid配列を受け取る。Entity削除は子孫Entityと所属Propertyを再帰削除し、Property削除は子孫Propertyを再帰削除する。指定IDが未登録なら`TARGET_NOT_FOUND`を返し、その要求では変更しない。
 - メインスレッド要求の待機上限は2秒。キュー待ち要求はタイムアウト時に取り消す。処理開始後は中断せず、結果不明として返すため、送信側は確認なしに再送しない。

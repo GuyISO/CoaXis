@@ -372,7 +372,7 @@ public class ModelEntity
 			return;
 		}
 
-		var command = new SetModelVisibilityCommand(
+		var command = new SetModelEntityVisibilityCommand(
 			[Id],
 			ModelVisibilityResolver.GetNextVisibility(Visibility));
 		Application.Command.Execute(command);

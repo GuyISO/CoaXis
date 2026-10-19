@@ -4,7 +4,7 @@ using System;
 /// <summary>
 /// ModelNode の表示状態を変更する Undo/Redo 対応コマンド、バッチで複数モデルの表示状態を変更することも可能
 /// </summary>
-public sealed partial class SetModelVisibilityCommand : BaseCommand
+public sealed partial class SetModelEntityVisibilityCommand : BaseCommand
 {
     #region Fields
 
@@ -19,7 +19,7 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
     /// <summary>
     /// コマンドの説明、ログ出力時に使用される
     /// </summary>
-    public override string Description => "Set model visibility";
+    public override string Description => "Set model entity visibility";
 
     #endregion
 
@@ -30,7 +30,7 @@ public sealed partial class SetModelVisibilityCommand : BaseCommand
     /// </summary>
     /// <param name="entityIds">表示状態を変更する実体IDの配列</param>
     /// <param name="nextVisibility">変更後の表示設定</param>
-    public SetModelVisibilityCommand(Guid[] entityIds, ModelVisibility nextVisibility)
+    public SetModelEntityVisibilityCommand(Guid[] entityIds, ModelVisibility nextVisibility)
     {
         if (entityIds == null)
         {
