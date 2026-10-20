@@ -37,8 +37,7 @@ public static class ModelEntityMapper
 			ModelVisibilityResolver.Parse(dto.Visibility),
 			dto.IsCollapsed,
 			dto.IconPath,
-			dto.ScenePath,
-			dto.AlignToAabbCenter);
+			dto.ScenePath);
 	}
 
 	/// <summary>

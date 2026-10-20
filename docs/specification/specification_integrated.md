@@ -33,7 +33,7 @@ TreeItemはUIが構築・保持し、Model DomainはUI Nodeを保持しない。
 
 Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードする。SceneBuilderによる生成処理は本リポジトリで管理しない。
 
-ロードしたシーンのルートは`ModelNode.SceneRoot`から扱う。`Emphasize`または`SpinAppeal`が必要な場合に限りPivotを生成し、SceneRootをその配下へ移す。固定NodePathには依存しない。
+ロードしたシーンのルートは`ModelNode.SceneRoot`から扱う。`Emphasize`または`SpinAppeal`が必要な場合に限りPivotを生成し、SceneRootをその配下へ移してメッシュAABB中心をPivot原点に合わせる。見た目の位置を保つためPivot配下を逆方向へ補正し、`ModelNode`の位置は変更しない。固定NodePathには依存しない。
 
 カメラFitはNodeの可視状態と、MeshInstance3DのLayer・`ViewportDisplayHub.ActiveLayers`の共通Layerを考慮する。対象メッシュがない場合はカメラ状態を変更しない。
 

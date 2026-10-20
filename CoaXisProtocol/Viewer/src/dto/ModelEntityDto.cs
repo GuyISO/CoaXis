@@ -17,5 +17,4 @@ public class ModelEntityDto
     public bool IsCollapsed { get; init; } = false;
     public string IconPath { get; init; } = string.Empty;
     public string ScenePath { get; init; } = string.Empty;
-    public bool AlignToAabbCenter { get; init; } = false;
 }

@@ -16,7 +16,6 @@ public static class ModelMeshCenterAligner
     /// <remarks>
     /// シーン(scn/tscn)の原点は作成元ツール依存で任意の点になりやすく、
     /// 原点のまま Pivot を拡縮・回転させると見た目の中心がずれて見える。
-    /// このメソッドは ModelEntityDto.AlignToAabbCenter が true の場合にのみ呼び出す想定。
     /// ModelNode/ModelEntity の位置は CSV 由来の値と常に一致させる必要があるため、ここでは一切変更しない。
     /// </remarks>
     /// <param name="pivot">補正対象の Pivot ノード（原点位置のままであること）</param>

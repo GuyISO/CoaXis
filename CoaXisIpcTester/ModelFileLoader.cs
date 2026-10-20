@@ -98,7 +98,7 @@ public static class ModelFileLoader
                 continue;
             }
 
-            RequireColumnCount(columns, 16, parser.LineNumber, path);
+            RequireColumnCount(columns, 15, parser.LineNumber, path);
             entities.Add(new ModelEntityDto
             {
                 Id = Guid.Parse(columns[0]),
@@ -116,8 +116,7 @@ public static class ModelFileLoader
                 Visibility = columns[11],
                 IsCollapsed = bool.Parse(columns[12]),
                 IconPath = columns[13],
-                ScenePath = columns[14],
-                AlignToAabbCenter = bool.Parse(columns[15])
+                ScenePath = columns[14]
             });
         }
 

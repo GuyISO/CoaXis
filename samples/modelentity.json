@@ -18,8 +18,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/instance.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "68317706-95b6-4835-baab-0fa0e9ea2a59",
@@ -40,8 +39,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/component.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "a954ddae-d15a-4643-a536-efe9e567d96d",
@@ -62,8 +60,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/hybridbody.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "9820a076-f72c-4c0b-8a1a-818e29f1ed04",
@@ -84,8 +81,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/body.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "ac980da0-6793-44f4-ae95-8723ab7582b2",
@@ -106,8 +102,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "4283051e-a243-489e-a3b4-6ec7489be16d",
@@ -128,8 +123,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "e4f5cd0c-329d-4636-be81-f17640194773",
@@ -150,8 +144,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "fea4b389-df27-42bf-95ec-521ed62e191c",
@@ -172,8 +165,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "b1e55947-4bcb-4a30-907f-207b3e9fb52e",
@@ -194,8 +186,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "6fbe0d03-b991-4df4-9423-a088e081ff50",
@@ -216,8 +207,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "75e8b12a-6693-4aff-aba8-cc3ea713e270",
@@ -238,8 +228,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "5b282939-2339-4215-80b1-2802c1d0fa4b",
@@ -260,8 +249,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "14ebb6b9-4dc6-4a2d-b7fd-7f3730f95c90",
@@ -282,8 +270,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/line.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "2c4fb4fa-2045-4906-9d69-07ea6f93b9d5",
@@ -304,8 +291,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/body.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "81759a38-3622-40c2-8886-e57a3ed0f9a1",
@@ -326,8 +312,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/point.svg",
-        "ScenePath":  "res://assets/scene/point.tscn",
-        "AlignToAabbCenter":  true
+        "ScenePath":  "res://assets/scene/point.tscn"
     },
     {
         "Id":  "70b94563-91ec-4546-9301-df808071c152",
@@ -348,8 +333,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/point.svg",
-        "ScenePath":  "res://assets/scene/point.tscn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "res://assets/scene/point.tscn"
     },
     {
         "Id":  "bcb01a04-7cdb-4f98-8ef6-738b5fe054ab",
@@ -370,8 +354,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/point.svg",
-        "ScenePath":  "res://assets/scene/point.tscn",
-        "AlignToAabbCenter":  true
+        "ScenePath":  "res://assets/scene/point.tscn"
     },
     {
         "Id":  "048c6e7c-c9d9-4104-8571-53713097ac2a",
@@ -392,8 +375,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/point.svg",
-        "ScenePath":  "res://assets/scene/point.tscn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "res://assets/scene/point.tscn"
     },
     {
         "Id":  "414af6b1-828a-4271-ac46-06d73d0dfb48",
@@ -414,8 +396,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/point.svg",
-        "ScenePath":  "res://assets/scene/point.tscn",
-        "AlignToAabbCenter":  true
+        "ScenePath":  "res://assets/scene/point.tscn"
     },
     {
         "Id":  "aab9f7c4-9339-4601-91e1-8fbde00b072c",
@@ -436,8 +417,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/point.svg",
-        "ScenePath":  "res://assets/scene/point.tscn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "res://assets/scene/point.tscn"
     },
     {
         "Id":  "ddf375bb-dd68-4cfd-b8a7-112c6462669d",
@@ -458,8 +438,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/point.svg",
-        "ScenePath":  "res://assets/scene/point.tscn",
-        "AlignToAabbCenter":  true
+        "ScenePath":  "res://assets/scene/point.tscn"
     },
     {
         "Id":  "ff76421c-6ba7-4335-801c-3c8fd6684a7b",
@@ -480,8 +459,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/instance.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "02ddf0e2-b355-492d-aede-c14c83d92705",
@@ -502,8 +480,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/component.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "d2ab4cb5-914b-4ae2-a830-81be9616f3a2",
@@ -524,8 +501,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/hybridbody.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "084cdcb3-51dc-4c3d-8cb7-6e615f2a0060",
@@ -546,8 +522,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/body.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "6da8e10e-f9da-4366-91b4-48e049830982",
@@ -568,8 +543,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.shaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.shaded.scn"
     },
     {
         "Id":  "bf138455-be68-41a2-99b1-6bf08de1893d",
@@ -590,8 +564,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.unshaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.unshaded.scn"
     },
     {
         "Id":  "181fa24f-2274-4415-b05b-dd2542cbf900",
@@ -612,8 +585,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider.shaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider.shaded.scn"
     },
     {
         "Id":  "680a5b36-c288-4a60-9fe0-69ae39bfc387",
@@ -634,8 +606,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider.unshaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider.unshaded.scn"
     },
     {
         "Id":  "62bf6caf-5c5c-4136-b9f3-ed3dc05b4794",
@@ -656,8 +627,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-lineset.shaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-lineset.shaded.scn"
     },
     {
         "Id":  "38dbbbff-cc02-4bc5-814f-246bc17bae19",
@@ -678,8 +648,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-lineset.unshaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-lineset.unshaded.scn"
     },
     {
         "Id":  "2b3b97b5-9052-4595-a58c-b62280ed3b42",
@@ -700,8 +669,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider-lineset.shaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider-lineset.shaded.scn"
     },
     {
         "Id":  "d64d06f9-6dc2-45dd-a771-974912800363",
@@ -722,8 +690,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider-lineset.unshaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider-lineset.unshaded.scn"
     },
     {
         "Id":  "a3882493-deb5-4758-8660-3f9883669cf0",
@@ -744,8 +711,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  false,
         "IconPath":  "res://assets/icon/entity/surface.svg",
-        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.shaded.scn",
-        "AlignToAabbCenter":  false
+        "ScenePath":  "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.shaded.scn"
     },
     {
         "Id":  "936283c5-8178-4329-8cc3-2bee8e58523c",
@@ -766,8 +732,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  true,
         "IconPath":  "res://assets/icon/entity/annotationset.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "60f2034e-53a7-4141-9f4c-b4ff0ecab1dd",
@@ -788,8 +753,7 @@
         "Visibility":  "Inherit",
         "IsCollapsed":  true,
         "IconPath":  "res://assets/icon/entity/annotation.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "26926d6b-45c8-4647-8ea5-b1167ff1dffe",
@@ -810,8 +774,7 @@
         "Visibility":  "Invisible",
         "IsCollapsed":  true,
         "IconPath":  "res://assets/icon/entity/annotation.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "9ec7599a-782d-4773-a075-9551f1c95990",
@@ -832,8 +795,7 @@
         "Visibility":  "Invisible",
         "IsCollapsed":  true,
         "IconPath":  "res://assets/icon/entity/annotation.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "9e7a60cf-cf96-41a9-bdc1-7e9fab72cad8",
@@ -854,8 +816,7 @@
         "Visibility":  "Visible",
         "IsCollapsed":  true,
         "IconPath":  "res://assets/icon/entity/annotation.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     },
     {
         "Id":  "0c48a500-5037-4515-9025-56a5665e4274",
@@ -876,7 +837,6 @@
         "Visibility":  "Visible",
         "IsCollapsed":  true,
         "IconPath":  "res://assets/icon/entity/annotation.svg",
-        "ScenePath":  "",
-        "AlignToAabbCenter":  false
+        "ScenePath":  ""
     }
 ]

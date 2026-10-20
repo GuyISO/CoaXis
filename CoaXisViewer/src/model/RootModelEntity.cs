@@ -58,8 +58,7 @@ public class RootModelEntity : ModelEntity
             ModelVisibility.Visible,
             false,
             string.Empty,
-            string.Empty,
-            false)
+            string.Empty)
     {
         // Root は常に存在するため、初期化直後からロード済みとして扱う、Registryの制約上、Initialized状態で追加する必要がある
         InitializeForRegistration();

@@ -205,11 +205,7 @@ public partial class ModelNode : Node3D
         _pivot = new Node3D { Name = "Pivot" };
         AddChild(_pivot);
         SceneRoot.Reparent(_pivot, false);
-
-        if (Entity != null && Entity.AlignToAabbCenter)
-        {
-            ModelMeshCenterAligner.Pivot(_pivot);
-        }
+        ModelMeshCenterAligner.Pivot(_pivot);
 
         return _pivot;
     }

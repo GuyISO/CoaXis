@@ -122,9 +122,6 @@ public class ModelEntity
     /// <summary>読み込み対象シーンのパス</summary>
     public string ScenePath { get; }
 
-    /// <summary>読み込んだシーンのAABB中心をモデル原点に合わせる位置補正を行うかどうか</summary>
-    public bool AlignToAabbCenter { get; }
-
     /// <summary>ModelEntityの現在状態を取得する。</summary>
     public ModelStatus Status => _status;
 
@@ -175,8 +172,7 @@ public class ModelEntity
         ModelVisibility visibility,
         bool isCollapsed,
         string iconPath,
-        string scenePath,
-        bool alignToAabbCenter)
+        string scenePath)
     {
         Id = id;
         ParentId = parentId;
@@ -188,7 +184,6 @@ public class ModelEntity
         _isCollapsed = isCollapsed;
         IconPath = iconPath ?? string.Empty;
         ScenePath = scenePath ?? string.Empty;
-        AlignToAabbCenter = alignToAabbCenter;
     }
 
     /// <summary>
@@ -205,8 +200,7 @@ public class ModelEntity
             ModelVisibility.Inherit,
             false,
             string.Empty,
-            string.Empty,
-            false)
+            string.Empty)
     {
     }
 
