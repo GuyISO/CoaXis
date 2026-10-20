@@ -433,9 +433,8 @@ public partial class ModelEntityTree : Tree
         // --- テキスト（名前） ---
         treeItem.SetText(0, modelEntity.Name);
 
-        // --- 左側アイコン（ModelEntity に紐づくモデルアイコン。不在時は既定アイコンで代替） ---
-        Texture2D icon = Application.Asset.Icon.GetByPath(modelEntity.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
-            ?? Application.Asset.Icon.GetDefaultEntity(Constant.Ui.Tree.HierarchyVisibleIconSize);
+        // --- 左側アイコン（ModelEntity に紐づくモデルアイコン） ---
+        Texture2D icon = Application.Asset.Icon.GetModelIcon(modelEntity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（表示切替・演出用） ---

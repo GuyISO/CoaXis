@@ -1,4 +1,5 @@
 using Godot;
+using CoaXis.Protocol.Viewer;
 using System.Collections.Generic;
 
 /// <summary>
@@ -8,8 +9,6 @@ public partial class AssetIconHub : BaseHub
 {
     #region Fields
 
-    /// <summary>Entity既定アイコンのパス。</summary>
-    private const string DefaultEntityIconPath = "res://assets/icon/mono/question.svg";
     /// <summary>継承表示（可視）アイコンのパス。</summary>
     private const string InheritVisibleIconPath = "res://assets/icon/visibility/inherit_visible.svg";
     /// <summary>継承表示（不可視）アイコンのパス。</summary>
@@ -18,6 +17,22 @@ public partial class AssetIconHub : BaseHub
     private const string VisibleIconPath = "res://assets/icon/visibility/visible.svg";
     /// <summary>非表示アイコンのパス。</summary>
     private const string InvisibleIconPath = "res://assets/icon/visibility/invisible.svg";
+
+    /// <summary>ProtocolアイコンIDとViewerアセットの対応表。</summary>
+    private static readonly Dictionary<string, string> ModelIconPaths = new(System.StringComparer.OrdinalIgnoreCase)
+    {
+        [ModelIconId.Annotation] = "res://assets/icon/entity/annotation.svg",
+        [ModelIconId.AnnotationSet] = "res://assets/icon/entity/annotationset.svg",
+        [ModelIconId.Body] = "res://assets/icon/entity/body.svg",
+        [ModelIconId.Component] = "res://assets/icon/entity/component.svg",
+        [ModelIconId.HybridBody] = "res://assets/icon/entity/hybridbody.svg",
+        [ModelIconId.Instance] = "res://assets/icon/entity/instance.svg",
+        [ModelIconId.Line] = "res://assets/icon/entity/line.svg",
+        [ModelIconId.Point] = "res://assets/icon/entity/point.svg",
+        [ModelIconId.Product] = "res://assets/icon/entity/product.svg",
+        [ModelIconId.Surface] = "res://assets/icon/entity/surface.svg",
+        [ModelIconId.Target] = "res://assets/icon/mono/target.svg"
+    };
 
     /// <summary>読み込み済みアイコンのキャッシュ。</summary>
     private readonly Dictionary<string, Texture2D> _iconCache = new Dictionary<string, Texture2D>();
@@ -68,13 +83,29 @@ public partial class AssetIconHub : BaseHub
     }
 
     /// <summary>
-    /// モデルアイコン不在時に使う既定アイコンを取得する。
+    /// ModelEntityまたはModelPropertyのアイコンIDに対応する画像を取得する。
     /// </summary>
+    /// <param name="iconId">Protocolで定義されたアイコンID</param>
     /// <param name="size">返却アイコンのサイズ</param>
-    /// <returns>取得したアイコン、失敗時は null</returns>
-    public Texture2D GetDefaultEntity(int size = 16)
+    /// <returns>対応するアイコン。Noneの場合は null</returns>
+    public Texture2D GetModelIcon(string iconId, int size = 16)
     {
-        return GetByPath(DefaultEntityIconPath, size);
+        if (string.IsNullOrEmpty(iconId))
+        {
+            return null;
+        }
+
+        if (!ModelIconId.IsValid(iconId))
+        {
+            throw new System.ArgumentException($"Unsupported model icon ID '{iconId}'.", nameof(iconId));
+        }
+
+        if (!ModelIconPaths.TryGetValue(iconId, out string path))
+        {
+            throw new System.InvalidOperationException($"Model icon ID '{iconId}' has no Viewer asset mapping.");
+        }
+
+        return GetByPath(path, size);
     }
 
     /// <summary>

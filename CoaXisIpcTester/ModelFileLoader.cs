@@ -59,7 +59,7 @@ public static class ModelFileLoader
                 continue;
             }
 
-            // 旧形式の5列に加え、表示設定とパーティクル指定を含む10列を受け付ける
+            // 基本情報の5列に加え、表示設定とパーティクル指定を含む10列を受け付ける
             if (columns.Length != 5)
             {
                 RequireColumnCount(columns, 10, parser.LineNumber, path);
@@ -74,7 +74,7 @@ public static class ModelFileLoader
                 ValueType = columns[3],
                 Value = columns[4],
                 Visibility = hasParticle && !string.IsNullOrWhiteSpace(columns[5]) ? columns[5] : "Inherit",
-                IconPath = hasParticle ? columns[6] : string.Empty,
+                IconId = hasParticle ? columns[6] : string.Empty,
                 ParticleType = hasParticle && !string.IsNullOrWhiteSpace(columns[7]) ? columns[7] : ModelPropertyParticleType.None,
                 ParticleTexturePath = hasParticle ? columns[8] : string.Empty,
                 ParticleColor = hasParticle ? columns[9] : string.Empty
@@ -115,7 +115,7 @@ public static class ModelFileLoader
                 },
                 Visibility = columns[11],
                 IsCollapsed = bool.Parse(columns[12]),
-                IconPath = columns[13],
+                IconId = columns[13],
                 ScenePath = columns[14]
             });
         }

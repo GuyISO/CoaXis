@@ -38,9 +38,9 @@ public class ModelPropertyDto
     public string Visibility { get; init; } = "Inherit";
 
     /// <summary>
-    /// ツリー表示に使うアイコン画像のパス。空の場合はアイコンなし
+    /// ツリー表示に使うアイコンID。省略時または空文字の場合はアイコンを表示しない。
     /// </summary>
-    public string IconPath { get; init; } = string.Empty;
+    public string IconId { get; init; } = string.Empty;
 
     /// <summary>
     /// 3D Viewer 上のパーティクル表現の種類（None / Point / Box）

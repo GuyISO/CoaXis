@@ -85,9 +85,9 @@ public class ModelProperty
     public bool IsVisible => ModelVisibilityResolver.ResolveIsVisible(this);
 
     /// <summary>
-    /// ツリー表示に使うアイコン画像のパス、アイコンなしの場合は空文字
+    /// ツリー表示に使うアイコンID
     /// </summary>
-    public string IconPath { get; }
+    public string IconId { get; }
 
     /// <summary>
     /// 3D Viewer 上のパーティクル表現の種類
@@ -147,7 +147,7 @@ public class ModelProperty
     /// <param name="valueType">値の型名</param>
     /// <param name="value">文字列化された値</param>
     /// <param name="visibility">表示設定</param>
-    /// <param name="iconPath">ツリー表示に使うアイコン画像のパス</param>
+    /// <param name="iconId">ツリー表示に使うアイコンID。空の場合はアイコンなし</param>
     /// <param name="particleType">パーティクル表現の種類</param>
     /// <param name="particleColor">パーティクルの色、null の場合は既定色</param>
     /// <param name="particleTexturePath">パーティクルのテクスチャ画像パス、空の場合は既定</param>
@@ -158,7 +158,7 @@ public class ModelProperty
         string valueType,
         string value,
         ModelVisibility visibility = ModelVisibility.Inherit,
-        string iconPath = null,
+        string iconId = "",
         ModelParticleType particleType = ModelParticleType.None,
         Color? particleColor = null,
         string particleTexturePath = null)
@@ -170,7 +170,7 @@ public class ModelProperty
         ValueType = valueType ?? string.Empty;
         Value = value ?? string.Empty;
         _visibility = visibility;
-        IconPath = iconPath ?? string.Empty;
+        IconId = iconId ?? string.Empty;
         ParticleType = particleType;
         _particleColor = particleColor;
     }

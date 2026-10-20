@@ -100,8 +100,7 @@ public partial class ModelPropertyTree : Tree
 
 		TreeItem rootItem = CreateItem();
 		rootItem.SetText(0, entity.Name);
-		Texture2D entityIcon = Application.Asset.Icon.GetByPath(entity.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
-			?? Application.Asset.Icon.GetDefaultEntity(Constant.Ui.Tree.HierarchyVisibleIconSize);
+		Texture2D entityIcon = Application.Asset.Icon.GetModelIcon(entity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
 		rootItem.SetIcon(0, entityIcon);
 		rootItem.AddButton(0, GetEntityVisibilityIcon(entity), id: VisibilityButtonId);
 		_rootItem = rootItem;
@@ -227,9 +226,9 @@ public partial class ModelPropertyTree : Tree
 		propertyItem.SetText(0, string.IsNullOrEmpty(property.Value)
 			? property.PropertyType
 			: $"{property.PropertyType} : {property.Value}");
-		if (!string.IsNullOrWhiteSpace(property.IconPath))
+		if (!string.IsNullOrEmpty(property.IconId))
 		{
-			Texture2D icon = Application.Asset.Icon.GetByPath(property.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize);
+			Texture2D icon = Application.Asset.Icon.GetModelIcon(property.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
 			if (icon != null)
 			{
 				propertyItem.SetIcon(0, icon);

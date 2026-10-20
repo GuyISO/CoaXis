@@ -15,12 +15,19 @@ public static class ModelEntityMapper
 	/// <param name="dto">変換元のモデル実体DTO</param>
 	/// <returns>Godot座標系へ変換済みのモデル実体</returns>
 	/// <exception cref="ArgumentNullException">dtoがnullの場合</exception>
-	/// <exception cref="ArgumentException">位置または姿勢が不正な場合</exception>
+	/// <exception cref="ArgumentException">アイコンID、位置、姿勢が不正な場合</exception>
 	public static ModelEntity Map(ModelEntityDto dto)
 	{
 		if (dto == null)
 		{
 			throw new ArgumentNullException(nameof(dto));
+		}
+
+		if (dto.IconId == null || (!string.IsNullOrEmpty(dto.IconId) && !ModelIconId.IsValid(dto.IconId)))
+		{
+			throw new ArgumentException(
+				$"ModelEntity '{dto.Id}' has an invalid IconId '{dto.IconId}'.",
+				nameof(dto));
 		}
 
 		Guid resolvedParentId = dto.ParentId ?? Guid.Empty;
@@ -36,7 +43,7 @@ public static class ModelEntityMapper
 			convertedRotation,
 			ModelVisibilityResolver.Parse(dto.Visibility),
 			dto.IsCollapsed,
-			dto.IconPath,
+			dto.IconId,
 			dto.ScenePath);
 	}
 

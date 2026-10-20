@@ -282,9 +282,8 @@ public partial class SelectionUi : PanelContainer
             TreeItem item = _tree.CreateItem(root);
             item.SetText(0, modelEntity?.Name ?? entityId.ToString());
 
-            // ModelEntityに紐づくアイコンを表示し、不在時は既定アイコンで代替する
-            Texture2D icon = Application.Asset.Icon.GetByPath(modelEntity?.IconPath, Constant.Ui.Tree.HierarchyVisibleIconSize)
-                ?? Application.Asset.Icon.GetDefaultEntity(Constant.Ui.Tree.HierarchyVisibleIconSize);
+            // ModelEntityに紐づくアイコンを表示する
+            Texture2D icon = Application.Asset.Icon.GetModelIcon(modelEntity?.IconId ?? string.Empty, Constant.Ui.Tree.HierarchyVisibleIconSize);
             item.SetIcon(0, icon);
 
             // 右クリックメニューはModelEntity単位で対象を扱う設計のため、TreeItemにEntityIdをmeta保持しておく

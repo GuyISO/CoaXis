@@ -15,8 +15,10 @@ IPC Testerの現行 `ReplaceModelSet` IPC契約を使ってモデル集合を置
 ## 入力形式
 
 - JSON: `ModelEntityDto` の配列。現在の `samples/modelentity.json` 形式。
-- 実体CSV: ヘッダー付き15列。`Id,ParentId,Type,Name,PositionX,PositionY,PositionZ,RotationX,RotationY,RotationZ,RotationW,Visibility,IsCollapsed,IconPath,ScenePath`。
-- 属性CSV: ヘッダー付き5列（`Id,ParentId,PropertyType,ValueType,Value`）、または表示設定とパーティクル指定を含む10列（`Id,ParentId,PropertyType,ValueType,Value,Visibility,IconPath,ParticleType,ParticleTexturePath,ParticleColor`）。10列の空欄は既定値（`Inherit`・`None`・星画像・白）として扱う。未指定の場合は空配列を送る。
+- Entity/PropertyのアイコンはProtocol定義の`IconId`を指定する。使用可能な値は`Annotation`、`AnnotationSet`、`Body`、`Component`、`HybridBody`、`Instance`、`Line`、`Point`、`Product`、`Surface`、`Target`。`IconId`の省略または空欄はアイコンなしを意味し、既定アイコンはない。画像パスでは指定しない。JSONで明示的に`null`を指定した場合は不正値となる。
+- 実体CSV: ヘッダー付き15列。`Id,ParentId,Type,Name,PositionX,PositionY,PositionZ,RotationX,RotationY,RotationZ,RotationW,Visibility,IsCollapsed,IconId,ScenePath`。
+- 属性CSV: ヘッダー付き5列（`Id,ParentId,PropertyType,ValueType,Value`）、または表示設定とパーティクル指定を含む10列（`Id,ParentId,PropertyType,ValueType,Value,Visibility,IconId,ParticleType,ParticleTexturePath,ParticleColor`）。10列の空欄は既定値（`Inherit`・アイコンなし・`None`・星画像・白）として扱う。未指定の場合は空配列を送る。
+- Protocol v2ではアイコンの画像パス指定を`IconId`に置き換えている。v1クライアントはProtocol契約に合わせて更新する。
 - 数値はカルチャに依存しない小数点表記とする。CSVは引用符内のカンマと二重引用符を扱う。
 
 ## 切り分け

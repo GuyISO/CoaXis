@@ -4,7 +4,6 @@ ModelPropertyのフォールバック値や色の初期値を見直す
 # Viewer
 
 EntityがPropertyを保有していることがわかるよう保有数をボタンで表示する
-PropertyTreeにもアイコンを表示する
 ModelEntityに対してAABBの空間にエフェクトを配置する
 
 Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする

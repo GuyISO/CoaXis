@@ -16,12 +16,19 @@ public static partial class ModelPropertyMapper
     /// <param name="dto">変換元のモデル属性DTO</param>
     /// <returns>変換済みのModelProperty</returns>
     /// <exception cref="ArgumentNullException">dtoがnullの場合</exception>
-    /// <exception cref="ArgumentException">パーティクルの種類または色が不正な場合</exception>
+    /// <exception cref="ArgumentException">アイコンID、パーティクルの種類または色が不正な場合</exception>
     public static ModelProperty Map(ModelPropertyDto dto)
     {
         if (dto == null)
         {
             throw new ArgumentNullException(nameof(dto));
+        }
+
+        if (dto.IconId == null || (!string.IsNullOrEmpty(dto.IconId) && !ModelIconId.IsValid(dto.IconId)))
+        {
+            throw new ArgumentException(
+                $"ModelProperty '{dto.Id}' has an invalid IconId '{dto.IconId}'.",
+                nameof(dto));
         }
 
         Guid resolvedParentId = dto.ParentId ?? Guid.Empty;
@@ -32,7 +39,7 @@ public static partial class ModelPropertyMapper
             dto.ValueType,
             dto.Value,
             ModelVisibilityResolver.Parse(dto.Visibility),
-            dto.IconPath,
+            dto.IconId,
             ParseParticleType(dto),
             ParseParticleColor(dto),
             dto.ParticleTexturePath?.Trim());

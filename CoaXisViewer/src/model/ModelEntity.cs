@@ -116,8 +116,8 @@ public class ModelEntity
         }
     }
 
-    /// <summary>アイコン画像のパス</summary>
-    public string IconPath { get; }
+    /// <summary>ツリー表示に使うアイコンID</summary>
+    public string IconId { get; }
 
     /// <summary>読み込み対象シーンのパス</summary>
     public string ScenePath { get; }
@@ -171,7 +171,7 @@ public class ModelEntity
         Quaternion rotation,
         ModelVisibility visibility,
         bool isCollapsed,
-        string iconPath,
+        string iconId,
         string scenePath)
     {
         Id = id;
@@ -182,7 +182,7 @@ public class ModelEntity
         _rotation = rotation;
         _visibility = visibility;
         _isCollapsed = isCollapsed;
-        IconPath = iconPath ?? string.Empty;
+        IconId = iconId ?? string.Empty;
         ScenePath = scenePath ?? string.Empty;
     }
 
