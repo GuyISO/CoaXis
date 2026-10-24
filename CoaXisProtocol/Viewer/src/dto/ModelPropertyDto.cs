@@ -48,9 +48,9 @@ public class ModelPropertyDto
     public string ParticleType { get; init; } = ModelPropertyParticleType.None;
 
     /// <summary>
-    /// パーティクルのテクスチャ画像パス（res://...）。空の場合は既定の星画像
+    /// パーティクルのテクスチャID（<see cref="ModelParticleTextureId"/>）。省略時または空文字の場合は既定の星画像
     /// </summary>
-    public string ParticleTexturePath { get; init; } = string.Empty;
+    public string ParticleTextureId { get; init; } = string.Empty;
 
     /// <summary>
     /// パーティクルの色。"#RRGGBB" 形式、空の場合は既定色

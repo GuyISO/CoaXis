@@ -1,11 +1,11 @@
 ModelPropertyにもParticle追加したかのステータス管理が必要
 ModelPropertyのフォールバック値や色の初期値を見直す
 
+ModelEntityのシーンロードとパーティクルの初期化順序を見直す
+
 # Viewer
 
 EntityがPropertyを保有していることがわかるよう保有数をボタンで表示する
-ModelEntityに対してAABBの空間にエフェクトを配置する
-
 Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする
 ModelProertyTreeは、Containerの中に配置する形で使用する
 
@@ -20,23 +20,12 @@ ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介�
 FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
 
 ## 3D表示関係
-点群座標へのVFX配置
-    GodotのVFX Graphを使用して、点群座標にエフェクトを配置する機能を実装する
 レイヤー管理
     表示非表示以外のレイヤーを用意、分類は未決定
         Model、VFXでわけるか？
     透明度をレイヤー別で設定可能にする？
 
 コマンド化、IPC化進める
-
-イベントの経路やFacadeを見直す
-    イベントを経由せずサービス層を直接参照可能な処理はそうする
-ModelServiceの責務がおかしいので、ModelServiceの責務を整理する
-    ModelServiceはModelの読み込み・保存・削除などの処理を行う
-    Modelの表示状態やVFXの切り替えなどはModelServiceではなく、別のサービスで行うようにする
-    ModelServiceはModelの状態を管理するだけにする
-ModelTree
-    ModelAddedで都度追加するのやめて、一斉に描画更新
 
 ## UI
 設定画面

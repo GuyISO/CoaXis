@@ -1,6 +1,7 @@
 // TODO: ちゃんと内容理解する
 
 using Godot;
+using CoaXis.Protocol.Viewer;
 using System;
 
 /// <summary>
@@ -15,7 +16,7 @@ public partial class ModelParticle : GpuParticles3D
 	private const float HdrIntensity = 3.5f;
 
 	/// <summary>AABB対角線長に対する、各方向への余白の割合</summary>
-	private const float PaddingRatio = 0.05f;
+	private const float PaddingRatio = 0.01f;
 
 	/// <summary>AABB対角線長に対する、スプライト1枚の一辺の割合。モデルの大きさに関わらず密度感を保つ</summary>
 	private const float SpriteSizeRatio = 0.03f;
@@ -23,11 +24,11 @@ public partial class ModelParticle : GpuParticles3D
 	/// <summary>色未指定時の既定色（発光倍率適用前）</summary>
 	private static readonly Color DefaultColor = Colors.White;
 
-	/// <summary>テクスチャ未指定時、および読み込み失敗時に使う画像パス</summary>
-	private const string DefaultTexturePath = "res://assets/icon/particle/star.png";
+	/// <summary>テクスチャ未指定時の既定テクスチャID</summary>
+	private const string DefaultTextureId = ModelParticleTextureId.Star;
 
 	/// <summary>パーティクル1個あたりの描画数</summary>
-	private const int ParticleAmount = 12;
+	private const int ParticleAmount = 4;
 
 	/// <summary>パーティクルの寿命（秒）</summary>
 	private const double ParticleLifetime = 0.5;
@@ -35,16 +36,17 @@ public partial class ModelParticle : GpuParticles3D
 	/// <summary>放出範囲が未確定の間に使うスプライトの一辺</summary>
 	private const float DefaultSpriteSize = 0.05f;
 
-	/// <summary>要求パスごとの描画メッシュ。メッシュとマテリアルは同じ画像のパーティクル間で共有する</summary>
-	private static readonly System.Collections.Generic.Dictionary<string, QuadMesh> MeshCache = new();
+	/// <summary>テクスチャIDごとの描画メッシュ。メッシュとマテリアルは同じ画像のパーティクル間で共有する</summary>
+	private static readonly System.Collections.Generic.Dictionary<string, QuadMesh> MeshCache = new(System.StringComparer.OrdinalIgnoreCase);
 
 	/// <summary>種類ごとのフェード用スケール曲線。全パーティクルで共有する</summary>
 	private static readonly System.Collections.Generic.Dictionary<ModelParticleType, CurveTexture> ScaleCurveCache = new();
 
-	/// <summary>現在の描画メッシュに適用済みの要求テクスチャパス</summary>
-	private string _appliedTexturePath;
+	/// <summary>現在の描画メッシュに適用済みのテクスチャID</summary>
+	private string _appliedTextureId;
 
 	#endregion
+	
 	#region Properties
 
 	/// <summary>
@@ -91,7 +93,7 @@ public partial class ModelParticle : GpuParticles3D
 			return;
 		}
 
-		ApplyTexture(property.ParticleTexturePath);
+		ApplyTexture(property.ParticleTextureId);
 
 		if (ProcessMaterial is ParticleProcessMaterial material)
 		{
@@ -116,8 +118,12 @@ public partial class ModelParticle : GpuParticles3D
 			!WorldAabbUtility.TryGetWorldAabb(new[] { modelNode }, out Aabb worldAabb) ||
 			worldAabb.Size == Vector3.Zero)
 		{
+			// AABBが無い間は既定サイズで目立たないよう非表示にする
+			Visible = false;
 			return;
 		}
+
+		Visible = true;
 
 		// ModelNodeローカル空間の外接AABBへ変換し、ModelNodeの回転・スケールに追従させる
 		Transform3D worldToLocal = modelNode.GlobalTransform.AffineInverse();
@@ -199,41 +205,32 @@ public partial class ModelParticle : GpuParticles3D
 	#region Helpers
 
 	/// <summary>
-	/// 要求されたテクスチャパスの共有メッシュを描画パスへ適用する。パスが変わらない場合は何もしない
+	/// 要求されたテクスチャIDの共有メッシュを描画パスへ適用する。IDが変わらない場合は何もしない
 	/// </summary>
-	private void ApplyTexture(string requestedPath)
+	private void ApplyTexture(string requestedId)
 	{
-		string key = string.IsNullOrWhiteSpace(requestedPath) ? DefaultTexturePath : requestedPath;
-		if (key == _appliedTexturePath)
+		string key = string.IsNullOrWhiteSpace(requestedId) ? DefaultTextureId : requestedId;
+		if (key == _appliedTextureId)
 		{
 			return;
 		}
 
-		_appliedTexturePath = key;
+		_appliedTextureId = key;
 		DrawPass1 = GetOrCreateMesh(key);
 	}
 
 	/// <summary>
-	/// テクスチャパスに対応する共有メッシュを取得する。読み込めない場合は既定の星画像で代替し、警告は初回のみ出す
+	/// テクスチャIDに対応する共有メッシュを取得する。画像を読み込めない場合はテクスチャなしで描画する
 	/// </summary>
-	private static QuadMesh GetOrCreateMesh(string path)
+	private static QuadMesh GetOrCreateMesh(string textureId)
 	{
-		if (MeshCache.TryGetValue(path, out QuadMesh cached))
+		if (MeshCache.TryGetValue(textureId, out QuadMesh cached))
 		{
 			return cached;
 		}
 
-		Texture2D texture = ResourceLoader.Exists(path) ? ResourceLoader.Load<Texture2D>(path) : null;
-		if (texture == null)
-		{
-			Application.Log.Warn($"ModelParticle: failed to load texture '{path}'. Falling back to '{DefaultTexturePath}'.");
-			QuadMesh fallback = path == DefaultTexturePath ? CreateMesh(null) : GetOrCreateMesh(DefaultTexturePath);
-			MeshCache[path] = fallback;
-			return fallback;
-		}
-
-		QuadMesh mesh = CreateMesh(texture);
-		MeshCache[path] = mesh;
+		QuadMesh mesh = CreateMesh(Application.Asset.Texture.GetParticle(textureId));
+		MeshCache[textureId] = mesh;
 		return mesh;
 	}
 
@@ -264,11 +261,21 @@ public partial class ModelParticle : GpuParticles3D
 			return cached;
 		}
 
-		float peak = particleType == ModelParticleType.Box ? 0.498f : 0.733f;
 		var curve = new Curve();
-		curve.AddPoint(new Vector2(0f, 0f));
-		curve.AddPoint(new Vector2(peak, 1f));
-		curve.AddPoint(new Vector2(1f, 0f));
+		if (particleType == ModelParticleType.Point)
+		{
+			// 発生時にサイズ1、消滅時に0へ線形に遷移させる
+			curve.AddPoint(new Vector2(0f, 1f), 0f, 0f, Curve.TangentMode.Linear, Curve.TangentMode.Linear);
+			curve.AddPoint(new Vector2(1f, 0f), 0f, 0f, Curve.TangentMode.Linear, Curve.TangentMode.Linear);
+		}
+		else
+		{
+			// 発生時にサイズ0、中央で最大1、消滅時に0へ線形に遷移させる
+			curve.AddPoint(new Vector2(0f, 0f));
+			curve.AddPoint(new Vector2(0.5f, 1f));
+			curve.AddPoint(new Vector2(1f, 0f));
+		}
+
 		var texture = new CurveTexture { Curve = curve };
 		ScaleCurveCache[particleType] = texture;
 		return texture;

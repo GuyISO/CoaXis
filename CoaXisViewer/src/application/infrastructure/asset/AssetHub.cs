@@ -15,6 +15,8 @@ public partial class AssetHub : BaseHub
     public AssetSceneHub Scene { get; }
     /// <summary>マテリアルハブを取得する。</summary>
     public AssetMaterialHub Material { get; }
+    /// <summary>テクスチャハブを取得する。</summary>
+    public AssetTextureHub Texture { get; }
 
     #endregion
 
@@ -32,6 +34,7 @@ public partial class AssetHub : BaseHub
         Icon = AddModule<AssetIconHub>("Icon");
         Scene = AddModule<AssetSceneHub>("Scene");
         Material = AddModule<AssetMaterialHub>("Material");
+        Texture = AddModule<AssetTextureHub>("Texture");
     }
 
     #endregion

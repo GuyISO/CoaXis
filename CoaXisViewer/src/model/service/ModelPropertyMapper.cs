@@ -31,6 +31,14 @@ public static partial class ModelPropertyMapper
                 nameof(dto));
         }
 
+        string particleTextureId = dto.ParticleTextureId?.Trim();
+        if (particleTextureId == null || (particleTextureId.Length > 0 && !ModelParticleTextureId.IsValid(particleTextureId)))
+        {
+            throw new ArgumentException(
+                $"ModelProperty '{dto.Id}' has an invalid ParticleTextureId '{dto.ParticleTextureId}'.",
+                nameof(dto));
+        }
+
         Guid resolvedParentId = dto.ParentId ?? Guid.Empty;
         return new ModelProperty(
             dto.Id,
@@ -42,7 +50,7 @@ public static partial class ModelPropertyMapper
             dto.IconId,
             ParseParticleType(dto),
             ParseParticleColor(dto),
-            dto.ParticleTexturePath?.Trim());
+            particleTextureId);
     }
 
     #endregion

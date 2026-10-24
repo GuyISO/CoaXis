@@ -93,6 +93,8 @@ public partial class ModelPropertyLoadHub : BaseHub
             ModelEntity entity = property.GetEntity();
             ModelNode entityNode = entity?.Node;
             bool canAttach = property.ParticleType != ModelParticleType.None
+                && entity != null
+                && entity.Status == ModelStatus.Loaded
                 && entityNode != null
                 && GodotObject.IsInstanceValid(entityNode)
                 && Application.Model.Entity.Registry.IsRootConnected(entity.Id);

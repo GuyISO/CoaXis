@@ -95,9 +95,9 @@ public class ModelProperty
     public ModelParticleType ParticleType { get; }
 
     /// <summary>
-    /// パーティクルのテクスチャ画像パス、空の場合は既定の星画像
+    /// パーティクルのテクスチャID、空の場合は既定の星画像
     /// </summary>
-    public string ParticleTexturePath { get; }
+    public string ParticleTextureId { get; }
 
     /// <summary>
     /// パーティクルの色、null の場合は種類ごとの既定色
@@ -150,7 +150,7 @@ public class ModelProperty
     /// <param name="iconId">ツリー表示に使うアイコンID。空の場合はアイコンなし</param>
     /// <param name="particleType">パーティクル表現の種類</param>
     /// <param name="particleColor">パーティクルの色、null の場合は既定色</param>
-    /// <param name="particleTexturePath">パーティクルのテクスチャ画像パス、空の場合は既定</param>
+    /// <param name="particleTextureId">パーティクルのテクスチャID、空の場合は既定</param>
     public ModelProperty(
         Guid id,
         Guid parentId,
@@ -161,9 +161,9 @@ public class ModelProperty
         string iconId = "",
         ModelParticleType particleType = ModelParticleType.None,
         Color? particleColor = null,
-        string particleTexturePath = null)
+        string particleTextureId = null)
     {
-        ParticleTexturePath = particleTexturePath ?? string.Empty;
+        ParticleTextureId = particleTextureId ?? string.Empty;
         Id = id;
         ParentId = parentId;
         PropertyType = propertyType ?? string.Empty;

@@ -10,6 +10,8 @@ ambient_light_color = Color(1, 1, 1, 1)
 ambient_light_energy = 0.2
 reflected_light_source = 1
 glow_enabled = true
+glow_intensity = 2.0
+glow_strength = 1.5
 glow_hdr_threshold = 1.5
 
 [node name="Environments" type="Node" unique_id=98385259]
@@ -21,6 +23,7 @@ script = ExtResource("1_uxlda")
 [node name="DirectionalLight3DFwd" type="DirectionalLight3D" parent="." unique_id=389294113]
 transform = Transform3D(0.8535533, -0.14644662, 0.49999997, 0.49999997, 0.49999997, -0.70710677, -0.14644662, 0.8535533, 0.49999997, 0, 0, 0)
 layers = 1048573
+light_energy = 0.5
 light_cull_mask = 4294967293
 
 [node name="DirectionalLight3DAft" type="DirectionalLight3D" parent="." unique_id=1547430842]

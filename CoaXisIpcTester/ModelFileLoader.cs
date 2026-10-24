@@ -76,7 +76,7 @@ public static class ModelFileLoader
                 Visibility = hasParticle && !string.IsNullOrWhiteSpace(columns[5]) ? columns[5] : "Inherit",
                 IconId = hasParticle ? columns[6] : string.Empty,
                 ParticleType = hasParticle && !string.IsNullOrWhiteSpace(columns[7]) ? columns[7] : ModelPropertyParticleType.None,
-                ParticleTexturePath = hasParticle ? columns[8] : string.Empty,
+                ParticleTextureId = hasParticle ? columns[8] : string.Empty,
                 ParticleColor = hasParticle ? columns[9] : string.Empty
             });
         }
