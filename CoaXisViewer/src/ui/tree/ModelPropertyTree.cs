@@ -24,6 +24,11 @@ public partial class ModelPropertyTree : Tree
 	private const int VisibilityButtonId = 1;
 
 	/// <summary>
+	/// Property OverlayTree表示切替ボタンのID（Root行のみ）
+	/// </summary>
+	private const int PropertyButtonId = 2;
+
+	/// <summary>
 	/// ModelProperty識別子と、対応する TreeItem の対応表
 	/// </summary>
 	private readonly System.Collections.Generic.Dictionary<Guid, TreeItem> _propertyItems = new();
@@ -38,6 +43,7 @@ public partial class ModelPropertyTree : Tree
 		ButtonClicked += OnButtonClicked;
 		Application.Model.Property.Visual.VisibilityResolved += OnPropertyVisibilityResolved;
 		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
+		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityPropertyTreeVisibleNotified;
 	}
 
 	public override void _ExitTree()
@@ -45,6 +51,7 @@ public partial class ModelPropertyTree : Tree
 		ButtonClicked -= OnButtonClicked;
 		Application.Model.Property.Visual.VisibilityResolved -= OnPropertyVisibilityResolved;
 		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
+		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityPropertyTreeVisibleNotified;
 		base._ExitTree();
 	}
 
@@ -102,6 +109,7 @@ public partial class ModelPropertyTree : Tree
 		rootItem.SetText(0, entity.Name);
 		Texture2D entityIcon = Application.Asset.Icon.GetModelIcon(entity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
 		rootItem.SetIcon(0, entityIcon);
+		rootItem.AddButton(0, GetEntityPropertyIcon(entity), id: PropertyButtonId, disabled: entity.Properties.Count == 0);
 		rootItem.AddButton(0, GetEntityVisibilityIcon(entity), id: VisibilityButtonId);
 		_rootItem = rootItem;
 
@@ -129,7 +137,22 @@ public partial class ModelPropertyTree : Tree
 	/// </summary>
 	private void OnButtonClicked(TreeItem item, long column, long id, long mouseButtonIndex)
 	{
-		if (id != VisibilityButtonId || item == null)
+		if (item == null)
+		{
+			return;
+		}
+
+		if (id == PropertyButtonId && item == _rootItem)
+		{
+			if (_entityId != Guid.Empty)
+			{
+				Application.Ui.Property.ToggleModelEntityProperties(_entityId);
+			}
+
+			return;
+		}
+
+		if (id != VisibilityButtonId)
 		{
 			return;
 		}
@@ -180,7 +203,30 @@ public partial class ModelPropertyTree : Tree
 		ModelEntity entity = Application.Model.Entity.Registry.Get(parsedId);
 		if (entity != null)
 		{
-			_rootItem.SetButton(0, 0, GetEntityVisibilityIcon(entity));
+			int index = _rootItem.GetButtonById(0, VisibilityButtonId);
+			if (index >= 0)
+			{
+				_rootItem.SetButton(0, index, GetEntityVisibilityIcon(entity));
+			}
+		}
+	}
+
+	/// <summary>
+	/// Property OverlayTreeの表示状態が通知されたとき、Root行のPropertyボタンを更新する
+	/// </summary>
+	/// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
+	private void OnEntityPropertyTreeVisibleNotified(string entityId)
+	{
+		if (_rootItem == null || !Guid.TryParse(entityId, out Guid parsedId) || parsedId != _entityId)
+		{
+			return;
+		}
+
+		ModelEntity entity = Application.Model.Entity.Registry.Get(parsedId);
+		int index = _rootItem.GetButtonById(0, PropertyButtonId);
+		if (entity != null && index >= 0)
+		{
+			_rootItem.SetButton(0, index, GetEntityPropertyIcon(entity));
 		}
 	}
 
@@ -196,6 +242,17 @@ public partial class ModelPropertyTree : Tree
 		return Application.Asset.Icon.GetVisibility(
 			entity.Visibility,
 			entity.IsVisible,
+			Constant.Ui.Tree.HierarchyVisibleIconSize);
+	}
+
+	/// <summary>
+	/// EntityのProperty有無とOverlayTree表示状態に対応するボタンアイコンを取得する
+	/// </summary>
+	private static Texture2D GetEntityPropertyIcon(ModelEntity entity)
+	{
+		return Application.Asset.Icon.GetProperty(
+			entity.Properties.Count > 0,
+			entity.IsPropertyTreeVisible,
 			Constant.Ui.Tree.HierarchyVisibleIconSize);
 	}
 

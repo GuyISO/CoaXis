@@ -64,6 +64,10 @@ public partial class ModelEntityStateHub : BaseHub
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void CollapsedEventHandler(string entityId);
 
+	/// <summary>Property OverlayTreeの表示状態の変更通知。値は ModelEntity.IsPropertyTreeVisible を参照する。</summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	[Signal] public delegate void PropertyTreeVisibleNotifiedEventHandler(string entityId);
+
 	/// <summary>モデルのロード状態の変更通知。値は ModelEntity.Status を参照する。</summary>
 	/// <param name="entityId">変更された ModelEntity の識別子</param>
 	[Signal] public delegate void StatusNotifiedEventHandler(string entityId);
@@ -114,6 +118,15 @@ public partial class ModelEntityStateHub : BaseHub
 	public void NotifyCollapsed(Guid entityId)
 	{
 		EmitSignal(SignalName.Collapsed, entityId.ToString());
+	}
+
+	/// <summary>
+	/// Property OverlayTreeの表示状態の変更を通知する。Fieldの変更に対して状態の反映はModelEntity自身が行うが、変更を周知するためにModelEntity自身から呼び出して使用する。
+	/// </summary>
+	/// <param name="entityId">変更された ModelEntity の識別子</param>
+	public void NotifyPropertyTreeVisible(Guid entityId)
+	{
+		EmitSignal(SignalName.PropertyTreeVisibleNotified, entityId.ToString());
 	}
 
 	/// <summary>

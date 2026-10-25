@@ -17,6 +17,12 @@ public partial class AssetIconHub : BaseHub
     private const string VisibleIconPath = "res://assets/icon/visibility/visible.svg";
     /// <summary>非表示アイコンのパス。</summary>
     private const string InvisibleIconPath = "res://assets/icon/visibility/invisible.svg";
+    /// <summary>Propertyなしアイコンのパス。</summary>
+    private const string PropertyNoneIconPath = "res://assets/icon/property/none.svg";
+    /// <summary>Propertyあり・OverlayTree非表示アイコンのパス。</summary>
+    private const string PropertyHiddenIconPath = "res://assets/icon/property/hidden.svg";
+    /// <summary>Propertyあり・OverlayTree表示中アイコンのパス。</summary>
+    private const string PropertyShownIconPath = "res://assets/icon/property/shown.svg";
 
     /// <summary>ProtocolアイコンIDとViewerアセットの対応表。</summary>
     private static readonly Dictionary<string, string> ModelIconPaths = new(System.StringComparer.OrdinalIgnoreCase)
@@ -79,6 +85,19 @@ public partial class AssetIconHub : BaseHub
             ModelVisibility.Invisible => InvisibleIconPath,
             _ => isVisible ? InheritVisibleIconPath : InheritInvisibleIconPath,
         };
+        return GetByPath(path, size);
+    }
+
+    /// <summary>
+    /// ModelEntityのPropertyの有無とOverlayTree表示状態に対応するアイコンを取得する。
+    /// </summary>
+    /// <param name="hasProperty">Propertyを持つ場合は true</param>
+    /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
+    /// <param name="size">返却アイコンのサイズ</param>
+    /// <returns>取得したアイコン、失敗時は null</returns>
+    public Texture2D GetProperty(bool hasProperty, bool isTreeVisible, int size = 24)
+    {
+        string path = !hasProperty ? PropertyNoneIconPath : isTreeVisible ? PropertyShownIconPath : PropertyHiddenIconPath;
         return GetByPath(path, size);
     }
 

@@ -99,7 +99,7 @@ public static class ModelFileLoader
                 continue;
             }
 
-            RequireColumnCount(columns, 15, parser.LineNumber, path);
+            RequireColumnCountRange(columns, 15, 16, parser.LineNumber, path);
             entities.Add(new ModelEntityDto
             {
                 Id = Guid.Parse(columns[0]),
@@ -117,7 +117,8 @@ public static class ModelFileLoader
                 Visibility = columns[11],
                 IsCollapsed = bool.Parse(columns[12]),
                 IconId = columns[13],
-                ScenePath = columns[14]
+                ScenePath = columns[14],
+                IsPropertyTreeVisible = columns.Length == 16 && bool.Parse(columns[15])
             });
         }
 
@@ -156,6 +157,14 @@ public static class ModelFileLoader
         if (columns.Length != expected)
         {
             throw new InvalidDataException($"{Path.GetFileName(path)} の{lineNumber}行目は{expected}列必要ですが、{columns.Length}列です。");
+        }
+    }
+
+    private static void RequireColumnCountRange(string[] columns, int min, int max, long lineNumber, string path)
+    {
+        if (columns.Length < min || columns.Length > max)
+        {
+            throw new InvalidDataException($"{Path.GetFileName(path)} の{lineNumber}行目は{min}～{max}列必要ですが、{columns.Length}列です。");
         }
     }
 }

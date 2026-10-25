@@ -21,6 +21,8 @@ public class ModelEntity
     private ModelVisibility _visibility;
     /// <summary>ツリー表示時の折り畳み状態</summary>
     private bool _isCollapsed;
+    /// <summary>Viewport上のProperty OverlayTreeの表示状態</summary>
+    private bool _isPropertyTreeVisible;
     /// <summary>モデルのロード状態</summary>
     private ModelStatus _status = ModelStatus.Unloaded;
     /// <summary>この実体に対応する描画用ノード</summary>
@@ -116,6 +118,22 @@ public class ModelEntity
         }
     }
 
+    /// <summary>Viewport上のProperty OverlayTreeを表示するかどうか。変更はUiPropertyHub経由で行う。</summary>
+    public bool IsPropertyTreeVisible
+    {
+        get => _isPropertyTreeVisible;
+        set
+        {
+            if (_isPropertyTreeVisible == value)
+            {
+                return;
+            }
+
+            _isPropertyTreeVisible = value;
+            Application.Model.Entity.State.NotifyPropertyTreeVisible(Id);
+        }
+    }
+
     /// <summary>ツリー表示に使うアイコンID</summary>
     public string IconId { get; }
 
@@ -172,8 +190,10 @@ public class ModelEntity
         ModelVisibility visibility,
         bool isCollapsed,
         string iconId,
-        string scenePath)
+        string scenePath,
+        bool isPropertyTreeVisible = false)
     {
+        _isPropertyTreeVisible = isPropertyTreeVisible;
         Id = id;
         ParentId = parentId;
         Type = type ?? string.Empty;

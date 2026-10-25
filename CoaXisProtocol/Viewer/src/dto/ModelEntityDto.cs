@@ -55,4 +55,9 @@ public class ModelEntityDto
     /// シーン内でのパス。省略時は空文字列。
     /// </summary>
     public string ScenePath { get; init; } = string.Empty;
+
+    /// <summary>
+    /// Viewport上にPropertyのOverlayTreeを表示するかどうか。省略時は false。
+    /// </summary>
+    public bool IsPropertyTreeVisible { get; init; } = false;
 }

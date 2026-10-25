@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// ModelEntityに紐づくModelPropertyTreeをビューポート上に表示する。
@@ -47,8 +48,10 @@ public partial class ViewportPropertyOverlay : Control
     private void SubscribeEvents()
     {
         Resized += OnResized;
-        Application.Ui.Property.ShowRequested += OnShowRequested;
-        Application.Ui.Property.HideRequested += OnHideRequested;
+        Application.Model.Entity.State.PropertyTreeVisibleNotified += OnPropertyTreeVisibleNotified;
+        Application.Model.Entity.Registry.Registered += OnEntityRegistered;
+        Application.Model.Entity.Registry.Cleared += OnEntityCleared;
+        Application.Model.Property.Registry.Changed += OnPropertyChanged;
         Application.Viewport.Camera.PositionNotified += OnCameraChanged;
         Application.Viewport.Camera.RotationNotified += OnCameraChanged;
         Application.Viewport.Camera.DistanceNotified += OnCameraChanged;
@@ -69,8 +72,10 @@ public partial class ViewportPropertyOverlay : Control
     private void UnsubscribeEvents()
     {
         Resized -= OnResized;
-        Application.Ui.Property.ShowRequested -= OnShowRequested;
-        Application.Ui.Property.HideRequested -= OnHideRequested;
+        Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnPropertyTreeVisibleNotified;
+        Application.Model.Entity.Registry.Registered -= OnEntityRegistered;
+        Application.Model.Entity.Registry.Cleared -= OnEntityCleared;
+        Application.Model.Property.Registry.Changed -= OnPropertyChanged;
         Application.Viewport.Camera.PositionNotified -= OnCameraChanged;
         Application.Viewport.Camera.RotationNotified -= OnCameraChanged;
         Application.Viewport.Camera.DistanceNotified -= OnCameraChanged;
@@ -86,33 +91,60 @@ public partial class ViewportPropertyOverlay : Control
     }
 
     /// <summary>
-    /// ModelEntityのプロパティ表示要求を受け、対応するツリーを表示する。
+    /// ModelEntityのOverlayTree表示状態に合わせて、対応するツリーを表示または破棄する。
     /// </summary>
-    /// <param name="entityId">表示対象のModelEntity識別子。</param>
-    private void OnShowRequested(string entityId)
+    /// <param name="entityId">表示状態が変更されたModelEntity識別子。</param>
+    private void OnPropertyTreeVisibleNotified(string entityId)
     {
         if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
         {
-            Application.Log.Warn($"ViewportPropertyOverlay: invalid property display target. entityId='{entityId}'");
+            Application.Log.Warn($"ViewportPropertyOverlay: invalid property tree target. entityId='{entityId}'");
             return;
         }
 
-        ShowPropertyTree(parsedEntityId);
+        SyncPropertyTree(parsedEntityId);
     }
 
     /// <summary>
-    /// ModelEntityのプロパティ非表示要求を受け、対応するツリーを破棄する。
+    /// Entity集合の置換時、DTO由来の表示状態をすべてのツリーへ反映し、消えたEntityのツリーを破棄する。
     /// </summary>
-    /// <param name="entityId">非表示対象のModelEntity識別子。</param>
-    private void OnHideRequested(string entityId)
+    private void OnEntityRegistered()
     {
-        if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
+        foreach (Guid staleId in _propertyTrees.Keys.Where(id => !Application.Model.Entity.Registry.IsRegistered(id)).ToList())
         {
-            Application.Log.Warn($"ViewportPropertyOverlay: invalid property hide target. entityId='{entityId}'");
-            return;
+            HidePropertyTree(staleId);
         }
 
-        HidePropertyTree(parsedEntityId);
+        foreach (ModelEntity entity in Application.Model.Entity.Registry.Items.Values)
+        {
+            SyncPropertyTree(entity.Id);
+        }
+    }
+
+    /// <summary>
+    /// Entity集合のクリア時、すべてのツリーを破棄する。
+    /// </summary>
+    private void OnEntityCleared()
+    {
+        foreach (Guid entityId in _propertyTrees.Keys.ToList())
+        {
+            HidePropertyTree(entityId);
+        }
+    }
+
+    /// <summary>
+    /// Propertyの紐づけが変化したとき、表示中のツリーを再構築する。
+    /// </summary>
+    private void OnPropertyChanged()
+    {
+        foreach ((Guid entityId, ModelPropertyTree propertyTree) in _propertyTrees.ToList())
+        {
+            if (GodotObject.IsInstanceValid(propertyTree))
+            {
+                propertyTree.Show(entityId);
+                UpdateTreePosition(entityId, propertyTree);
+            }
+        }
     }
 
     /// <summary>
@@ -163,6 +195,23 @@ public partial class ViewportPropertyOverlay : Control
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// ModelEntityのIsPropertyTreeVisibleに合わせて、ツリーを表示または破棄する。
+    /// </summary>
+    /// <param name="entityId">対象のModelEntity識別子。</param>
+    private void SyncPropertyTree(Guid entityId)
+    {
+        ModelEntity entity = Application.Model.Entity.Registry.Get(entityId);
+        if (entity != null && entity.IsPropertyTreeVisible)
+        {
+            ShowPropertyTree(entityId);
+        }
+        else
+        {
+            HidePropertyTree(entityId);
+        }
+    }
 
     /// <summary>
     /// 指定したModelEntityのModelPropertyTreeを生成または再利用して表示する。

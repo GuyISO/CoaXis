@@ -16,7 +16,7 @@ IPC Testerの現行 `ReplaceModelSet` IPC契約を使ってモデル集合を置
 
 - JSON: `ModelEntityDto` の配列。現在の `samples/modelentity.json` 形式。
 - Entity/PropertyのアイコンはProtocol定義の`IconId`を指定する。使用可能な値は`Annotation`、`AnnotationSet`、`Body`、`Component`、`HybridBody`、`Instance`、`Line`、`Point`、`Product`、`Surface`、`Target`。`IconId`の省略または空欄はアイコンなしを意味し、既定アイコンはない。画像パスでは指定しない。JSONで明示的に`null`を指定した場合は不正値となる。
-- 実体CSV: ヘッダー付き15列。`Id,ParentId,Type,Name,PositionX,PositionY,PositionZ,RotationX,RotationY,RotationZ,RotationW,Visibility,IsCollapsed,IconId,ScenePath`。
+- 実体CSV: ヘッダー付き15列、または末尾に`IsPropertyTreeVisible`（`true`/`false`、Viewport上のProperty OverlayTree初期表示）を加えた16列。`Id,ParentId,Type,Name,PositionX,PositionY,PositionZ,RotationX,RotationY,RotationZ,RotationW,Visibility,IsCollapsed,IconId,ScenePath[,IsPropertyTreeVisible]`。15列の場合は`false`として扱う。JSONの`ModelEntityDto`も`IsPropertyTreeVisible`（省略時`false`）を持つ。
 - 属性CSV: ヘッダー付き5列（`Id,ParentId,PropertyType,ValueType,Value`）、または表示設定とパーティクル指定を含む11列（`Id,ParentId,PropertyType,ValueType,Value,Visibility,IconId,ParticleEmitterType,ParticleBehaviorType,ParticleTextureId,ParticleColor`）。11列形式の空欄は既定値（`Inherit`・アイコンなし・発生源`None`・挙動`None`・`Star`・白）として扱う。発生源は`None`/`Point`/`Box`/`Sphere`/`Surface`、挙動は`None`/`Disperse`/`Sparkle`/`Emerge`。発生源と挙動は両方`None`か両方指定する。未指定の場合は空配列を送る。
 - Protocol v2ではアイコンの画像パス指定を`IconId`に置き換えている。v1クライアントはProtocol契約に合わせて更新する。
 - 数値はカルチャに依存しない小数点表記とする。CSVは引用符内のカンマと二重引用符を扱う。

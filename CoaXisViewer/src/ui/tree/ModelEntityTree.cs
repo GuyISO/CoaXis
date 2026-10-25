@@ -24,7 +24,6 @@ public partial class ModelEntityTree : Tree
 
     private const int VisibilityButtonId = 1;
     private const int PropertyButtonId = 2;
-    private const string PropertyButtonIconPath = "res://assets/icon/mono/book.svg";
 
     #endregion
 
@@ -106,6 +105,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Registry.Registered += OnModelEntityRegistered;
         Application.Model.Entity.Visual.VisibilityResolved += OnModelEntityVisibilityResolved;
         Application.Model.Property.Registry.Changed += OnModelPropertyChanged;
+        Application.Model.Entity.State.PropertyTreeVisibleNotified += OnModelEntityPropertyTreeVisibleNotified;
         Application.Model.Entity.State.Collapsed += OnModelEntityCollapsed;
         Application.Model.Entity.State.StatusNotified += OnModelEntityStatusNotified;
         Application.Model.Entity.Registry.Cleared += OnModelEntityRegistryCleared;
@@ -123,6 +123,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Registry.Registered -= OnModelEntityRegistered;
         Application.Model.Entity.Visual.VisibilityResolved -= OnModelEntityVisibilityResolved;
         Application.Model.Property.Registry.Changed -= OnModelPropertyChanged;
+        Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnModelEntityPropertyTreeVisibleNotified;
         Application.Model.Entity.State.StatusNotified -= OnModelEntityStatusNotified;
         Application.Model.Entity.State.Collapsed -= OnModelEntityCollapsed;
         Application.Model.Entity.Registry.Cleared -= OnModelEntityRegistryCleared;
@@ -308,14 +309,11 @@ public partial class ModelEntityTree : Tree
             }
         }
 
-        if (modelEntity.Properties.Count > 0)
-        {
-            Texture2D propertyIcon = Application.Asset.Icon.GetByPath(
-                PropertyButtonIconPath,
-                Constant.Ui.Tree.HierarchyVisibleIconSize);
-            treeItem.AddButton(0, propertyIcon, id: PropertyButtonId);
-        }
-
+        Texture2D propertyIcon = Application.Asset.Icon.GetProperty(
+            modelEntity.Properties.Count > 0,
+            modelEntity.IsPropertyTreeVisible,
+            Constant.Ui.Tree.HierarchyVisibleIconSize);
+        treeItem.AddButton(0, propertyIcon, id: PropertyButtonId, disabled: modelEntity.Properties.Count == 0);
         Texture2D visibilityIcon = Application.Asset.Icon.GetVisibility(
             modelEntity.Visibility,
             modelEntity.IsVisible,
@@ -335,6 +333,25 @@ public partial class ModelEntityTree : Tree
             {
                 RebuildButtons(pair.Value, modelEntity);
             }
+        }
+    }
+
+    /// <summary>
+    /// Property OverlayTreeの表示状態が通知されたとき、対応するTreeItemのPropertyボタンを更新する。
+    /// </summary>
+    /// <param name="entityId">表示状態が変更された ModelEntity の識別子</param>
+    private void OnModelEntityPropertyTreeVisibleNotified(string entityId)
+    {
+        if (!Guid.TryParse(entityId, out Guid parsedEntityId)
+            || !_entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem treeItem))
+        {
+            return;
+        }
+
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
+        if (modelEntity != null)
+        {
+            RebuildButtons(treeItem, modelEntity);
         }
     }
 
@@ -790,7 +807,7 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
-    /// TreeItem の Property ボタンがクリックされたとき、対応する ModelEntity のプロパティを表示する
+    /// TreeItem の Property ボタンがクリックされたとき、対応する ModelEntity の Property OverlayTree 表示を切り替える
     /// </summary>
     /// <param name="item">クリックされた TreeItem</param>
     private void HandlePropertyButtonClicked(TreeItem item)
@@ -802,7 +819,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        Application.Ui.Property.ShowModelEntityProperties(entityId);
+        Application.Ui.Property.ToggleModelEntityProperties(entityId);
     }
 
     /// <summary>

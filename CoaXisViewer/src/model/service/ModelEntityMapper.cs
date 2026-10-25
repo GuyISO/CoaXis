@@ -44,7 +44,8 @@ public static class ModelEntityMapper
 			ModelVisibilityResolver.Parse(dto.Visibility),
 			dto.IsCollapsed,
 			dto.IconId,
-			dto.ScenePath);
+			dto.ScenePath,
+			dto.IsPropertyTreeVisible);
 	}
 
 	/// <summary>
