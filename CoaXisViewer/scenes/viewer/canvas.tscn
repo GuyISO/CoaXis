@@ -10,6 +10,7 @@
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/selection_ui.tscn" id="6_npq5x"]
 [ext_resource type="PackedScene" uid="uid://bfdie23q7sox" path="res://scenes/ui/camera_state_ui.tscn" id="7_57r0r"]
 [ext_resource type="PackedScene" uid="uid://djb751h7aic7h" path="res://scenes/ui/visual_ui.tscn" id="7_xrtxh"]
+[ext_resource type="Script" uid="uid://c5r05kmp1e5iv" path="res://src/ui/label/PipeUi.cs" id="9_bn6oc"]
 [ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/EmbeddedModelEntityTree.cs" id="10_57r0r"]
 [ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbeddedModelPropertyTree.cs" id="12_bn6oc"]
 
@@ -80,6 +81,17 @@ _container = ExtResource("7_57r0r")
 layout_mode = 2
 size_flags_horizontal = 3
 
+[node name="LabelPipe" type="Label" parent="VBoxContainer/TopBar" unique_id=271860447]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 2
+script = ExtResource("9_bn6oc")
+
+[node name="BlankPanel2" type="Panel" parent="VBoxContainer/TopBar" unique_id=1366037303]
+custom_minimum_size = Vector2(4, 0)
+layout_mode = 2
+size_flags_vertical = 3
+
 [node name="LabelFps" type="Label" parent="VBoxContainer/TopBar" unique_id=886535964]
 layout_mode = 2
 theme_override_font_sizes/font_size = 24
@@ -138,7 +150,6 @@ script = ExtResource("10_57r0r")
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_constants/v_separation = 2
-columns = 1
 allow_reselect = true
 allow_search = false
 script = ExtResource("12_bn6oc")
