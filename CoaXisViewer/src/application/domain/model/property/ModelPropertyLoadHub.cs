@@ -56,10 +56,12 @@ public partial class ModelPropertyLoadHub : BaseHub
             return;
         }
 
-        SyncParticles();
+        var createdIds = new HashSet<Guid>();
+        SyncParticles(createdIds);
         foreach (ModelProperty property in Application.Model.Property.Registry.Items.Values)
         {
-            if (property.GetEntity() == entity)
+            // 新規生成分は Bind 時に反映済み
+            if (property.GetEntity() == entity && !createdIds.Contains(property.Id))
             {
                 property.ParticleNode?.Refresh();
             }
@@ -87,7 +89,8 @@ public partial class ModelPropertyLoadHub : BaseHub
     /// <remarks>
     /// Entityの置換でNodeが作り直された場合も、現在のNode配下へ再生成する。
     /// </remarks>
-    internal void SyncParticles()
+    /// <param name="createdIds">指定時、今回新規生成したパーティクルのProperty識別子を追加する</param>
+    internal void SyncParticles(ISet<Guid> createdIds = null)
     {
         foreach (ModelProperty property in Application.Model.Property.Registry.Items.Values)
         {
@@ -124,6 +127,7 @@ public partial class ModelPropertyLoadHub : BaseHub
             entityNode.AddChild(particle);
             particle.Bind(property.Id);
             property.AttachParticle(particle);
+            createdIds?.Add(property.Id);
             Application.Model.Property.Visual.ResolveAndApply(property);
         }
     }

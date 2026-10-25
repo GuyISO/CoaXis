@@ -7,21 +7,25 @@ using System.Collections.Generic;
 /// </summary>
 public static class MeshSurfaceSampler
 {
+    #region Fields
+
+    /// <summary>Surface の放出点数（全Model共通）。</summary>
+    private const int SurfacePointCount = 512;
+
+    #endregion
+
     #region Methods
 
     /// <summary>
-    /// ModelNode 配下（子 ModelNode は除く）の可視メッシュ表面を面積比でサンプリングし、ModelNode ローカル座標の点列を返す
+    /// ModelNode 配下（子 ModelNode は除く）の可視メッシュ表面から512点をサンプリングし、ModelNode ローカル座標の点列を返す
     /// </summary>
     /// <remarks>
     /// 三角形を面積で重み付けして選び、選んだ三角形の内部を一様にサンプリングする。
     /// サンプリングのたびに異なる点列を生成する。
     /// </remarks>
     /// <param name="modelNode">サンプリング対象の ModelNode</param>
-    /// <param name="minCount">最小点数</param>
-    /// <param name="countPerArea">表面積(ModelNode ローカル単位の面積)1あたりの点数</param>
-    /// <param name="maxCount">最大点数</param>
     /// <returns>サンプリングした点列、サンプリング可能な三角形が無い場合は空配列</returns>
-    public static Vector3[] Sample(ModelNode modelNode, int minCount, double countPerArea, int maxCount)
+    public static Vector3[] Sample(ModelNode modelNode)
     {
         if (modelNode == null)
         {
@@ -31,17 +35,15 @@ public static class MeshSurfaceSampler
         var triangles = new List<Triangle>();
         double totalArea = 0d;
         CollectTriangles(modelNode, modelNode, modelNode.GlobalTransform.AffineInverse(), triangles, ref totalArea);
-        if (triangles.Count == 0 || totalArea <= 0d || maxCount <= 0)
+        if (triangles.Count == 0 || totalArea <= 0d)
         {
             return Array.Empty<Vector3>();
         }
 
-        int count = (int)Math.Clamp(totalArea * countPerArea, Math.Min(minCount, maxCount), maxCount);
-
         var random = new RandomNumberGenerator();
         random.Randomize();
-        var points = new Vector3[count];
-        for (int i = 0; i < count; i++)
+        var points = new Vector3[SurfacePointCount];
+        for (int i = 0; i < SurfacePointCount; i++)
         {
             Triangle triangle = triangles[FindTriangleIndex(triangles, random.Randf() * totalArea)];
 

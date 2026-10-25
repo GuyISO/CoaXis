@@ -91,7 +91,7 @@ public static partial class ModelPropertyMapper
         if (!TryParseEnumName(dto.ParticleBehaviorType, out ModelParticleBehaviorType behaviorType))
         {
             throw new ArgumentException(
-                $"ModelProperty '{dto.Id}' has an invalid ParticleBehaviorType '{dto.ParticleBehaviorType}'; expected None, Disperse or Sparkle.",
+                $"ModelProperty '{dto.Id}' has an invalid ParticleBehaviorType '{dto.ParticleBehaviorType}'; expected None, Disperse, Sparkle or Emerge.",
                 nameof(dto));
         }
 

@@ -252,7 +252,7 @@ public class ModelProperty
         }
 
         _particleColor = color;
-        ParticleNode?.Refresh();
+        ParticleNode?.ApplyColor(color);
     }
 
     /// <summary>

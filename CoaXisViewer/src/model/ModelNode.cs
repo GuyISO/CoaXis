@@ -97,17 +97,14 @@ public partial class ModelNode : Node3D
     /// <summary>
     /// 表面サンプリング点の放出用テクスチャを取得する、初回要求時に生成して以降は複数 ModelParticle で共有する
     /// </summary>
-    /// <param name="minCount">最小点数</param>
-    /// <param name="countPerArea">表面積1あたりの点数</param>
-    /// <param name="maxCount">最大点数</param>
     /// <param name="texture">放出点テクスチャ</param>
     /// <param name="count">放出点数</param>
     /// <returns>サンプリング可能な表面がある場合は true</returns>
-    public bool TryGetSurfacePoints(int minCount, double countPerArea, int maxCount, out ImageTexture texture, out int count)
+    public bool TryGetSurfacePoints(out ImageTexture texture, out int count)
     {
         if (_surfacePointTexture == null)
         {
-            Vector3[] points = MeshSurfaceSampler.Sample(this, minCount, countPerArea, maxCount);
+            Vector3[] points = MeshSurfaceSampler.Sample(this);
             if (points.Length == 0)
             {
                 texture = null;

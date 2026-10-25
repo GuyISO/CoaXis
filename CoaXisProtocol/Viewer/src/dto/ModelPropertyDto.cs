@@ -48,7 +48,7 @@ public class ModelPropertyDto
     public string ParticleEmitterType { get; init; } = nameof(ModelParticleEmitterType.None);
 
     /// <summary>
-    /// 3D Viewer 上のパーティクル挙動（None / Disperse / Sparkle）
+    /// 3D Viewer 上のパーティクル挙動（None / Disperse / Sparkle / Emerge）
     /// </summary>
     public string ParticleBehaviorType { get; init; } = nameof(ModelParticleBehaviorType.None);
 
