@@ -43,9 +43,14 @@ public class ModelPropertyDto
     public string IconId { get; init; } = string.Empty;
 
     /// <summary>
-    /// 3D Viewer 上のパーティクル表現の種類（None / Point / Box）
+    /// 3D Viewer 上のパーティクル発生源（None / Point / Box / Sphere / Surface）
     /// </summary>
-    public string ParticleType { get; init; } = ModelPropertyParticleType.None;
+    public string ParticleEmitterType { get; init; } = nameof(ModelParticleEmitterType.None);
+
+    /// <summary>
+    /// 3D Viewer 上のパーティクル挙動（None / Disperse / Sparkle）
+    /// </summary>
+    public string ParticleBehaviorType { get; init; } = nameof(ModelParticleBehaviorType.None);
 
     /// <summary>
     /// パーティクルのテクスチャID（<see cref="ModelParticleTextureId"/>）。省略時または空文字の場合は既定の星画像

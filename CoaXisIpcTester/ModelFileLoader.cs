@@ -59,13 +59,13 @@ public static class ModelFileLoader
                 continue;
             }
 
-            // 基本情報の5列に加え、表示設定とパーティクル指定を含む10列を受け付ける
+            // 基本情報の5列に加え、表示設定とパーティクル指定を含む11列を受け付ける
             if (columns.Length != 5)
             {
-                RequireColumnCount(columns, 10, parser.LineNumber, path);
+                RequireColumnCount(columns, 11, parser.LineNumber, path);
             }
 
-            bool hasParticle = columns.Length == 10;
+            bool hasParticle = columns.Length == 11;
             properties.Add(new ModelPropertyDto
             {
                 Id = Guid.Parse(columns[0]),
@@ -75,9 +75,10 @@ public static class ModelFileLoader
                 Value = columns[4],
                 Visibility = hasParticle && !string.IsNullOrWhiteSpace(columns[5]) ? columns[5] : "Inherit",
                 IconId = hasParticle ? columns[6] : string.Empty,
-                ParticleType = hasParticle && !string.IsNullOrWhiteSpace(columns[7]) ? columns[7] : ModelPropertyParticleType.None,
-                ParticleTextureId = hasParticle ? columns[8] : string.Empty,
-                ParticleColor = hasParticle ? columns[9] : string.Empty
+                ParticleEmitterType = hasParticle && !string.IsNullOrWhiteSpace(columns[7]) ? columns[7] : nameof(ModelParticleEmitterType.None),
+                ParticleBehaviorType = hasParticle && !string.IsNullOrWhiteSpace(columns[8]) ? columns[8] : nameof(ModelParticleBehaviorType.None),
+                ParticleTextureId = hasParticle ? columns[9] : string.Empty,
+                ParticleColor = hasParticle ? columns[10] : string.Empty
             });
         }
 

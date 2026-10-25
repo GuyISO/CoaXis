@@ -26,6 +26,16 @@ public partial class ModelNode : Node3D
     public Node3D SceneRoot { get; private set; }
 
     /// <summary>
+    /// 表面サンプリング点のキャッシュ、シーン差し替えで破棄する
+    /// </summary>
+    private ImageTexture _surfacePointTexture;
+
+    /// <summary>
+    /// キャッシュ済みの表面サンプリング点数
+    /// </summary>
+    private int _surfacePointCount;
+
+    /// <summary>
     /// アニメーション用の Pivot、Emphasize/SpinAppeal 初回実行時にのみ生成する
     /// </summary>
     private Node3D _pivot;
@@ -80,6 +90,45 @@ public partial class ModelNode : Node3D
     {
         AddChild(instance);
         SceneRoot = instance as Node3D;
+        _surfacePointTexture = null;
+        _surfacePointCount = 0;
+    }
+
+    /// <summary>
+    /// 表面サンプリング点の放出用テクスチャを取得する、初回要求時に生成して以降は複数 ModelParticle で共有する
+    /// </summary>
+    /// <param name="minCount">最小点数</param>
+    /// <param name="countPerArea">表面積1あたりの点数</param>
+    /// <param name="maxCount">最大点数</param>
+    /// <param name="seed">乱数シード</param>
+    /// <param name="texture">放出点テクスチャ</param>
+    /// <param name="count">放出点数</param>
+    /// <returns>サンプリング可能な表面がある場合は true</returns>
+    public bool TryGetSurfacePoints(int minCount, double countPerArea, int maxCount, ulong seed, out ImageTexture texture, out int count)
+    {
+        if (_surfacePointTexture == null)
+        {
+            Vector3[] points = MeshSurfaceSampler.Sample(this, minCount, countPerArea, maxCount, seed);
+            if (points.Length == 0)
+            {
+                texture = null;
+                count = 0;
+                return false;
+            }
+
+            var image = Image.CreateEmpty(points.Length, 1, false, Image.Format.Rgbf);
+            for (int i = 0; i < points.Length; i++)
+            {
+                image.SetPixel(i, 0, new Color(points[i].X, points[i].Y, points[i].Z));
+            }
+
+            _surfacePointTexture = ImageTexture.CreateFromImage(image);
+            _surfacePointCount = points.Length;
+        }
+
+        texture = _surfacePointTexture;
+        count = _surfacePointCount;
+        return true;
     }
 
     /// <summary>

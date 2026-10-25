@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using CoaXis.Protocol.Viewer;
 using Godot;
 
 /// <summary>
@@ -90,9 +91,14 @@ public class ModelProperty
     public string IconId { get; }
 
     /// <summary>
-    /// 3D Viewer 上のパーティクル表現の種類
+    /// 3D Viewer 上のパーティクル発生源
     /// </summary>
-    public ModelParticleType ParticleType { get; }
+    public ModelParticleEmitterType ParticleEmitterType { get; }
+
+    /// <summary>
+    /// 3D Viewer 上のパーティクル挙動
+    /// </summary>
+    public ModelParticleBehaviorType ParticleBehaviorType { get; }
 
     /// <summary>
     /// パーティクルのテクスチャID、空の場合は既定の星画像
@@ -100,7 +106,7 @@ public class ModelProperty
     public string ParticleTextureId { get; }
 
     /// <summary>
-    /// パーティクルの色、null の場合は種類ごとの既定色
+    /// パーティクルの色、null の場合は既定色
     /// </summary>
     public Color? ParticleColor => _particleColor;
 
@@ -148,7 +154,8 @@ public class ModelProperty
     /// <param name="value">文字列化された値</param>
     /// <param name="visibility">表示設定</param>
     /// <param name="iconId">ツリー表示に使うアイコンID。空の場合はアイコンなし</param>
-    /// <param name="particleType">パーティクル表現の種類</param>
+    /// <param name="particleEmitterType">パーティクルの発生源</param>
+    /// <param name="particleBehaviorType">パーティクルの挙動</param>
     /// <param name="particleColor">パーティクルの色、null の場合は既定色</param>
     /// <param name="particleTextureId">パーティクルのテクスチャID、空の場合は既定</param>
     public ModelProperty(
@@ -159,10 +166,28 @@ public class ModelProperty
         string value,
         ModelVisibility visibility = ModelVisibility.Inherit,
         string iconId = "",
-        ModelParticleType particleType = ModelParticleType.None,
+        ModelParticleEmitterType particleEmitterType = ModelParticleEmitterType.None,
+        ModelParticleBehaviorType particleBehaviorType = ModelParticleBehaviorType.None,
         Color? particleColor = null,
         string particleTextureId = null)
     {
+        if (!Enum.IsDefined(particleEmitterType))
+        {
+            throw new ArgumentOutOfRangeException(nameof(particleEmitterType));
+        }
+
+        if (!Enum.IsDefined(particleBehaviorType))
+        {
+            throw new ArgumentOutOfRangeException(nameof(particleBehaviorType));
+        }
+
+        if ((particleEmitterType == ModelParticleEmitterType.None)
+            != (particleBehaviorType == ModelParticleBehaviorType.None))
+        {
+            throw new ArgumentException(
+                "Particle emitter and behavior must both be None or both be specified.");
+        }
+
         ParticleTextureId = particleTextureId ?? string.Empty;
         Id = id;
         ParentId = parentId;
@@ -171,7 +196,8 @@ public class ModelProperty
         Value = value ?? string.Empty;
         _visibility = visibility;
         IconId = iconId ?? string.Empty;
-        ParticleType = particleType;
+        ParticleEmitterType = particleEmitterType;
+        ParticleBehaviorType = particleBehaviorType;
         _particleColor = particleColor;
     }
 

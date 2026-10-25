@@ -39,6 +39,16 @@ public static partial class ModelPropertyMapper
                 nameof(dto));
         }
 
+        ModelParticleEmitterType particleEmitterType = ParseParticleEmitterType(dto);
+        ModelParticleBehaviorType particleBehaviorType = ParseParticleBehaviorType(dto);
+        if ((particleEmitterType == ModelParticleEmitterType.None)
+            != (particleBehaviorType == ModelParticleBehaviorType.None))
+        {
+            throw new ArgumentException(
+                $"ModelProperty '{dto.Id}' must specify both ParticleEmitterType and ParticleBehaviorType, or set both to None.",
+                nameof(dto));
+        }
+
         Guid resolvedParentId = dto.ParentId ?? Guid.Empty;
         return new ModelProperty(
             dto.Id,
@@ -48,7 +58,8 @@ public static partial class ModelPropertyMapper
             dto.Value,
             ModelVisibilityResolver.Parse(dto.Visibility),
             dto.IconId,
-            ParseParticleType(dto),
+            particleEmitterType,
+            particleBehaviorType,
             ParseParticleColor(dto),
             particleTextureId);
     }
@@ -58,18 +69,51 @@ public static partial class ModelPropertyMapper
     #region Helpers
 
     /// <summary>
-    /// パーティクルの種類名を列挙値へ変換する
+    /// パーティクル発生源名を列挙値へ変換する
     /// </summary>
-    private static ModelParticleType ParseParticleType(ModelPropertyDto dto)
+    private static ModelParticleEmitterType ParseParticleEmitterType(ModelPropertyDto dto)
     {
-        if (!ModelPropertyParticleType.IsValid(dto.ParticleType))
+        if (!TryParseEnumName(dto.ParticleEmitterType, out ModelParticleEmitterType emitterType))
         {
             throw new ArgumentException(
-                $"ModelProperty '{dto.Id}' has an invalid ParticleType '{dto.ParticleType}'; expected None, Point or Box.",
+                $"ModelProperty '{dto.Id}' has an invalid ParticleEmitterType '{dto.ParticleEmitterType}'; expected None, Point, Box, Sphere or Surface.",
                 nameof(dto));
         }
 
-        return Enum.Parse<ModelParticleType>(dto.ParticleType, ignoreCase: true);
+        return emitterType;
+    }
+
+    /// <summary>
+    /// パーティクル挙動名を列挙値へ変換する
+    /// </summary>
+    private static ModelParticleBehaviorType ParseParticleBehaviorType(ModelPropertyDto dto)
+    {
+        if (!TryParseEnumName(dto.ParticleBehaviorType, out ModelParticleBehaviorType behaviorType))
+        {
+            throw new ArgumentException(
+                $"ModelProperty '{dto.Id}' has an invalid ParticleBehaviorType '{dto.ParticleBehaviorType}'; expected None, Disperse or Sparkle.",
+                nameof(dto));
+        }
+
+        return behaviorType;
+    }
+
+    /// <summary>
+    /// enumの定義名として有効な文字列を大文字小文字を区別せず列挙値に変換する
+    /// </summary>
+    private static bool TryParseEnumName<TEnum>(string value, out TEnum parsed)
+        where TEnum : struct, Enum
+    {
+        string name = value?.Trim();
+        if (Enum.TryParse(name, ignoreCase: true, out parsed)
+            && Enum.IsDefined(parsed)
+            && string.Equals(Enum.GetName(parsed), name, StringComparison.OrdinalIgnoreCase))
+        {
+            return true;
+        }
+
+        parsed = default;
+        return false;
     }
 
     /// <summary>

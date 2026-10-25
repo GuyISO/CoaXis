@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoaXis.Protocol.Viewer;
 using Godot;
 
 /// <summary>
@@ -92,7 +93,7 @@ public partial class ModelPropertyLoadHub : BaseHub
         {
             ModelEntity entity = property.GetEntity();
             ModelNode entityNode = entity?.Node;
-            bool canAttach = property.ParticleType != ModelParticleType.None
+            bool canAttach = property.ParticleEmitterType != ModelParticleEmitterType.None
                 && entity != null
                 && entity.Status == ModelStatus.Loaded
                 && entityNode != null
@@ -111,7 +112,9 @@ public partial class ModelPropertyLoadHub : BaseHub
                 continue;
             }
 
-            ModelParticle particle = ModelParticle.Create(property.ParticleType);
+            ModelParticle particle = ModelParticle.Create(
+                property.ParticleEmitterType,
+                property.ParticleBehaviorType);
             if (particle == null)
             {
                 continue;
