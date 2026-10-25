@@ -17,8 +17,10 @@ public partial class ViewportUi : PanelContainer
     private Button _buttonAlignNormal = null!;
     private Button _buttonRollLeft = null!;
     private Button _buttonRollRight = null!;
-    private Button _buttonLayerVisible = null!;
-    private Button _buttonLayerInvisible = null!;
+    private Button _buttonLayerModelEntityVisible = null!;
+    private Button _buttonLayerModelEntityInvisible = null!;
+    private Button _buttonLayerModelPropertyVisible = null!;
+    private Button _buttonLayerModelPropertyInvisible = null!;
     private Label _labelPositionX = null!;
     private Label _labelPositionY = null!;
     private Label _labelPositionZ = null!;
@@ -68,8 +70,10 @@ public partial class ViewportUi : PanelContainer
         _buttonAlignNormal = (Button)FindChild("ButtonAlignNormal");
         _buttonRollLeft = (Button)FindChild("ButtonRollLeft");
         _buttonRollRight = (Button)FindChild("ButtonRollRight");
-        _buttonLayerVisible = (Button)FindChild("ButtonLayerVisible");
-        _buttonLayerInvisible = (Button)FindChild("ButtonLayerInvisible");
+        _buttonLayerModelEntityVisible = (Button)FindChild("ButtonLayerModelEntityVisible");
+        _buttonLayerModelEntityInvisible = (Button)FindChild("ButtonLayerModelEntityInvisible");
+        _buttonLayerModelPropertyVisible = (Button)FindChild("ButtonLayerModelPropertyVisible");
+        _buttonLayerModelPropertyInvisible = (Button)FindChild("ButtonLayerModelPropertyInvisible");
         _labelPositionX = (Label)FindChild("LabelValuePositionX");
         _labelPositionY = (Label)FindChild("LabelValuePositionY");
         _labelPositionZ = (Label)FindChild("LabelValuePositionZ");
@@ -93,8 +97,10 @@ public partial class ViewportUi : PanelContainer
         _buttonAlignNormal.Pressed += OnButtonAlignNormalPressed;
         _buttonRollLeft.Pressed += OnButtonRollLeftPressed;
         _buttonRollRight.Pressed += OnButtonRollRightPressed;
-        _buttonLayerVisible.Pressed += OnButtonLayerVisiblePressed;
-        _buttonLayerInvisible.Pressed += OnButtonLayerInvisiblePressed;
+        _buttonLayerModelEntityVisible.Pressed += OnButtonLayerModelEntityVisiblePressed;
+        _buttonLayerModelEntityInvisible.Pressed += OnButtonLayerModelEntityInvisiblePressed;
+        _buttonLayerModelPropertyVisible.Pressed += OnButtonLayerModelPropertyVisiblePressed;
+        _buttonLayerModelPropertyInvisible.Pressed += OnButtonLayerModelPropertyInvisiblePressed;
         _sliderFov.ValueChanged += OnSliderFovValueChanged;
     }
 
@@ -109,8 +115,10 @@ public partial class ViewportUi : PanelContainer
         _buttonAlignNormal.Pressed -= OnButtonAlignNormalPressed;
         _buttonRollLeft.Pressed -= OnButtonRollLeftPressed;
         _buttonRollRight.Pressed -= OnButtonRollRightPressed;
-        _buttonLayerVisible.Pressed -= OnButtonLayerVisiblePressed;
-        _buttonLayerInvisible.Pressed -= OnButtonLayerInvisiblePressed;
+        _buttonLayerModelEntityVisible.Pressed -= OnButtonLayerModelEntityVisiblePressed;
+        _buttonLayerModelEntityInvisible.Pressed -= OnButtonLayerModelEntityInvisiblePressed;
+        _buttonLayerModelPropertyVisible.Pressed -= OnButtonLayerModelPropertyVisiblePressed;
+        _buttonLayerModelPropertyInvisible.Pressed -= OnButtonLayerModelPropertyInvisiblePressed;
         _sliderFov.ValueChanged -= OnSliderFovValueChanged;
     }
 
@@ -240,26 +248,6 @@ public partial class ViewportUi : PanelContainer
     }
 
     /// <summary>
-    /// Visible レイヤーの表示切替をリクエストする
-    /// </summary>
-    private void OnButtonLayerVisiblePressed()
-    {
-        Application.Viewport.Display.SetLayerActive(
-            (uint)ViewportLayer.VisibleEntity,
-            _buttonLayerVisible.ButtonPressed);
-    }
-
-    /// <summary>
-    /// Invisible レイヤーの表示切替をリクエストする
-    /// </summary>
-    private void OnButtonLayerInvisiblePressed()
-    {
-        Application.Viewport.Display.SetLayerActive(
-            (uint)ViewportLayer.InvisibleEntity,
-            _buttonLayerInvisible.ButtonPressed);
-    }
-
-    /// <summary>
     /// FOVスライダーの値変更イベントハンドラ、カメラのFOV設定をリクエストする
     /// </summary>
     /// <param name="value">新しい FOV 値</param>
@@ -267,6 +255,46 @@ public partial class ViewportUi : PanelContainer
     {
         Application.Log.Debug($"ViewportUi: set-fov requested. fov={value:F1}");
         Application.Viewport.Camera.SetFov((float)value);
+    }
+
+    /// <summary>
+    /// Visible レイヤーの表示切替をリクエストする
+    /// </summary>
+    private void OnButtonLayerModelEntityVisiblePressed()
+    {
+        Application.Viewport.Display.SetLayerActive(
+            (uint)ViewportLayer.VisibleEntity,
+            _buttonLayerModelEntityVisible.ButtonPressed);
+    }
+
+    /// <summary>
+    /// ModelEntity Invisible レイヤーの表示切替をリクエストする
+    /// </summary>
+    private void OnButtonLayerModelEntityInvisiblePressed()
+    {
+        Application.Viewport.Display.SetLayerActive(
+            (uint)ViewportLayer.InvisibleEntity,
+            _buttonLayerModelEntityInvisible.ButtonPressed);
+    }
+
+    /// <summary>
+    /// ModelProperty Visible レイヤーの表示切替をリクエストする
+    /// </summary>
+    private void OnButtonLayerModelPropertyVisiblePressed()
+    {
+        Application.Viewport.Display.SetLayerActive(
+            (uint)ViewportLayer.VisibleProperty,
+            _buttonLayerModelPropertyVisible.ButtonPressed);
+    }
+
+    /// <summary>
+    /// ModelProperty Invisible レイヤーの表示切替をリクエストする
+    /// </summary>
+    private void OnButtonLayerModelPropertyInvisiblePressed()
+    {
+        Application.Viewport.Display.SetLayerActive(
+            (uint)ViewportLayer.InvisibleProperty,
+            _buttonLayerModelPropertyInvisible.ButtonPressed);
     }
 
     /// <summary>
@@ -341,8 +369,10 @@ public partial class ViewportUi : PanelContainer
     private void OnActiveLayersNotified()
     {
         uint activeLayers = Application.Viewport.Display.ActiveLayers;
-        _buttonLayerVisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.VisibleEntity) != 0;
-        _buttonLayerInvisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.InvisibleEntity) != 0;
+        _buttonLayerModelEntityVisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.VisibleEntity) != 0;
+        _buttonLayerModelEntityInvisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.InvisibleEntity) != 0;
+        _buttonLayerModelPropertyVisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.VisibleProperty) != 0;
+        _buttonLayerModelPropertyInvisible.ButtonPressed = (activeLayers & (uint)ViewportLayer.InvisibleProperty) != 0;
     }
 
     #endregion

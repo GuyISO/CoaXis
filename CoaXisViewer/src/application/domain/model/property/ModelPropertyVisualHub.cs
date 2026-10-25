@@ -149,11 +149,13 @@ public partial class ModelPropertyVisualHub : BaseHub
 		{
 			// 描画Layerは実効状態の投影であり、別の可視状態として読み戻さない。
 			bool isVisible = property.IsVisible;
-			particle.Layers = (uint)(isVisible ? ViewportLayer.VisibleEntity : ViewportLayer.InvisibleEntity);
+			ViewportLayer visibilityLayer = isVisible
+				? ViewportLayer.VisibleProperty
+				: ViewportLayer.InvisibleProperty;
+			particle.Layers = (uint)(ViewportLayer.Default | visibilityLayer);
 
 			// どのカメラにも映らない間は、シミュレーションと描画負荷を止める。
-			bool invisibleLayerActive = (Application.Viewport.Display.ActiveLayers & (uint)ViewportLayer.InvisibleEntity) != 0;
-			particle.Emitting = isVisible || invisibleLayerActive;
+			particle.Emitting = (Application.Viewport.Display.ActiveLayers & (uint)visibilityLayer) != 0;
 		}
 
 		EmitSignal(SignalName.VisibilityResolved, property.Id.ToString());

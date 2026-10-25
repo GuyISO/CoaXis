@@ -266,11 +266,17 @@ size_flags_horizontal = 3
 tooltip_text = "右に90度回転します"
 text = "RollRight"
 
+[node name="LabelTitileModelEntity" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1104025341]
+layout_mode = 2
+text = "ModelEntity"
+horizontal_alignment = 1
+vertical_alignment = 1
+
 [node name="HBoxContainer2" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=211718471]
 layout_mode = 2
 alignment = 1
 
-[node name="ButtonLayerVisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1305464635]
+[node name="ButtonLayerModelEntityVisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1305464635]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "表示レイヤーの表示状態を切り替えます"
@@ -278,7 +284,32 @@ toggle_mode = true
 button_pressed = true
 text = "Visible"
 
-[node name="ButtonLayerInvisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1341091895]
+[node name="ButtonLayerModelEntityInvisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1341091895]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "非表示レイヤーの表示状態を切り替えます"
+toggle_mode = true
+text = "Invisible"
+
+[node name="LabelTitileModelProperty" type="Label" parent="MarginContainer/VBoxContainer" unique_id=1618180620]
+layout_mode = 2
+text = "ModelProperty"
+horizontal_alignment = 1
+vertical_alignment = 1
+
+[node name="HBoxContainer3" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1088649088]
+layout_mode = 2
+alignment = 1
+
+[node name="ButtonLayerModelPropertyVisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=905281917]
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "表示レイヤーの表示状態を切り替えます"
+toggle_mode = true
+button_pressed = true
+text = "Visible"
+
+[node name="ButtonLayerModelPropertyInvisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1108740421]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "非表示レイヤーの表示状態を切り替えます"
