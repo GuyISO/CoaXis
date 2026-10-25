@@ -14,15 +14,14 @@ public static class MeshSurfaceSampler
     /// </summary>
     /// <remarks>
     /// 三角形を面積で重み付けして選び、選んだ三角形の内部を一様にサンプリングする。
-    /// 同じ入力と seed に対しては常に同じ点列を返す。
+    /// サンプリングのたびに異なる点列を生成する。
     /// </remarks>
     /// <param name="modelNode">サンプリング対象の ModelNode</param>
     /// <param name="minCount">最小点数</param>
     /// <param name="countPerArea">表面積(ModelNode ローカル単位の面積)1あたりの点数</param>
     /// <param name="maxCount">最大点数</param>
-    /// <param name="seed">乱数シード</param>
     /// <returns>サンプリングした点列、サンプリング可能な三角形が無い場合は空配列</returns>
-    public static Vector3[] Sample(ModelNode modelNode, int minCount, double countPerArea, int maxCount, ulong seed)
+    public static Vector3[] Sample(ModelNode modelNode, int minCount, double countPerArea, int maxCount)
     {
         if (modelNode == null)
         {
@@ -39,7 +38,8 @@ public static class MeshSurfaceSampler
 
         int count = (int)Math.Clamp(totalArea * countPerArea, Math.Min(minCount, maxCount), maxCount);
 
-        var random = new RandomNumberGenerator { Seed = seed };
+        var random = new RandomNumberGenerator();
+        random.Randomize();
         var points = new Vector3[count];
         for (int i = 0; i < count; i++)
         {

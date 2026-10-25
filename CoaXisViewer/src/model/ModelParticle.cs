@@ -44,15 +44,6 @@ public partial class ModelParticle : GpuParticles3D
 	/// <summary>表面積(ModelNode ローカル単位の面積)1あたりの放出点数</summary>
 	private const double SurfacePointsPerArea = 4096d;
 
-	/// <summary>Surface の描画数が ParticleAmount となる基準の放出点数</summary>
-	private const int SurfaceReferencePoints = 8192;
-
-	/// <summary>Surface の描画数の上限</summary>
-	private const int MaxSurfaceParticleAmount = 96;
-
-	/// <summary>Surface の再描画時にも放出点が変わらないようにする乱数シード</summary>
-	private const ulong SurfaceSamplingSeed = 1;
-
 	/// <summary>放出範囲が未確定の間に使うスプライトの一辺</summary>
 	private const float DefaultSpriteSize = 0.05f;
 
@@ -290,20 +281,13 @@ public partial class ModelParticle : GpuParticles3D
 	/// <returns>放出点を設定できた場合は true</returns>
 	private bool TryApplySurfacePoints(ModelNode modelNode, ParticleProcessMaterial material)
 	{
-		if (!modelNode.TryGetSurfacePoints(MinSurfacePoints, SurfacePointsPerArea, MaxSurfacePoints, SurfaceSamplingSeed, out ImageTexture texture, out int count))
+		if (!modelNode.TryGetSurfacePoints(MinSurfacePoints, SurfacePointsPerArea, MaxSurfacePoints, out ImageTexture texture, out int count))
 		{
 			return false;
 		}
 
 		material.EmissionPointTexture = texture;
 		material.EmissionPointCount = count;
-
-		// 放出点が増えた分だけ同時描画数も増やし、広い面でも密度を保つ
-		int amount = Math.Clamp((int)Math.Round((double)ParticleAmount * count / SurfaceReferencePoints), ParticleAmount, MaxSurfaceParticleAmount);
-		if (Amount != amount)
-		{
-			Amount = amount;
-		}
 
 		return true;
 	}

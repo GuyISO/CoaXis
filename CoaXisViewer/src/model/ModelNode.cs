@@ -100,15 +100,14 @@ public partial class ModelNode : Node3D
     /// <param name="minCount">最小点数</param>
     /// <param name="countPerArea">表面積1あたりの点数</param>
     /// <param name="maxCount">最大点数</param>
-    /// <param name="seed">乱数シード</param>
     /// <param name="texture">放出点テクスチャ</param>
     /// <param name="count">放出点数</param>
     /// <returns>サンプリング可能な表面がある場合は true</returns>
-    public bool TryGetSurfacePoints(int minCount, double countPerArea, int maxCount, ulong seed, out ImageTexture texture, out int count)
+    public bool TryGetSurfacePoints(int minCount, double countPerArea, int maxCount, out ImageTexture texture, out int count)
     {
         if (_surfacePointTexture == null)
         {
-            Vector3[] points = MeshSurfaceSampler.Sample(this, minCount, countPerArea, maxCount, seed);
+            Vector3[] points = MeshSurfaceSampler.Sample(this, minCount, countPerArea, maxCount);
             if (points.Length == 0)
             {
                 texture = null;
