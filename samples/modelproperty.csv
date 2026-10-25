@@ -1,17 +1,4 @@
 Id,ParentId,PropertyType,ValueType,Value,Visibility,IconId,ParticleEmitterType,ParticleBehaviorType,ParticleTextureId,ParticleColor
-10000000-0000-0000-0000-000000000001,7acd5132-0f8b-4ae7-826e-a0d06bbe5192,DisplayName,string,7acd5132-property,Inherit,Point,Surface,Emerge,,#FF00FF
-10000000-0000-0000-0000-000000000002,68317706-95b6-4835-baab-0fa0e9ea2a59,DisplayName,string,68317706-property,Inherit,Target,Surface,Emerge,,#FFFF00
-10000000-0000-0000-0000-000000000003,a954ddae-d15a-4643-a536-efe9e567d96d,DisplayName,string,a954ddae-property,Inherit,Point,Surface,Emerge,Star,#00FFFF
-10000000-0000-0000-0000-000000000004,9820a076-f72c-4c0b-8a1a-818e29f1ed04,DisplayName,string,9820a076-property,Inherit,Target,Surface,Emerge,Kira,#00FF40
-10000000-0000-0000-0000-000000000005,ac980da0-6793-44f4-ae95-8723ab7582b2,Sequence,int,5,Invisible,Point,Surface,Emerge,,#FF8000
-10000000-0000-0000-0000-000000000006,4283051e-a243-489e-a3b4-6ec7489be16d,LoadFactor,float,0.6,Inherit,Target,Surface,Emerge,,#4080FF
-10000000-0000-0000-0000-000000000007,e4f5cd0c-329d-4636-be81-f17640194773,Enabled,bool,TRUE,Inherit,Point,Surface,Emerge,,#FF00FF
-10000000-0000-0000-0000-000000000008,fea4b389-df27-42bf-95ec-521ed62e191c,MeasuredAt,datetime,2026-09-15T09:00:00Z,Inherit,Target,Surface,Emerge,Kira,#FFFF00
-10000000-0000-0000-0000-000000000009,b1e55947-4bcb-4a30-907f-207b3e9fb52e,Offset,Vector3,"(1.0, 2.0, 3.0)",Inherit,Point,Surface,Emerge,,#00FFFF
-10000000-0000-0000-0000-000000000010,6fbe0d03-b991-4df4-9423-a088e081ff50,Orientation,Quaternion,"(0.0, 0.0, 0.0, 1.0)",Inherit,Target,Surface,Emerge,,#00FF40
-10000000-0000-0000-0000-000000000011,75e8b12a-6693-4aff-aba8-cc3ea713e270,Color,Color,"(0.2, 0.4, 0.6, 1.0)",Inherit,Point,Surface,Emerge,,#FF8000
-10000000-0000-0000-0000-000000000012,5b282939-2339-4215-80b1-2802c1d0fa4b,LocalTransform,Transform,"Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 10, 20, 30)",Inherit,Target,Surface,Emerge,Kira,#4080FF
-10000000-0000-0000-0000-000000000013,14ebb6b9-4dc6-4a2d-b7fd-7f3730f95c90,DisplayName,string,14ebb6b9-property,Inherit,Point,Surface,Emerge,,#FF00FF
 10000000-0000-0000-0000-000000000014,2c4fb4fa-2045-4906-9d69-07ea6f93b9d5,DisplayName,string,2c4fb4fa-property,Inherit,Target,Surface,Emerge,,#FFFF00
 10000000-0000-0000-0000-000000000015,81759a38-3622-40c2-8886-e57a3ed0f9a1,Sequence,int,15,Inherit,Point,Surface,Emerge,,#00FFFF
 10000000-0000-0000-0000-000000000016,70b94563-91ec-4546-9301-df808071c152,LoadFactor,float,1.6,Inherit,Target,Surface,Emerge,Kira,#00FF40

@@ -23,6 +23,8 @@ public partial class ModelEntityTree : Tree
     private bool _ispublicSelection = false;
 
     private const int VisibilityButtonId = 1;
+    private const int PropertyButtonId = 2;
+    private const string PropertyButtonIconPath = "res://assets/icon/mono/book.svg";
 
     #endregion
 
@@ -103,6 +105,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
         Application.Model.Entity.Registry.Registered += OnModelEntityRegistered;
         Application.Model.Entity.Visual.VisibilityResolved += OnModelEntityVisibilityResolved;
+        Application.Model.Property.Registry.Changed += OnModelPropertyChanged;
         Application.Model.Entity.State.Collapsed += OnModelEntityCollapsed;
         Application.Model.Entity.State.StatusNotified += OnModelEntityStatusNotified;
         Application.Model.Entity.Registry.Cleared += OnModelEntityRegistryCleared;
@@ -119,6 +122,7 @@ public partial class ModelEntityTree : Tree
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
         Application.Model.Entity.Registry.Registered -= OnModelEntityRegistered;
         Application.Model.Entity.Visual.VisibilityResolved -= OnModelEntityVisibilityResolved;
+        Application.Model.Property.Registry.Changed -= OnModelPropertyChanged;
         Application.Model.Entity.State.StatusNotified -= OnModelEntityStatusNotified;
         Application.Model.Entity.State.Collapsed -= OnModelEntityCollapsed;
         Application.Model.Entity.Registry.Cleared -= OnModelEntityRegistryCleared;
@@ -163,6 +167,9 @@ public partial class ModelEntityTree : Tree
         {
             case VisibilityButtonId:
                 HandleVisibleButtonClicked(item);
+                break;
+            case PropertyButtonId:
+                HandlePropertyButtonClicked(item);
                 break;
         }
     }
@@ -275,7 +282,60 @@ public partial class ModelEntityTree : Tree
             modelEntity.Visibility,
             modelEntity.IsVisible,
             Constant.Ui.Tree.HierarchyVisibleIconSize);
-        treeItem.SetButton(0, 0, buttonIcon);
+        int visibilityButtonIndex = treeItem.GetButtonById(0, VisibilityButtonId);
+        if (visibilityButtonIndex < 0)
+        {
+            return;
+        }
+
+        treeItem.SetButton(0, visibilityButtonIndex, buttonIcon);
+    }
+
+    /// <summary>
+    /// Property の有無に応じて、Property ボタン（左）と Visibility ボタン（右）を再構築する。
+    /// </summary>
+    /// <param name="treeItem">ボタンを持つTreeItem</param>
+    /// <param name="modelEntity">ボタン状態の正本を持つModelEntity</param>
+    private static void RebuildButtons(TreeItem treeItem, ModelEntity modelEntity)
+    {
+        // ボタン位置は追加順で決まるため、IDで特定して全削除してから並べ直す。
+        foreach (int buttonId in new[] { PropertyButtonId, VisibilityButtonId })
+        {
+            int index = treeItem.GetButtonById(0, buttonId);
+            if (index >= 0)
+            {
+                treeItem.EraseButton(0, index);
+            }
+        }
+
+        if (modelEntity.Properties.Count > 0)
+        {
+            Texture2D propertyIcon = Application.Asset.Icon.GetByPath(
+                PropertyButtonIconPath,
+                Constant.Ui.Tree.HierarchyVisibleIconSize);
+            treeItem.AddButton(0, propertyIcon, id: PropertyButtonId);
+        }
+
+        Texture2D visibilityIcon = Application.Asset.Icon.GetVisibility(
+            modelEntity.Visibility,
+            modelEntity.IsVisible,
+            Constant.Ui.Tree.HierarchyVisibleIconSize);
+        treeItem.AddButton(0, visibilityIcon, id: VisibilityButtonId);
+    }
+
+    /// <summary>
+    /// Property の紐づけが変化したとき、全TreeItemのボタンを再構築する。
+    /// </summary>
+    private void OnModelPropertyChanged()
+    {
+        foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
+        {
+            ModelEntity modelEntity = Application.Model.Entity.Registry.Get(pair.Key);
+            if (modelEntity != null)
+            {
+                RebuildButtons(pair.Value, modelEntity);
+            }
+        }
     }
 
     /// <summary>
@@ -437,12 +497,8 @@ public partial class ModelEntityTree : Tree
         Texture2D icon = Application.Asset.Icon.GetModelIcon(modelEntity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.SetIcon(0, icon);
 
-        // --- 右側ボタン（表示切替・演出用） ---
-        Texture2D btnIcon = Application.Asset.Icon.GetVisibility(
-            modelEntity.Visibility,
-            modelEntity.IsVisible,
-            Constant.Ui.Tree.HierarchyVisibleIconSize);
-        treeItem.AddButton(0, btnIcon, id: VisibilityButtonId);
+        // --- 右側ボタン（Property表示・Visibility切替） ---
+        RebuildButtons(treeItem, modelEntity);
 
         // EntityId と TreeItem の対応を登録
         treeItem.SetMeta("EntityId", entityId.ToString());
@@ -731,6 +787,22 @@ public partial class ModelEntityTree : Tree
 
         // 表示切替要求は対象ModelEntityへ直接渡し、変更と通知はEntityの状態アクセサーに集約する。
         modelEntity.ToggleVisibility();
+    }
+
+    /// <summary>
+    /// TreeItem の Property ボタンがクリックされたとき、対応する ModelEntity のプロパティを表示する
+    /// </summary>
+    /// <param name="item">クリックされた TreeItem</param>
+    private void HandlePropertyButtonClicked(TreeItem item)
+    {
+        Guid entityId = TryGetEntityId(item);
+        if (entityId == Guid.Empty)
+        {
+            Application.Log.Warn("ModelEntityTree: clicked property button item has no associated entity.");
+            return;
+        }
+
+        Application.Ui.Property.ShowModelEntityProperties(entityId);
     }
 
     /// <summary>
