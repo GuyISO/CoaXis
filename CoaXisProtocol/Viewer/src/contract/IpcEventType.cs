@@ -13,17 +13,21 @@ public static class IpcEventType
         /// <summary>モデル集合置換要求</summary>
         public const string ReplaceModelSet = "ReplaceModelSet";
 
-        /// <summary>モデル実体の追加または置換要求</summary>
-        public const string AddOrReplaceModelEntities = "AddOrReplaceModelEntities";
+        /// <summary>モデル集合の全消去要求</summary>
+        public const string ClearModelSet = "ClearModelSet";
 
-        /// <summary>モデル属性の追加または置換要求</summary>
-        public const string AddOrReplaceModelProperties = "AddOrReplaceModelProperties";
+        /// <summary>モデル実体と属性の同時追加要求。既存IDとの衝突は拒否する</summary>
+        public const string AddModelSet = "AddModelSet";
 
-        /// <summary>モデル実体の削除要求</summary>
-        public const string DeleteModelEntities = "DeleteModelEntities";
+        /// <summary>モデル実体と属性の同時削除要求</summary>
+        public const string RemoveModelSet = "RemoveModelSet";
 
-        /// <summary>モデル属性の削除要求</summary>
-        public const string DeleteModelProperties = "DeleteModelProperties";
+        /// <summary>モデル実体と属性の値の同時変更要求</summary>
+        public const string ModifyModelSet = "ModifyModelSet";
+
+        /// <summary>モデル実体と属性のID指定読み出し要求。応答のResultにDTOを含める</summary>
+        public const string ReadModelSet = "ReadModelSet";
+
     }
 
     /// <summary>

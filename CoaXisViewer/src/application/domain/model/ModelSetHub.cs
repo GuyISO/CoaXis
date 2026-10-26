@@ -59,46 +59,195 @@ public partial class ModelSetHub : BaseHub
     }
 
     /// <summary>
-    /// Entity DTO群を追加し、既存IDはDTOの値で置換する。
+    /// EntityとPropertyをすべて削除する。ルートEntityは残る。
     /// </summary>
-    /// <param name="entityDtos">追加または置換するEntity DTO</param>
-    /// <returns>追加または置換したEntity数</returns>
-    /// <exception cref="ArgumentNullException">entityDtosがnullの場合</exception>
-    /// <exception cref="ArgumentException">DTOが不正、またはルートEntityを含む場合</exception>
-    public int AddOrReplaceEntities(IReadOnlyList<ModelEntityDto> entityDtos)
+    /// <returns>削除したEntity数</returns>
+    public int Clear()
     {
-        IReadOnlyList<ModelEntity> existingEntities = Application.Model.Entity.Registry.Items.Values.ToList();
-        IReadOnlyList<ModelEntity> entities = ModelFactory.CreateEntityUpdates(entityDtos, existingEntities);
+        int removedEntityCount = Application.Model.Entity.Registry.Items.Keys
+            .Count(entityId => entityId != RootModelEntity.RootEntityId);
+
+        Application.Model.Property.Registry.Clear();
+        Application.Model.Entity.Load.Clear();
+        return removedEntityCount;
+    }
+
+    /// <summary>
+    /// EntityとProperty DTO群を同時に追加する。既存IDと衝突する場合は何も変更しない。
+    /// </summary>
+    /// <param name="entityDtos">追加するEntity DTO</param>
+    /// <param name="propertyDtos">追加するProperty DTO</param>
+    /// <returns>追加したEntity数とProperty数</returns>
+    /// <exception cref="ArgumentNullException">いずれかのDTO集合がnullの場合</exception>
+    /// <exception cref="ArgumentException">DTOが不正、既存IDと衝突、ルートEntityを含む、または両方が空の場合</exception>
+    public (int EntityCount, int PropertyCount) Add(
+        IReadOnlyList<ModelEntityDto> entityDtos,
+        IReadOnlyList<ModelPropertyDto> propertyDtos)
+    {
+        IReadOnlyList<ModelEntity> entities = ModelFactory.CreateEntityAdditions(
+            entityDtos,
+            Application.Model.Entity.Registry.Items.Values.ToList());
+        IReadOnlyList<ModelProperty> properties = ModelFactory.CreatePropertyAdditions(
+            propertyDtos,
+            Application.Model.Property.Registry.Items.Values.ToList());
+        if (entities.Count == 0 && properties.Count == 0)
+        {
+            throw new ArgumentException("At least one entity or property is required.", nameof(entityDtos));
+        }
+
         EnsureRootEntityIsNotIncluded(entities);
-        Application.Model.Entity.Load.AddOrReplacePrepared(entities);
-        Application.Model.Property.Registry.ResolveHierarchy();
-        Application.Model.Property.Load.SyncParticles();
-        return entities.Count;
+
+        if (entities.Count > 0)
+        {
+            Application.Model.Entity.Load.AddOrReplacePrepared(entities);
+            Application.Model.Property.Registry.ResolveHierarchy();
+            Application.Model.Property.Load.SyncParticles();
+        }
+
+        if (properties.Count > 0)
+        {
+            Application.Model.Property.Load.AddOrReplacePrepared(properties);
+        }
+
+        return (entities.Count, properties.Count);
     }
 
     /// <summary>
-    /// Property DTO群を追加し、既存IDはDTOの値で置換する。
+    /// EntityとPropertyを同時に削除する。削除前にすべてのIDを検証し、不正な場合は何も変更しない。
     /// </summary>
-    /// <param name="propertyDtos">追加または置換するProperty DTO</param>
-    /// <returns>追加または置換したProperty数</returns>
-    /// <exception cref="ArgumentNullException">propertyDtosがnullの場合</exception>
-    public int AddOrReplaceProperties(IReadOnlyList<ModelPropertyDto> propertyDtos)
+    /// <param name="entityIds">削除対象のEntity識別子。空を許可</param>
+    /// <param name="propertyIds">削除対象のProperty識別子。空を許可</param>
+    /// <returns>削除したEntity数と、指定されたPropertyの削除数</returns>
+    /// <exception cref="ArgumentNullException">いずれかの識別子一覧がnullの場合</exception>
+    /// <exception cref="ArgumentException">識別子が不正、両方が空、またはルートEntityを含む場合</exception>
+    /// <exception cref="KeyNotFoundException">指定対象が登録されていない場合</exception>
+    public (int EntityCount, int PropertyCount) Remove(
+        IReadOnlyCollection<Guid> entityIds,
+        IReadOnlyCollection<Guid> propertyIds)
     {
-        IReadOnlyList<ModelProperty> existingProperties = Application.Model.Property.Registry.Items.Values.ToList();
-        IReadOnlyList<ModelProperty> properties = ModelFactory.CreatePropertyUpdates(propertyDtos, existingProperties);
-        Application.Model.Property.Load.AddOrReplacePrepared(properties);
-        return properties.Count;
+        HashSet<Guid> entityRoots = ValidateOptionalIds(
+            entityIds,
+            Application.Model.Entity.Registry.Items.Keys,
+            nameof(entityIds));
+        HashSet<Guid> propertyRoots = ValidateOptionalIds(
+            propertyIds,
+            Application.Model.Property.Registry.Items.Keys,
+            nameof(propertyIds));
+        if (entityRoots.Count == 0 && propertyRoots.Count == 0)
+        {
+            throw new ArgumentException("At least one entity id or property id is required.", nameof(entityIds));
+        }
+
+        if (entityRoots.Contains(RootModelEntity.RootEntityId))
+        {
+            throw new ArgumentException("The root ModelEntity cannot be deleted.", nameof(entityIds));
+        }
+
+        // Entity削除は所属Propertyも削除するため、指定Propertyを先に削除して二重削除を避ける。
+        int propertyCount = propertyRoots.Count > 0 ? RemovePropertiesCore(propertyRoots) : 0;
+        int entityCount = entityRoots.Count > 0 ? RemoveEntitiesCore(entityRoots) : 0;
+        return (entityCount, propertyCount);
     }
 
     /// <summary>
-    /// 指定Entityとその子孫、および所属Propertyを削除する。
+    /// EntityとPropertyの値を同時に部分更新する。更新前にすべてを検証し、不正な場合は何も変更しない。
+    /// </summary>
+    /// <param name="entityDtos">Entity部分更新DTO</param>
+    /// <param name="propertyDtos">Property部分更新DTO</param>
+    /// <returns>更新したEntity数とProperty数</returns>
+    /// <exception cref="ArgumentNullException">いずれかのDTO集合がnullの場合</exception>
+    /// <exception cref="ArgumentException">DTOが不正、ルートEntityを含む、または両方が空の場合</exception>
+    /// <exception cref="KeyNotFoundException">指定対象が登録されていない場合</exception>
+    public (int EntityCount, int PropertyCount) Modify(
+        IReadOnlyList<ModelEntityModificationDto> entityDtos,
+        IReadOnlyList<ModelPropertyModificationDto> propertyDtos)
+    {
+        IReadOnlyList<ModelEntityModification> entityModifications = ModelFactory.CreateEntityModifications(entityDtos);
+        IReadOnlyList<ModelPropertyModification> propertyModifications = ModelFactory.CreatePropertyModifications(propertyDtos);
+        if (entityModifications.Count == 0 && propertyModifications.Count == 0)
+        {
+            throw new ArgumentException("At least one entity or property modification is required.", nameof(entityDtos));
+        }
+
+        var entities = new List<(ModelEntity Entity, ModelEntityModification Modification)>(entityModifications.Count);
+        foreach (ModelEntityModification modification in entityModifications)
+        {
+            if (modification.Id == RootModelEntity.RootEntityId)
+            {
+                throw new ArgumentException("The root ModelEntity cannot be modified.", nameof(entityDtos));
+            }
+
+            ModelEntity entity = Application.Model.Entity.Registry.Get(modification.Id)
+                ?? throw new KeyNotFoundException($"Model target '{modification.Id}' was not found.");
+            entities.Add((entity, modification));
+        }
+
+        var properties = new List<(ModelProperty Property, ModelPropertyModification Modification)>(propertyModifications.Count);
+        foreach (ModelPropertyModification modification in propertyModifications)
+        {
+            ModelProperty property = Application.Model.Property.Registry.Get(modification.Id)
+                ?? throw new KeyNotFoundException($"Model target '{modification.Id}' was not found.");
+            properties.Add((property, modification));
+        }
+
+        foreach ((ModelEntity entity, ModelEntityModification modification) in entities)
+        {
+            ApplyModification(entity, modification);
+        }
+
+        foreach ((ModelProperty property, ModelPropertyModification modification) in properties)
+        {
+            ApplyModification(property, modification);
+        }
+
+        return (entities.Count, properties.Count);
+    }
+
+    /// <summary>
+    /// 指定したEntityとPropertyをDTOとして読み出す。指定されたIDのみを対象とし、子孫や所属Propertyは含めない。
+    /// </summary>
+    /// <param name="entityIds">読み出すEntity識別子。空を許可</param>
+    /// <param name="propertyIds">読み出すProperty識別子。空を許可</param>
+    /// <returns>読み出したEntityとPropertyのDTO</returns>
+    /// <exception cref="ArgumentNullException">いずれかの識別子一覧がnullの場合</exception>
+    /// <exception cref="ArgumentException">識別子が不正、または両方が空の場合</exception>
+    /// <exception cref="KeyNotFoundException">指定対象が登録されていない場合</exception>
+    public ModelSetPayload Read(
+        IReadOnlyCollection<Guid> entityIds,
+        IReadOnlyCollection<Guid> propertyIds)
+    {
+        HashSet<Guid> entityIdSet = ValidateOptionalIds(
+            entityIds,
+            Application.Model.Entity.Registry.Items.Keys,
+            nameof(entityIds));
+        HashSet<Guid> propertyIdSet = ValidateOptionalIds(
+            propertyIds,
+            Application.Model.Property.Registry.Items.Keys,
+            nameof(propertyIds));
+        if (entityIdSet.Count == 0 && propertyIdSet.Count == 0)
+        {
+            throw new ArgumentException("At least one entity id or property id is required.", nameof(entityIds));
+        }
+
+        return new ModelSetPayload
+        {
+            Entities = entityIds
+                .Distinct()
+                .Select(id => ModelEntityMapper.ToDto(Application.Model.Entity.Registry.Get(id)))
+                .ToList(),
+            Properties = propertyIds
+                .Distinct()
+                .Select(id => ModelPropertyMapper.ToDto(Application.Model.Property.Registry.Get(id)))
+                .ToList()
+        };
+    }
+
+    /// <summary>
+    /// RemoveModelSetの検証済みEntity識別子群を削除する。
     /// </summary>
     /// <param name="entityIds">削除対象のEntity識別子</param>
     /// <returns>削除したEntity数</returns>
-    /// <exception cref="ArgumentNullException">entityIdsがnullの場合</exception>
-    /// <exception cref="ArgumentException">識別子一覧が空、不正、またはルートEntityを含む場合</exception>
-    /// <exception cref="KeyNotFoundException">指定Entityが登録されていない場合</exception>
-    public int DeleteEntities(IReadOnlyCollection<Guid> entityIds)
+    private int RemoveEntitiesCore(IReadOnlyCollection<Guid> entityIds)
     {
         HashSet<Guid> roots = ValidateIds(
             entityIds,
@@ -121,14 +270,11 @@ public partial class ModelSetHub : BaseHub
     }
 
     /// <summary>
-    /// 指定Propertyとその子孫を削除する。
+    /// RemoveModelSetの検証済みProperty識別子群を削除する。
     /// </summary>
     /// <param name="propertyIds">削除対象のProperty識別子</param>
     /// <returns>削除したProperty数</returns>
-    /// <exception cref="ArgumentNullException">propertyIdsがnullの場合</exception>
-    /// <exception cref="ArgumentException">識別子一覧が空または不正な場合</exception>
-    /// <exception cref="KeyNotFoundException">指定Propertyが登録されていない場合</exception>
-    public int DeleteProperties(IReadOnlyCollection<Guid> propertyIds)
+    private int RemovePropertiesCore(IReadOnlyCollection<Guid> propertyIds)
     {
         HashSet<Guid> roots = ValidateIds(
             propertyIds,
@@ -187,6 +333,74 @@ public partial class ModelSetHub : BaseHub
         }
 
         return propertyIds;
+    }
+
+    /// <summary>
+    /// ID一覧が空でもよい場合に、含まれるIDがすべて登録済みであることを検証する。
+    /// </summary>
+    private static HashSet<Guid> ValidateOptionalIds(
+        IReadOnlyCollection<Guid> ids,
+        IEnumerable<Guid> registeredIds,
+        string parameterName)
+    {
+        if (ids == null)
+        {
+            throw new ArgumentNullException(parameterName);
+        }
+
+        return ids.Count == 0 ? new HashSet<Guid>() : ValidateIds(ids, registeredIds, parameterName);
+    }
+
+    /// <summary>
+    /// 検証済みの部分更新をEntityへ反映する。
+    /// </summary>
+    private static void ApplyModification(ModelEntity entity, ModelEntityModification modification)
+    {
+        if (modification.Position.HasValue)
+        {
+            entity.Position = modification.Position.Value;
+        }
+
+        if (modification.Rotation.HasValue)
+        {
+            entity.Rotation = modification.Rotation.Value;
+        }
+
+        if (modification.Visibility.HasValue)
+        {
+            entity.Visibility = modification.Visibility.Value;
+        }
+
+        if (modification.IsCollapsed.HasValue)
+        {
+            entity.IsCollapsed = modification.IsCollapsed.Value;
+        }
+
+        if (modification.IsPropertyTreeVisible.HasValue)
+        {
+            entity.IsPropertyTreeVisible = modification.IsPropertyTreeVisible.Value;
+        }
+    }
+
+    /// <summary>
+    /// 検証済みの部分更新をPropertyへ反映する。
+    /// </summary>
+    private static void ApplyModification(ModelProperty property, ModelPropertyModification modification)
+    {
+        if (modification.Value != null)
+        {
+            property.SetValue(modification.Value);
+        }
+
+        if (modification.Visibility.HasValue)
+        {
+            property.Visibility = modification.Visibility.Value;
+        }
+
+        if (modification.ChangesParticleColor)
+        {
+            property.SetParticleColor(modification.ParticleColor);
+        }
     }
 
     /// <summary>

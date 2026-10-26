@@ -6,11 +6,18 @@ namespace CoaXis.Protocol.Viewer;
 /// <remarks>
 /// プロパティ名は<see cref="IpcJsonOptions.Default"/>のcamelCase命名ポリシーに委ねる
 /// </remarks>
-public sealed class IpcResultPayload
+public class IpcResultPayload
 {
+    /// <summary>要求の処理が成功したかどうか。</summary>
     public bool Ok { get; set; }
+
+    /// <summary>処理した要求のイベント種別。</summary>
     public string Request { get; set; } = string.Empty;
+
+    /// <summary>失敗時の標準化エラーコード。</summary>
     public string ErrorCode { get; set; } = IpcErrorCode.None;
+
+    /// <summary>処理結果の説明。</summary>
     public string Message { get; set; } = string.Empty;
 
     /// <summary>

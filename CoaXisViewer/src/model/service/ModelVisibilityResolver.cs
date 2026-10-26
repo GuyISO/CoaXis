@@ -18,6 +18,25 @@ public static class ModelVisibilityResolver
     }
 
     /// <summary>
+    /// 表示設定文字列を厳密に ModelVisibility へ変換する。
+    /// </summary>
+    /// <exception cref="ArgumentException">定義されていない表示設定の場合</exception>
+    public static ModelVisibility ParseStrict(string visibility)
+    {
+        if (Enum.TryParse(visibility?.Trim(), true, out ModelVisibility parsed)
+            && Enum.IsDefined(parsed)
+            && !string.IsNullOrWhiteSpace(visibility)
+            && !int.TryParse(visibility.Trim(), out _))
+        {
+            return parsed;
+        }
+
+        throw new ArgumentException(
+            $"Invalid Visibility '{visibility}'; expected Inherit, Visible or Invisible.",
+            nameof(visibility));
+    }
+
+    /// <summary>
     /// 親の設定をたどってモデルの実効表示状態を返す。
     /// </summary>
     public static bool ResolveIsVisible(ModelEntity entity)

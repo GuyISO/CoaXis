@@ -27,14 +27,50 @@ public static class ModelFactory
     }
 
     /// <summary>
-    /// Entity DTO群を現在のEntity集合へ適用した結果の階層を検証し、更新モデルを生成する。
+    /// Entity部分更新DTOを検証し、更新内容へ変換する。
     /// </summary>
-    /// <param name="entityDtos">追加または置換するEntity DTO</param>
+    /// <param name="entityDtos">部分更新DTO</param>
+    /// <returns>検証済みの更新内容</returns>
+    /// <exception cref="ArgumentNullException">DTO集合がnullの場合</exception>
+    /// <exception cref="ArgumentException">DTOの値または識別子が不正な場合</exception>
+    public static IReadOnlyList<ModelEntityModification> CreateEntityModifications(
+        IReadOnlyList<ModelEntityModificationDto> entityDtos)
+    {
+        return CreateModels(
+            entityDtos,
+            ModelEntityMapper.MapModification,
+            modification => modification.Id,
+            "ModelEntityModificationDto",
+            nameof(entityDtos));
+    }
+
+    /// <summary>
+    /// Property部分更新DTOを検証し、更新内容へ変換する。
+    /// </summary>
+    /// <param name="propertyDtos">部分更新DTO</param>
+    /// <returns>検証済みの更新内容</returns>
+    /// <exception cref="ArgumentNullException">DTO集合がnullの場合</exception>
+    /// <exception cref="ArgumentException">DTOの値または識別子が不正な場合</exception>
+    public static IReadOnlyList<ModelPropertyModification> CreatePropertyModifications(
+        IReadOnlyList<ModelPropertyModificationDto> propertyDtos)
+    {
+        return CreateModels(
+            propertyDtos,
+            ModelPropertyMapper.MapModification,
+            modification => modification.Id,
+            "ModelPropertyModificationDto",
+            nameof(propertyDtos));
+    }
+
+    /// <summary>
+    /// Entity DTO群を既存Entityへ追加した結果の階層を検証し、追加モデルを生成する。
+    /// </summary>
+    /// <param name="entityDtos">追加するEntity DTO</param>
     /// <param name="existingEntities">現在のEntity集合</param>
-    /// <returns>検証済みの追加・置換用Entity</returns>
+    /// <returns>検証済みの追加用Entity</returns>
     /// <exception cref="ArgumentNullException">いずれかの集合がnullの場合</exception>
-    /// <exception cref="ArgumentException">DTOまたは更新後のEntity階層が不正な場合</exception>
-    internal static IReadOnlyList<ModelEntity> CreateEntityUpdates(
+    /// <exception cref="ArgumentException">DTO、既存IDとの重複、または追加後のEntity階層が不正な場合</exception>
+    internal static IReadOnlyList<ModelEntity> CreateEntityAdditions(
         IReadOnlyList<ModelEntityDto> entityDtos,
         IReadOnlyCollection<ModelEntity> existingEntities)
     {
@@ -43,16 +79,23 @@ public static class ModelFactory
             throw new ArgumentNullException(nameof(existingEntities));
         }
 
-        IReadOnlyList<ModelEntity> updates = CreateEntities(entityDtos, nameof(entityDtos));
+        IReadOnlyList<ModelEntity> additions = CreateEntities(entityDtos, nameof(entityDtos));
         var mergedById = new Dictionary<Guid, ModelEntity>();
         foreach (ModelEntity entity in existingEntities)
         {
-            mergedById[entity.Id] = entity;
+            mergedById.Add(entity.Id, entity);
         }
 
-        foreach (ModelEntity entity in updates)
+        foreach (ModelEntity entity in additions)
         {
-            mergedById[entity.Id] = entity;
+            if (mergedById.ContainsKey(entity.Id))
+            {
+                throw new ArgumentException(
+                    $"ModelEntity ID '{entity.Id}' is already registered.",
+                    nameof(entityDtos));
+            }
+
+            mergedById.Add(entity.Id, entity);
         }
 
         ValidateHierarchy(
@@ -60,18 +103,18 @@ public static class ModelFactory
             entity => entity.Id,
             entity => entity.ParentId,
             "ModelEntity");
-        return updates;
+        return additions;
     }
 
     /// <summary>
-    /// Property DTO群を現在のProperty集合へ適用した結果の階層を検証し、更新モデルを生成する。
+    /// Property DTO群を既存Propertyへ追加した結果の階層を検証し、追加モデルを生成する。
     /// </summary>
-    /// <param name="propertyDtos">追加または置換するProperty DTO</param>
+    /// <param name="propertyDtos">追加するProperty DTO</param>
     /// <param name="existingProperties">現在のProperty集合</param>
-    /// <returns>検証済みの追加・置換用Property</returns>
+    /// <returns>検証済みの追加用Property</returns>
     /// <exception cref="ArgumentNullException">いずれかの集合がnullの場合</exception>
-    /// <exception cref="ArgumentException">DTOまたは更新後のProperty階層が不正な場合</exception>
-    internal static IReadOnlyList<ModelProperty> CreatePropertyUpdates(
+    /// <exception cref="ArgumentException">DTO、既存IDとの重複、または追加後のProperty階層が不正な場合</exception>
+    internal static IReadOnlyList<ModelProperty> CreatePropertyAdditions(
         IReadOnlyList<ModelPropertyDto> propertyDtos,
         IReadOnlyCollection<ModelProperty> existingProperties)
     {
@@ -80,16 +123,23 @@ public static class ModelFactory
             throw new ArgumentNullException(nameof(existingProperties));
         }
 
-        IReadOnlyList<ModelProperty> updates = CreateProperties(propertyDtos, nameof(propertyDtos));
+        IReadOnlyList<ModelProperty> additions = CreateProperties(propertyDtos, nameof(propertyDtos));
         var mergedById = new Dictionary<Guid, ModelProperty>();
         foreach (ModelProperty property in existingProperties)
         {
-            mergedById[property.Id] = property;
+            mergedById.Add(property.Id, property);
         }
 
-        foreach (ModelProperty property in updates)
+        foreach (ModelProperty property in additions)
         {
-            mergedById[property.Id] = property;
+            if (mergedById.ContainsKey(property.Id))
+            {
+                throw new ArgumentException(
+                    $"ModelProperty ID '{property.Id}' is already registered.",
+                    nameof(propertyDtos));
+            }
+
+            mergedById.Add(property.Id, property);
         }
 
         ValidateHierarchy(
@@ -97,7 +147,7 @@ public static class ModelFactory
             property => property.Id,
             property => property.ParentId,
             "ModelProperty");
-        return updates;
+        return additions;
     }
 
     /// <summary>

@@ -64,9 +64,88 @@ public static partial class ModelPropertyMapper
             particleTextureId);
     }
 
+    /// <summary>
+    /// 部分更新DTOを検証し、更新内容へ変換する
+    /// </summary>
+    /// <param name="dto">変換元の部分更新DTO</param>
+    /// <returns>検証済みの更新内容</returns>
+    /// <exception cref="ArgumentNullException">dtoがnullの場合</exception>
+    /// <exception cref="ArgumentException">IDが空、または表示設定、パーティクル色が不正な場合</exception>
+    public static ModelPropertyModification MapModification(ModelPropertyModificationDto dto)
+    {
+        if (dto == null)
+        {
+            throw new ArgumentNullException(nameof(dto));
+        }
+
+        if (dto.Id == Guid.Empty)
+        {
+            throw new ArgumentException("ModelPropertyModificationDto.Id must not be empty.", nameof(dto));
+        }
+
+        return new ModelPropertyModification
+        {
+            Id = dto.Id,
+            Value = dto.Value,
+            Visibility = dto.Visibility == null ? null : ModelVisibilityResolver.ParseStrict(dto.Visibility),
+            ChangesParticleColor = dto.ParticleColor != null,
+            ParticleColor = dto.ParticleColor == null ? null : ParseParticleColorText(dto.Id, dto.ParticleColor)
+        };
+    }
+
+    /// <summary>
+    /// ModelPropertyを外部向けDTOへ変換する
+    /// </summary>
+    /// <param name="property">変換元のモデル属性</param>
+    /// <returns>モデル属性DTO</returns>
+    /// <exception cref="ArgumentNullException">propertyがnullの場合</exception>
+    public static ModelPropertyDto ToDto(ModelProperty property)
+    {
+        if (property == null)
+        {
+            throw new ArgumentNullException(nameof(property));
+        }
+
+        return new ModelPropertyDto
+        {
+            Id = property.Id,
+            ParentId = property.ParentId == Guid.Empty ? null : property.ParentId,
+            PropertyType = property.PropertyType,
+            ValueType = property.ValueType,
+            Value = property.Value,
+            Visibility = property.Visibility.ToString(),
+            IconId = property.IconId,
+            ParticleEmitterType = property.ParticleEmitterType.ToString(),
+            ParticleBehaviorType = property.ParticleBehaviorType.ToString(),
+            ParticleTextureId = property.ParticleTextureId,
+            ParticleColor = property.ParticleColor.HasValue ? "#" + property.ParticleColor.Value.ToHtml(false).ToUpperInvariant() : string.Empty
+        };
+    }
+
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// パーティクルの色文字列を解析する、空の場合は null（既定色）を返す
+    /// </summary>
+    private static Color? ParseParticleColorText(Guid propertyId, string colorText)
+    {
+        string text = colorText.Trim();
+        if (text.Length == 0)
+        {
+            return null;
+        }
+
+        if (HexColorPattern().IsMatch(text))
+        {
+            return Color.FromHtml(text);
+        }
+
+        throw new ArgumentException(
+            $"ModelProperty '{propertyId}' has an invalid ParticleColor '{colorText}'; expected '#RRGGBB'.",
+            nameof(colorText));
+    }
 
     /// <summary>
     /// パーティクル発生源名を列挙値へ変換する

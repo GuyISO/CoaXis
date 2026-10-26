@@ -21,6 +21,10 @@ public partial class ModelPropertyStateHub : BaseHub
     /// <param name="propertyId">変更された ModelProperty の識別子</param>
     [Signal] public delegate void VisibilityNotifiedEventHandler(string propertyId);
 
+    /// <summary>Propertyの値の変更通知。値は ModelProperty.Value を参照する。</summary>
+    /// <param name="propertyId">変更された ModelProperty の識別子</param>
+    [Signal] public delegate void ValueNotifiedEventHandler(string propertyId);
+
     #endregion
 
     #region Lifecycle
@@ -40,6 +44,15 @@ public partial class ModelPropertyStateHub : BaseHub
     public void NotifyVisibility(Guid propertyId)
     {
         EmitSignal(SignalName.VisibilityNotified, propertyId.ToString());
+    }
+
+    /// <summary>
+    /// 値の変更を通知する。状態の反映はModelProperty自身が行い、変更を周知するためにModelProperty自身から呼び出して使用する。
+    /// </summary>
+    /// <param name="propertyId">変更された ModelProperty の識別子</param>
+    public void NotifyValue(Guid propertyId)
+    {
+        EmitSignal(SignalName.ValueNotified, propertyId.ToString());
     }
 
     #endregion

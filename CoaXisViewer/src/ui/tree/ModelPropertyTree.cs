@@ -42,6 +42,7 @@ public partial class ModelPropertyTree : Tree
 		base._Ready();
 		ButtonClicked += OnButtonClicked;
 		Application.Model.Property.Visual.VisibilityResolved += OnPropertyVisibilityResolved;
+		Application.Model.Property.State.ValueNotified += OnPropertyValueNotified;
 		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityPropertyTreeVisibleNotified;
 	}
@@ -50,6 +51,7 @@ public partial class ModelPropertyTree : Tree
 	{
 		ButtonClicked -= OnButtonClicked;
 		Application.Model.Property.Visual.VisibilityResolved -= OnPropertyVisibilityResolved;
+		Application.Model.Property.State.ValueNotified -= OnPropertyValueNotified;
 		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityPropertyTreeVisibleNotified;
 		base._ExitTree();
@@ -190,6 +192,25 @@ public partial class ModelPropertyTree : Tree
 	}
 
 	/// <summary>
+	/// Propertyの値が変更されたとき、対応する行の表示文字列と値メタデータを更新する
+	/// </summary>
+	/// <param name="propertyId">値が変更された ModelProperty の識別子</param>
+	private void OnPropertyValueNotified(string propertyId)
+	{
+		if (!Guid.TryParse(propertyId, out Guid parsedId) || !_propertyItems.TryGetValue(parsedId, out TreeItem item))
+		{
+			return;
+		}
+
+		ModelProperty property = Application.Model.Property.Registry.Get(parsedId);
+		if (property != null)
+		{
+			item.SetText(0, GetPropertyText(property));
+			item.SetMeta("PropertyValue", Variant.CreateFrom(property.Value ?? string.Empty));
+		}
+	}
+
+	/// <summary>
 	/// Entityの実効表示が解決されたとき、表示中Entityのルート行の表示ボタンを更新する
 	/// </summary>
 	/// <param name="entityId">解決された ModelEntity の識別子</param>
@@ -257,6 +278,16 @@ public partial class ModelPropertyTree : Tree
 	}
 
 	/// <summary>
+	/// Propertyの行に表示する文字列を取得する
+	/// </summary>
+	private static string GetPropertyText(ModelProperty property)
+	{
+		return string.IsNullOrEmpty(property.Value)
+			? property.PropertyType
+			: $"{property.PropertyType} : {property.Value}";
+	}
+
+	/// <summary>
 	/// Propertyの表示設定と実効表示に対応するボタンアイコンを取得する
 	/// </summary>
 	private static Texture2D GetVisibilityIcon(ModelProperty property)
@@ -280,9 +311,7 @@ public partial class ModelPropertyTree : Tree
 		}
 
 		TreeItem propertyItem = parentItem.CreateChild();
-		propertyItem.SetText(0, string.IsNullOrEmpty(property.Value)
-			? property.PropertyType
-			: $"{property.PropertyType} : {property.Value}");
+		propertyItem.SetText(0, GetPropertyText(property));
 		if (!string.IsNullOrEmpty(property.IconId))
 		{
 			Texture2D icon = Application.Asset.Icon.GetModelIcon(property.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);

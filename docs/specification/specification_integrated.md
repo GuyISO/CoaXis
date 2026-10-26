@@ -44,16 +44,19 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 - Named PipeでUTF-8の1行1JSONメッセージを送受信する。
 - `IpcHub`はNamed Pipeの接続・受信・送信、メインスレッドへの要求振り分け、応答エンベロープ生成を担う。ドメイン状態は所有せず、ModelEntity選択通知ではSelectionHubの変更通知を受けて現在のID集合をProtocol payloadへ変換する。
 - Viewerは各要求のバージョンが空でないことと、メジャーバージョン一致を検査する。起動時のバージョン照会は行わない。
-- Viewerが処理する要求は`ReplaceModelSet`、`AddOrReplaceModelEntities`、`AddOrReplaceModelProperties`、`DeleteModelEntities`、`DeleteModelProperties`。その他の未対応要求には`UNSUPPORTED_EVENT_TYPE`を返す。
+- Viewerが処理する要求は`ReplaceModelSet`、`ClearModelSet`、`AddModelSet`、`RemoveModelSet`、`ModifyModelSet`、`ReadModelSet`。その他の未対応要求には`UNSUPPORTED_EVENT_TYPE`を返す。
 - 接続中のIPCクライアントがある状態で選択ID集合が実際に変わると、Viewerは`ModelEntitySelected`を送信する。payloadの`entityIds`は変更後の全選択IDを昇順で含み、全解除時は空配列となる。同じ選択集合を再指定した場合は通知しない。接続開始時点の選択状態は別途通知しない。
 - `ModelEntitySelected`は要求への応答ではないため`correlationId`はnull。Viewerは応答と通知を同一接続上の単一送信キューから直列に書き込む。IPCクライアントは`Result`の`correlationId`で要求応答を識別し、非同期通知と区別する。
-- 要求への応答は`Result`イベントで返し、`correlationId`に要求の`eventId`を設定する。payloadは`ok`、`request`、`errorCode`、`message`を持つ。
+- 要求への応答は`Result`イベントで返し、`correlationId`に要求の`eventId`を設定する。payloadは共通して`ok`、`request`、`errorCode`、`message`を持つ。
 - `ReplaceModelSet`のpayloadには`entities`と`properties`が必須。`entities`は1件以上、`properties`は空配列を許可する。両方を検証してから現在のモデル集合を置換する。
 - Entity・Propertyの生成と階層検証は既存モデルの置換前に完了する。不正なpayloadには`INVALID_PAYLOAD`を返し、現在のモデル集合は変更しない。Entityの`position`は有限値3要素、`rotation`は有限値4要素かつゼロでないクォータニオンとする。DTOで省略した値は既定値を使うが、明示的な`null`や不正な配列は拒否する。
 - Propertyの`iconId`はツリー表示用アイコンID（省略または空文字ならなし）。`particleEmitterType`は`None`（既定）/`Point`/`Box`/`Sphere`/`Surface`、`particleBehaviorType`は`None`（既定）/`Disperse`/`Sparkle`/`Emerge`。パーティクルを無効にする場合は両方を`None`にし、有効にする場合はいずれも`None`以外にする。既定の組み合わせは`Point + Disperse`、`Box + Sparkle`、`Surface + Sparkle`。SphereはBoxと同様にAABB中心へ配置し、AABBを包含する球から放出する。Disperseは粒子を発生源から外向きに広げながら縮小させる。EmergeはDisperseと同じく外向きに広がりながら縮小するが、初速と寿命内の最大移動距離をDisperseの25%に抑える。Surfaceは所属Entityの可視メッシュ（三角形のみ）の表面を面積比でサンプリングし、全Modelで固定512点を放出点にする。発生源が`None`以外の場合、所属Entityの描画Node配下に`ModelParticle`を生成し、`ModelProperty`が対応するパーティクルを所有する。`particleTextureId`は粒子画像のテクスチャID（`ModelParticleTextureId`で定義し、現在は`Star`、`Kira`をサポート。省略または空文字なら`Star`）で、画像パスはProtocolに含めずViewerの`AssetTextureHub`がIDからアセットへ変換する。明示的な`null`と未定義IDは`INVALID_PAYLOAD`、画像を読み込めない場合はテクスチャなしで描画しWarnログを出す。`particleColor`は`#RRGGBB`形式、空なら白（Point/Disperse・Emerge、Box/Sparkle、Sphere/Sparkle、Surface/Sparkle共通。指定色には固定の発光倍率を掛ける）。`visibility`は`Inherit`（既定）/`Visible`/`Invisible`で、Inheritは親Property、所属Entityの順に継承し、実効表示でパーティクルの描画Layerを切り替える（Entityと同様にTreeのボタンで切替・Undo/Redo可能）。不正値は`INVALID_PAYLOAD`とする。Point/Box/Sphereのパーティクルは所属Entityの描画NodeのAABB中心を基準に配置する。AABBをその対角線長の10%だけ全方向へ広げ、Sphereの放出半径は拡張AABBの外接球半径とする（薄いモデルでも見えるようにするため）。SurfaceはModelNodeローカル座標系の原点から点を放出し、各可視メッシュ頂点をModelNodeローカル座標へ変換して三角形を構成する。面積累積に基づいて三角形を選び、各三角形内を一様にサンプリングする。シーンのロード完了時に再配置する。Entity置換でNodeが作り直された場合は、同期時に現在のNode配下へ再生成する。
 - `Disperse`の最大移動距離は余白を含むAABB半サイズの長さ（外接球半径）とし、寿命から初速を求める。`Emerge`の最大移動距離と初速はその25%とする。発生範囲がPoint以外の場合は、その移動距離を表示AABBにも加算する。
-- `AddOrReplaceModelEntities`は`entities` DTO配列、`AddOrReplaceModelProperties`は`properties` DTO配列を受け取る。同一IDが登録済みならDTOの値で置換する。各要求の配列全体を検証してから反映する。
-- `DeleteModelEntities`と`DeleteModelProperties`は`ids` Guid配列を受け取る。Entity削除は子孫Entityと所属Propertyを再帰削除し、Property削除は子孫Propertyを再帰削除する。指定IDが未登録なら`TARGET_NOT_FOUND`を返し、その要求では変更しない。
+- `ClearModelSet`のpayloadは空オブジェクト（省略可）。ルートEntity以外のEntityと全Propertyを削除する。
+- `AddModelSet`のpayloadは`ReplaceModelSet`と同じ`entities`・`properties`（ともに必須、空配列可、両方空は`INVALID_PAYLOAD`）。既存を残したまま追加する。EntityまたはPropertyのIDがそれぞれの既存集合と衝突する場合は`INVALID_PAYLOAD`を返し、要求全体を反映しない。両方を検証してから反映する。既存値の変更には`ModifyModelSet`を使用し、IDや階層など変更対象外の構造を変える場合は`ReplaceModelSet`を使用する。
+- `RemoveModelSet`と`ReadModelSet`のpayloadは`entityIds`・`propertyIds`のGuid配列（ともに必須、空配列可、両方空は`INVALID_PAYLOAD`）。`RemoveModelSet`はEntityの子孫と所属Propertyも削除し、指定Propertyを先に削除する。未登録IDは`TARGET_NOT_FOUND`で、全IDを検証してから反映するため部分削除しない。ルートEntityは削除できない。
+- `ModifyModelSet`のpayloadは`entities`・`properties`（ともに必須、空配列可、両方空は`INVALID_PAYLOAD`）。各要素は`id`が必須で、指定した項目だけを更新し省略した項目は変更しない。Entityは`position`・`rotation`（CATIA座標系、検証は`ReplaceModelSet`と同じ）・`visibility`・`isCollapsed`・`isPropertyTreeVisible`、Propertyは`value`・`visibility`・`particleColor`（空文字で既定色）を変更できる。`parentId`・`type`・`name`・`iconId`・`scenePath`などの構造項目は変更できない。ルートEntityは変更できない。全要素を検証してから反映する。
+- `ReadModelSet`の成功`Result`は、共通Result項目に加えてpayload直下の`modelSet`に`entities`・`properties`のDTO（`ReplaceModelSet`と同形式、座標はCATIA座標系）を含む専用Result型で返す。ワイヤ上のJSON形式と共通Result処理は他の要求と同じで、`modelSet`だけが追加される。指定IDのみを返し、子孫や所属Propertyは含めない。他の要求の`Result`には`modelSet`を含めない。
 - メインスレッド要求の待機上限は2秒。キュー待ち要求はタイムアウト時に取り消す。処理開始後は中断せず、結果不明として返すため、送信側は確認なしに再送しない。
 
 ## IPC Tester

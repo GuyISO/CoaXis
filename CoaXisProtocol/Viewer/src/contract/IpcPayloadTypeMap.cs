@@ -12,10 +12,12 @@ public static class IpcPayloadTypeMap
     {
         // ToViewerイベントのpayload型
         [IpcEventType.ToViewer.ReplaceModelSet] = typeof(ModelSetPayload),
-        [IpcEventType.ToViewer.AddOrReplaceModelEntities] = typeof(ModelEntitiesPayload),
-        [IpcEventType.ToViewer.AddOrReplaceModelProperties] = typeof(ModelPropertiesPayload),
-        [IpcEventType.ToViewer.DeleteModelEntities] = typeof(ModelIdsPayload),
-        [IpcEventType.ToViewer.DeleteModelProperties] = typeof(ModelIdsPayload),
+        [IpcEventType.ToViewer.ClearModelSet] = typeof(IpcEmptyPayload),
+        [IpcEventType.ToViewer.AddModelSet] = typeof(ModelSetPayload),
+        [IpcEventType.ToViewer.RemoveModelSet] = typeof(ModelSetIdsPayload),
+        [IpcEventType.ToViewer.ModifyModelSet] = typeof(ModelSetModificationPayload),
+        [IpcEventType.ToViewer.ReadModelSet] = typeof(ModelSetIdsPayload),
+        // FromViewerイベントのpayload型
         [IpcEventType.FromViewer.ModelEntitySelected] = typeof(ModelEntitySelectedPayload),
         // Commonイベントのpayload型
         [IpcEventType.Common.Result] = typeof(IpcResultPayload)

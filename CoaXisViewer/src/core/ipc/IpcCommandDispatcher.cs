@@ -18,10 +18,11 @@ public static class IpcCommandDispatcher
     private static readonly Dictionary<string, Handler> Handlers = new()
     {
         [IpcEventType.ToViewer.ReplaceModelSet] = HandleReplaceModelSet,
-        [IpcEventType.ToViewer.AddOrReplaceModelEntities] = HandleAddOrReplaceModelEntities,
-        [IpcEventType.ToViewer.AddOrReplaceModelProperties] = HandleAddOrReplaceModelProperties,
-        [IpcEventType.ToViewer.DeleteModelEntities] = HandleDeleteModelEntities,
-        [IpcEventType.ToViewer.DeleteModelProperties] = HandleDeleteModelProperties
+        [IpcEventType.ToViewer.ClearModelSet] = HandleClearModelSet,
+        [IpcEventType.ToViewer.AddModelSet] = HandleAddModelSet,
+        [IpcEventType.ToViewer.RemoveModelSet] = HandleRemoveModelSet,
+        [IpcEventType.ToViewer.ModifyModelSet] = HandleModifyModelSet,
+        [IpcEventType.ToViewer.ReadModelSet] = HandleReadModelSet
     };
 
     #endregion
@@ -46,7 +47,10 @@ public static class IpcCommandDispatcher
                 return IpcResultPayload.Failure(envelope.EventType, IpcErrorCode.UnsupportedEventType, $"No payload contract is defined for eventType: {envelope.EventType}");
             }
 
-            object typedPayload = envelope.Payload.Deserialize(payloadType, IpcJsonOptions.Default);
+            // 引数のない要求ではpayload省略を許可する
+            object typedPayload = envelope.Payload.ValueKind is JsonValueKind.Undefined or JsonValueKind.Null && payloadType == typeof(IpcEmptyPayload)
+                ? new IpcEmptyPayload()
+                : envelope.Payload.Deserialize(payloadType, IpcJsonOptions.Default);
             return handler(typedPayload);
         }
         catch (JsonException ex)
@@ -99,83 +103,110 @@ public static class IpcCommandDispatcher
     }
 
     /// <summary>
-    /// ModelEntity DTO群を追加または同じIDのEntityへ置換する。
+    /// ClearModelSet: 現在のモデル実体と属性をすべて削除する
     /// </summary>
-    /// <param name="payload">Entity DTO群payload</param>
-    private static IpcResultPayload HandleAddOrReplaceModelEntities(object payload)
+    /// <param name="payload">IpcEmptyPayload</param>
+    private static IpcResultPayload HandleClearModelSet(object payload)
     {
-        if (payload is not ModelEntitiesPayload entitiesPayload || entitiesPayload.Entities == null)
-        {
-            return IpcResultPayload.Failure(
-                IpcEventType.ToViewer.AddOrReplaceModelEntities,
-                IpcErrorCode.InvalidPayload,
-                "payload.entities is required.");
-        }
-
-        int count = Application.Model.ModelSet.AddOrReplaceEntities(entitiesPayload.Entities);
+        int count = Application.Model.ModelSet.Clear();
         return IpcResultPayload.Success(
-            IpcEventType.ToViewer.AddOrReplaceModelEntities,
-            $"Added or replaced {count} models.");
+            IpcEventType.ToViewer.ClearModelSet,
+            $"Cleared {count} models and their properties.");
     }
 
     /// <summary>
-    /// ModelProperty DTO群を追加または同じIDのPropertyへ置換する。
+    /// AddModelSet: モデル実体と属性を同時に追加し、既存IDと衝突した場合は拒否する
     /// </summary>
-    /// <param name="payload">Property DTO群payload</param>
-    private static IpcResultPayload HandleAddOrReplaceModelProperties(object payload)
+    /// <param name="payload">ModelSetPayload</param>
+    private static IpcResultPayload HandleAddModelSet(object payload)
     {
-        if (payload is not ModelPropertiesPayload propertiesPayload || propertiesPayload.Properties == null)
+        if (payload is not ModelSetPayload modelSetPayload ||
+            modelSetPayload.Entities == null ||
+            modelSetPayload.Properties == null)
         {
             return IpcResultPayload.Failure(
-                IpcEventType.ToViewer.AddOrReplaceModelProperties,
+                IpcEventType.ToViewer.AddModelSet,
                 IpcErrorCode.InvalidPayload,
-                "payload.properties is required.");
+                "payload.entities and payload.properties are required.");
         }
 
-        int count = Application.Model.ModelSet.AddOrReplaceProperties(propertiesPayload.Properties);
+        (int entityCount, int propertyCount) = Application.Model.ModelSet.Add(
+            modelSetPayload.Entities,
+            modelSetPayload.Properties);
         return IpcResultPayload.Success(
-            IpcEventType.ToViewer.AddOrReplaceModelProperties,
-            $"Added or replaced {count} properties.");
+            IpcEventType.ToViewer.AddModelSet,
+            $"Added or replaced {entityCount} models and {propertyCount} properties.");
     }
 
     /// <summary>
-    /// 指定Entityと子孫Entity、所属Propertyを削除する。
+    /// RemoveModelSet: 指定したモデル実体と属性を同時に削除する
     /// </summary>
-    /// <param name="payload">削除対象ID群payload</param>
-    private static IpcResultPayload HandleDeleteModelEntities(object payload)
+    /// <param name="payload">ModelSetIdsPayload</param>
+    private static IpcResultPayload HandleRemoveModelSet(object payload)
     {
-        if (payload is not ModelIdsPayload idsPayload || idsPayload.Ids == null)
+        if (payload is not ModelSetIdsPayload idsPayload ||
+            idsPayload.EntityIds == null ||
+            idsPayload.PropertyIds == null)
         {
             return IpcResultPayload.Failure(
-                IpcEventType.ToViewer.DeleteModelEntities,
+                IpcEventType.ToViewer.RemoveModelSet,
                 IpcErrorCode.InvalidPayload,
-                "payload.ids is required.");
+                "payload.entityIds and payload.propertyIds are required.");
         }
 
-        int count = Application.Model.ModelSet.DeleteEntities(idsPayload.Ids);
+        (int entityCount, int propertyCount) = Application.Model.ModelSet.Remove(
+            idsPayload.EntityIds,
+            idsPayload.PropertyIds);
         return IpcResultPayload.Success(
-            IpcEventType.ToViewer.DeleteModelEntities,
-            $"Deleted {count} models and their properties.");
+            IpcEventType.ToViewer.RemoveModelSet,
+            $"Removed {entityCount} models (including descendants) and {propertyCount} properties.");
     }
 
     /// <summary>
-    /// 指定Propertyと子孫Propertyを削除する。
+    /// ModifyModelSet: モデル実体と属性の値を同時に部分更新する
     /// </summary>
-    /// <param name="payload">削除対象ID群payload</param>
-    private static IpcResultPayload HandleDeleteModelProperties(object payload)
+    /// <param name="payload">ModelSetModificationPayload</param>
+    private static IpcResultPayload HandleModifyModelSet(object payload)
     {
-        if (payload is not ModelIdsPayload idsPayload || idsPayload.Ids == null)
+        if (payload is not ModelSetModificationPayload modificationPayload ||
+            modificationPayload.Entities == null ||
+            modificationPayload.Properties == null)
         {
             return IpcResultPayload.Failure(
-                IpcEventType.ToViewer.DeleteModelProperties,
+                IpcEventType.ToViewer.ModifyModelSet,
                 IpcErrorCode.InvalidPayload,
-                "payload.ids is required.");
+                "payload.entities and payload.properties are required.");
         }
 
-        int count = Application.Model.ModelSet.DeleteProperties(idsPayload.Ids);
+        (int entityCount, int propertyCount) = Application.Model.ModelSet.Modify(
+            modificationPayload.Entities,
+            modificationPayload.Properties);
         return IpcResultPayload.Success(
-            IpcEventType.ToViewer.DeleteModelProperties,
-            $"Deleted {count} properties.");
+            IpcEventType.ToViewer.ModifyModelSet,
+            $"Modified {entityCount} models and {propertyCount} properties.");
+    }
+
+    /// <summary>
+    /// ReadModelSet: 指定したモデル実体と属性のDTOをResultに含めて返す
+    /// </summary>
+    /// <param name="payload">ModelSetIdsPayload</param>
+    private static IpcResultPayload HandleReadModelSet(object payload)
+    {
+        if (payload is not ModelSetIdsPayload idsPayload ||
+            idsPayload.EntityIds == null ||
+            idsPayload.PropertyIds == null)
+        {
+            return IpcResultPayload.Failure(
+                IpcEventType.ToViewer.ReadModelSet,
+                IpcErrorCode.InvalidPayload,
+                "payload.entityIds and payload.propertyIds are required.");
+        }
+
+        ModelSetPayload modelSet = Application.Model.ModelSet.Read(idsPayload.EntityIds, idsPayload.PropertyIds);
+        return ReadModelSetResultPayload.Success(
+            IpcEventType.ToViewer.ReadModelSet,
+            $"Read {modelSet.Entities.Count} models and {modelSet.Properties.Count} properties.",
+            modelSet);
     }
 
     #endregion

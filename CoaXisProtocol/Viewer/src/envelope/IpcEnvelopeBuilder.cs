@@ -18,6 +18,7 @@ public static class IpcEnvelopeBuilder
     /// <param name="payload">エンベロープに格納するデータ</param>
     /// <param name="correlationId">関連する要求のイベントID。要求への応答でない場合は null</param>
     /// <returns>共通項目を設定したIPCエンベロープ</returns>
+    /// <remarks>payloadが派生型の場合も実行時の型でJSON化し、派生プロパティを保持する。</remarks>
     public static IpcEnvelope Create<TPayload>(string eventType, string source, TPayload payload, string correlationId = null)
     {
         return new IpcEnvelope
@@ -28,7 +29,10 @@ public static class IpcEnvelopeBuilder
             Timestamp = DateTime.UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ", CultureInfo.InvariantCulture),
             Source = source,
             CorrelationId = correlationId,
-            Payload = JsonSerializer.SerializeToElement(payload, IpcJsonOptions.Default)
+            Payload = JsonSerializer.SerializeToElement(
+                payload,
+                payload == null ? typeof(TPayload) : payload.GetType(),
+                IpcJsonOptions.Default)
         };
     }
 }

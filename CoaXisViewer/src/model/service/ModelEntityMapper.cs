@@ -49,6 +49,67 @@ public static class ModelEntityMapper
 	}
 
 	/// <summary>
+	/// 部分更新DTOを検証し、Godot座標系の更新内容へ変換する
+	/// </summary>
+	/// <param name="dto">変換元の部分更新DTO</param>
+	/// <returns>検証済みの更新内容</returns>
+	/// <exception cref="ArgumentNullException">dtoがnullの場合</exception>
+	/// <exception cref="ArgumentException">IDが空、または位置、姿勢、表示設定が不正な場合</exception>
+	public static ModelEntityModification MapModification(ModelEntityModificationDto dto)
+	{
+		if (dto == null)
+		{
+			throw new ArgumentNullException(nameof(dto));
+		}
+
+		if (dto.Id == Guid.Empty)
+		{
+			throw new ArgumentException("ModelEntityModificationDto.Id must not be empty.", nameof(dto));
+		}
+
+		return new ModelEntityModification
+		{
+			Id = dto.Id,
+			Position = dto.Position == null ? null : ConvertPosition(dto.Id, dto.Position),
+			Rotation = dto.Rotation == null ? null : ConvertRotation(dto.Id, dto.Rotation),
+			Visibility = dto.Visibility == null ? null : ModelVisibilityResolver.ParseStrict(dto.Visibility),
+			IsCollapsed = dto.IsCollapsed,
+			IsPropertyTreeVisible = dto.IsPropertyTreeVisible
+		};
+	}
+
+	/// <summary>
+	/// ModelEntityを外部向けDTO（CATIA座標系）へ変換する
+	/// </summary>
+	/// <param name="entity">変換元のモデル実体</param>
+	/// <returns>モデル実体DTO</returns>
+	/// <exception cref="ArgumentNullException">entityがnullの場合</exception>
+	public static ModelEntityDto ToDto(ModelEntity entity)
+	{
+		if (entity == null)
+		{
+			throw new ArgumentNullException(nameof(entity));
+		}
+
+		Vector3 position = CoordinateSystemUtility.GodotToCatia(entity.Position);
+		Quaternion rotation = CoordinateSystemUtility.GodotToCatia(entity.Rotation);
+		return new ModelEntityDto
+		{
+			Id = entity.Id,
+			ParentId = entity.ParentId == Guid.Empty ? null : entity.ParentId,
+			Type = entity.Type,
+			Name = entity.Name,
+			Position = new[] { position.X, position.Y, position.Z },
+			Rotation = new[] { rotation.X, rotation.Y, rotation.Z, rotation.W },
+			Visibility = entity.Visibility.ToString(),
+			IsCollapsed = entity.IsCollapsed,
+			IconId = entity.IconId,
+			ScenePath = entity.ScenePath,
+			IsPropertyTreeVisible = entity.IsPropertyTreeVisible
+		};
+	}
+
+	/// <summary>
 	/// 外部DTOのCATIA座標を内部で使用するGodot座標へ変換する
 	/// </summary>
 	/// <param name="entityId">変換対象のEntity識別子</param>

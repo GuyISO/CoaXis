@@ -236,8 +236,14 @@ public class ModelProperty
     /// <param name="newValue">新しい文字列化された値</param>
     public void SetValue(string newValue)
     {
-        // 描画更新や外部IPCからの指示時にプロパティ値を書き換える
-        Value = newValue ?? string.Empty;
+        string resolvedValue = newValue ?? string.Empty;
+        if (Value == resolvedValue)
+        {
+            return;
+        }
+
+        Value = resolvedValue;
+        Application.Model.Property.State.NotifyValue(Id);
     }
 
     /// <summary>
