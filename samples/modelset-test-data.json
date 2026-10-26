@@ -1,0 +1,95 @@
+{
+  "add": {
+    "entities": [
+      {
+        "id": "21000000-0000-4000-8000-000000000001",
+        "parentId": "7acd5132-0f8b-4ae7-826e-a0d06bbe5192",
+        "type": "IpcTester",
+        "name": "IPC追加テスト",
+        "position": [250.0, 0.0, 0.0],
+        "rotation": [0.0, 0.0, 0.0, 1.0],
+        "visibility": "Inherit",
+        "isCollapsed": false,
+        "iconId": "Component",
+        "scenePath": "",
+        "isPropertyTreeVisible": true
+      },
+      {
+        "id": "21000000-0000-4000-8000-000000000002",
+        "parentId": "21000000-0000-4000-8000-000000000001",
+        "type": "IpcTester",
+        "name": "追加した子Entity",
+        "position": [50.0, 0.0, 0.0],
+        "rotation": [0.0, 0.0, 0.0, 1.0],
+        "visibility": "Inherit",
+        "isCollapsed": false,
+        "iconId": "Point",
+        "scenePath": ""
+      }
+    ],
+    "properties": [
+      {
+        "id": "31000000-0000-4000-8000-000000000001",
+        "parentId": "21000000-0000-4000-8000-000000000001",
+        "propertyType": "TesterStatus",
+        "valueType": "string",
+        "value": "追加されたProperty",
+        "visibility": "Visible",
+        "iconId": "",
+        "particleEmitterType": "Point",
+        "particleBehaviorType": "Sparkle",
+        "particleTextureId": "Kira",
+        "particleColor": "#33AAFF"
+      },
+      {
+        "id": "31000000-0000-4000-8000-000000000002",
+        "parentId": "31000000-0000-4000-8000-000000000001",
+        "propertyType": "NestedValue",
+        "valueType": "int",
+        "value": "42",
+        "visibility": "Inherit",
+        "iconId": "",
+        "particleEmitterType": "None",
+        "particleBehaviorType": "None",
+        "particleTextureId": "",
+        "particleColor": ""
+      }
+    ]
+  },
+  "remove": {
+    "entityIds": [
+      "21000000-0000-4000-8000-000000000001"
+    ],
+    "propertyIds": [
+      "31000000-0000-4000-8000-000000000001",
+      "31000000-0000-4000-8000-000000000002"
+    ]
+  },
+  "modify": {
+    "entities": [
+      {
+        "id": "7acd5132-0f8b-4ae7-826e-a0d06bbe5192",
+        "position": [350.0, 100.0, -50.0],
+        "visibility": "Visible",
+        "isCollapsed": true,
+        "isPropertyTreeVisible": true
+      }
+    ],
+    "properties": [
+      {
+        "id": "10000000-0000-0000-0000-000000000014",
+        "value": "値をIPCから更新",
+        "visibility": "Visible",
+        "particleColor": "#FF4080"
+      }
+    ]
+  },
+  "read": {
+    "entityIds": [
+      "7acd5132-0f8b-4ae7-826e-a0d06bbe5192"
+    ],
+    "propertyIds": [
+      "10000000-0000-0000-0000-000000000014"
+    ]
+  }
+}

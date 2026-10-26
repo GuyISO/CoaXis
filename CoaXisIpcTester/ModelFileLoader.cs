@@ -14,6 +14,33 @@ namespace CoaXis.IpcTester;
 public static class ModelFileLoader
 {
     /// <summary>
+    /// JSONからモデル集合操作用テストデータを読み込む。
+    /// </summary>
+    /// <param name="path">入力JSONの絶対パス</param>
+    /// <returns>読み込んだ要求payloadの集合</returns>
+    /// <exception cref="InvalidDataException">JSONが空、または不正な場合</exception>
+    public static ModelSetTestData LoadTestData(string path)
+    {
+        ModelSetTestData testData = JsonSerializer.Deserialize<ModelSetTestData>(
+            File.ReadAllText(path),
+            IpcJsonOptions.Default);
+        if (testData == null)
+        {
+            throw new InvalidDataException("操作テストデータJSONを読み込めませんでした。");
+        }
+
+        if (testData.Add == null ||
+            testData.Remove == null ||
+            testData.Modify == null ||
+            testData.Read == null)
+        {
+            throw new InvalidDataException("操作テストデータにはadd、remove、modify、readの各payloadが必要です。");
+        }
+
+        return testData;
+    }
+
+    /// <summary>
     /// JSONまたはCSVからモデル実体一覧を読み込む。
     /// </summary>
     /// <param name="path">入力ファイルの絶対パス</param>

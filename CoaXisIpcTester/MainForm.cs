@@ -10,14 +10,17 @@ using System.Windows.Forms;
 namespace CoaXis.IpcTester;
 
 /// <summary>
-/// 入力ファイルを読み込み、ReplaceModelSet要求とViewerの応答を表示する。
+/// 入力ファイルを読み込み、モデル集合のIPC要求とViewerの応答を表示する。
 /// </summary>
 public sealed class MainForm : Form
 {
     private readonly TextBox _pipeName = new() { Text = "CoaXisViewerPipe", Width = 220 };
     private readonly TextBox _entityPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
     private readonly TextBox _propertyPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
+    private readonly TextBox _testDataPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
+    private readonly ComboBox _requestType = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
     private readonly Button _sendButton = new() { Text = "ReplaceModelSetを送信", AutoSize = true };
+    private readonly Button _sendRequestButton = new() { Text = "選択した要求を送信", AutoSize = true };
     private readonly ListBox _history = new() { Dock = DockStyle.Fill, IntegralHeight = false };
     private readonly TextBox _requestJson = CreateJsonView();
     private readonly TextBox _responseJson = CreateJsonView();
@@ -35,6 +38,16 @@ public sealed class MainForm : Form
         StartPosition = FormStartPosition.CenterScreen;
         _entityPath.Text = FindSamplePath("modelentity.csv");
         _propertyPath.Text = FindSamplePath("modelproperty.csv");
+        _testDataPath.Text = FindSamplePath("modelset-test-data.json");
+        _requestType.Items.AddRange(new object[]
+        {
+            new RequestOption(IpcEventType.ToViewer.ClearModelSet, "ClearModelSet（全消去）"),
+            new RequestOption(IpcEventType.ToViewer.AddModelSet, "AddModelSet（追加）"),
+            new RequestOption(IpcEventType.ToViewer.RemoveModelSet, "RemoveModelSet（部分削除）"),
+            new RequestOption(IpcEventType.ToViewer.ModifyModelSet, "ModifyModelSet（部分変更）"),
+            new RequestOption(IpcEventType.ToViewer.ReadModelSet, "ReadModelSet（ID指定読み出し）")
+        });
+        _requestType.SelectedIndex = 0;
 
         var root = new TableLayoutPanel
         {
@@ -58,6 +71,7 @@ public sealed class MainForm : Form
         statusStrip.Dock = DockStyle.Bottom;
 
         _sendButton.Click += async (_, _) => await SendReplaceModelSetAsync();
+        _sendRequestButton.Click += async (_, _) => await SendSelectedRequestAsync();
         _history.SelectedIndexChanged += (_, _) => ShowSelectedExchange();
     }
 
@@ -100,7 +114,7 @@ public sealed class MainForm : Form
             Dock = DockStyle.Top,
             AutoSize = true,
             ColumnCount = 3,
-            RowCount = 3,
+            RowCount = 4,
             Padding = new Padding(0, 0, 0, 10)
         };
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
@@ -109,8 +123,21 @@ public sealed class MainForm : Form
 
         AddFileRow(panel, 0, "実体 (JSON/CSV)", _entityPath, "選択...", SelectEntityFile);
         AddFileRow(panel, 1, "属性 (CSV・任意)", _propertyPath, "選択...", SelectPropertyFile);
-        panel.Controls.Add(_sendButton, 2, 2);
-        panel.SetColumnSpan(_sendButton, 1);
+        AddFileRow(panel, 2, "操作テストデータ (JSON)", _testDataPath, "選択...", SelectTestDataFile);
+
+        panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
+        panel.Controls.Add(new Label { Text = "要求", AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 7, 10, 7) }, 0, 3);
+        panel.Controls.Add(_requestType, 1, 3);
+        var buttons = new FlowLayoutPanel
+        {
+            AutoSize = true,
+            WrapContents = false,
+            Dock = DockStyle.Fill,
+            Margin = new Padding(0, 2, 0, 0)
+        };
+        buttons.Controls.Add(_sendButton);
+        buttons.Controls.Add(_sendRequestButton);
+        panel.Controls.Add(buttons, 2, 3);
         panel.Margin = new Padding(0, 4, 0, 0);
         return panel;
     }
@@ -189,6 +216,18 @@ public sealed class MainForm : Form
         }
     }
 
+    private void SelectTestDataFile(object sender, EventArgs args)
+    {
+        using var dialog = new OpenFileDialog
+        {
+            Filter = "モデル集合操作テストデータ (*.json)|*.json|すべてのファイル (*.*)|*.*"
+        };
+        if (dialog.ShowDialog(this) == DialogResult.OK)
+        {
+            _testDataPath.Text = dialog.FileName;
+        }
+    }
+
     private async Task SendReplaceModelSetAsync()
     {
         if (string.IsNullOrWhiteSpace(_entityPath.Text))
@@ -197,18 +236,78 @@ public sealed class MainForm : Form
             return;
         }
 
+        await ExecuteRequestAsync(
+            IpcEventType.ToViewer.ReplaceModelSet,
+            "ReplaceModelSetを送信中",
+            () =>
+            {
+                List<ModelEntityDto> entities = ModelFileLoader.LoadEntities(_entityPath.Text);
+                List<ModelPropertyDto> properties = ModelFileLoader.LoadProperties(_propertyPath.Text);
+                return ModelSetPayload.Create(entities, properties);
+            });
+    }
+
+    private async Task SendSelectedRequestAsync()
+    {
+        if (_requestType.SelectedItem is not RequestOption option)
+        {
+            MessageBox.Show(this, "送信する要求を選択してください。", Text, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            return;
+        }
+
+        if (option.EventType == IpcEventType.ToViewer.ClearModelSet &&
+            MessageBox.Show(
+                this,
+                "ルート以外のすべてのEntityと全Propertyを削除します。実行しますか？",
+                Text,
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning) != DialogResult.Yes)
+        {
+            return;
+        }
+
+        await ExecuteRequestAsync(
+            option.EventType,
+            $"{option.EventType}を送信中",
+            () =>
+            {
+                if (option.EventType == IpcEventType.ToViewer.ClearModelSet)
+                {
+                    return new IpcEmptyPayload();
+                }
+
+                if (string.IsNullOrWhiteSpace(_testDataPath.Text))
+                {
+                    throw new InvalidDataException("操作テストデータJSONを選択してください。");
+                }
+
+                ModelSetTestData testData = ModelFileLoader.LoadTestData(_testDataPath.Text);
+                return option.EventType switch
+                {
+                    IpcEventType.ToViewer.AddModelSet => testData.Add,
+                    IpcEventType.ToViewer.RemoveModelSet => testData.Remove,
+                    IpcEventType.ToViewer.ModifyModelSet => testData.Modify,
+                    IpcEventType.ToViewer.ReadModelSet => testData.Read,
+                    _ => throw new InvalidOperationException($"未対応の要求です: {option.EventType}")
+                };
+            });
+    }
+
+    private async Task ExecuteRequestAsync(string eventType, string progressMessage, Func<object> createPayload)
+    {
         _sendButton.Enabled = false;
+        _sendRequestButton.Enabled = false;
         _requestJson.Clear();
+        _responseJson.Clear();
         try
         {
-            List<ModelEntityDto> entities = ModelFileLoader.LoadEntities(_entityPath.Text);
-            List<ModelPropertyDto> properties = ModelFileLoader.LoadProperties(_propertyPath.Text);
-            ModelSetPayload payload = ModelSetPayload.Create(entities, properties);
-            IpcEnvelope request = IpcEnvelopeBuilder.Create(IpcEventType.ToViewer.ReplaceModelSet, "CoaXisIpcTester", payload);
+            object payload = createPayload();
+            IpcEnvelope request = IpcEnvelopeBuilder.Create(eventType, "CoaXisIpcTester", payload);
             string requestJson = JsonSerializer.Serialize(request, IpcJsonOptions.Default);
-            _requestJson.Text = JsonSerializer.Serialize(request, new JsonSerializerOptions(IpcJsonOptions.Default) { WriteIndented = true });
-            _responseJson.Clear();
-            _status.Text = $"送信中: {entities.Count} models / {properties.Count} properties";
+            _requestJson.Text = JsonSerializer.Serialize(
+                request,
+                new JsonSerializerOptions(IpcJsonOptions.Default) { WriteIndented = true });
+            _status.Text = progressMessage;
 
             string responseJson = await IpcClient.SendAsync(
                 _pipeName.Text.Trim(),
@@ -222,19 +321,22 @@ public sealed class MainForm : Form
             string formattedResponse = FormatJson(responseJson);
             _responseJson.Text = formattedResponse;
             (string result, string message) = ReadResult(responseJson);
-            AddExchange(request.EventType, result, requestJson, formattedResponse, message);
+            AddExchange(eventType, result, requestJson, formattedResponse, message);
             _status.Text = $"{result}: {message}";
         }
         catch (Exception exception)
         {
-            string errorJson = JsonSerializer.Serialize(new { error = exception.Message }, new JsonSerializerOptions { WriteIndented = true });
+            string errorJson = JsonSerializer.Serialize(
+                new { error = exception.Message },
+                new JsonSerializerOptions { WriteIndented = true });
             _responseJson.Text = errorJson;
-            AddExchange(IpcEventType.ToViewer.ReplaceModelSet, "失敗", _requestJson.Text, errorJson, exception.Message);
+            AddExchange(eventType, "失敗", _requestJson.Text, errorJson, exception.Message);
             _status.Text = $"失敗: {exception.Message}";
         }
         finally
         {
             _sendButton.Enabled = true;
+            _sendRequestButton.Enabled = true;
         }
     }
 
@@ -320,6 +422,14 @@ public sealed class MainForm : Form
         public override string ToString()
         {
             return $"{Timestamp:HH:mm:ss}  {EventType}  {Result}  {Detail}";
+        }
+    }
+
+    private sealed record RequestOption(string EventType, string DisplayName)
+    {
+        public override string ToString()
+        {
+            return DisplayName;
         }
     }
 }
