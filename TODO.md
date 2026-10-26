@@ -4,6 +4,8 @@ EntityがPropertyを保有していることがわかるよう保有数をボタ
 Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする
 ModelProertyTreeは、Containerの中に配置する形で使用する
 
+Property用のSelection機能を実装する
+
 SettingもFacadeにして、各種設定を管理するHub
 Settingで設定可能にする必要のない項目が多すぎる、Settingは全体的に見直す
 

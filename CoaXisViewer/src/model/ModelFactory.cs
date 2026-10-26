@@ -1,6 +1,7 @@
 using CoaXis.Protocol.Viewer;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 /// <summary>
 /// 外部DTOから検証済みのモデルを生成するファクトリ。
@@ -23,6 +24,7 @@ public static class ModelFactory
     {
         IReadOnlyList<ModelEntity> entities = CreateEntities(entityDtos, nameof(entityDtos));
         IReadOnlyList<ModelProperty> properties = CreateProperties(propertyDtos, nameof(propertyDtos));
+        ValidateModelHierarchy(entities, properties);
         return new ModelSet(entities, properties);
     }
 
@@ -98,11 +100,7 @@ public static class ModelFactory
             mergedById.Add(entity.Id, entity);
         }
 
-        ValidateHierarchy(
-            new List<ModelEntity>(mergedById.Values),
-            entity => entity.Id,
-            entity => entity.ParentId,
-            "ModelEntity");
+        ValidateEntityHierarchy(new List<ModelEntity>(mergedById.Values));
         return additions;
     }
 
@@ -182,6 +180,100 @@ public static class ModelFactory
             parameterName);
         ValidateHierarchy(properties, property => property.Id, property => property.ParentId, "ModelProperty");
         return properties;
+    }
+
+    /// <summary>
+    /// EntityとPropertyの親参照がすべて解決できることを検証する。
+    /// </summary>
+    /// <param name="entities">検証対象のEntity集合</param>
+    /// <param name="properties">検証対象のProperty集合</param>
+    /// <exception cref="ArgumentNullException">いずれかの集合がnullの場合</exception>
+    /// <exception cref="ArgumentException">親が存在しない、階層が循環している、またはEntity/Property間でIDが重複する場合</exception>
+    internal static void ValidateModelHierarchy(
+        IReadOnlyCollection<ModelEntity> entities,
+        IReadOnlyCollection<ModelProperty> properties)
+    {
+        if (entities == null)
+        {
+            throw new ArgumentNullException(nameof(entities));
+        }
+
+        if (properties == null)
+        {
+            throw new ArgumentNullException(nameof(properties));
+        }
+
+        var entityIds = new HashSet<Guid>();
+        foreach (ModelEntity entity in entities)
+        {
+            entityIds.Add(entity.Id);
+        }
+        entityIds.Add(RootModelEntity.RootEntityId);
+
+        var propertyIds = new HashSet<Guid>();
+        foreach (ModelProperty property in properties)
+        {
+            propertyIds.Add(property.Id);
+        }
+
+        Guid duplicateId = entityIds.FirstOrDefault(propertyIds.Contains);
+        if (duplicateId != Guid.Empty)
+        {
+            throw new ArgumentException(
+                $"ModelEntity and ModelProperty IDs must be unique across the model set. Duplicate ID '{duplicateId}'.");
+        }
+
+        ValidateEntityHierarchy(entities);
+        ValidatePropertyHierarchy(properties, entityIds);
+    }
+
+    /// <summary>
+    /// Entityの親が集合内またはシーンRootに存在し、階層がRootへ到達することを検証する。
+    /// </summary>
+    private static void ValidateEntityHierarchy(IReadOnlyCollection<ModelEntity> entities)
+    {
+        var entityIds = new HashSet<Guid>(entities.Select(entity => entity.Id));
+        foreach (ModelEntity entity in entities)
+        {
+            if (entity.ParentId != Guid.Empty &&
+                entity.ParentId != RootModelEntity.RootEntityId &&
+                !entityIds.Contains(entity.ParentId))
+            {
+                throw new ArgumentException(
+                    $"ModelEntity '{entity.Id}' references missing parent '{entity.ParentId}'.");
+            }
+        }
+
+        ValidateHierarchy(
+            entities.ToList(),
+            entity => entity.Id,
+            entity => entity.ParentId,
+            "ModelEntity");
+    }
+
+    /// <summary>
+    /// Propertyの親がPropertyまたはEntityとして存在することを検証する。
+    /// </summary>
+    private static void ValidatePropertyHierarchy(
+        IReadOnlyCollection<ModelProperty> properties,
+        ISet<Guid> entityIds)
+    {
+        var propertyIds = new HashSet<Guid>(properties.Select(property => property.Id));
+        foreach (ModelProperty property in properties)
+        {
+            if (property.ParentId == Guid.Empty ||
+                (!propertyIds.Contains(property.ParentId) && !entityIds.Contains(property.ParentId)))
+            {
+                throw new ArgumentException(
+                    $"ModelProperty '{property.Id}' references missing parent '{property.ParentId}'.");
+            }
+        }
+
+        ValidateHierarchy(
+            properties.ToList(),
+            property => property.Id,
+            property => property.ParentId,
+            "ModelProperty");
     }
 
     /// <summary>

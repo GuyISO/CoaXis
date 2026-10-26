@@ -79,7 +79,7 @@ public partial class ModelSetHub : BaseHub
     /// <param name="propertyDtos">追加するProperty DTO</param>
     /// <returns>追加したEntity数とProperty数</returns>
     /// <exception cref="ArgumentNullException">いずれかのDTO集合がnullの場合</exception>
-    /// <exception cref="ArgumentException">DTOが不正、既存IDと衝突、ルートEntityを含む、または両方が空の場合</exception>
+    /// <exception cref="ArgumentException">DTOまたは親階層が不正、IDが衝突、ルートEntityを含む、または両方が空の場合</exception>
     public (int EntityCount, int PropertyCount) Add(
         IReadOnlyList<ModelEntityDto> entityDtos,
         IReadOnlyList<ModelPropertyDto> propertyDtos)
@@ -96,6 +96,9 @@ public partial class ModelSetHub : BaseHub
         }
 
         EnsureRootEntityIsNotIncluded(entities);
+        ModelFactory.ValidateModelHierarchy(
+            Application.Model.Entity.Registry.Items.Values.Concat(entities).ToList(),
+            Application.Model.Property.Registry.Items.Values.Concat(properties).ToList());
 
         if (entities.Count > 0)
         {

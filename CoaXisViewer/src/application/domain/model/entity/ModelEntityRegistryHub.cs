@@ -225,8 +225,15 @@ public partial class ModelEntityRegistryHub : BaseHub
             entity.DetachProperty(property);
         }
 
-        ModelEntity parent = Get(entity.ParentId);
-        parent?.DetachEntity(entity);
+        if (entity.ParentId == Guid.Empty)
+        {
+            Root?.DetachEntity(entity);
+        }
+        else
+        {
+            ModelEntity parent = Get(entity.ParentId);
+            parent?.DetachEntity(entity);
+        }
 
         _items.Remove(entityId);
         _unlinkedIds.Remove(entityId);
@@ -284,8 +291,19 @@ public partial class ModelEntityRegistryHub : BaseHub
     /// </summary>
     private bool LinkToParent(ModelEntity modelEntity)
     {
+        if (modelEntity.Id == RootModelEntity.RootEntityId)
+        {
+            return true;
+        }
+
         if (modelEntity.ParentId == Guid.Empty)
         {
+            if (Root == null)
+            {
+                return false;
+            }
+
+            Root.AttachEntity(modelEntity);
             return true;
         }
 
