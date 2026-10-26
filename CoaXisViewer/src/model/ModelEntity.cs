@@ -173,6 +173,21 @@ public class ModelEntity
     /// <summary>このモデル実体に直接紐づくルートプロパティの一覧を返す</summary>
     public IReadOnlyCollection<ModelProperty> Properties => _properties.Values;
 
+    /// <summary>このモデル実体に紐づくルートプロパティと、その全子孫プロパティの総数を返す</summary>
+    public int PropertyCountRecursive
+    {
+        get
+        {
+            int count = 0;
+            foreach (ModelProperty property in _properties.Values)
+            {
+                count += CountPropertyRecursive(property);
+            }
+
+            return count;
+        }
+    }
+
     #endregion
 
     #region Constructors
@@ -395,6 +410,20 @@ public class ModelEntity
     #endregion
 
 	#region Helpers
+
+    /// <summary>
+    /// プロパティ自身と全子孫プロパティの数を数える
+    /// </summary>
+    private static int CountPropertyRecursive(ModelProperty property)
+    {
+        int count = 1;
+        foreach (ModelProperty child in property.Children)
+        {
+            count += CountPropertyRecursive(child);
+        }
+
+        return count;
+    }
 
     /// <summary>
     /// 許可された状態遷移だけを実行し、状態変更を通知する。

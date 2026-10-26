@@ -272,7 +272,7 @@ public partial class ModelPropertyTree : Tree
 	private static Texture2D GetEntityPropertyIcon(ModelEntity entity)
 	{
 		return Application.Asset.Icon.GetProperty(
-			entity.Properties.Count > 0,
+			entity.PropertyCountRecursive,
 			entity.IsPropertyTreeVisible,
 			Constant.Ui.Tree.HierarchyVisibleIconSize);
 	}

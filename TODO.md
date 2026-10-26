@@ -1,6 +1,5 @@
 # Viewer
 
-EntityがPropertyを保有していることがわかるよう保有数をボタンで表示する
 Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする
 ModelProertyTreeは、Containerの中に配置する形で使用する
 

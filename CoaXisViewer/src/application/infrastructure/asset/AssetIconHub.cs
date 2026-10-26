@@ -120,7 +120,7 @@ public partial class AssetIconHub : BaseHub
     /// <summary>
     /// Propertyの個数バッジを右下に重ねたアイコンを取得する。個数が0以下の場合はバッジなし。
     /// </summary>
-    /// <param name="count">Propertyの個数。99を超える場合は「99+」と表示する</param>
+    /// <param name="count">Propertyの個数。999を超える場合は「999+」と表示する</param>
     /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
@@ -132,7 +132,7 @@ public partial class AssetIconHub : BaseHub
             return baseIcon;
         }
 
-        string text = count > 99 ? "99+" : count.ToString();
+        string text = count > 999 ? "999+" : count.ToString();
         string key = $"property-badge|{isTreeVisible}|{text}|{size}";
         if (_iconCache.TryGetValue(key, out Texture2D cached))
         {

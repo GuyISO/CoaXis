@@ -297,7 +297,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     /// <param name="treeItem">ボタンを持つTreeItem</param>
     /// <param name="modelEntity">ボタン状態の正本を持つModelEntity</param>
-    private static void RebuildButtons(TreeItem treeItem, ModelEntity modelEntity)
+    private static void RebuildButtons(TreeItem treeItem, ModelEntity modelEntity, int propertyCount)
     {
         // ボタン位置は追加順で決まるため、IDで特定して全削除してから並べ直す。
         foreach (int buttonId in new[] { PropertyButtonId, VisibilityButtonId })
@@ -310,7 +310,7 @@ public partial class ModelEntityTree : Tree
         }
 
         Texture2D propertyIcon = Application.Asset.Icon.GetProperty(
-            modelEntity.Properties.Count,
+            propertyCount,
             modelEntity.IsPropertyTreeVisible,
             Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.AddButton(0, propertyIcon, id: PropertyButtonId, disabled: modelEntity.Properties.Count == 0);
@@ -326,12 +326,20 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void OnModelPropertyChanged()
     {
+        ModelEntity root = Application.Model.Entity.Registry.Root;
+        if (root == null)
+        {
+            return;
+        }
+
+        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(root);
         foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
         {
             ModelEntity modelEntity = Application.Model.Entity.Registry.Get(pair.Key);
-            if (modelEntity != null)
+            if (modelEntity != null && propertySubtreeCounts.TryGetValue(pair.Key, out int subtreeCount))
             {
-                RebuildButtons(pair.Value, modelEntity);
+                int propertyCount = modelEntity.IsCollapsed ? subtreeCount : modelEntity.PropertyCountRecursive;
+                RebuildButtons(pair.Value, modelEntity, propertyCount);
             }
         }
     }
@@ -351,7 +359,8 @@ public partial class ModelEntityTree : Tree
         ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
         if (modelEntity != null)
         {
-            RebuildButtons(treeItem, modelEntity);
+            Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(modelEntity);
+            RebuildButtons(treeItem, modelEntity, ResolvePropertyCount(modelEntity, propertySubtreeCounts));
         }
     }
 
@@ -373,6 +382,8 @@ public partial class ModelEntityTree : Tree
             return;
         }
         bool isCollapsed = modelEntity.IsCollapsed;
+        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(modelEntity);
+        RebuildButtons(item, modelEntity, ResolvePropertyCount(modelEntity, propertySubtreeCounts));
         // すでに折り畳み状態が一致している場合は自分が発した通知による変更の可能性があり何もしない
         if (item.IsCollapsed() == isCollapsed)
         {
@@ -428,7 +439,8 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        AddToTree(Application.Model.Entity.Registry.Root.Id, Guid.Empty);
+        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
+        AddToTree(Application.Model.Entity.Registry.Root.Id, Guid.Empty, propertySubtreeCounts);
     }
 
     /// <summary>
@@ -470,7 +482,8 @@ public partial class ModelEntityTree : Tree
 
         _rootModelEntity = rootModelEntity;
 
-        AddToTree(_rootModelEntity.Id, Guid.Empty);
+        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(_rootModelEntity);
+        AddToTree(_rootModelEntity.Id, Guid.Empty, propertySubtreeCounts);
     }
     
     #endregion
@@ -482,7 +495,7 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     /// <param name="entityId">追加する子 ModelEntity の識別子</param>
     /// <param name="parentEntityId">親 ModelEntity の識別子</param>
-    private void AddToTree(Guid entityId, Guid parentEntityId)
+    private void AddToTree(Guid entityId, Guid parentEntityId, IReadOnlyDictionary<Guid, int> propertySubtreeCounts)
     {
         // Tree への再構築時に、レジストリから既に消えているモデルや root 直前の空 ID を拾わないように防ぐ。
         // これがないと、Clear 中や既存モデルが破棄済みのタイミングで NullReference になりやすい。
@@ -515,7 +528,8 @@ public partial class ModelEntityTree : Tree
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（Property表示・Visibility切替） ---
-        RebuildButtons(treeItem, modelEntity);
+        int propertyCount = ResolvePropertyCount(modelEntity, propertySubtreeCounts);
+        RebuildButtons(treeItem, modelEntity, propertyCount);
 
         // EntityId と TreeItem の対応を登録
         treeItem.SetMeta("EntityId", entityId.ToString());
@@ -532,8 +546,63 @@ public partial class ModelEntityTree : Tree
             }
 
             // ModelNode のみをツリーに追加する
-            AddToTree(childModelEntity.Id, entityId);
+            AddToTree(childModelEntity.Id, entityId, propertySubtreeCounts);
         }
+    }
+
+    /// <summary>
+    /// 指定したEntityと各子孫Entityが持つProperty数の合計を作成する。
+    /// </summary>
+    /// <param name="root">集計対象のルートEntity</param>
+    /// <returns>Entity IDごとの部分木内Property総数</returns>
+    private static Dictionary<Guid, int> BuildPropertySubtreeCounts(ModelEntity root)
+    {
+        Dictionary<Guid, int> counts = new();
+        HashSet<Guid> visited = new();
+        AddPropertySubtreeCounts(root, counts, visited);
+        return counts;
+    }
+
+    /// <summary>
+    /// 折り畳み状態に応じたPropertyボタン表示数を取得する。
+    /// </summary>
+    /// <param name="modelEntity">表示数を求めるEntity</param>
+    /// <param name="propertySubtreeCounts">Entityごとの部分木内Property総数</param>
+    /// <returns>Propertyボタンに表示する数</returns>
+    private static int ResolvePropertyCount(
+        ModelEntity modelEntity,
+        IReadOnlyDictionary<Guid, int> propertySubtreeCounts)
+    {
+        return modelEntity.IsCollapsed
+            ? propertySubtreeCounts.GetValueOrDefault(modelEntity.Id, modelEntity.PropertyCountRecursive)
+            : modelEntity.PropertyCountRecursive;
+    }
+
+    /// <summary>
+    /// Entityと子孫のProperty数を再帰的に集計する。
+    /// </summary>
+    /// <param name="modelEntity">集計対象のEntity</param>
+    /// <param name="counts">Entity IDごとの集計結果</param>
+    /// <param name="visited">重複・循環参照による二重集計を防ぐ集合</param>
+    /// <returns>対象Entityの部分木内Property総数</returns>
+    private static int AddPropertySubtreeCounts(
+        ModelEntity modelEntity,
+        Dictionary<Guid, int> counts,
+        HashSet<Guid> visited)
+    {
+        if (modelEntity == null || !visited.Add(modelEntity.Id))
+        {
+            return 0;
+        }
+
+        int count = modelEntity.PropertyCountRecursive;
+        foreach (ModelEntity child in modelEntity.Children)
+        {
+            count = checked(count + AddPropertySubtreeCounts(child, counts, visited));
+        }
+
+        counts[modelEntity.Id] = count;
+        return count;
     }
 
     /// <summary>
