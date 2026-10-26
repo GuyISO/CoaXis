@@ -310,7 +310,7 @@ public partial class ModelEntityTree : Tree
         }
 
         Texture2D propertyIcon = Application.Asset.Icon.GetProperty(
-            modelEntity.Properties.Count > 0,
+            modelEntity.Properties.Count,
             modelEntity.IsPropertyTreeVisible,
             Constant.Ui.Tree.HierarchyVisibleIconSize);
         treeItem.AddButton(0, propertyIcon, id: PropertyButtonId, disabled: modelEntity.Properties.Count == 0);

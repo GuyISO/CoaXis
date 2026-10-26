@@ -40,6 +40,22 @@ public partial class AssetIconHub : BaseHub
         [ModelIconId.Target] = "res://assets/icon/mono/target.svg"
     };
 
+    /// <summary>バッジ描画用の3x5ビットマップフォント。</summary>
+    private static readonly Dictionary<char, string> BadgeGlyphs = new()
+    {
+        ['0'] = "###" + "#.#" + "#.#" + "#.#" + "###",
+        ['1'] = ".#." + "##." + ".#." + ".#." + "###",
+        ['2'] = "###" + "..#" + "###" + "#.." + "###",
+        ['3'] = "###" + "..#" + "###" + "..#" + "###",
+        ['4'] = "#.#" + "#.#" + "###" + "..#" + "..#",
+        ['5'] = "###" + "#.." + "###" + "..#" + "###",
+        ['6'] = "###" + "#.." + "###" + "#.#" + "###",
+        ['7'] = "###" + "..#" + "..#" + "..#" + "..#",
+        ['8'] = "###" + "#.#" + "###" + "#.#" + "###",
+        ['9'] = "###" + "#.#" + "###" + "..#" + "###",
+        ['+'] = "..." + ".#." + "###" + ".#." + "...",
+    };
+
     /// <summary>読み込み済みアイコンのキャッシュ。</summary>
     private readonly Dictionary<string, Texture2D> _iconCache = new Dictionary<string, Texture2D>();
 
@@ -102,6 +118,46 @@ public partial class AssetIconHub : BaseHub
     }
 
     /// <summary>
+    /// Propertyの個数バッジを右下に重ねたアイコンを取得する。個数が0以下の場合はバッジなし。
+    /// </summary>
+    /// <param name="count">Propertyの個数。99を超える場合は「99+」と表示する</param>
+    /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
+    /// <param name="size">返却アイコンのサイズ</param>
+    /// <returns>取得したアイコン、失敗時は null</returns>
+    public Texture2D GetProperty(int count, bool isTreeVisible, int size = 24)
+    {
+        Texture2D baseIcon = GetProperty(count > 0, isTreeVisible, size);
+        if (count <= 0 || baseIcon == null)
+        {
+            return baseIcon;
+        }
+
+        string text = count > 99 ? "99+" : count.ToString();
+        string key = $"property-badge|{isTreeVisible}|{text}|{size}";
+        if (_iconCache.TryGetValue(key, out Texture2D cached))
+        {
+            return cached;
+        }
+
+        Image image = baseIcon.GetImage();
+        if (image == null)
+        {
+            return baseIcon;
+        }
+
+        if (image.IsCompressed())
+        {
+            image.Decompress();
+        }
+
+        image.Convert(Image.Format.Rgba8);
+        DrawBadge(image, text);
+        Texture2D badged = ImageTexture.CreateFromImage(image);
+        _iconCache[key] = badged;
+        return badged;
+    }
+
+    /// <summary>
     /// ModelEntityまたはModelPropertyのアイコンIDに対応する画像を取得する。
     /// </summary>
     /// <param name="iconId">Protocolで定義されたアイコンID</param>
@@ -152,6 +208,65 @@ public partial class AssetIconHub : BaseHub
     #endregion
 
     #region Helpers
+
+    /// <summary>
+    /// 画像の右下に、文字列を持つバッジを直接描画する。
+    /// </summary>
+    private static void DrawBadge(Image image, string text)
+    {
+        const int glyphWidth = 3;
+        const int glyphHeight = 5;
+        int scale = image.GetWidth() >= 24 && text.Length <= 2 ? 2 : 1;
+        int padding = 1;
+        int textWidth = (text.Length * (glyphWidth + 1) - 1) * scale;
+        int textHeight = glyphHeight * scale;
+        int badgeWidth = textWidth + padding * 2;
+        int badgeHeight = textHeight + padding * 2;
+        int left = image.GetWidth() - badgeWidth;
+        int top = image.GetHeight() - badgeHeight;
+        if (left < 0 || top < 0)
+        {
+            return;
+        }
+
+        Color background = new Color(0.1f, 0.1f, 0.1f, 0.9f);
+        for (int y = top; y < top + badgeHeight; y++)
+        {
+            for (int x = left; x < left + badgeWidth; x++)
+            {
+                image.SetPixel(x, y, background);
+            }
+        }
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            if (!BadgeGlyphs.TryGetValue(text[i], out string glyph))
+            {
+                continue;
+            }
+
+            int originX = left + padding + i * (glyphWidth + 1) * scale;
+            int originY = top + padding;
+            for (int gy = 0; gy < glyphHeight; gy++)
+            {
+                for (int gx = 0; gx < glyphWidth; gx++)
+                {
+                    if (glyph[gy * glyphWidth + gx] != '#')
+                    {
+                        continue;
+                    }
+
+                    for (int sy = 0; sy < scale; sy++)
+                    {
+                        for (int sx = 0; sx < scale; sx++)
+                        {
+                            image.SetPixel(originX + gx * scale + sx, originY + gy * scale + sy, Colors.White);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
     /// <summary>
     /// 指定パスが有効なアイコンパスかどうかを判定する。
