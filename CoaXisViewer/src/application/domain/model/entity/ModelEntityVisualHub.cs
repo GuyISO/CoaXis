@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using CoaXis.Protocol.Viewer;
 
 /// <summary>
 /// モデルの表示状態と描画ノードへの反映を管理するハブ。
@@ -76,7 +77,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	{
 		foreach (ModelEntity modelEntity in Application.Model.Entity.Registry.Items.Values)
 		{
-			if (modelEntity.Id != RootModelEntity.RootEntityId)
+			if (modelEntity.Id != ViewerConstants.RootModelEntityId)
 			{
 				ResolveAndApplyVisibility(modelEntity);
 			}

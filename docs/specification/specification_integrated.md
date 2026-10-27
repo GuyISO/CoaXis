@@ -1,6 +1,6 @@
 # CoaXis Viewer・Protocol仕様
 
-最終更新: 2026-10-18
+最終更新: 2026-10-27
 
 この文書は、本リポジトリで管理するCoaXisViewer・CoaXisProtocol・CoaXisIpcTesterの現行仕様を記す。その他のCoaXisアプリケーションとSceneBuilderは対象外。Viewerが使うモデルシーンは外部で生成する。
 
@@ -48,7 +48,7 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 - 接続中のIPCクライアントがある状態で選択ID集合が実際に変わると、Viewerは`ModelEntitySelected`を送信する。payloadの`entityIds`は変更後の全選択IDを昇順で含み、全解除時は空配列となる。同じ選択集合を再指定した場合は通知しない。接続開始時点の選択状態は別途通知しない。
 - `ModelEntitySelected`は要求への応答ではないため`correlationId`はnull。Viewerは応答と通知を同一接続上の単一送信キューから直列に書き込む。IPCクライアントは`Result`の`correlationId`で要求応答を識別し、非同期通知と区別する。
 - 要求への応答は`Result`イベントで返し、`correlationId`に要求の`eventId`を設定する。payloadは共通して`ok`、`request`、`errorCode`、`message`を持つ。
-- `ReplaceModelSet`のpayloadには`entities`と`properties`が必須。`entities`は1件以上、`properties`は空配列を許可する。全Entity/Propertyの親参照とRootへの到達を含め、両方を検証してから現在のモデル集合を置換する。
+- `ReplaceModelSet`のpayloadには`entities`と`properties`が必須。`entities`は1件以上、`properties`は空配列を許可する。Root Entity自体はViewerが常に保持するためpayloadに含めず、Rootを親とするEntityの`parentId`にはProtocolの`ViewerConstants.RootModelEntityId`（`00000000-0000-0000-0000-000000000001`）を指定する。`AddModelSet`でも同じIDをRootの親参照に使用する。全Entity/Propertyの親参照とRootへの到達を含め、両方を検証してから現在のモデル集合を置換する。
 - Entity・Propertyの生成と階層検証は既存モデルの置換前に完了する。不正なpayloadには`INVALID_PAYLOAD`を返し、現在のモデル集合は変更しない。Entityの`position`は有限値3要素、`rotation`は有限値4要素かつゼロでないクォータニオンとする。DTOで省略した値は既定値を使うが、明示的な`null`や不正な配列は拒否する。
 - Propertyの`iconId`はツリー表示用アイコンID（省略または空文字ならなし）。`particleEmitterType`は`None`（既定）/`Point`/`Box`/`Sphere`/`Surface`、`particleBehaviorType`は`None`（既定）/`Disperse`/`Sparkle`/`Emerge`。パーティクルを無効にする場合は両方を`None`にし、有効にする場合はいずれも`None`以外にする。既定の組み合わせは`Point + Disperse`、`Box + Sparkle`、`Surface + Sparkle`。SphereはBoxと同様にAABB中心へ配置し、AABBを包含する球から放出する。Disperseは粒子を発生源から外向きに広げながら縮小させる。EmergeはDisperseと同じく外向きに広がりながら縮小するが、初速と寿命内の最大移動距離をDisperseの25%に抑える。Surfaceは所属Entityの可視メッシュ（三角形のみ）の表面を面積比でサンプリングし、全Modelで固定512点を放出点にする。発生源が`None`以外の場合、所属Entityの描画Node配下に`ModelParticle`を生成し、`ModelProperty`が対応するパーティクルを所有する。`particleTextureId`は粒子画像のテクスチャID（`ModelParticleTextureId`で定義し、現在は`Star`、`Kira`をサポート。省略または空文字なら`Star`）で、画像パスはProtocolに含めずViewerの`AssetTextureHub`がIDからアセットへ変換する。明示的な`null`と未定義IDは`INVALID_PAYLOAD`、画像を読み込めない場合はテクスチャなしで描画しWarnログを出す。`particleColor`は`#RRGGBB`形式、空なら白（Point/Disperse・Emerge、Box/Sparkle、Sphere/Sparkle、Surface/Sparkle共通。指定色には固定の発光倍率を掛ける）。`visibility`は`Inherit`（既定）/`Visible`/`Invisible`で、Inheritは親Property、所属Entityの順に継承し、実効表示でパーティクルの描画Layerを切り替える（Entityと同様にTreeのボタンで切替・Undo/Redo可能）。不正値は`INVALID_PAYLOAD`とする。Point/Box/Sphereのパーティクルは所属Entityの描画NodeのAABB中心を基準に配置する。AABBをその対角線長の10%だけ全方向へ広げ、Sphereの放出半径は拡張AABBの外接球半径とする（薄いモデルでも見えるようにするため）。SurfaceはModelNodeローカル座標系の原点から点を放出し、各可視メッシュ頂点をModelNodeローカル座標へ変換して三角形を構成する。面積累積に基づいて三角形を選び、各三角形内を一様にサンプリングする。シーンのロード完了時に再配置する。Entity置換でNodeが作り直された場合は、同期時に現在のNode配下へ再生成する。
 - `Disperse`の最大移動距離は余白を含むAABB半サイズの長さ（外接球半径）とし、寿命から初速を求める。`Emerge`の最大移動距離と初速はその25%とする。発生範囲がPoint以外の場合は、その移動距離を表示AABBにも加算する。

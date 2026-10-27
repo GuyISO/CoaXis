@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using CoaXis.Protocol.Viewer;
 
 /// <summary>
 /// 検証済みModelEntityの登録、置換、削除を管理するハブ。
@@ -61,7 +62,7 @@ public partial class ModelEntityLoadHub : BaseHub
 				throw new ArgumentException("ModelEntity must not be null.", nameof(entities));
 			}
 
-			if (entity.Id == RootModelEntity.RootEntityId)
+			if (entity.Id == ViewerConstants.RootModelEntityId)
 			{
 				throw new ArgumentException("The root ModelEntity cannot be added or replaced.", nameof(entities));
 			}
@@ -105,12 +106,12 @@ public partial class ModelEntityLoadHub : BaseHub
 		List<ModelEntity> registeredEntities = Application.Model.Entity.Registry.Items.Values.ToList();
 		List<ModelEntity> rootConnectedEntities = registeredEntities
 			.Where(entity =>
-				entity.Id != RootModelEntity.RootEntityId &&
+				entity.Id != ViewerConstants.RootModelEntityId &&
 				Application.Model.Entity.Registry.IsRootConnected(entity.Id))
 			.ToList();
 		List<ModelEntity> disconnectedEntities = registeredEntities
 			.Where(entity =>
-				entity.Id != RootModelEntity.RootEntityId &&
+				entity.Id != ViewerConstants.RootModelEntityId &&
 				!Application.Model.Entity.Registry.IsRootConnected(entity.Id))
 			.ToList();
 		RemoveNodesFromDisconnectedEntities(disconnectedEntities);

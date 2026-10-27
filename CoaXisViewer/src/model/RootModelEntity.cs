@@ -1,4 +1,5 @@
 using System;
+using CoaXis.Protocol.Viewer;
 using Godot;
 
 /// <summary>
@@ -7,11 +8,6 @@ using Godot;
 public class RootModelEntity : ModelEntity
 {
     #region Constants
-
-    /// <summary>
-    /// ルート ModelEntity の固定識別子
-    /// </summary>
-        public static readonly Guid RootEntityId = Guid.Parse(Constant.Model.RootEntityId);
 
     /// <summary>
     /// ルート ModelEntity の固定名
@@ -49,7 +45,7 @@ public class RootModelEntity : ModelEntity
     /// </summary>
     public RootModelEntity()
         : base(
-            RootEntityId,
+            ViewerConstants.RootModelEntityId,
             Guid.Empty,
             string.Empty,
             RootName,
@@ -67,7 +63,7 @@ public class RootModelEntity : ModelEntity
 
         MarkLoaded();
 
-        Node = new RootModelNode(RootEntityId);
+        Node = new RootModelNode(ViewerConstants.RootModelEntityId);
     }
 
     #endregion

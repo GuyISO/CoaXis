@@ -208,8 +208,8 @@ public static class ModelFactory
         {
             entityIds.Add(entity.Id);
         }
-        entityIds.Add(RootModelEntity.RootEntityId);
-
+        entityIds.Add(ViewerConstants.RootModelEntityId);
+    
         var propertyIds = new HashSet<Guid>();
         foreach (ModelProperty property in properties)
         {
@@ -236,7 +236,7 @@ public static class ModelFactory
         foreach (ModelEntity entity in entities)
         {
             if (entity.ParentId != Guid.Empty &&
-                entity.ParentId != RootModelEntity.RootEntityId &&
+                entity.ParentId != ViewerConstants.RootModelEntityId &&
                 !entityIds.Contains(entity.ParentId))
             {
                 throw new ArgumentException(

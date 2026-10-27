@@ -65,7 +65,7 @@ public partial class ModelSetHub : BaseHub
     public int Clear()
     {
         int removedEntityCount = Application.Model.Entity.Registry.Items.Keys
-            .Count(entityId => entityId != RootModelEntity.RootEntityId);
+            .Count(entityId => entityId != ViewerConstants.RootModelEntityId);
 
         Application.Model.Property.Registry.Clear();
         Application.Model.Entity.Load.Clear();
@@ -141,7 +141,7 @@ public partial class ModelSetHub : BaseHub
             throw new ArgumentException("At least one entity id or property id is required.", nameof(entityIds));
         }
 
-        if (entityRoots.Contains(RootModelEntity.RootEntityId))
+        if (entityRoots.Contains(ViewerConstants.RootModelEntityId))
         {
             throw new ArgumentException("The root ModelEntity cannot be deleted.", nameof(entityIds));
         }
@@ -175,7 +175,7 @@ public partial class ModelSetHub : BaseHub
         var entities = new List<(ModelEntity Entity, ModelEntityModification Modification)>(entityModifications.Count);
         foreach (ModelEntityModification modification in entityModifications)
         {
-            if (modification.Id == RootModelEntity.RootEntityId)
+            if (modification.Id == ViewerConstants.RootModelEntityId)
             {
                 throw new ArgumentException("The root ModelEntity cannot be modified.", nameof(entityDtos));
             }
@@ -256,7 +256,7 @@ public partial class ModelSetHub : BaseHub
             entityIds,
             Application.Model.Entity.Registry.Items.Keys,
             nameof(entityIds));
-        if (roots.Contains(RootModelEntity.RootEntityId))
+        if (roots.Contains(ViewerConstants.RootModelEntityId))
         {
             throw new ArgumentException("The root ModelEntity cannot be deleted.", nameof(entityIds));
         }
@@ -450,7 +450,7 @@ public partial class ModelSetHub : BaseHub
     /// </summary>
     private static void EnsureRootEntityIsNotIncluded(IEnumerable<ModelEntity> entities)
     {
-        if (entities.Any(entity => entity.Id == RootModelEntity.RootEntityId))
+        if (entities.Any(entity => entity.Id == ViewerConstants.RootModelEntityId))
         {
             throw new ArgumentException("The root ModelEntity cannot be replaced.", nameof(entities));
         }

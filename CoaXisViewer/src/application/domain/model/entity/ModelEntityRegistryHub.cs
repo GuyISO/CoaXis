@@ -2,6 +2,7 @@ using System;
 using Godot;
 using System.Collections.Generic;
 using System.Linq;
+using CoaXis.Protocol.Viewer;
 
 /// <summary>
 /// ModelEntity の識別子、階層、およびルート実体を管理するハブ。
@@ -263,7 +264,7 @@ public partial class ModelEntityRegistryHub : BaseHub
     {
         foreach (Guid entityId in new List<Guid>(_items.Keys))
         {
-            if (entityId == RootModelEntity.RootEntityId)
+            if (entityId == ViewerConstants.RootModelEntityId)
             {
                 continue;
             }
@@ -291,7 +292,7 @@ public partial class ModelEntityRegistryHub : BaseHub
     /// </summary>
     private bool LinkToParent(ModelEntity modelEntity)
     {
-        if (modelEntity.Id == RootModelEntity.RootEntityId)
+        if (modelEntity.Id == ViewerConstants.RootModelEntityId)
         {
             return true;
         }

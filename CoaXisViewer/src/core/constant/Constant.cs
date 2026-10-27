@@ -32,8 +32,4 @@ public static class Constant
 		public const string CommandUndoColor = "#808080FF";
 	}
 
-	public static class Model
-	{
-		public const string RootEntityId = "00000000-0000-0000-0000-000000000001";
-	}
 }
