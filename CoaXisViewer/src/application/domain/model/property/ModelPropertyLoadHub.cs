@@ -96,7 +96,7 @@ public partial class ModelPropertyLoadHub : BaseHub
         {
             ModelEntity entity = property.GetEntity();
             ModelNode entityNode = entity?.Node;
-            bool canAttach = property.ParticleEmitterType != ModelParticleEmitterType.None
+            bool canAttach = property.IsParticleEnabled
                 && entity != null
                 && entity.Status == ModelStatus.Loaded
                 && entityNode != null

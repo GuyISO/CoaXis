@@ -101,9 +101,17 @@ public class ModelProperty
     public ModelParticleBehaviorType ParticleBehaviorType { get; }
 
     /// <summary>
-    /// パーティクルのテクスチャID、空の場合は既定の星画像
+    /// パーティクルのテクスチャID、空の場合はパーティクルを表示しない
     /// </summary>
     public string ParticleTextureId { get; }
+
+    /// <summary>
+    /// 発生源・挙動・テクスチャがすべて指定され、パーティクルを表示できるか
+    /// </summary>
+    public bool IsParticleEnabled =>
+        ParticleEmitterType != ModelParticleEmitterType.None
+        && ParticleBehaviorType != ModelParticleBehaviorType.None
+        && !string.IsNullOrWhiteSpace(ParticleTextureId);
 
     /// <summary>
     /// パーティクルの色、null の場合は既定色

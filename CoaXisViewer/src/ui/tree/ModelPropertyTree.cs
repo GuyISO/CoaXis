@@ -1,4 +1,5 @@
 using System;
+using CoaXis.Protocol.Viewer;
 using Godot;
 
 /// <summary>
@@ -27,6 +28,11 @@ public partial class ModelPropertyTree : Tree
 	/// Property OverlayTree表示切替ボタンのID（Root行のみ）
 	/// </summary>
 	private const int PropertyButtonId = 2;
+
+	/// <summary>
+	/// Particleテクスチャ表示ボタンのID（Particle指定のProperty行のみ）
+	/// </summary>
+	private const int ParticleButtonId = 3;
 
 	/// <summary>
 	/// ModelProperty識別子と、対応する TreeItem の対応表
@@ -299,6 +305,46 @@ public partial class ModelPropertyTree : Tree
 	}
 
 	/// <summary>
+	/// Particleテクスチャ指定があるPropertyのボタンアイコンを、ParticleColorで着色して取得する
+	/// </summary>
+	/// <returns>着色済みアイコン、テクスチャ未指定または取得失敗時は null</returns>
+	private static Texture2D GetParticleIcon(ModelProperty property)
+	{
+		if (!property.IsParticleEnabled)
+		{
+			return null;
+		}
+
+		Texture2D source = Application.Asset.Texture.GetParticle(property.ParticleTextureId);
+		Image image = source?.GetImage();
+		if (image == null)
+		{
+			return null;
+		}
+
+		image = (Image)image.Duplicate();
+		if (image.IsCompressed())
+		{
+			image.Decompress();
+		}
+
+		image.Convert(Image.Format.Rgba8);
+		int size = Constant.Ui.Tree.HierarchyVisibleIconSize;
+		image.Resize(size, size, Image.Interpolation.Lanczos);
+
+		Color tint = property.ParticleColor ?? Colors.White;
+		for (int y = 0; y < image.GetHeight(); y++)
+		{
+			for (int x = 0; x < image.GetWidth(); x++)
+			{
+				image.SetPixel(x, y, image.GetPixel(x, y) * tint);
+			}
+		}
+
+		return ImageTexture.CreateFromImage(image);
+	}
+
+	/// <summary>
 	/// ModelProperty とその子プロパティをツリーへ追加する
 	/// </summary>
 	/// <param name="property">追加対象の ModelProperty</param>
@@ -320,11 +366,18 @@ public partial class ModelPropertyTree : Tree
 				propertyItem.SetIcon(0, icon);
 			}
 		}
+		
 		// 右クリックメニューでの値コピー用に、表示列とは別に値そのものをメタデータへ保持する
 		propertyItem.SetMeta("PropertyValue", Variant.CreateFrom(property.Value ?? string.Empty));
 		propertyItem.SetMeta("PropertyId", Variant.CreateFrom(property.Id.ToString()));
 
+		Texture2D particleIcon = GetParticleIcon(property);
+		if (particleIcon != null)
+		{
+			propertyItem.AddButton(0, particleIcon, id: ParticleButtonId);
+		}
 		propertyItem.AddButton(0, GetVisibilityIcon(property), id: VisibilityButtonId);
+
 		_propertyItems[property.Id] = propertyItem;
 
 		foreach (ModelProperty childProperty in property.Children)
