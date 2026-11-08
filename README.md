@@ -10,6 +10,8 @@ CoaXis は、3D モデルの可視化と事前アセット生成を分離して�
   - 共通契約と IPC で使う DTO / 定義を管理するプロジェクト
 - CoaXisIpcTester
   - JSON/CSVや操作テストデータを使い、Viewerへモデル集合の読込・追加・削除・変更・読み出し要求を送り、要求と応答を確認するWindowsデスクトップツール
+- CoaXisUi
+  - WinFormsアプリケーションで共通利用するテーマ、フォーム、ボタン、ナビゲーションレールを提供するUIライブラリ。`CoaXisForm` を継承すると共通テーマが適用され、`CoaXisButton` や `CoaXisNavigationRail` を配置して利用できる
 
 ## 開発
 

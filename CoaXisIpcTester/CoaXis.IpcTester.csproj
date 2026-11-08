@@ -9,5 +9,11 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CoaXisProtocol\Viewer\CoaXis.Protocol.Viewer.csproj" />
+    <ProjectReference Include="..\CoaXisUi\CoaXisUi.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Icons\ipc.svg" />
+    <EmbeddedResource Include="Icons\development-one.svg" />
+    <EmbeddedResource Include="Icons\development-two.svg" />
   </ItemGroup>
 </Project>

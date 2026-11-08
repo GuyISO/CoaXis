@@ -1,4 +1,5 @@
 using CoaXis.Protocol.Viewer;
+using CoaXis.Ui;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -12,15 +13,15 @@ namespace CoaXis.IpcTester;
 /// <summary>
 /// 入力ファイルを読み込み、モデル集合のIPC要求とViewerの応答を表示する。
 /// </summary>
-public sealed class MainForm : Form
+public sealed class MainForm : CoaXisForm
 {
     private readonly TextBox _pipeName = new() { Text = "CoaXisViewerPipe", Width = 220 };
     private readonly TextBox _entityPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
     private readonly TextBox _propertyPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
     private readonly TextBox _testDataPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
     private readonly ComboBox _requestType = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
-    private readonly Button _sendButton = new() { Text = "ReplaceModelSetを送信", AutoSize = true };
-    private readonly Button _sendRequestButton = new() { Text = "選択した要求を送信", AutoSize = true };
+    private readonly Button _sendButton = new CoaXisButton { Text = "ReplaceModelSetを送信", AutoSize = true };
+    private readonly Button _sendRequestButton = new CoaXisButton { Text = "選択した要求を送信", AutoSize = true };
     private readonly ListBox _history = new() { Dock = DockStyle.Fill, IntegralHeight = false };
     private readonly TextBox _requestJson = CreateJsonView();
     private readonly TextBox _responseJson = CreateJsonView();
@@ -33,12 +34,15 @@ public sealed class MainForm : Form
     public MainForm()
     {
         Text = "CoaXis IPC Tester";
+        Header.ApplicationTitle = "IPC Tester";
         MinimumSize = new Size(860, 580);
         Size = new Size(1120, 760);
         StartPosition = FormStartPosition.CenterScreen;
         _entityPath.Text = FindSamplePath("modelentity.csv");
         _propertyPath.Text = FindSamplePath("modelproperty.csv");
         _testDataPath.Text = FindSamplePath("modelset-test-data.json");
+        _sendButton.Tag = "Primary";
+        _sendRequestButton.Tag = "Primary";
         _requestType.Items.AddRange(new object[]
         {
             new RequestOption(IpcEventType.ToViewer.ClearModelSet, "ClearModelSet（全消去）"),
@@ -54,12 +58,17 @@ public sealed class MainForm : Form
             Dock = DockStyle.Fill,
             ColumnCount = 1,
             RowCount = 3,
-            Padding = new Padding(12)
+            Padding = new Padding(20),
+            Tag = "Background"
         };
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        Controls.Add(root);
+        var navigation = new CoaXisNavigationRail();
+        navigation.AddPage("IPC操作", typeof(MainForm).Assembly, "CoaXis.IpcTester.Icons.ipc.svg", root);
+        navigation.AddPage("開発中1", typeof(MainForm).Assembly, "CoaXis.IpcTester.Icons.development-one.svg", CreateDevelopmentPage("開発中1"));
+        navigation.AddPage("開発中2", typeof(MainForm).Assembly, "CoaXis.IpcTester.Icons.development-two.svg", CreateDevelopmentPage("開発中2"));
+        Controls.Add(navigation);
 
         root.Controls.Add(BuildConnectionPanel(), 0, 0);
         root.Controls.Add(BuildFilePanel(), 0, 1);
@@ -69,10 +78,25 @@ public sealed class MainForm : Form
         statusStrip.Items.Add(_status);
         Controls.Add(statusStrip);
         statusStrip.Dock = DockStyle.Bottom;
+        Controls.Add(Header);
+        Header.SendToBack();
 
         _sendButton.Click += async (_, _) => await SendReplaceModelSetAsync();
         _sendRequestButton.Click += async (_, _) => await SendSelectedRequestAsync();
         _history.SelectedIndexChanged += (_, _) => ShowSelectedExchange();
+    }
+
+    private static Control CreateDevelopmentPage(string title)
+    {
+        var page = new Panel { Tag = "Background", Padding = new Padding(20) };
+        page.Controls.Add(new Label
+        {
+            Text = title,
+            AutoSize = true,
+            Dock = DockStyle.Top,
+            Tag = "Brand"
+        });
+        return page;
     }
 
     private static string FindSamplePath(string fileName)
@@ -99,11 +123,13 @@ public sealed class MainForm : Form
             Dock = DockStyle.Fill,
             AutoSize = true,
             WrapContents = false,
-            Padding = new Padding(0, 0, 0, 8)
+            Padding = new Padding(12),
+            Margin = new Padding(0, 0, 0, 12),
+            Tag = "Surface"
         };
         panel.Controls.Add(new Label { Text = "Pipe名", AutoSize = true, Margin = new Padding(0, 7, 8, 0) });
         panel.Controls.Add(_pipeName);
-        panel.Controls.Add(new Label { Text = "Viewer起動後に送信", AutoSize = true, ForeColor = SystemColors.GrayText, Margin = new Padding(12, 7, 0, 0) });
+        panel.Controls.Add(new Label { Text = "Viewer起動後に送信", AutoSize = true, Tag = "Muted", Margin = new Padding(12, 7, 0, 0) });
         return panel;
     }
 
@@ -114,8 +140,10 @@ public sealed class MainForm : Form
             Dock = DockStyle.Top,
             AutoSize = true,
             ColumnCount = 3,
-            RowCount = 4,
-            Padding = new Padding(0, 0, 0, 10)
+            RowCount = 5,
+            Padding = new Padding(12),
+            Margin = new Padding(0, 0, 0, 12),
+            Tag = "Surface"
         };
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
         panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
@@ -126,57 +154,62 @@ public sealed class MainForm : Form
         AddFileRow(panel, 2, "操作テストデータ (JSON)", _testDataPath, "選択...", SelectTestDataFile);
 
         panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        panel.Controls.Add(new Label { Text = "要求", AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 7, 10, 7) }, 0, 3);
+        panel.Controls.Add(new Label { Text = "要求", AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 10, 10, 10) }, 0, 3);
         panel.Controls.Add(_requestType, 1, 3);
+        panel.SetColumnSpan(_requestType, 2);
+        panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
         var buttons = new FlowLayoutPanel
         {
             AutoSize = true,
             WrapContents = false,
             Dock = DockStyle.Fill,
-            Margin = new Padding(0, 2, 0, 0)
+            Margin = new Padding(0, 6, 0, 0)
         };
         buttons.Controls.Add(_sendButton);
         buttons.Controls.Add(_sendRequestButton);
-        panel.Controls.Add(buttons, 2, 3);
-        panel.Margin = new Padding(0, 4, 0, 0);
+        panel.Controls.Add(buttons, 1, 4);
+        panel.SetColumnSpan(buttons, 2);
+        panel.Margin = new Padding(0);
         return panel;
     }
 
     private static void AddFileRow(TableLayoutPanel panel, int row, string label, TextBox path, string buttonText, EventHandler onClick)
     {
         panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        panel.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 7, 10, 7) }, 0, row);
+        panel.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 10, 10, 10) }, 0, row);
         panel.Controls.Add(path, 1, row);
-        var button = new Button { Text = buttonText, AutoSize = true };
+        var button = new CoaXisButton { Text = buttonText, AutoSize = true, Margin = new Padding(8, 4, 0, 4) };
         button.Click += onClick;
         panel.Controls.Add(button, 2, row);
     }
 
     private Control BuildExchangePanel()
     {
+        var card = new Panel
+        {
+            Dock = DockStyle.Fill,
+            Padding = new Padding(12),
+            Tag = "Surface"
+        };
         var split = new SplitContainer
         {
             Dock = DockStyle.Fill,
-            Orientation = Orientation.Vertical
+            Orientation = Orientation.Vertical,
+            BorderStyle = BorderStyle.None
         };
         Shown += (_, _) =>
         {
-            split.SplitterDistance = 310;
+            split.SplitterDistance = Math.Min(310, split.ClientSize.Width - split.SplitterWidth - 420);
             split.Panel1MinSize = 220;
             split.Panel2MinSize = 420;
         };
         split.Panel1.Controls.Add(_history);
-        split.Panel1.Controls.Add(new Label { Text = "通信履歴", Dock = DockStyle.Top, Height = 26, TextAlign = ContentAlignment.MiddleLeft });
+        split.Panel1.Controls.Add(new Label { Text = "通信履歴", Dock = DockStyle.Top, Height = 34, TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(4, 0, 0, 0) });
 
-        var tabs = new TabControl { Dock = DockStyle.Fill };
-        var requestTab = new TabPage("送信JSON");
-        var responseTab = new TabPage("応答JSON");
-        requestTab.Controls.Add(_requestJson);
-        responseTab.Controls.Add(_responseJson);
-        tabs.TabPages.Add(requestTab);
-        tabs.TabPages.Add(responseTab);
+        var tabs = new ExchangeTabs(_requestJson, _responseJson) { Dock = DockStyle.Fill };
         split.Panel2.Controls.Add(tabs);
-        return split;
+        card.Controls.Add(split);
+        return card;
     }
 
     private static TextBox CreateJsonView()
@@ -187,8 +220,7 @@ public sealed class MainForm : Form
             Multiline = true,
             ReadOnly = true,
             ScrollBars = ScrollBars.Both,
-            WordWrap = false,
-            Font = new Font(FontFamily.GenericMonospace, 9)
+            WordWrap = false
         };
     }
 
