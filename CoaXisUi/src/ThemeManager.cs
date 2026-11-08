@@ -200,6 +200,15 @@ public static class ThemeManager
             case DataGridView grid:
                 ApplyGrid(grid);
                 break;
+            case TreeView tree:
+                tree.BorderStyle = BorderStyle.FixedSingle;
+                tree.BackColor = _currentTheme.Surface;
+                tree.ForeColor = _currentTheme.Text;
+                tree.LineColor = _currentTheme.Border;
+                break;
+            case CheckBox checkBox:
+                checkBox.FlatStyle = FlatStyle.Flat;
+                break;
             case Splitter splitter:
                 splitter.BackColor = _currentTheme.Border;
                 break;
@@ -212,9 +221,7 @@ public static class ThemeManager
                 statusStrip.SizingGrip = false;
                 foreach (ToolStripItem item in statusStrip.Items)
                 {
-                    item.Font = StandardFont;
-                    item.ForeColor = _currentTheme.MutedText;
-                    item.BackColor = _currentTheme.Surface;
+                    ApplyStatusItem(item);
                 }
                 break;
             case Label label when label.Tag is string labelTag && labelTag == "Muted":
@@ -243,9 +250,16 @@ public static class ThemeManager
         }
     }
 
+    internal static void ApplyStatusItem(ToolStripItem item)
+    {
+        item.Font = StandardFont;
+        item.ForeColor = _currentTheme.MutedText;
+        item.BackColor = _currentTheme.Surface;
+    }
+
     private static bool HasScrollBars(Control control)
     {
-        return control is ListBox or DataGridView ||
+        return control is ListBox or DataGridView or TreeView ||
             control is TextBox textBox && textBox.ScrollBars != ScrollBars.None;
     }
 

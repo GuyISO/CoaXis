@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -19,10 +20,13 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel
         WrapContents = false,
         Padding = new Padding(4, 12, 4, 0)
     };
-    private readonly Panel _pages = new() { Dock = DockStyle.Fill, Tag = "Background" };
+    private readonly Panel _pages = new() { Dock = DockStyle.Fill, Margin = Padding.Empty, Tag = "Background" };
     private readonly List<(CoaXisNavigationButton Button, Control Page)> _destinations = new();
+    private readonly List<CoaXisNavigationButton> _previewButtons = new();
     private readonly ToolTip _toolTip = new();
     private Control _selectedPage;
+    private string _designerPreviewIcons = string.Empty;
+    private TabControl _designerTabs;
 
     /// <summary>ナビゲーションレールとページ領域を作成する。</summary>
     public CoaXisNavigationRail()
@@ -36,13 +40,70 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel
         RowStyles.Add(new RowStyle(SizeType.Percent, 100));
         Controls.Add(_rail, 0, 0);
         Controls.Add(_pages, 1, 0);
+        _rail.SizeChanged += OnRailSizeChanged;
     }
 
     /// <summary>選択されているページを取得する。</summary>
     public Control SelectedPage => _selectedPage;
 
+    /// <inheritdoc />
+    public override ISite Site
+    {
+        get => base.Site;
+        set
+        {
+            base.Site = value;
+            UpdateDesignerPreview();
+        }
+    }
+
+    /// <summary>デザイナーでプレビューする共有SVGアイコンのリソース名をセミコロン区切りで取得または設定する。</summary>
+    [DefaultValue("")]
+    public string DesignerPreviewIcons
+    {
+        get => _designerPreviewIcons;
+        set
+        {
+            _designerPreviewIcons = value ?? string.Empty;
+            UpdateDesignerPreview();
+        }
+    }
+
+    /// <summary>デザイナーのページ切り替えに合わせてプレビューの選択状態を更新する。</summary>
+    [DefaultValue(null)]
+    public TabControl DesignerTabs
+    {
+        get => _designerTabs;
+        set
+        {
+            if (_designerTabs != null)
+            {
+                _designerTabs.SelectedIndexChanged -= OnDesignerTabChanged;
+                _designerTabs.HandleCreated -= OnDesignerTabChanged;
+            }
+
+            _designerTabs = value;
+            if (_designerTabs != null)
+            {
+                _designerTabs.SelectedIndexChanged += OnDesignerTabChanged;
+                _designerTabs.HandleCreated += OnDesignerTabChanged;
+            }
+
+            UpdatePreviewSelection();
+        }
+    }
+
     /// <summary>選択ページが変更されたときに発生する。</summary>
     public event EventHandler SelectedPageChanged;
+
+    /// <summary>CoaXis UIライブラリに含まれるアイコンでナビゲーション項目を追加する。</summary>
+    /// <param name="title">項目の表示名とアクセシブル名。</param>
+    /// <param name="iconResourceName">共有アイコンのマニフェストリソース名。</param>
+    /// <param name="page">項目を選択したときに表示するページ。</param>
+    public void AddPage(string title, string iconResourceName, Control page)
+    {
+        AddPage(title, typeof(CoaXisNavigationRail).Assembly, iconResourceName, page);
+    }
 
     /// <summary>ナビゲーション項目と対応するページを追加する。</summary>
     /// <param name="title">項目の表示名とアクセシブル名。</param>
@@ -67,11 +128,13 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel
             Height = 46,
             Margin = new Padding(0, 0, 0, 8)
         };
+        button.SizeChanged += OnRailSizeChanged;
         _toolTip.SetToolTip(button, title);
         page.Dock = DockStyle.Fill;
         page.Visible = false;
         _pages.Controls.Add(page);
         _rail.Controls.Add(button);
+        CenterRailButtons();
         _destinations.Add((button, page));
         button.Click += (_, _) => SelectPage(page);
 
@@ -114,6 +177,11 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel
     {
         if (disposing)
         {
+            if (_designerTabs != null)
+            {
+                _designerTabs.SelectedIndexChanged -= OnDesignerTabChanged;
+                _designerTabs.HandleCreated -= OnDesignerTabChanged;
+            }
             _toolTip.Dispose();
         }
 
@@ -128,9 +196,72 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel
             {
                 return true;
             }
+
         }
 
         return false;
+    }
+
+    private void OnRailSizeChanged(object sender, EventArgs e) => CenterRailButtons();
+
+    private void OnDesignerTabChanged(object sender, EventArgs e) => UpdatePreviewSelection();
+
+    private void UpdatePreviewSelection()
+    {
+        int selected = Math.Max(0, _designerTabs?.SelectedIndex ?? 0);
+        for (int i = 0; i < _previewButtons.Count; i++)
+        {
+            _previewButtons[i].Tag = i == selected ? "Primary" : null;
+            _previewButtons[i].Invalidate();
+        }
+    }
+
+    private void CenterRailButtons()
+    {
+        if (_rail.Controls.Count == 0)
+        {
+            return;
+        }
+
+        int left = Math.Max(0, (_rail.ClientSize.Width - _rail.Controls[0].Width) / 2);
+        Padding padding = _rail.Padding;
+        if (padding.Left != left || padding.Right != left)
+        {
+            _rail.Padding = new Padding(left, padding.Top, left, padding.Bottom);
+        }
+    }
+
+    private void UpdateDesignerPreview()
+    {
+        foreach (CoaXisNavigationButton button in _previewButtons)
+        {
+            _rail.Controls.Remove(button);
+            button.Dispose();
+        }
+
+        _previewButtons.Clear();
+        if (Site?.DesignMode != true)
+        {
+            return;
+        }
+
+        _rail.BackColor = ThemeManager.CurrentTheme.Surface;
+        foreach (string resourceName in _designerPreviewIcons.Split(';', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+        {
+            var button = new CoaXisNavigationButton(typeof(CoaXisNavigationRail).Assembly, resourceName)
+            {
+                Width = 46,
+                Height = 46,
+                Margin = new Padding(0, 0, 0, 8),
+                Tag = null
+            };
+            button.SizeChanged += OnRailSizeChanged;
+            _previewButtons.Add(button);
+            _rail.Controls.Add(button);
+        }
+
+        CenterRailButtons();
+        UpdatePreviewSelection();
     }
 }
 
@@ -198,6 +329,12 @@ internal sealed class CoaXisNavigationButton : Button
     protected override void OnMouseLeave(EventArgs e) { base.OnMouseLeave(e); _hovered = false; Invalidate(); }
     protected override void OnGotFocus(EventArgs e) { base.OnGotFocus(e); Invalidate(); }
     protected override void OnLostFocus(EventArgs e) { base.OnLostFocus(e); Invalidate(); }
+
+    protected override void OnDpiChangedAfterParent(EventArgs e)
+    {
+        base.OnDpiChangedAfterParent(e);
+        Invalidate();
+    }
 
     protected override void Dispose(bool disposing)
     {

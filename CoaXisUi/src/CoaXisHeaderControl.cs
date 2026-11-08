@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
+using Svg;
 
 namespace CoaXis.Ui;
 
@@ -13,6 +15,9 @@ public sealed class CoaXisHeaderControl : Panel
     private readonly Button _minimizeButton = new() { Dock = DockStyle.Right, Width = 46, Text = "\uE921", AccessibleName = "最小化" };
     private readonly CaptionHitTestButton _maximizeButton = new() { Dock = DockStyle.Right, Width = 46, AccessibleName = "最大化" };
     private readonly Button _closeButton = new() { Dock = DockStyle.Right, Width = 46, Text = "\uE8BB", AccessibleName = "閉じる" };
+    private readonly SvgDocument _logoDocument;
+    private Bitmap _renderedLogo;
+    private Size _renderedLogoSize;
     private Theme _theme = ThemeManager.CurrentTheme;
     private string _applicationTitle = string.Empty;
     private bool _maximizeHovered;
@@ -21,9 +26,13 @@ public sealed class CoaXisHeaderControl : Panel
     public CoaXisHeaderControl()
     {
         Dock = DockStyle.Top;
-        Height = 46;
+        Height = 36;
         DoubleBuffered = true;
+        SetStyle(ControlStyles.ResizeRedraw, true);
         AccessibleName = "CoaXis タイトルバー";
+        using Stream logoStream = CoaXisUiAssets.OpenStream(CoaXisUiAssets.LogoResourceName);
+        _logoDocument = SvgDocument.Open<SvgDocument>(logoStream)
+            ?? throw new InvalidDataException($"CoaXisロゴを読み込めません: {CoaXisUiAssets.LogoResourceName}");
         Controls.Add(_themeButton);
         Controls.Add(_minimizeButton);
         Controls.Add(_maximizeButton);
@@ -33,6 +42,7 @@ public sealed class CoaXisHeaderControl : Panel
         _minimizeButton.Click += OnMinimizeClick;
         _maximizeButton.Click += OnMaximizeClick;
         _closeButton.Click += OnCloseClick;
+        ApplyTheme(ThemeManager.CurrentTheme);
     }
 
     /// <summary>CoaXisの後ろに表示するアプリケーション名を取得または設定する。</summary>
@@ -66,6 +76,13 @@ public sealed class CoaXisHeaderControl : Panel
         _maximizeButton.Text = maximized ? "\uE923" : "\uE922";
         _maximizeButton.AccessibleName = maximized ? "元に戻す" : "最大化";
         SetMaximizeHovered(false);
+    }
+
+    internal void SetDialogMode()
+    {
+        _themeButton.Visible = false;
+        _minimizeButton.Visible = false;
+        _maximizeButton.Visible = false;
     }
 
     internal void ApplyTheme(Theme theme)
@@ -104,23 +121,56 @@ public sealed class CoaXisHeaderControl : Panel
     protected override void OnPaint(PaintEventArgs e)
     {
         base.OnPaint(e);
-        int iconSize = (int)Math.Round(22 * DeviceDpi / 96.0);
-        int left = (int)Math.Round(14 * DeviceDpi / 96.0);
-        var icon = new Rectangle(left, (Height - iconSize) / 2, iconSize, iconSize);
-        using var pen = new Pen(_theme.Primary, Math.Max(1F, 2F * DeviceDpi / 96F));
-        e.Graphics.DrawRectangle(pen, icon);
-        e.Graphics.DrawLine(pen, icon.Left + 5, icon.Top + 5, icon.Right - 5, icon.Bottom - 5);
-        e.Graphics.DrawLine(pen, icon.Right - 5, icon.Top + 5, icon.Left + 5, icon.Bottom - 5);
+        int dpiScale = DeviceDpi;
+        Rectangle contentBounds = DisplayRectangle;
+        int logoHeight = Math.Max(1, Math.Min(
+            (int)Math.Round(40 * dpiScale / 96.0),
+            contentBounds.Height - (int)Math.Round(6 * dpiScale / 96.0)));
+        int logoWidth = Math.Max(1, (int)Math.Round(logoHeight * _logoDocument.ViewBox.Width / _logoDocument.ViewBox.Height));
+        var logoSize = new Size(logoWidth, logoHeight);
+        if (_renderedLogo == null || _renderedLogoSize != logoSize)
+        {
+            Bitmap rendered = _logoDocument.Draw(logoWidth, logoHeight);
+            _renderedLogo?.Dispose();
+            _renderedLogo = rendered;
+            _renderedLogoSize = logoSize;
+        }
 
-        int titleLeft = icon.Right + (int)Math.Round(12 * DeviceDpi / 96.0);
+        int left = (int)Math.Round(8 * DeviceDpi / 96.0);
+        var logoBounds = new Rectangle(left, contentBounds.Top + (contentBounds.Height - logoHeight) / 2, logoWidth, logoHeight);
+        e.Graphics.DrawImageUnscaled(_renderedLogo, logoBounds.Location);
+
+        int titleLeft = logoBounds.Right + (int)Math.Round(10 * DeviceDpi / 96.0);
         var flags = TextFormatFlags.NoPadding | TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine;
-        Size brandSize = TextRenderer.MeasureText(e.Graphics, "CoaXis", TitleFont, Size.Empty, flags);
-        int titleWidth = Math.Max(0, _themeButton.Left - titleLeft - 8);
-        var brandBounds = new Rectangle(titleLeft, 0, Math.Min(brandSize.Width, titleWidth), Height);
-        TextRenderer.DrawText(e.Graphics, "CoaXis", TitleFont, brandBounds, _theme.Primary, flags | TextFormatFlags.EndEllipsis);
-        int nameLeft = titleLeft + brandSize.Width + (int)Math.Round(8 * DeviceDpi / 96.0);
-        var nameBounds = new Rectangle(nameLeft, 0, Math.Max(0, _themeButton.Left - nameLeft - 8), Height);
+        int controlsLeft = _themeButton.Visible ? _themeButton.Left : _closeButton.Left;
+        int titleWidth = Math.Max(0, controlsLeft - titleLeft - 8);
+        var nameBounds = new Rectangle(titleLeft, contentBounds.Top, titleWidth, contentBounds.Height);
         TextRenderer.DrawText(e.Graphics, _applicationTitle, TitleFont, nameBounds, _theme.Text, flags | TextFormatFlags.EndEllipsis);
+    }
+
+    /// <inheritdoc />
+    protected override void OnPaddingChanged(EventArgs e)
+    {
+        base.OnPaddingChanged(e);
+        Invalidate();
+    }
+
+    /// <inheritdoc />
+    protected override void OnDpiChangedAfterParent(EventArgs e)
+    {
+        base.OnDpiChangedAfterParent(e);
+        Invalidate();
+    }
+
+    /// <inheritdoc />
+    protected override void Dispose(bool disposing)
+    {
+        if (disposing)
+        {
+            _renderedLogo?.Dispose();
+        }
+
+        base.Dispose(disposing);
     }
 
     /// <inheritdoc />
@@ -150,10 +200,12 @@ public sealed class CoaXisHeaderControl : Panel
         }
     }
 
-    private void OnMaximizeClick(object sender, EventArgs e)
+    private void OnMaximizeClick(object sender, EventArgs e) => ToggleWindowState();
+
+    internal void ToggleWindowState()
     {
         Form form = FindForm();
-        if (form != null)
+        if (form != null && form.MaximizeBox)
         {
             form.WindowState = form.WindowState == FormWindowState.Maximized
                 ? FormWindowState.Normal

@@ -13,8 +13,13 @@ public class CoaXisForm : Form
     private const int WmNcCalcSize = 0x0083;
     private const int WmNcHitTest = 0x0084;
     private const int WmNcMouseMove = 0x00A0;
+    private const int WmNcLeftButtonDown = 0x00A1;
     private const int WmNcMouseLeave = 0x02A2;
     private const int WmNcLeftButtonUp = 0x00A2;
+    private const int WmMouseMove = 0x0200;
+    private const int WmLeftButtonUp = 0x0202;
+    private const int WmCaptureChanged = 0x0215;
+    private const int WmCancelMode = 0x001F;
     private const int WmSysCommand = 0x0112;
     private const int HtClient = 1;
     private const int HtCaption = 2;
@@ -32,6 +37,7 @@ public class CoaXisForm : Form
     private const uint SwpNoZOrder = 0x0004;
     private const uint SwpFrameChanged = 0x0020;
     private readonly CoaXisHeaderControl _header = new();
+    private bool _maximizePressed;
 
     /// <summary>サイズ変更可能なフォームを作成する。</summary>
     public CoaXisForm()
@@ -43,6 +49,24 @@ public class CoaXisForm : Form
 
     /// <summary>フォーム上部の共通ヘッダーを取得する。</summary>
     public CoaXisHeaderControl Header => _header;
+
+    /// <summary>共通ヘッダーに表示するアプリケーション名を取得または設定する。</summary>
+    [DefaultValue("")]
+    public string HeaderTitle
+    {
+        get => _header.ApplicationTitle;
+        set => _header.ApplicationTitle = value;
+    }
+
+    /// <inheritdoc />
+    protected override void OnControlAdded(ControlEventArgs e)
+    {
+        base.OnControlAdded(e);
+        if (_header != null && e.Control != _header && _header.Parent == this)
+        {
+            _header.SendToBack();
+        }
+    }
 
     /// <inheritdoc />
     protected override void OnHandleCreated(EventArgs e)
@@ -102,6 +126,42 @@ public class CoaXisForm : Form
             }
 
             return;
+        }
+
+        if (m.Msg == WmNcLeftButtonDown && m.WParam.ToInt32() == HtMaxButton && _header != null)
+        {
+            if (MaximizeBox)
+            {
+                _maximizePressed = true;
+                Capture = true;
+            }
+
+            return;
+        }
+
+        if (_maximizePressed && (m.Msg == WmMouseMove || m.Msg == WmLeftButtonUp))
+        {
+            long coordinates = m.LParam.ToInt64();
+            var clientPoint = new Point(unchecked((short)coordinates), unchecked((short)(coordinates >> 16)));
+            bool overButton = _header.IsMaximizeButton(PointToScreen(clientPoint));
+            _header.SetMaximizeHovered(overButton);
+            if (m.Msg == WmLeftButtonUp)
+            {
+                _maximizePressed = false;
+                Capture = false;
+                if (overButton)
+                {
+                    _header.ToggleWindowState();
+                }
+            }
+
+            return;
+        }
+
+        if (_maximizePressed && (m.Msg == WmCaptureChanged || m.Msg == WmCancelMode))
+        {
+            _maximizePressed = false;
+            _header.SetMaximizeHovered(false);
         }
 
         if (m.Msg == WmNcMouseMove && _header != null)

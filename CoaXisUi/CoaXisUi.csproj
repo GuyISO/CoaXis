@@ -11,4 +11,10 @@
   <ItemGroup>
     <PackageReference Include="Svg" Version="3.4.7" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="assets\logo\logo.svg" LogicalName="CoaXis.Ui.Assets.Logo.svg" />
+    <EmbeddedResource Include="assets\icons\ipc.svg" LogicalName="CoaXis.Ui.Assets.Icons.ipc.svg" />
+    <EmbeddedResource Include="assets\icons\development-one.svg" LogicalName="CoaXis.Ui.Assets.Icons.development-one.svg" />
+    <EmbeddedResource Include="assets\icons\development-two.svg" LogicalName="CoaXis.Ui.Assets.Icons.development-two.svg" />
+  </ItemGroup>
 </Project>

@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -15,6 +16,19 @@ public sealed class CoaXisButton : Button
     public CoaXisButton()
     {
         SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+        ThemeManager.Apply(this);
+    }
+
+    /// <summary>テーマのボタン種別を指定する。</summary>
+    [DefaultValue(null)]
+    public new object Tag
+    {
+        get => base.Tag;
+        set
+        {
+            base.Tag = value;
+            ThemeManager.Apply(this);
+        }
     }
 
     protected override void OnPaint(PaintEventArgs e)

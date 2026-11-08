@@ -2,7 +2,6 @@ using CoaXis.Protocol.Viewer;
 using CoaXis.Ui;
 using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -13,19 +12,8 @@ namespace CoaXis.IpcTester;
 /// <summary>
 /// 入力ファイルを読み込み、モデル集合のIPC要求とViewerの応答を表示する。
 /// </summary>
-public sealed class MainForm : CoaXisForm
+public sealed partial class MainForm : CoaXisForm
 {
-    private readonly TextBox _pipeName = new() { Text = "CoaXisViewerPipe", Width = 220 };
-    private readonly TextBox _entityPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
-    private readonly TextBox _propertyPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
-    private readonly TextBox _testDataPath = new() { ReadOnly = true, Dock = DockStyle.Fill };
-    private readonly ComboBox _requestType = new() { DropDownStyle = ComboBoxStyle.DropDownList, Width = 260 };
-    private readonly Button _sendButton = new CoaXisButton { Text = "ReplaceModelSetを送信", AutoSize = true };
-    private readonly Button _sendRequestButton = new CoaXisButton { Text = "選択した要求を送信", AutoSize = true };
-    private readonly ListBox _history = new() { Dock = DockStyle.Fill, IntegralHeight = false };
-    private readonly TextBox _requestJson = CreateJsonView();
-    private readonly TextBox _responseJson = CreateJsonView();
-    private readonly ToolStripStatusLabel _status = new("Viewer未接続");
     private readonly List<ExchangeRecord> _records = new();
 
     /// <summary>
@@ -33,16 +21,10 @@ public sealed class MainForm : CoaXisForm
     /// </summary>
     public MainForm()
     {
-        Text = "CoaXis IPC Tester";
-        Header.ApplicationTitle = "IPC Tester";
-        MinimumSize = new Size(860, 580);
-        Size = new Size(1120, 760);
-        StartPosition = FormStartPosition.CenterScreen;
+        InitializeComponent();
         _entityPath.Text = FindSamplePath("modelentity.csv");
         _propertyPath.Text = FindSamplePath("modelproperty.csv");
         _testDataPath.Text = FindSamplePath("modelset-test-data.json");
-        _sendButton.Tag = "Primary";
-        _sendRequestButton.Tag = "Primary";
         _requestType.Items.AddRange(new object[]
         {
             new RequestOption(IpcEventType.ToViewer.ClearModelSet, "ClearModelSet（全消去）"),
@@ -52,51 +34,45 @@ public sealed class MainForm : CoaXisForm
             new RequestOption(IpcEventType.ToViewer.ReadModelSet, "ReadModelSet（ID指定読み出し）")
         });
         _requestType.SelectedIndex = 0;
-
-        var root = new TableLayoutPanel
-        {
-            Dock = DockStyle.Fill,
-            ColumnCount = 1,
-            RowCount = 3,
-            Padding = new Padding(20),
-            Tag = "Background"
-        };
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        root.RowStyles.Add(new RowStyle(SizeType.Percent, 100));
-        var navigation = new CoaXisNavigationRail();
-        navigation.AddPage("IPC操作", typeof(MainForm).Assembly, "CoaXis.IpcTester.Icons.ipc.svg", root);
-        navigation.AddPage("開発中1", typeof(MainForm).Assembly, "CoaXis.IpcTester.Icons.development-one.svg", CreateDevelopmentPage("開発中1"));
-        navigation.AddPage("開発中2", typeof(MainForm).Assembly, "CoaXis.IpcTester.Icons.development-two.svg", CreateDevelopmentPage("開発中2"));
-        Controls.Add(navigation);
-
-        root.Controls.Add(BuildConnectionPanel(), 0, 0);
-        root.Controls.Add(BuildFilePanel(), 0, 1);
-        root.Controls.Add(BuildExchangePanel(), 0, 2);
-
-        var statusStrip = new StatusStrip();
-        statusStrip.Items.Add(_status);
-        Controls.Add(statusStrip);
-        statusStrip.Dock = DockStyle.Bottom;
-        Controls.Add(Header);
+        _demoGrid.Rows.Add("名前", "CoaXis");
+        _demoGrid.Rows.Add("状態", "準備完了");
+        _demoTree.ExpandAll();
+        _demoMessageButton.Click += (_, _) => CoaXisMessageBox.Show(
+            this, "CoaXisのメッセージボックスです。", "メッセージ",
+            MessageBoxButtons.OKCancel, MessageBoxIcon.Information);
+        _navigationRail.AddPage("IPC操作", CoaXisUiAssets.IpcIconResourceName, _ipcPage);
+        _navigationRail.AddPage("開発中1", CoaXisUiAssets.DevelopmentOneIconResourceName, _developmentOnePage);
+        _navigationRail.AddPage("開発中2", CoaXisUiAssets.DevelopmentTwoIconResourceName, _developmentTwoPage);
+        _navigationRail.DesignerTabs = null;
+        Controls.Remove(_designerTabs);
+        _designerTabs.Dispose();
+        _navigationRail.Dock = DockStyle.Fill;
         Header.SendToBack();
 
         _sendButton.Click += async (_, _) => await SendReplaceModelSetAsync();
         _sendRequestButton.Click += async (_, _) => await SendSelectedRequestAsync();
+        _selectEntityButton.Click += SelectEntityFile;
+        _selectPropertyButton.Click += SelectPropertyFile;
+        _selectTestDataButton.Click += SelectTestDataFile;
         _history.SelectedIndexChanged += (_, _) => ShowSelectedExchange();
+        _requestTabButton.Click += (_, _) => SelectExchangeTab(true);
+        _responseTabButton.Click += (_, _) => SelectExchangeTab(false);
+        _requestTabButton.KeyDown += OnExchangeTabKeyDown;
+        _responseTabButton.KeyDown += OnExchangeTabKeyDown;
+        Shown += OnMainFormShown;
     }
 
-    private static Control CreateDevelopmentPage(string title)
+    protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
     {
-        var page = new Panel { Tag = "Background", Padding = new Padding(20) };
-        page.Controls.Add(new Label
+        if (keyData == (Keys.Control | Keys.Tab) || keyData == (Keys.Control | Keys.Shift | Keys.Tab))
         {
-            Text = title,
-            AutoSize = true,
-            Dock = DockStyle.Top,
-            Tag = "Brand"
-        });
-        return page;
+            bool request = _requestTabButton.Tag is not string tag || tag != "Primary";
+            SelectExchangeTab(request);
+            (request ? _requestTabButton : _responseTabButton).Focus();
+            return true;
+        }
+
+        return base.ProcessCmdKey(ref msg, keyData);
     }
 
     private static string FindSamplePath(string fileName)
@@ -116,112 +92,42 @@ public sealed class MainForm : CoaXisForm
         return string.Empty;
     }
 
-    private Control BuildConnectionPanel()
+    private void OnMainFormShown(object sender, EventArgs e)
     {
-        var panel = new FlowLayoutPanel
+        int availableWidth = _exchangeSplit.ClientSize.Width - _exchangeSplit.SplitterWidth - 420;
+        if (availableWidth < 220)
         {
-            Dock = DockStyle.Fill,
-            AutoSize = true,
-            WrapContents = false,
-            Padding = new Padding(12),
-            Margin = new Padding(0, 0, 0, 12),
-            Tag = "Surface"
-        };
-        panel.Controls.Add(new Label { Text = "Pipe名", AutoSize = true, Margin = new Padding(0, 7, 8, 0) });
-        panel.Controls.Add(_pipeName);
-        panel.Controls.Add(new Label { Text = "Viewer起動後に送信", AutoSize = true, Tag = "Muted", Margin = new Padding(12, 7, 0, 0) });
-        return panel;
+            throw new InvalidOperationException("通信履歴領域を表示するためのフォーム幅が不足しています。");
+        }
+
+        _exchangeSplit.Panel1MinSize = 220;
+        _exchangeSplit.Panel2MinSize = 420;
+        _exchangeSplit.SplitterDistance = Math.Min(310, availableWidth);
     }
 
-    private Control BuildFilePanel()
+    private void OnExchangeTabKeyDown(object sender, KeyEventArgs e)
     {
-        var panel = new TableLayoutPanel
+        if (e.KeyCode != Keys.Left && e.KeyCode != Keys.Right)
         {
-            Dock = DockStyle.Top,
-            AutoSize = true,
-            ColumnCount = 3,
-            RowCount = 5,
-            Padding = new Padding(12),
-            Margin = new Padding(0, 0, 0, 12),
-            Tag = "Surface"
-        };
-        panel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-        panel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100));
-        panel.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
+            return;
+        }
 
-        AddFileRow(panel, 0, "実体 (JSON/CSV)", _entityPath, "選択...", SelectEntityFile);
-        AddFileRow(panel, 1, "属性 (CSV・任意)", _propertyPath, "選択...", SelectPropertyFile);
-        AddFileRow(panel, 2, "操作テストデータ (JSON)", _testDataPath, "選択...", SelectTestDataFile);
-
-        panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        panel.Controls.Add(new Label { Text = "要求", AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 10, 10, 10) }, 0, 3);
-        panel.Controls.Add(_requestType, 1, 3);
-        panel.SetColumnSpan(_requestType, 2);
-        panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        var buttons = new FlowLayoutPanel
-        {
-            AutoSize = true,
-            WrapContents = false,
-            Dock = DockStyle.Fill,
-            Margin = new Padding(0, 6, 0, 0)
-        };
-        buttons.Controls.Add(_sendButton);
-        buttons.Controls.Add(_sendRequestButton);
-        panel.Controls.Add(buttons, 1, 4);
-        panel.SetColumnSpan(buttons, 2);
-        panel.Margin = new Padding(0);
-        return panel;
+        bool request = sender == _responseTabButton;
+        SelectExchangeTab(request);
+        (request ? _requestTabButton : _responseTabButton).Focus();
+        e.Handled = true;
+        e.SuppressKeyPress = true;
     }
 
-    private static void AddFileRow(TableLayoutPanel panel, int row, string label, TextBox path, string buttonText, EventHandler onClick)
+    private void SelectExchangeTab(bool request)
     {
-        panel.RowStyles.Add(new RowStyle(SizeType.AutoSize));
-        panel.Controls.Add(new Label { Text = label, AutoSize = true, Anchor = AnchorStyles.Left, Margin = new Padding(0, 10, 10, 10) }, 0, row);
-        panel.Controls.Add(path, 1, row);
-        var button = new CoaXisButton { Text = buttonText, AutoSize = true, Margin = new Padding(8, 4, 0, 4) };
-        button.Click += onClick;
-        panel.Controls.Add(button, 2, row);
-    }
-
-    private Control BuildExchangePanel()
-    {
-        var card = new Panel
-        {
-            Dock = DockStyle.Fill,
-            Padding = new Padding(12),
-            Tag = "Surface"
-        };
-        var split = new SplitContainer
-        {
-            Dock = DockStyle.Fill,
-            Orientation = Orientation.Vertical,
-            BorderStyle = BorderStyle.None
-        };
-        Shown += (_, _) =>
-        {
-            split.SplitterDistance = Math.Min(310, split.ClientSize.Width - split.SplitterWidth - 420);
-            split.Panel1MinSize = 220;
-            split.Panel2MinSize = 420;
-        };
-        split.Panel1.Controls.Add(_history);
-        split.Panel1.Controls.Add(new Label { Text = "通信履歴", Dock = DockStyle.Top, Height = 34, TextAlign = ContentAlignment.MiddleLeft, Padding = new Padding(4, 0, 0, 0) });
-
-        var tabs = new ExchangeTabs(_requestJson, _responseJson) { Dock = DockStyle.Fill };
-        split.Panel2.Controls.Add(tabs);
-        card.Controls.Add(split);
-        return card;
-    }
-
-    private static TextBox CreateJsonView()
-    {
-        return new TextBox
-        {
-            Dock = DockStyle.Fill,
-            Multiline = true,
-            ReadOnly = true,
-            ScrollBars = ScrollBars.Both,
-            WordWrap = false
-        };
+        _requestJson.Visible = request;
+        _responseJson.Visible = !request;
+        _requestTabButton.Tag = request ? "Primary" : null;
+        _responseTabButton.Tag = request ? null : "Primary";
+        _requestTabButton.AccessibleDescription = request ? "選択中" : null;
+        _responseTabButton.AccessibleDescription = request ? null : "選択中";
+        ThemeManager.Apply(_exchangeTabBar);
     }
 
     private void SelectEntityFile(object sender, EventArgs args)
