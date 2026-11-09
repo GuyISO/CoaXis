@@ -11,6 +11,7 @@ public sealed class CoaXisButton : Button, ICoaXisThemedControl
 {
     private bool _hovered;
     private bool _pressed;
+    private bool _isSelected;
 
     /// <summary>ボタンを作成する。</summary>
     public CoaXisButton()
@@ -22,8 +23,7 @@ public sealed class CoaXisButton : Button, ICoaXisThemedControl
     /// <inheritdoc />
     public void ApplyTheme(Theme theme)
     {
-        bool primary = Tag is string tag && (tag == "Primary" ||
-            tag == "ThemeDark" && theme is DarkTheme || tag == "ThemeLight" && theme is LightTheme);
+        bool primary = IsPrimary;
         Font = theme.ButtonFont;
         FlatStyle = FlatStyle.Flat;
         FlatAppearance.BorderSize = 0;
@@ -49,6 +49,25 @@ public sealed class CoaXisButton : Button, ICoaXisThemedControl
         }
     }
 
+    /// <summary>選択中のボタンを強調表示するかどうかを取得または設定する。</summary>
+    [DefaultValue(false)]
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected == value)
+            {
+                return;
+            }
+
+            _isSelected = value;
+            ThemeManager.Apply(this);
+        }
+    }
+
+    private bool IsPrimary => _isSelected || Tag is string tag && tag == "Primary";
+
     protected override void OnPaint(PaintEventArgs e)
     {
         e.Graphics.Clear(Parent?.BackColor ?? SystemColors.Control);
@@ -58,7 +77,7 @@ public sealed class CoaXisButton : Button, ICoaXisThemedControl
         }
 
         Theme theme = ThemeManager.CurrentTheme;
-        bool primary = Tag is string tag && tag == "Primary";
+        bool primary = IsPrimary;
         Color background = !Enabled ? theme.Border
             : primary && _pressed ? Blend(theme.Primary, Color.Black, 0.12)
             : primary && _hovered ? Blend(theme.Primary, Color.White, 0.10)

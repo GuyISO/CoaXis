@@ -35,6 +35,9 @@ public abstract class Theme
     /// <summary>テキストや選択項目を入力する領域の背景色を取得する。</summary>
     public virtual Color InputBackground => Surface;
 
+    /// <summary>未選択のチェック欄にマウスを重ねたときの背景色を取得する。</summary>
+    public virtual Color CheckBoxHoverBackground => InputBackground;
+
     /// <summary>読み取り専用の表示領域の背景色を取得する。</summary>
     public virtual Color DisplayBackground => Surface;
 
@@ -70,6 +73,9 @@ public abstract class Theme
 
     /// <summary>タイトルバーのボタンに重ねるホバー色を取得する。</summary>
     public abstract Color HeaderHover { get; }
+
+    /// <summary>スクロールバーに適用するWindowsのテーマ名を取得する。nullは既定のテーマを表す。</summary>
+    public virtual string ScrollBarThemeName => null;
 }
 
 /// <summary>
@@ -78,13 +84,16 @@ public abstract class Theme
 public sealed class LightTheme : Theme
 {
     /// <inheritdoc />
-    public override Color Background => ColorTranslator.FromHtml("#F1F3F5");
+    public override Color Background => ColorTranslator.FromHtml("#E2E3E5");
 
     /// <inheritdoc />
-    public override Color Surface => ColorTranslator.FromHtml("#EEF0F2");
+    public override Color Surface => ColorTranslator.FromHtml("#DCDDE0");
 
     /// <inheritdoc />
-    public override Color InputBackground => ColorTranslator.FromHtml("#D8DEE5");
+    public override Color InputBackground => ColorTranslator.FromHtml("#F2F3F4");
+
+    /// <inheritdoc />
+    public override Color DisplayBackground => ColorTranslator.FromHtml("#CFD1D4");
 
     /// <inheritdoc />
     public override Color Border => ColorTranslator.FromHtml("#D2DAE2");
@@ -114,7 +123,7 @@ public sealed class LightTheme : Theme
     public override Color GridHeader => ColorTranslator.FromHtml("#EAF1F7");
 
     /// <inheritdoc />
-    public override Color Header => ColorTranslator.FromHtml("#F8F8F8");
+    public override Color Header => ColorTranslator.FromHtml("#E5E6E8");
 
     /// <inheritdoc />
     public override Color HeaderHover => ColorTranslator.FromHtml("#E6F1FB");
@@ -133,6 +142,9 @@ public sealed class DarkTheme : Theme
 
     /// <inheritdoc />
     public override Color InputBackground => ColorTranslator.FromHtml("#17181A");
+
+    /// <inheritdoc />
+    public override Color CheckBoxHoverBackground => SecondaryButton;
 
     /// <inheritdoc />
     public override Color DisplayBackground => ColorTranslator.FromHtml("#323438");
@@ -169,6 +181,9 @@ public sealed class DarkTheme : Theme
 
     /// <inheritdoc />
     public override Color HeaderHover => ColorTranslator.FromHtml("#34363A");
+
+    /// <inheritdoc />
+    public override string ScrollBarThemeName => "DarkMode_Explorer";
 }
 
 /// <summary>

@@ -440,7 +440,7 @@ public sealed partial class MainForm
         _requestTabButton.AutoSize = true;
         _requestTabButton.Margin = new System.Windows.Forms.Padding(0, 0, 6, 6);
         _requestTabButton.Name = "_requestTabButton";
-        _requestTabButton.Tag = "Primary";
+        _requestTabButton.IsSelected = true;
         _requestTabButton.Text = "送信JSON";
         _responseTabButton.AutoSize = true;
         _responseTabButton.Margin = new System.Windows.Forms.Padding(0, 0, 0, 6);

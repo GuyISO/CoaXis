@@ -17,6 +17,7 @@ CoaXis は、3D モデルの可視化と事前アセット生成を分離して�
   - `CoaXisComboBox`、`CoaXisLabel`、入力用の `CoaXisTextBox`、表示用の `CoaXisDisplayTextBox`、`CoaXisDataGridView`、`CoaXisTreeView`、`CoaXisCheckBox` を共通コントロールとして利用できる。IpcTesterの「開発中1」で表示を確認できる
   - 履歴表示などに `CoaXisListBox`、ステータス表示に `CoaXisStatusStrip` を利用できる。レイアウト用に `CoaXisPanel`、`CoaXisTableLayoutPanel`、`CoaXisFlowLayoutPanel`、`CoaXisSplitContainer`、`CoaXisTabControl`、`CoaXisTabPage` も用意している。ステータスバーの項目は追加時とテーマ適用時に配色される
   - `CoaXisForm` は表示時とテーマ変更時に、`ICoaXisThemedControl` を実装した子孫へテーマを適用する。テーマ適用が必要なコントロールはCoaXis.Uiの共通コントロールを使用する。フォーム外のコントロールは `ThemeManager.Apply` で再適用する
+  - `CoaXisButton` は `Tag = "Primary"` で強調し、選択状態の表示には `IsSelected` を使う。テーマ固有のスクロールバーの外観は `Theme.ScrollBarThemeName` でWindowsのテーマ名を指定し、`null` はOSの既定テーマを使う
   - `CoaXisMessageBox.Show(owner, text, caption, buttons, icon)` はオーナー付きのモーダルダイアログを表示し、`DialogResult` を返す。ボタンとアイコンにはWinFormsの `MessageBoxButtons` と `MessageBoxIcon` を指定する
 
 ## 開発

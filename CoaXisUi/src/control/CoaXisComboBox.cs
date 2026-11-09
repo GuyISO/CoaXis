@@ -20,10 +20,17 @@ public sealed class CoaXisComboBox : ComboBox, ICoaXisThemedControl
         Font = theme.StandardFont;
         FlatStyle = FlatStyle.Flat;
         DrawMode = DrawMode.OwnerDrawFixed;
-        ItemHeight = Math.Max(20, (int)Math.Round(24 * DeviceDpi / 96.0));
+        UpdateItemHeight();
         BackColor = theme.InputBackground;
         ForeColor = theme.Text;
         Invalidate();
+    }
+
+    /// <inheritdoc />
+    protected override void OnDpiChangedAfterParent(EventArgs e)
+    {
+        base.OnDpiChangedAfterParent(e);
+        UpdateItemHeight();
     }
 
     /// <inheritdoc />
@@ -77,6 +84,11 @@ public sealed class CoaXisComboBox : ComboBox, ICoaXisThemedControl
             base.Site = value;
             UpdateDesignerPreview();
         }
+    }
+
+    private void UpdateItemHeight()
+    {
+        ItemHeight = Math.Max(Font.Height, (int)Math.Round(20 * DeviceDpi / 96.0));
     }
 
     private void UpdateDesignerPreview()

@@ -66,7 +66,7 @@ public sealed partial class MainForm : CoaXisForm
     {
         if (keyData == (Keys.Control | Keys.Tab) || keyData == (Keys.Control | Keys.Shift | Keys.Tab))
         {
-            bool request = _requestTabButton.Tag is not string tag || tag != "Primary";
+            bool request = !_requestTabButton.IsSelected;
             SelectExchangeTab(request);
             (request ? _requestTabButton : _responseTabButton).Focus();
             return true;
@@ -123,8 +123,8 @@ public sealed partial class MainForm : CoaXisForm
     {
         _requestJson.Visible = request;
         _responseJson.Visible = !request;
-        _requestTabButton.Tag = request ? "Primary" : null;
-        _responseTabButton.Tag = request ? null : "Primary";
+        _requestTabButton.IsSelected = request;
+        _responseTabButton.IsSelected = !request;
         _requestTabButton.AccessibleDescription = request ? "選択中" : null;
         _responseTabButton.AccessibleDescription = request ? null : "選択中";
     }

@@ -12,7 +12,7 @@ public sealed class CoaXisTextBox : TextBox, ICoaXisThemedControl
     public void ApplyTheme(Theme theme)
     {
         Font = theme.StandardFont;
-        BorderStyle = BorderStyle.None;
+        BorderStyle = BorderStyle.FixedSingle;
         BackColor = theme.InputBackground;
         ForeColor = theme.Text;
         ScrollBarTheme.Apply(this, theme);

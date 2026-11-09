@@ -37,16 +37,15 @@ public sealed class CoaXisCheckBox : CheckBox, ICoaXisThemedControl
         Rectangle checkBounds = GetCheckBounds(size);
         bool checkedState = CheckState != CheckState.Unchecked;
         Color checkFill = !Enabled ? theme.Border : checkedState ? theme.Primary
-            : _hovered && theme is DarkTheme ? theme.SecondaryButton : theme.InputBackground;
+            : _hovered ? theme.CheckBoxHoverBackground : theme.InputBackground;
         Color checkBorder = checkedState ? theme.Primary : _hovered ? theme.Primary : theme.Border;
         using var path = CreateCheckPath(checkBounds);
         using (var fill = new SolidBrush(checkFill))
         {
             e.Graphics.FillPath(fill, path);
         }
-        if (theme is not DarkTheme)
+        using (var border = new Pen(checkBorder, Math.Max(1F, DeviceDpi / 96F)))
         {
-            using var border = new Pen(checkBorder, Math.Max(1F, DeviceDpi / 96F));
             e.Graphics.DrawPath(border, path);
         }
 

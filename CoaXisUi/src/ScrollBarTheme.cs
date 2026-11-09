@@ -27,7 +27,7 @@ internal static class ScrollBarTheme
 
     private static void ApplyToHandle(Control control, Theme theme)
     {
-        int result = SetWindowTheme(control.Handle, theme is DarkTheme ? "DarkMode_Explorer" : null, null);
+        int result = SetWindowTheme(control.Handle, theme.ScrollBarThemeName, null);
         if (result < 0)
         {
             Trace.TraceWarning("スクロールバーのテーマ適用に失敗しました: 0x{0:X8}", result);
