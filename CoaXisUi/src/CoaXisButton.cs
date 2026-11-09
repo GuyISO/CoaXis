@@ -7,7 +7,7 @@ using System.Windows.Forms;
 namespace CoaXis.Ui;
 
 /// <summary>CoaXis共通テーマに合わせて描画する丸角ボタン。</summary>
-public sealed class CoaXisButton : Button
+public sealed class CoaXisButton : Button, ICoaXisThemedControl
 {
     private bool _hovered;
     private bool _pressed;
@@ -17,6 +17,24 @@ public sealed class CoaXisButton : Button
     {
         SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
         ThemeManager.Apply(this);
+    }
+
+    /// <inheritdoc />
+    public void ApplyTheme(Theme theme)
+    {
+        bool primary = Tag is string tag && (tag == "Primary" ||
+            tag == "ThemeDark" && theme is DarkTheme || tag == "ThemeLight" && theme is LightTheme);
+        Font = theme.ButtonFont;
+        FlatStyle = FlatStyle.Flat;
+        FlatAppearance.BorderSize = 0;
+        FlatAppearance.MouseOverBackColor = primary ? theme.Primary : theme.SecondaryButtonHover;
+        FlatAppearance.MouseDownBackColor = primary ? theme.Primary : theme.SecondaryButtonPressed;
+        UseVisualStyleBackColor = false;
+        BackColor = primary ? theme.Primary : theme.SecondaryButton;
+        ForeColor = Color.White;
+        Cursor = Cursors.Hand;
+        Padding = new Padding(10, 4, 10, 4);
+        Invalidate();
     }
 
     /// <summary>テーマのボタン種別を指定する。</summary>
@@ -42,8 +60,10 @@ public sealed class CoaXisButton : Button
         Theme theme = ThemeManager.CurrentTheme;
         bool primary = Tag is string tag && tag == "Primary";
         Color background = !Enabled ? theme.Border
-            : _pressed ? Blend(BackColor, theme.Text, 0.18)
-            : _hovered ? Blend(BackColor, theme.Text, 0.10)
+            : primary && _pressed ? Blend(theme.Primary, Color.Black, 0.12)
+            : primary && _hovered ? Blend(theme.Primary, Color.White, 0.10)
+            : _pressed ? theme.SecondaryButtonPressed
+            : _hovered ? theme.SecondaryButtonHover
             : BackColor;
         Color foreground = Enabled ? ForeColor : theme.MutedText;
         float diameter = Math.Min(12F * DeviceDpi / 96F, Math.Min(ClientSize.Width - 1, ClientSize.Height - 1));

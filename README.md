@@ -11,12 +11,12 @@ CoaXis は、3D モデルの可視化と事前アセット生成を分離して�
 - CoaXisIpcTester
   - JSON/CSVや操作テストデータを使い、Viewerへモデル集合の読込・追加・削除・変更・読み出し要求を送り、要求と応答を確認するWindowsデスクトップツール
 - CoaXisUi
-  - WinFormsアプリケーションで共通利用するテーマ、フォーム、ボタン、ナビゲーションレール、ロゴとSVGアイコンを提供するUIライブラリ。`CoaXisForm` を継承すると共通テーマが適用され、`CoaXisButton` や `CoaXisNavigationRail` を配置して利用できる。共有アセットは `CoaXisUiAssets` から参照できる
+  - WinFormsアプリケーションで共通利用するテーマ、フォーム、ボタン、ナビゲーションレール、ロゴとSVGアイコンを提供するUIライブラリ。ブランドカラーはブルー `#4E95D9` とグレー `#7F7F7F`、フォントはSegoe UIに統一し、フラットデザインを基本とする。`CoaXisForm` を継承すると共通テーマが適用され、`CoaXisButton` や `CoaXisNavigationRail` を配置して利用できる。共有アセットは `CoaXisUiAssets` から参照できる
   - モニター間のDPI変更に対応するには、利用側のWinFormsプロジェクトで `ApplicationHighDpiMode` に `PerMonitorV2` を指定し、起動時に `ApplicationConfiguration.Initialize()` を呼ぶ
   - IpcTesterのフォームデザイナーではタブで各ページを切り替えて編集する。タブとレールのアイコンはデザイン時のプレビューで、実行時は通常のナビゲーションレールを使う。コンボボックスと表のサンプルはデザイン時専用のプレビューで、実行時のデータには混ざらない
-  - `CoaXisComboBox`、`CoaXisLabel`、`CoaXisTextBox`、`CoaXisDataGridView`、`CoaXisTreeView`、`CoaXisCheckBox` を共通コントロールとして利用できる。IpcTesterの「開発中1」で表示を確認できる
+  - `CoaXisComboBox`、`CoaXisLabel`、入力用の `CoaXisTextBox`、表示用の `CoaXisDisplayTextBox`、`CoaXisDataGridView`、`CoaXisTreeView`、`CoaXisCheckBox` を共通コントロールとして利用できる。IpcTesterの「開発中1」で表示を確認できる
   - 履歴表示などに `CoaXisListBox`、ステータス表示に `CoaXisStatusStrip` を利用できる。レイアウト用に `CoaXisPanel`、`CoaXisTableLayoutPanel`、`CoaXisFlowLayoutPanel`、`CoaXisSplitContainer`、`CoaXisTabControl`、`CoaXisTabPage` も用意している。ステータスバーの項目は追加時とテーマ適用時に配色される
-  - `CoaXisForm` は表示時とヘッダーのテーマ切り替え時に子コントロールへテーマを適用する。既存のWinFormsコントロールもその対象となる。`ThemeManager.SetTheme` を直接呼んだ場合は、表示中の対象に `ThemeManager.Apply` を呼んで再適用する
+  - `CoaXisForm` は表示時とテーマ変更時に、`ICoaXisThemedControl` を実装した子孫へテーマを適用する。テーマ適用が必要なコントロールはCoaXis.Uiの共通コントロールを使用する。フォーム外のコントロールは `ThemeManager.Apply` で再適用する
   - `CoaXisMessageBox.Show(owner, text, caption, buttons, icon)` はオーナー付きのモーダルダイアログを表示し、`DialogResult` を返す。ボタンとアイコンにはWinFormsの `MessageBoxButtons` と `MessageBoxIcon` を指定する
 
 ## 開発

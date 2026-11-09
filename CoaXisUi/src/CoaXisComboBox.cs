@@ -1,17 +1,60 @@
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 namespace CoaXis.Ui;
 
 /// <summary>CoaXisテーマのコンボボックス。</summary>
-public sealed class CoaXisComboBox : ComboBox
+public sealed class CoaXisComboBox : ComboBox, ICoaXisThemedControl
 {
     private string _designerPreviewItems = string.Empty;
     private string[] _previewItems = Array.Empty<string>();
 
     /// <summary>コンボボックスを作成する。</summary>
     public CoaXisComboBox() => ThemeManager.Apply(this);
+
+    /// <inheritdoc />
+    public void ApplyTheme(Theme theme)
+    {
+        Font = theme.StandardFont;
+        FlatStyle = FlatStyle.Flat;
+        DrawMode = DrawMode.OwnerDrawFixed;
+        ItemHeight = Math.Max(20, (int)Math.Round(24 * DeviceDpi / 96.0));
+        BackColor = theme.InputBackground;
+        ForeColor = theme.Text;
+        Invalidate();
+    }
+
+    /// <inheritdoc />
+    protected override void OnDrawItem(DrawItemEventArgs e)
+    {
+        Theme theme = ThemeManager.CurrentTheme;
+        bool selected = e.Index >= 0 && (e.State & DrawItemState.Selected) != 0
+            && (e.State & DrawItemState.ComboBoxEdit) == 0;
+        using var brush = new SolidBrush(selected ? theme.Primary : theme.InputBackground);
+        e.Graphics.FillRectangle(brush, e.Bounds);
+        if (e.Index >= 0 && e.Index < Items.Count)
+        {
+            TextRenderer.DrawText(e.Graphics, GetItemText(Items[e.Index]), Font,
+                Rectangle.Inflate(e.Bounds, -10, 0), selected ? Color.White : theme.Text,
+                TextFormatFlags.VerticalCenter | TextFormatFlags.SingleLine |
+                TextFormatFlags.EndEllipsis | TextFormatFlags.NoPrefix);
+        }
+        base.OnDrawItem(e);
+    }
+
+    /// <inheritdoc />
+    protected override CreateParams CreateParams
+    {
+        get
+        {
+            CreateParams parameters = base.CreateParams;
+            parameters.Style &= ~0x00800000;
+            parameters.ExStyle &= ~0x00000200;
+            return parameters;
+        }
+    }
 
     /// <summary>デザイナーで表示する項目を改行区切りで指定する。</summary>
     [DefaultValue("")]

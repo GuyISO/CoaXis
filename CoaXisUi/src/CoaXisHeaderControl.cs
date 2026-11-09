@@ -7,9 +7,8 @@ using Svg;
 namespace CoaXis.Ui;
 
 /// <summary>CoaXis共通のタイトル、テーマ切替、ウィンドウ操作を表示する。</summary>
-public sealed class CoaXisHeaderControl : Panel
+public sealed class CoaXisHeaderControl : Panel, ICoaXisThemedControl
 {
-    private static readonly Font TitleFont = ThemeManager.TitleFont;
     private static readonly Font WindowButtonFont = new("Segoe MDL2 Assets", 10F);
     private readonly Button _themeButton = new() { Dock = DockStyle.Right, Width = 96 };
     private readonly Button _minimizeButton = new() { Dock = DockStyle.Right, Width = 46, Text = "\uE921", AccessibleName = "最小化" };
@@ -85,6 +84,12 @@ public sealed class CoaXisHeaderControl : Panel
         _maximizeButton.Visible = false;
     }
 
+    internal void SetDialogDpi(int dpi)
+    {
+        Height = (int)Math.Round(36 * dpi / 96.0);
+        _closeButton.Width = (int)Math.Round(46 * dpi / 96.0);
+    }
+
     internal void ApplyTheme(Theme theme)
     {
         _theme = theme;
@@ -104,7 +109,7 @@ public sealed class CoaXisHeaderControl : Panel
             button.Font = WindowButtonFont;
         }
 
-        _themeButton.Font = ThemeManager.ButtonFont;
+        _themeButton.Font = theme.ButtonFont;
         _themeButton.Text = theme is DarkTheme ? "☀ Light" : "🌙 Dark";
         _themeButton.AccessibleName = theme is DarkTheme ? "ライトテーマに切り替え" : "ダークテーマに切り替え";
         _closeButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(196, 43, 28);
@@ -116,6 +121,8 @@ public sealed class CoaXisHeaderControl : Panel
         _maximizeButton.BackColor = _maximizeHovered ? theme.HeaderHover : theme.Header;
         Invalidate();
     }
+
+    void ICoaXisThemedControl.ApplyTheme(Theme theme) => ApplyTheme(theme);
 
     /// <inheritdoc />
     protected override void OnPaint(PaintEventArgs e)
@@ -145,7 +152,8 @@ public sealed class CoaXisHeaderControl : Panel
         int controlsLeft = _themeButton.Visible ? _themeButton.Left : _closeButton.Left;
         int titleWidth = Math.Max(0, controlsLeft - titleLeft - 8);
         var nameBounds = new Rectangle(titleLeft, contentBounds.Top, titleWidth, contentBounds.Height);
-        TextRenderer.DrawText(e.Graphics, _applicationTitle, TitleFont, nameBounds, _theme.Text, flags | TextFormatFlags.EndEllipsis);
+        Color titleColor = _theme.Text;
+        TextRenderer.DrawText(e.Graphics, _applicationTitle, _theme.TitleFont, nameBounds, titleColor, flags | TextFormatFlags.EndEllipsis);
     }
 
     /// <inheritdoc />
@@ -188,7 +196,10 @@ public sealed class CoaXisHeaderControl : Panel
     private void OnThemeClick(object sender, EventArgs e)
     {
         ThemeManager.SetTheme(_theme is DarkTheme ? new LightTheme() : new DarkTheme());
-        ThemeManager.Apply(FindForm() ?? (Control)this);
+        if (FindForm() is not CoaXisForm)
+        {
+            ThemeManager.Apply(FindForm() ?? (Control)this);
+        }
     }
 
     private void OnMinimizeClick(object sender, EventArgs e)

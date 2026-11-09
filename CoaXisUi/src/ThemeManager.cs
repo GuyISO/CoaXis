@@ -1,7 +1,5 @@
 using System;
-using System.Diagnostics;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 namespace CoaXis.Ui;
@@ -11,11 +9,34 @@ namespace CoaXis.Ui;
 /// </summary>
 public abstract class Theme
 {
+    private static readonly Font DefaultStandardFont = new("Segoe UI", 9F, FontStyle.Regular);
+    private static readonly Font DefaultButtonFont = new("Segoe UI", 9F, FontStyle.Bold);
+    private static readonly Font DefaultBrandFont = new("Segoe UI", 16F, FontStyle.Bold);
+    private static readonly Font DefaultTitleFont = new("Segoe UI", 15F, FontStyle.Bold);
+
+    /// <summary>通常のコントロールのフォントを取得する。</summary>
+    public virtual Font StandardFont => DefaultStandardFont;
+
+    /// <summary>ボタンのフォントを取得する。</summary>
+    public virtual Font ButtonFont => DefaultButtonFont;
+
+    /// <summary>ブランド見出しのフォントを取得する。</summary>
+    public virtual Font BrandFont => DefaultBrandFont;
+
+    /// <summary>タイトルバーのアプリケーション名のフォントを取得する。</summary>
+    public virtual Font TitleFont => DefaultTitleFont;
+
     /// <summary>アプリケーションの背景色を取得する。</summary>
     public abstract Color Background { get; }
 
     /// <summary>カードや入力欄の背景色を取得する。</summary>
     public abstract Color Surface { get; }
+
+    /// <summary>テキストや選択項目を入力する領域の背景色を取得する。</summary>
+    public virtual Color InputBackground => Surface;
+
+    /// <summary>読み取り専用の表示領域の背景色を取得する。</summary>
+    public virtual Color DisplayBackground => Surface;
 
     /// <summary>境界線の色を取得する。</summary>
     public abstract Color Border { get; }
@@ -25,6 +46,15 @@ public abstract class Theme
 
     /// <summary>操作のアクセントカラーを取得する。</summary>
     public abstract Color Primary { get; }
+
+    /// <summary>通常ボタンの背景色を取得する。</summary>
+    public virtual Color SecondaryButton => ColorTranslator.FromHtml("#66717C");
+
+    /// <summary>通常ボタンのホバー色を取得する。</summary>
+    public virtual Color SecondaryButtonHover => ColorTranslator.FromHtml("#59636D");
+
+    /// <summary>通常ボタンの押下色を取得する。</summary>
+    public virtual Color SecondaryButtonPressed => ColorTranslator.FromHtml("#4D5660");
 
     /// <summary>補助情報の文字色を取得する。</summary>
     public abstract Color MutedText { get; }
@@ -48,34 +78,46 @@ public abstract class Theme
 public sealed class LightTheme : Theme
 {
     /// <inheritdoc />
-    public override Color Background => ColorTranslator.FromHtml("#FFFFFF");
+    public override Color Background => ColorTranslator.FromHtml("#F1F3F5");
 
     /// <inheritdoc />
-    public override Color Surface => ColorTranslator.FromHtml("#F5F5F5");
+    public override Color Surface => ColorTranslator.FromHtml("#EEF0F2");
 
     /// <inheritdoc />
-    public override Color Border => ColorTranslator.FromHtml("#D0D0D0");
+    public override Color InputBackground => ColorTranslator.FromHtml("#D8DEE5");
+
+    /// <inheritdoc />
+    public override Color Border => ColorTranslator.FromHtml("#D2DAE2");
 
     /// <inheritdoc />
     public override Color Text => ColorTranslator.FromHtml("#202020");
 
     /// <inheritdoc />
-    public override Color Primary => ColorTranslator.FromHtml("#00B7FF");
+    public override Color Primary => ColorTranslator.FromHtml("#4E95D9");
+
+    /// <inheritdoc />
+    public override Color SecondaryButton => ColorTranslator.FromHtml("#66717C");
+
+    /// <inheritdoc />
+    public override Color SecondaryButtonHover => ColorTranslator.FromHtml("#59636D");
+
+    /// <inheritdoc />
+    public override Color SecondaryButtonPressed => ColorTranslator.FromHtml("#4D5660");
 
     /// <inheritdoc />
     public override Color MutedText => ColorTranslator.FromHtml("#606060");
 
     /// <inheritdoc />
-    public override Color Selection => ColorTranslator.FromHtml("#CDE8FF");
+    public override Color Selection => ColorTranslator.FromHtml("#DCEBFA");
 
     /// <inheritdoc />
-    public override Color GridHeader => ColorTranslator.FromHtml("#E8E8E8");
+    public override Color GridHeader => ColorTranslator.FromHtml("#EAF1F7");
 
     /// <inheritdoc />
     public override Color Header => ColorTranslator.FromHtml("#F8F8F8");
 
     /// <inheritdoc />
-    public override Color HeaderHover => ColorTranslator.FromHtml("#E5E5E5");
+    public override Color HeaderHover => ColorTranslator.FromHtml("#E6F1FB");
 }
 
 /// <summary>
@@ -84,34 +126,49 @@ public sealed class LightTheme : Theme
 public sealed class DarkTheme : Theme
 {
     /// <inheritdoc />
-    public override Color Background => ColorTranslator.FromHtml("#1E1E1E");
+    public override Color Background => ColorTranslator.FromHtml("#202124");
 
     /// <inheritdoc />
-    public override Color Surface => ColorTranslator.FromHtml("#2D2D30");
+    public override Color Surface => ColorTranslator.FromHtml("#252629");
 
     /// <inheritdoc />
-    public override Color Border => ColorTranslator.FromHtml("#404040");
+    public override Color InputBackground => ColorTranslator.FromHtml("#17181A");
 
     /// <inheritdoc />
-    public override Color Text => ColorTranslator.FromHtml("#FFFFFF");
+    public override Color DisplayBackground => ColorTranslator.FromHtml("#323438");
 
     /// <inheritdoc />
-    public override Color Primary => ColorTranslator.FromHtml("#00B7FF");
+    public override Color Border => ColorTranslator.FromHtml("#414347");
+
+    /// <inheritdoc />
+    public override Color Text => ColorTranslator.FromHtml("#F2F5F8");
+
+    /// <inheritdoc />
+    public override Color Primary => ColorTranslator.FromHtml("#4E95D9");
+
+    /// <inheritdoc />
+    public override Color SecondaryButton => ColorTranslator.FromHtml("#3A3D42");
+
+    /// <inheritdoc />
+    public override Color SecondaryButtonHover => ColorTranslator.FromHtml("#46494E");
+
+    /// <inheritdoc />
+    public override Color SecondaryButtonPressed => ColorTranslator.FromHtml("#303236");
 
     /// <inheritdoc />
     public override Color MutedText => ColorTranslator.FromHtml("#B0B0B0");
 
     /// <inheritdoc />
-    public override Color Selection => ColorTranslator.FromHtml("#164A69");
+    public override Color Selection => ColorTranslator.FromHtml("#3A3D42");
 
     /// <inheritdoc />
-    public override Color GridHeader => ColorTranslator.FromHtml("#252526");
+    public override Color GridHeader => ColorTranslator.FromHtml("#252629");
 
     /// <inheritdoc />
-    public override Color Header => ColorTranslator.FromHtml("#202124");
+    public override Color Header => ColorTranslator.FromHtml("#232427");
 
     /// <inheritdoc />
-    public override Color HeaderHover => ColorTranslator.FromHtml("#3A3B3E");
+    public override Color HeaderHover => ColorTranslator.FromHtml("#34363A");
 }
 
 /// <summary>
@@ -119,19 +176,20 @@ public sealed class DarkTheme : Theme
 /// </summary>
 public static class ThemeManager
 {
-    private const string DarkScrollBarTheme = "DarkMode_Explorer";
     private static Theme _currentTheme = new DarkTheme();
 
+    internal static Color BrandSecondary { get; } = ColorTranslator.FromHtml("#7F7F7F");
+
     /// <summary>通常のコントロールで使用する標準フォントを取得する。</summary>
-    public static Font StandardFont { get; } = CreateFont("Segoe UI Variable Text", "Segoe UI", 9F, FontStyle.Regular);
+    public static Font StandardFont => _currentTheme.StandardFont;
 
     /// <summary>ボタンの文字に使用するフォントを取得する。</summary>
-    public static Font ButtonFont { get; } = CreateFont("Segoe UI Variable Text Semibold", "Segoe UI Semibold", 9F, FontStyle.Regular);
+    public static Font ButtonFont => _currentTheme.ButtonFont;
 
     /// <summary>ブランド見出しで使用するフォントを取得する。</summary>
-    public static Font BrandFont { get; } = CreateFont("Segoe UI Variable Display", "Segoe UI", 16F, FontStyle.Bold);
+    public static Font BrandFont => _currentTheme.BrandFont;
 
-    internal static Font TitleFont { get; } = CreateFont("Segoe UI Variable Text Semibold", "Segoe UI Semibold", 15F, FontStyle.Regular);
+    internal static event EventHandler ThemeChanged;
 
     /// <summary>現在のテーマを取得する。</summary>
     public static Theme CurrentTheme => _currentTheme;
@@ -141,6 +199,7 @@ public static class ThemeManager
     public static void SetTheme(Theme theme)
     {
         _currentTheme = theme ?? throw new ArgumentNullException(nameof(theme));
+        ThemeChanged?.Invoke(null, EventArgs.Empty);
     }
 
     /// <summary>指定コントロールとその子孫へ現在のテーマを適用する。</summary>
@@ -151,215 +210,16 @@ public static class ThemeManager
         ApplyControl(root);
     }
 
-    private static Font CreateFont(string preferredFamily, string fallbackFamily, float size, FontStyle style)
-    {
-        var font = new Font(preferredFamily, size, style);
-        if (string.Equals(font.FontFamily.Name, preferredFamily, StringComparison.OrdinalIgnoreCase))
-        {
-            return font;
-        }
-
-        font.Dispose();
-        Trace.TraceWarning("フォント '{0}' が使用できないため '{1}' を使用します。", preferredFamily, fallbackFamily);
-        return new Font(fallbackFamily, size, style);
-    }
-
     private static void ApplyControl(Control control)
     {
-        control.Font = control.Tag is string tag && tag == "Brand" ? BrandFont : StandardFont;
-        control.ForeColor = _currentTheme.Text;
-
-        if (control is Form || control.Tag is string backgroundTag && backgroundTag == "Background")
+        if (control is ICoaXisThemedControl themed)
         {
-            control.BackColor = _currentTheme.Background;
-        }
-        else if (control is Panel or TableLayoutPanel or FlowLayoutPanel or SplitContainer or TabControl or TabPage)
-        {
-            control.BackColor = _currentTheme.Surface;
-        }
-
-        switch (control)
-        {
-            case Button button:
-                ApplyButton(button);
-                break;
-            case TextBox textBox:
-                textBox.BorderStyle = BorderStyle.FixedSingle;
-                textBox.BackColor = _currentTheme.Surface;
-                textBox.ForeColor = _currentTheme.Text;
-                break;
-            case ComboBox comboBox:
-                comboBox.FlatStyle = FlatStyle.Flat;
-                comboBox.BackColor = _currentTheme.Surface;
-                comboBox.ForeColor = _currentTheme.Text;
-                break;
-            case ListBox listBox:
-                listBox.BackColor = _currentTheme.Background;
-                listBox.ForeColor = _currentTheme.Text;
-                break;
-            case DataGridView grid:
-                ApplyGrid(grid);
-                break;
-            case TreeView tree:
-                tree.BorderStyle = BorderStyle.FixedSingle;
-                tree.BackColor = _currentTheme.Surface;
-                tree.ForeColor = _currentTheme.Text;
-                tree.LineColor = _currentTheme.Border;
-                break;
-            case CheckBox checkBox:
-                checkBox.FlatStyle = FlatStyle.Flat;
-                break;
-            case Splitter splitter:
-                splitter.BackColor = _currentTheme.Border;
-                break;
-            case TabControl tabControl:
-                ApplyTabs(tabControl);
-                break;
-            case StatusStrip statusStrip:
-                statusStrip.BackColor = _currentTheme.Surface;
-                statusStrip.ForeColor = _currentTheme.MutedText;
-                statusStrip.SizingGrip = false;
-                foreach (ToolStripItem item in statusStrip.Items)
-                {
-                    ApplyStatusItem(item);
-                }
-                break;
-            case Label label when label.Tag is string labelTag && labelTag == "Muted":
-                label.ForeColor = _currentTheme.MutedText;
-                break;
-        }
-
-        if (HasScrollBars(control))
-        {
-            control.HandleCreated -= ApplyScrollBarThemeOnHandleCreated;
-            control.HandleCreated += ApplyScrollBarThemeOnHandleCreated;
-            if (control.IsHandleCreated)
-            {
-                ApplyScrollBarTheme(control);
-            }
+            themed.ApplyTheme(_currentTheme);
         }
 
         foreach (Control child in control.Controls)
         {
             ApplyControl(child);
         }
-
-        if (control is CoaXisHeaderControl header)
-        {
-            header.ApplyTheme(_currentTheme);
-        }
     }
-
-    internal static void ApplyStatusItem(ToolStripItem item)
-    {
-        item.Font = StandardFont;
-        item.ForeColor = _currentTheme.MutedText;
-        item.BackColor = _currentTheme.Surface;
-    }
-
-    private static bool HasScrollBars(Control control)
-    {
-        return control is ListBox or DataGridView or TreeView ||
-            control is TextBox textBox && textBox.ScrollBars != ScrollBars.None;
-    }
-
-    private static void ApplyScrollBarThemeOnHandleCreated(object sender, EventArgs e)
-    {
-        if (sender is Control control)
-        {
-            ApplyScrollBarTheme(control);
-        }
-    }
-
-    private static void ApplyScrollBarTheme(Control control)
-    {
-        string theme = _currentTheme is DarkTheme ? DarkScrollBarTheme : null;
-        int result = SetWindowTheme(control.Handle, theme, null);
-        if (result < 0)
-        {
-            Trace.TraceWarning("スクロールバーのテーマ適用に失敗しました: 0x{0:X8}", result);
-        }
-    }
-
-    private static void ApplyButton(Button button)
-    {
-        bool isPrimary = button.Tag is string tag && tag == "Primary";
-        bool isActiveTheme =
-            button.Tag is string themeTag &&
-            ((themeTag == "ThemeDark" && _currentTheme is DarkTheme) ||
-             (themeTag == "ThemeLight" && _currentTheme is LightTheme));
-
-        button.Font = ButtonFont;
-        button.FlatStyle = FlatStyle.Flat;
-        button.FlatAppearance.BorderSize = 0;
-        button.UseVisualStyleBackColor = false;
-        button.BackColor = isPrimary || isActiveTheme ? _currentTheme.Primary : _currentTheme.Surface;
-        button.ForeColor = isPrimary || isActiveTheme
-            ? Color.FromArgb(30, 30, 30)
-            : _currentTheme.Text;
-        button.Cursor = Cursors.Hand;
-        button.Padding = new Padding(10, 4, 10, 4);
-    }
-
-    private static void ApplyGrid(DataGridView grid)
-    {
-        grid.EnableHeadersVisualStyles = false;
-        grid.BackgroundColor = _currentTheme.Background;
-        grid.BorderStyle = BorderStyle.None;
-        grid.GridColor = _currentTheme.Border;
-        grid.CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
-        grid.ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
-        grid.RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
-        grid.DefaultCellStyle.BackColor = _currentTheme.Surface;
-        grid.DefaultCellStyle.Font = StandardFont;
-        grid.DefaultCellStyle.ForeColor = _currentTheme.Text;
-        grid.DefaultCellStyle.SelectionBackColor = _currentTheme.Selection;
-        grid.DefaultCellStyle.SelectionForeColor = _currentTheme.Text;
-        grid.ColumnHeadersDefaultCellStyle.BackColor = _currentTheme.GridHeader;
-        grid.ColumnHeadersDefaultCellStyle.Font = StandardFont;
-        grid.ColumnHeadersDefaultCellStyle.ForeColor = _currentTheme.Text;
-        grid.ColumnHeadersDefaultCellStyle.SelectionBackColor = _currentTheme.GridHeader;
-        grid.ColumnHeadersDefaultCellStyle.SelectionForeColor = _currentTheme.Text;
-        grid.RowHeadersDefaultCellStyle.BackColor = _currentTheme.GridHeader;
-        grid.RowHeadersDefaultCellStyle.Font = StandardFont;
-        grid.RowHeadersDefaultCellStyle.ForeColor = _currentTheme.Text;
-        grid.RowHeadersDefaultCellStyle.SelectionBackColor = _currentTheme.GridHeader;
-        grid.RowHeadersDefaultCellStyle.SelectionForeColor = _currentTheme.Text;
-    }
-
-    private static void ApplyTabs(TabControl tabControl)
-    {
-        tabControl.DrawMode = TabDrawMode.OwnerDrawFixed;
-        tabControl.ItemSize = new Size(110, 32);
-        tabControl.Padding = new Point(12, 6);
-        tabControl.DrawItem -= DrawTab;
-        tabControl.DrawItem += DrawTab;
-    }
-
-    private static void DrawTab(object sender, DrawItemEventArgs args)
-    {
-        if (sender is not TabControl tabControl || args.Index < 0)
-        {
-            return;
-        }
-
-        bool selected = (args.State & DrawItemState.Selected) == DrawItemState.Selected;
-        Color background = selected ? _currentTheme.Primary : _currentTheme.Surface;
-        Color foreground = selected
-            ? Color.FromArgb(30, 30, 30)
-            : _currentTheme.Text;
-
-        using var brush = new SolidBrush(background);
-        args.Graphics.FillRectangle(brush, args.Bounds);
-        TextRenderer.DrawText(
-            args.Graphics,
-            tabControl.TabPages[args.Index].Text,
-            StandardFont,
-            args.Bounds,
-            foreground,
-            TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.EndEllipsis);
-    }
-
-    [DllImport("uxtheme.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-    private static extern int SetWindowTheme(IntPtr window, string subAppName, string subIdList);
 }

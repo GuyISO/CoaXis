@@ -1,6 +1,8 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
+using Svg;
 
 namespace CoaXis.Ui;
 
@@ -36,11 +38,8 @@ public static class CoaXisMessageBox
         ArgumentNullException.ThrowIfNull(text);
         ArgumentNullException.ThrowIfNull(caption);
         (string Text, DialogResult Result)[] choices = GetChoices(buttons);
-        Icon messageIcon = GetIcon(icon);
-        Screen screen = owner != null ? Screen.FromHandle(owner.Handle)
-            : Form.ActiveForm != null ? Screen.FromControl(Form.ActiveForm)
-            : Screen.FromPoint(Cursor.Position);
-        using var dialog = new MessageDialog(text, caption, choices, messageIcon, screen.WorkingArea.Height);
+        (string ResourceName, string AccessibleName) messageIcon = GetIcon(icon);
+        using var dialog = new MessageDialog(text, caption, choices, messageIcon);
         return owner == null ? dialog.ShowDialog() : dialog.ShowDialog(owner);
     }
 
@@ -56,23 +55,32 @@ public static class CoaXisMessageBox
         _ => throw new ArgumentOutOfRangeException(nameof(buttons), buttons, "未対応のボタン指定です。")
     };
 
-    private static Icon GetIcon(MessageBoxIcon icon) => icon switch
+    private static (string ResourceName, string AccessibleName) GetIcon(MessageBoxIcon icon) => icon switch
     {
-        MessageBoxIcon.None => null,
-        MessageBoxIcon.Error => SystemIcons.Error,
-        MessageBoxIcon.Question => SystemIcons.Question,
-        MessageBoxIcon.Warning => SystemIcons.Warning,
-        MessageBoxIcon.Information => SystemIcons.Information,
+        MessageBoxIcon.None => (null, null),
+        MessageBoxIcon.Error => (CoaXisUiAssets.MessageErrorIconResourceName, "エラー"),
+        MessageBoxIcon.Question => (CoaXisUiAssets.MessageQuestionIconResourceName, "質問"),
+        MessageBoxIcon.Warning => (CoaXisUiAssets.MessageWarningIconResourceName, "警告"),
+        MessageBoxIcon.Information => (CoaXisUiAssets.MessageInfoIconResourceName, "情報"),
         _ => throw new ArgumentOutOfRangeException(nameof(icon), icon, "未対応のアイコン指定です。")
     };
 
     private sealed class MessageDialog : CoaXisForm
     {
-        private readonly Image _icon;
+        private readonly SvgDocument _iconDocument;
+        private readonly PictureBox _iconBox;
+        private readonly CoaXisLabel _message;
+        private readonly FlowLayoutPanel _content;
+        private readonly FlowLayoutPanel _buttonBar;
+        private Image _icon;
         private readonly bool _canCancel;
         private readonly bool _closeReturnsOk;
 
-        public MessageDialog(string text, string caption, (string Text, DialogResult Result)[] choices, Icon icon, int screenHeight)
+        public MessageDialog(
+            string text,
+            string caption,
+            (string Text, DialogResult Result)[] choices,
+            (string ResourceName, string AccessibleName) icon)
         {
             Text = caption;
             _closeReturnsOk = choices.Length == 1;
@@ -83,16 +91,16 @@ public static class CoaXisMessageBox
             MaximizeBox = false;
             FormBorderStyle = FormBorderStyle.FixedDialog;
             StartPosition = FormStartPosition.CenterParent;
-            AutoScaleMode = AutoScaleMode.Font;
+            AutoScaleMode = AutoScaleMode.None;
 
-            var message = new CoaXisLabel
+            _message = new CoaXisLabel
             {
                 AutoSize = true,
                 MaximumSize = new Size(420, 0),
                 Text = text,
                 Margin = new Padding(0)
             };
-            var content = new FlowLayoutPanel
+            _content = new CoaXisFlowLayoutPanel
             {
                 Dock = DockStyle.Fill,
                 AutoScroll = true,
@@ -100,21 +108,23 @@ public static class CoaXisMessageBox
                 Padding = new Padding(20, 20, 20, 10),
                 Tag = "Background"
             };
-            if (icon != null)
+            if (icon.ResourceName != null)
             {
-                _icon = icon.ToBitmap();
-                content.Controls.Add(new PictureBox
+                using Stream iconStream = CoaXisUiAssets.OpenStream(icon.ResourceName);
+                _iconDocument = SvgDocument.Open<SvgDocument>(iconStream)
+                    ?? throw new InvalidDataException($"メッセージアイコンを読み込めません: {icon.ResourceName}");
+                _iconBox = new PictureBox
                 {
-                    Image = _icon,
                     Size = new Size(32, 32),
-                    SizeMode = PictureBoxSizeMode.CenterImage,
+                    SizeMode = PictureBoxSizeMode.Normal,
                     Margin = new Padding(0, 0, 16, 0),
-                    AccessibleName = icon == SystemIcons.Error ? "エラー" : "メッセージアイコン"
-                });
+                    AccessibleName = icon.AccessibleName
+                };
+                _content.Controls.Add(_iconBox);
             }
-            content.Controls.Add(message);
+            _content.Controls.Add(_message);
 
-            var buttonBar = new FlowLayoutPanel
+            _buttonBar = new CoaXisFlowLayoutPanel
             {
                 Dock = DockStyle.Bottom,
                 FlowDirection = FlowDirection.RightToLeft,
@@ -133,7 +143,7 @@ public static class CoaXisMessageBox
                     AutoSize = true,
                     Tag = i == 0 ? "Primary" : null
                 };
-                buttonBar.Controls.Add(button);
+                _buttonBar.Controls.Add(button);
                 if (i == 0)
                 {
                     AcceptButton = button;
@@ -145,12 +155,79 @@ public static class CoaXisMessageBox
                 }
             }
 
-            Controls.Add(content);
-            Controls.Add(buttonBar);
-            int measuredHeight = TextRenderer.MeasureText(text, ThemeManager.StandardFont, new Size(420, int.MaxValue),
-                TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl).Height;
-            int maxHeight = Math.Max(200, screenHeight - 80);
-            ClientSize = new Size(520, Math.Min(maxHeight, Math.Max(180, measuredHeight + 140)));
+            Controls.Add(_content);
+            Controls.Add(_buttonBar);
+            ClientSize = new Size(520, 180);
+        }
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+            UpdateDialogLayout();
+        }
+
+        protected override void OnDpiChanged(DpiChangedEventArgs e)
+        {
+            base.OnDpiChanged(e);
+            if (IsHandleCreated && _message != null)
+            {
+                UpdateDialogLayout();
+            }
+        }
+
+        private void UpdateDialogLayout()
+        {
+            int dpi = DeviceDpi;
+            int Scale(int value) => (int)Math.Round(value * dpi / 96.0);
+            Rectangle workingArea = Screen.FromControl(this).WorkingArea;
+            Point center = new(Left + Width / 2, Top + Height / 2);
+            int frameWidth = Width - ClientSize.Width;
+            int frameHeight = Height - ClientSize.Height;
+            int maxWidth = Math.Max(1, workingArea.Width - frameWidth);
+            int maxHeight = Math.Max(1, workingArea.Height - frameHeight);
+            int clientWidth = Math.Min(Scale(520), maxWidth);
+
+            SuspendLayout();
+            _content.SuspendLayout();
+            _buttonBar.SuspendLayout();
+            Header.SetDialogDpi(dpi);
+            _content.Padding = new Padding(Scale(20), Scale(20), Scale(20), Scale(10));
+            _buttonBar.Height = Scale(62);
+            _buttonBar.Padding = new Padding(Scale(12), Scale(8), Scale(12), Scale(8));
+            foreach (Control control in _buttonBar.Controls)
+            {
+                control.MinimumSize = new Size(Scale(86), Scale(34));
+                control.Margin = new Padding(Scale(3));
+            }
+
+            int iconWidth = 0;
+            if (_iconBox != null)
+            {
+                int iconSize = Scale(32);
+                _iconBox.Size = new Size(iconSize, iconSize);
+                _iconBox.Margin = new Padding(0, 0, Scale(16), 0);
+                Bitmap rendered = _iconDocument.Draw(iconSize, iconSize);
+                _iconBox.Image = rendered;
+                _icon?.Dispose();
+                _icon = rendered;
+                iconWidth = iconSize + Scale(16);
+            }
+
+            int messageWidth = Math.Max(1, clientWidth - _content.Padding.Horizontal - iconWidth);
+            _message.MaximumSize = new Size(messageWidth, 0);
+            using Graphics graphics = CreateGraphics();
+            int messageHeight = TextRenderer.MeasureText(graphics, _message.Text, _message.Font,
+                new Size(messageWidth, int.MaxValue), TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl).Height;
+            int contentHeight = _content.Padding.Vertical + Math.Max(messageHeight, _iconBox?.Height ?? 0);
+            int clientHeight = Math.Min(maxHeight, Math.Max(Scale(180), Header.Height + _buttonBar.Height + contentHeight));
+            ClientSize = new Size(clientWidth, clientHeight);
+            _buttonBar.ResumeLayout(true);
+            _content.ResumeLayout(true);
+            ResumeLayout(true);
+
+            int left = Math.Clamp(center.X - Width / 2, workingArea.Left, Math.Max(workingArea.Left, workingArea.Right - Width));
+            int top = Math.Clamp(center.Y - Height / 2, workingArea.Top, Math.Max(workingArea.Top, workingArea.Bottom - Height));
+            Location = new Point(left, top);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

@@ -8,7 +8,7 @@ using System.Windows.Forms;
 namespace CoaXis.Ui;
 
 /// <summary>Windowsのサイズ変更枠を維持し、タイトルバーをCoaXisヘッダーに置き換えるフォーム。</summary>
-public class CoaXisForm : Form
+public class CoaXisForm : Form, ICoaXisThemedControl
 {
     private const int WmNcCalcSize = 0x0083;
     private const int WmNcHitTest = 0x0084;
@@ -47,6 +47,14 @@ public class CoaXisForm : Form
         Resize += OnWindowResize;
     }
 
+    /// <inheritdoc />
+    public void ApplyTheme(Theme theme)
+    {
+        Font = theme.StandardFont;
+        ForeColor = theme.Text;
+        BackColor = theme.Background;
+    }
+
     /// <summary>フォーム上部の共通ヘッダーを取得する。</summary>
     public CoaXisHeaderControl Header => _header;
 
@@ -76,7 +84,15 @@ public class CoaXisForm : Form
         {
             throw new Win32Exception(Marshal.GetLastWin32Error());
         }
+        ThemeManager.ThemeChanged += OnThemeChanged;
         UpdateHeader();
+    }
+
+    /// <inheritdoc />
+    protected override void OnHandleDestroyed(EventArgs e)
+    {
+        ThemeManager.ThemeChanged -= OnThemeChanged;
+        base.OnHandleDestroyed(e);
     }
 
     /// <inheritdoc />
@@ -201,6 +217,8 @@ public class CoaXisForm : Form
     }
 
     private void OnWindowResize(object sender, EventArgs e) => UpdateHeader();
+
+    private void OnThemeChanged(object sender, EventArgs e) => ThemeManager.Apply(this);
 
     private void UpdateHeader()
     {

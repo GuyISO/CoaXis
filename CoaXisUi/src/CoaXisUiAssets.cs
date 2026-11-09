@@ -18,6 +18,18 @@ public static class CoaXisUiAssets
     /// <summary>開発中ページ2のアイコンのマニフェストリソース名。</summary>
     public const string DevelopmentTwoIconResourceName = "CoaXis.Ui.Assets.Icons.development-two.svg";
 
+    /// <summary>メッセージボックスの情報アイコンのマニフェストリソース名。</summary>
+    public const string MessageInfoIconResourceName = "CoaXis.Ui.Assets.Icons.message-info.svg";
+
+    /// <summary>メッセージボックスのエラーアイコンのマニフェストリソース名。</summary>
+    public const string MessageErrorIconResourceName = "CoaXis.Ui.Assets.Icons.message-error.svg";
+
+    /// <summary>メッセージボックスの警告アイコンのマニフェストリソース名。</summary>
+    public const string MessageWarningIconResourceName = "CoaXis.Ui.Assets.Icons.message-warning.svg";
+
+    /// <summary>メッセージボックスの質問アイコンのマニフェストリソース名。</summary>
+    public const string MessageQuestionIconResourceName = "CoaXis.Ui.Assets.Icons.message-question.svg";
+
     /// <summary>共有アセットを読み取り用ストリームとして開く。</summary>
     /// <param name="resourceName">このライブラリに埋め込まれたリソース名。</param>
     /// <returns>呼び出し側が破棄するリソースストリーム。</returns>

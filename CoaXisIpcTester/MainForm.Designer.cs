@@ -40,8 +40,8 @@ public sealed partial class MainForm
     private CoaXis.Ui.CoaXisButton _requestTabButton;
     private CoaXis.Ui.CoaXisButton _responseTabButton;
     private CoaXis.Ui.CoaXisPanel _jsonPanel;
-    private CoaXis.Ui.CoaXisTextBox _requestJson;
-    private CoaXis.Ui.CoaXisTextBox _responseJson;
+    private CoaXis.Ui.CoaXisDisplayTextBox _requestJson;
+    private CoaXis.Ui.CoaXisDisplayTextBox _responseJson;
     private CoaXis.Ui.CoaXisLabel _developmentOneLabel;
     private CoaXis.Ui.CoaXisTableLayoutPanel _demoLayout;
     private CoaXis.Ui.CoaXisLabel _demoInputLabel;
@@ -108,8 +108,8 @@ public sealed partial class MainForm
         _requestTabButton = new CoaXis.Ui.CoaXisButton();
         _responseTabButton = new CoaXis.Ui.CoaXisButton();
         _jsonPanel = new CoaXis.Ui.CoaXisPanel();
-        _requestJson = new CoaXis.Ui.CoaXisTextBox();
-        _responseJson = new CoaXis.Ui.CoaXisTextBox();
+        _requestJson = new CoaXis.Ui.CoaXisDisplayTextBox();
+        _responseJson = new CoaXis.Ui.CoaXisDisplayTextBox();
         _developmentOnePage = new CoaXis.Ui.CoaXisPanel();
         _developmentTwoPage = new CoaXis.Ui.CoaXisPanel();
         _developmentOneLabel = new CoaXis.Ui.CoaXisLabel();
@@ -232,7 +232,6 @@ public sealed partial class MainForm
         _connectionPanel.Padding = new System.Windows.Forms.Padding(12);
         _connectionPanel.Size = new System.Drawing.Size(1064, 48);
         _connectionPanel.TabIndex = 0;
-        _connectionPanel.Tag = "Surface";
         _connectionPanel.WrapContents = false;
         //
         // _pipeNameLabel
@@ -296,7 +295,6 @@ public sealed partial class MainForm
         _filePanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
         _filePanel.Size = new System.Drawing.Size(1064, 237);
         _filePanel.TabIndex = 1;
-        _filePanel.Tag = "Surface";
         _filePanel.SetColumnSpan(_requestType, 2);
         _filePanel.SetColumnSpan(_sendButtonsPanel, 2);
         //
@@ -381,11 +379,9 @@ public sealed partial class MainForm
         _exchangeCard.Padding = new System.Windows.Forms.Padding(12);
         _exchangeCard.Size = new System.Drawing.Size(1064, 376);
         _exchangeCard.TabIndex = 2;
-        _exchangeCard.Tag = "Surface";
         //
         // _exchangeSplit
         //
-        _exchangeSplit.BorderStyle = System.Windows.Forms.BorderStyle.None;
         _exchangeSplit.Dock = System.Windows.Forms.DockStyle.Fill;
         _exchangeSplit.Location = new System.Drawing.Point(12, 12);
         _exchangeSplit.Name = "_exchangeSplit";

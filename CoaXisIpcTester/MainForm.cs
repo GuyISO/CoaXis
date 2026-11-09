@@ -127,7 +127,6 @@ public sealed partial class MainForm : CoaXisForm
         _responseTabButton.Tag = request ? null : "Primary";
         _requestTabButton.AccessibleDescription = request ? "選択中" : null;
         _responseTabButton.AccessibleDescription = request ? null : "選択中";
-        ThemeManager.Apply(_exchangeTabBar);
     }
 
     private void SelectEntityFile(object sender, EventArgs args)

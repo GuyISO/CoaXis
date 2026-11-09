@@ -17,5 +17,5 @@ description: "Use when changing CoaXis architecture, state ownership, layer boun
 - **モデル操作・UI:** Pick/Measurement/Load/SceneはEntity配下、Property LoadはProperty配下に置く。Hub間は責務・依存方向を保ち循環させない。PopupMenuはUIごとに複製せず、対象IDを受けるApplication UI Menuから表示する。
 - **Viewport:** Camera状態・操作は`ViewportCameraHub`、操作状態は`ViewportInteractionHub`、Layer状態は`ViewportDisplayHub`が所有する。`ViewportHub`は構成、`CameraRig`は状態のScene反映に限る。
 - **IPC:** Protocolはwire DTOとenvelopeを扱い、ViewerがDTOからドメインへ変換する。単純なpayload factoryはpayload自身に置き、専用Builderを増やさない。
-- **WinForms UI:** CoaXisのWindows Formsアプリケーションは`CoaXisUi`を参照し、フォームは`CoaXisForm`、通常のボタンは`CoaXisButton`、ページナビゲーションは`CoaXisNavigationRail`を基本にする。共有SVGは`CoaXisUiAssets`から参照し、アプリ間で重複保持しない。`CoaXisForm`が表示時に共通テーマを適用し、専用描画が必要なコントロールだけ個別実装する。
+- **WinForms UI:** CoaXisのWindows Formsアプリケーションは`CoaXisUi`を参照し、フォームは`CoaXisForm`、通常のボタンは`CoaXisButton`、ページナビゲーションは`CoaXisNavigationRail`を基本にする。共有SVGは`CoaXisUiAssets`から参照し、アプリ間で重複保持しない。共通テーマが必要なコントロールは`ICoaXisThemedControl`を実装し、自身の外観を適用する。`ThemeManager`はテーマを保持し対象ツリーへ配布するが、個々のコントロール種別を判定しない。`CoaXisForm`は表示時とテーマ切替時に配下へ適用する。
 - **Application Hub:** 7 region（`Fields / Properties / Signals / Lifecycle / Events / Methods / Helpers`）をこの順で必ず置く。`[Signal]` と`NotifyXxx`はSignals、購読処理・`OnXxx`はEvents、操作はMethods、補助はHelpers。Lifecycle以外の全メンバーにXML summaryを付け、Actions/Notifications regionは使わない。

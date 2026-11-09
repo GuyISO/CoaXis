@@ -6,13 +6,41 @@ using System.Windows.Forms;
 namespace CoaXis.Ui;
 
 /// <summary>CoaXisテーマのデータグリッド。</summary>
-public sealed class CoaXisDataGridView : DataGridView
+public sealed class CoaXisDataGridView : DataGridView, ICoaXisThemedControl
 {
     private readonly List<DataGridViewRow> _previewRows = new();
     private string _designerPreviewRows = string.Empty;
 
     /// <summary>データグリッドを作成する。</summary>
     public CoaXisDataGridView() => ThemeManager.Apply(this);
+
+    /// <inheritdoc />
+    public void ApplyTheme(Theme theme)
+    {
+        Font = theme.StandardFont;
+        ForeColor = theme.Text;
+        EnableHeadersVisualStyles = false;
+        BackgroundColor = theme.Background;
+        BorderStyle = BorderStyle.None;
+        GridColor = theme.Border;
+        CellBorderStyle = DataGridViewCellBorderStyle.SingleHorizontal;
+        ColumnHeadersBorderStyle = DataGridViewHeaderBorderStyle.Single;
+        RowHeadersBorderStyle = DataGridViewHeaderBorderStyle.None;
+        DefaultCellStyle.BackColor = theme.Surface;
+        DefaultCellStyle.Font = theme.StandardFont;
+        DefaultCellStyle.ForeColor = theme.Text;
+        DefaultCellStyle.SelectionBackColor = theme.Selection;
+        DefaultCellStyle.SelectionForeColor = theme.Text;
+        foreach (DataGridViewCellStyle style in new[] { ColumnHeadersDefaultCellStyle, RowHeadersDefaultCellStyle })
+        {
+            style.BackColor = theme.GridHeader;
+            style.Font = theme.StandardFont;
+            style.ForeColor = theme.Text;
+            style.SelectionBackColor = theme.GridHeader;
+            style.SelectionForeColor = theme.Text;
+        }
+        ScrollBarTheme.Apply(this, theme);
+    }
 
     /// <summary>デザイナーで表示する行を改行区切り、セルをタブ区切りで指定する。</summary>
     [DefaultValue("")]

@@ -11,16 +11,16 @@ using Svg;
 namespace CoaXis.Ui;
 
 /// <summary>テーマ対応のナビゲーションレールとページ領域を提供する。</summary>
-public sealed class CoaXisNavigationRail : TableLayoutPanel
+public sealed class CoaXisNavigationRail : TableLayoutPanel, ICoaXisThemedControl
 {
-    private readonly FlowLayoutPanel _rail = new()
+    private readonly CoaXisFlowLayoutPanel _rail = new()
     {
         Dock = DockStyle.Fill,
         FlowDirection = FlowDirection.TopDown,
         WrapContents = false,
         Padding = new Padding(4, 12, 4, 0)
     };
-    private readonly Panel _pages = new() { Dock = DockStyle.Fill, Margin = Padding.Empty, Tag = "Background" };
+    private readonly CoaXisPanel _pages = new() { Dock = DockStyle.Fill, Margin = Padding.Empty, Tag = "Background" };
     private readonly List<(CoaXisNavigationButton Button, Control Page)> _destinations = new();
     private readonly List<CoaXisNavigationButton> _previewButtons = new();
     private readonly ToolTip _toolTip = new();
@@ -41,6 +41,15 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel
         Controls.Add(_rail, 0, 0);
         Controls.Add(_pages, 1, 0);
         _rail.SizeChanged += OnRailSizeChanged;
+        ThemeManager.Apply(this);
+    }
+
+    /// <inheritdoc />
+    public void ApplyTheme(Theme theme)
+    {
+        Font = theme.StandardFont;
+        ForeColor = theme.Text;
+        BackColor = theme.Surface;
     }
 
     /// <summary>選択されているページを取得する。</summary>
@@ -265,7 +274,7 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel
     }
 }
 
-internal sealed class CoaXisNavigationButton : Button
+internal sealed class CoaXisNavigationButton : Button, ICoaXisThemedControl
 {
     private readonly SvgDocument _icon;
     private Bitmap _renderedIcon;
@@ -280,6 +289,14 @@ internal sealed class CoaXisNavigationButton : Button
         _icon = SvgDocument.Open<SvgDocument>(stream)
             ?? throw new InvalidDataException($"ナビゲーションアイコンを読み込めません: {iconResourceName}");
         SetStyle(ControlStyles.UserPaint | ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer, true);
+    }
+
+    public void ApplyTheme(Theme theme)
+    {
+        Font = theme.ButtonFont;
+        ForeColor = theme.Text;
+        BackColor = theme.Surface;
+        Invalidate();
     }
 
     protected override void OnPaint(PaintEventArgs e)
