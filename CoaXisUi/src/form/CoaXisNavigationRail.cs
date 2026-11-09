@@ -20,7 +20,12 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel, ICoaXisThemedContro
         WrapContents = false,
         Padding = new Padding(4, 12, 4, 0)
     };
-    private readonly CoaXisPanel _pages = new() { Dock = DockStyle.Fill, Margin = Padding.Empty, Tag = "Background" };
+    private readonly CoaXisPanel _pages = new()
+    {
+        Dock = DockStyle.Fill,
+        Margin = Padding.Empty,
+        SurfaceRole = CoaXisSurfaceRole.Background
+    };
     private readonly List<(CoaXisNavigationButton Button, Control Page)> _destinations = new();
     private readonly List<CoaXisNavigationButton> _previewButtons = new();
     private readonly ToolTip _toolTip = new();
@@ -143,6 +148,8 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel, ICoaXisThemedContro
         page.Visible = false;
         _pages.Controls.Add(page);
         _rail.Controls.Add(button);
+        ThemeManager.Apply(button);
+        ThemeManager.Apply(page);
         CenterRailButtons();
         _destinations.Add((button, page));
         button.Click += (_, _) => SelectPage(page);
@@ -172,9 +179,8 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel, ICoaXisThemedContro
         {
             bool active = destinationPage == page;
             destinationPage.Visible = active;
-            button.Tag = active ? "Primary" : null;
+            button.IsSelected = active;
             button.AccessibleDescription = active ? "選択中" : null;
-            ThemeManager.Apply(button);
         }
 
         _selectedPage = page;
@@ -220,7 +226,7 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel, ICoaXisThemedContro
         int selected = Math.Max(0, _designerTabs?.SelectedIndex ?? 0);
         for (int i = 0; i < _previewButtons.Count; i++)
         {
-            _previewButtons[i].Tag = i == selected ? "Primary" : null;
+            _previewButtons[i].IsSelected = i == selected;
             _previewButtons[i].Invalidate();
         }
     }
@@ -262,7 +268,7 @@ public sealed class CoaXisNavigationRail : TableLayoutPanel, ICoaXisThemedContro
                 Width = 46,
                 Height = 46,
                 Margin = new Padding(0, 0, 0, 8),
-                Tag = null
+                IsSelected = false
             };
             button.SizeChanged += OnRailSizeChanged;
             _previewButtons.Add(button);
@@ -281,6 +287,7 @@ internal sealed class CoaXisNavigationButton : Button, ICoaXisThemedControl
     private Color _renderedColor;
     private int _renderedSize;
     private bool _hovered;
+    private bool _isSelected;
 
     public CoaXisNavigationButton(Assembly iconAssembly, string iconResourceName)
     {
@@ -299,11 +306,26 @@ internal sealed class CoaXisNavigationButton : Button, ICoaXisThemedControl
         Invalidate();
     }
 
+    public bool IsSelected
+    {
+        get => _isSelected;
+        set
+        {
+            if (_isSelected == value)
+            {
+                return;
+            }
+
+            _isSelected = value;
+            Invalidate();
+        }
+    }
+
     protected override void OnPaint(PaintEventArgs e)
     {
         e.Graphics.Clear(Parent?.BackColor ?? SystemColors.Control);
         Theme theme = ThemeManager.CurrentTheme;
-        bool selected = Tag is string tag && tag == "Primary";
+        bool selected = _isSelected;
         Color iconColor = selected ? theme.Primary : theme.Text;
         int iconSize = Math.Max(1, (int)Math.Round(24 * DeviceDpi / 96.0));
 

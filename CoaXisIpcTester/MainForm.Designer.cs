@@ -199,7 +199,7 @@ public sealed partial class MainForm
         _ipcPage.Name = "_ipcPage";
         _ipcPage.Padding = new System.Windows.Forms.Padding(20);
         _ipcPage.Size = new System.Drawing.Size(1104, 701);
-        _ipcPage.Tag = "Background";
+        _ipcPage.SurfaceRole = CoaXis.Ui.CoaXisSurfaceRole.Background;
         _ipcPage.TabIndex = 1;
         //
         // _ipcLayout
@@ -218,7 +218,7 @@ public sealed partial class MainForm
         _ipcLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
         _ipcLayout.Size = new System.Drawing.Size(1064, 661);
         _ipcLayout.TabIndex = 0;
-        _ipcLayout.Tag = "Background";
+        _ipcLayout.SurfaceRole = CoaXis.Ui.CoaXisSurfaceRole.Background;
         //
         // _connectionPanel
         //
@@ -261,7 +261,7 @@ public sealed partial class MainForm
         _connectionHintLabel.Name = "_connectionHintLabel";
         _connectionHintLabel.Size = new System.Drawing.Size(128, 15);
         _connectionHintLabel.TabIndex = 2;
-        _connectionHintLabel.Tag = "Muted";
+        _connectionHintLabel.Role = CoaXis.Ui.CoaXisLabelRole.Muted;
         _connectionHintLabel.Text = "Viewer起動後に送信";
         //
         // _filePanel
@@ -362,12 +362,12 @@ public sealed partial class MainForm
         _sendButton.AutoSize = true;
         _sendButton.Margin = new System.Windows.Forms.Padding(3, 3, 8, 3);
         _sendButton.Name = "_sendButton";
-        _sendButton.Tag = "Primary";
+        _sendButton.Variant = CoaXis.Ui.CoaXisButtonVariant.Primary;
         _sendButton.Text = "ReplaceModelSetを送信";
         _sendRequestButton.AutoSize = true;
         _sendRequestButton.Margin = new System.Windows.Forms.Padding(3);
         _sendRequestButton.Name = "_sendRequestButton";
-        _sendRequestButton.Tag = "Primary";
+        _sendRequestButton.Variant = CoaXis.Ui.CoaXisButtonVariant.Primary;
         _sendRequestButton.Text = "選択した要求を送信";
         //
         // _exchangeCard
@@ -475,11 +475,11 @@ public sealed partial class MainForm
         _developmentOnePage.Dock = System.Windows.Forms.DockStyle.Fill;
         _developmentOnePage.Name = "_developmentOnePage";
         _developmentOnePage.Padding = new System.Windows.Forms.Padding(20);
-        _developmentOnePage.Tag = "Background";
+        _developmentOnePage.SurfaceRole = CoaXis.Ui.CoaXisSurfaceRole.Background;
         _developmentOneLabel.AutoSize = true;
         _developmentOneLabel.Dock = System.Windows.Forms.DockStyle.Top;
         _developmentOneLabel.Name = "_developmentOneLabel";
-        _developmentOneLabel.Tag = "Brand";
+        _developmentOneLabel.Role = CoaXis.Ui.CoaXisLabelRole.Brand;
         _developmentOneLabel.Text = "開発中1";
         //
         // _demoLayout
@@ -505,7 +505,7 @@ public sealed partial class MainForm
         _demoLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
         _demoLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
         _demoLayout.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-        _demoLayout.Tag = "Background";
+        _demoLayout.SurfaceRole = CoaXis.Ui.CoaXisSurfaceRole.Background;
         _demoInputLabel.AutoSize = true;
         _demoInputLabel.Margin = new System.Windows.Forms.Padding(3, 16, 3, 6);
         _demoInputLabel.Name = "_demoInputLabel";
@@ -532,7 +532,7 @@ public sealed partial class MainForm
         _demoMessageButton.AutoSize = true;
         _demoMessageButton.Margin = new System.Windows.Forms.Padding(12, 8, 3, 8);
         _demoMessageButton.Name = "_demoMessageButton";
-        _demoMessageButton.Tag = "Primary";
+        _demoMessageButton.Variant = CoaXis.Ui.CoaXisButtonVariant.Primary;
         _demoMessageButton.Text = "メッセージを表示";
         _demoGridLabel.AutoSize = true;
         _demoGridLabel.Margin = new System.Windows.Forms.Padding(3, 8, 3, 6);
@@ -567,11 +567,11 @@ public sealed partial class MainForm
         _developmentTwoPage.Dock = System.Windows.Forms.DockStyle.Fill;
         _developmentTwoPage.Name = "_developmentTwoPage";
         _developmentTwoPage.Padding = new System.Windows.Forms.Padding(20);
-        _developmentTwoPage.Tag = "Background";
+        _developmentTwoPage.SurfaceRole = CoaXis.Ui.CoaXisSurfaceRole.Background;
         _developmentTwoLabel.AutoSize = true;
         _developmentTwoLabel.Dock = System.Windows.Forms.DockStyle.Top;
         _developmentTwoLabel.Name = "_developmentTwoLabel";
-        _developmentTwoLabel.Tag = "Brand";
+        _developmentTwoLabel.Role = CoaXis.Ui.CoaXisLabelRole.Brand;
         _developmentTwoLabel.Text = "開発中2";
         //
         // _statusStrip

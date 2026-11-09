@@ -20,6 +20,7 @@ public sealed class CoaXisHeaderControl : Panel, ICoaXisThemedControl
     private Theme _theme = ThemeManager.CurrentTheme;
     private string _applicationTitle = string.Empty;
     private bool _maximizeHovered;
+    private bool _showThemeButton = true;
 
     /// <summary>ヘッダーを作成する。</summary>
     public CoaXisHeaderControl()
@@ -79,6 +80,7 @@ public sealed class CoaXisHeaderControl : Panel, ICoaXisThemedControl
 
     internal void SetDialogMode()
     {
+        _showThemeButton = false;
         _themeButton.Visible = false;
         _minimizeButton.Visible = false;
         _maximizeButton.Visible = false;
@@ -110,6 +112,7 @@ public sealed class CoaXisHeaderControl : Panel, ICoaXisThemedControl
         }
 
         _themeButton.Font = theme.ButtonFont;
+        _themeButton.Visible = _showThemeButton && (theme is LightTheme or DarkTheme);
         _themeButton.Text = theme is DarkTheme ? "☀ Light" : "🌙 Dark";
         _themeButton.AccessibleName = theme is DarkTheme ? "ライトテーマに切り替え" : "ダークテーマに切り替え";
         _closeButton.FlatAppearance.MouseOverBackColor = Color.FromArgb(196, 43, 28);
@@ -195,6 +198,11 @@ public sealed class CoaXisHeaderControl : Panel, ICoaXisThemedControl
 
     private void OnThemeClick(object sender, EventArgs e)
     {
+        if (_theme is not LightTheme && _theme is not DarkTheme)
+        {
+            return;
+        }
+
         ThemeManager.SetTheme(_theme is DarkTheme ? new LightTheme() : new DarkTheme());
         if (FindForm() is not CoaXisForm)
         {

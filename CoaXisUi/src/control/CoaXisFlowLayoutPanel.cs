@@ -6,6 +6,8 @@ namespace CoaXis.Ui;
 /// <summary>CoaXisテーマのフローレイアウトパネル。</summary>
 public sealed class CoaXisFlowLayoutPanel : FlowLayoutPanel, ICoaXisThemedControl
 {
+    private CoaXisSurfaceRole _surfaceRole;
+
     /// <summary>フローレイアウトパネルを作成する。</summary>
     public CoaXisFlowLayoutPanel() => ThemeManager.Apply(this);
 
@@ -14,17 +16,22 @@ public sealed class CoaXisFlowLayoutPanel : FlowLayoutPanel, ICoaXisThemedContro
     {
         Font = theme.StandardFont;
         ForeColor = theme.Text;
-        BackColor = Tag is string tag && tag == "Background" ? theme.Background : theme.Surface;
+        BackColor = _surfaceRole == CoaXisSurfaceRole.Background ? theme.Background : theme.Surface;
     }
 
-    /// <summary>テーマの背景種別を指定する。</summary>
-    [DefaultValue(null)]
-    public new object Tag
+    /// <summary>パネルの背景の役割を取得または設定する。</summary>
+    [DefaultValue(CoaXisSurfaceRole.Surface)]
+    public CoaXisSurfaceRole SurfaceRole
     {
-        get => base.Tag;
+        get => _surfaceRole;
         set
         {
-            base.Tag = value;
+            if (_surfaceRole == value)
+            {
+                return;
+            }
+
+            _surfaceRole = value;
             ThemeManager.Apply(this);
         }
     }

@@ -6,24 +6,31 @@ namespace CoaXis.Ui;
 /// <summary>CoaXisテーマのラベル。</summary>
 public sealed class CoaXisLabel : Label, ICoaXisThemedControl
 {
+    private CoaXisLabelRole _role;
+
     /// <summary>ラベルを作成する。</summary>
     public CoaXisLabel() => ThemeManager.Apply(this);
 
     /// <inheritdoc />
     public void ApplyTheme(Theme theme)
     {
-        Font = Tag is string tag && tag == "Brand" ? theme.BrandFont : theme.StandardFont;
-        ForeColor = Tag is string labelTag && labelTag == "Muted" ? theme.MutedText : theme.Text;
+        Font = _role == CoaXisLabelRole.Brand ? theme.BrandFont : theme.StandardFont;
+        ForeColor = _role == CoaXisLabelRole.Muted ? theme.MutedText : theme.Text;
     }
 
-    /// <summary>テーマの文字種別を指定する。</summary>
-    [DefaultValue(null)]
-    public new object Tag
+    /// <summary>ラベルの文字の役割を取得または設定する。</summary>
+    [DefaultValue(CoaXisLabelRole.Standard)]
+    public CoaXisLabelRole Role
     {
-        get => base.Tag;
+        get => _role;
         set
         {
-            base.Tag = value;
+            if (_role == value)
+            {
+                return;
+            }
+
+            _role = value;
             ThemeManager.Apply(this);
         }
     }

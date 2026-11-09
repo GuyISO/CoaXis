@@ -12,6 +12,7 @@ public sealed class CoaXisButton : Button, ICoaXisThemedControl
     private bool _hovered;
     private bool _pressed;
     private bool _isSelected;
+    private CoaXisButtonVariant _variant;
 
     /// <summary>ボタンを作成する。</summary>
     public CoaXisButton()
@@ -37,14 +38,19 @@ public sealed class CoaXisButton : Button, ICoaXisThemedControl
         Invalidate();
     }
 
-    /// <summary>テーマのボタン種別を指定する。</summary>
-    [DefaultValue(null)]
-    public new object Tag
+    /// <summary>ボタンの基本的な表示バリエーションを取得または設定する。</summary>
+    [DefaultValue(CoaXisButtonVariant.Secondary)]
+    public CoaXisButtonVariant Variant
     {
-        get => base.Tag;
+        get => _variant;
         set
         {
-            base.Tag = value;
+            if (_variant == value)
+            {
+                return;
+            }
+
+            _variant = value;
             ThemeManager.Apply(this);
         }
     }
@@ -66,7 +72,7 @@ public sealed class CoaXisButton : Button, ICoaXisThemedControl
         }
     }
 
-    private bool IsPrimary => _isSelected || Tag is string tag && tag == "Primary";
+    private bool IsPrimary => _isSelected || _variant == CoaXisButtonVariant.Primary;
 
     protected override void OnPaint(PaintEventArgs e)
     {

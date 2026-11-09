@@ -106,7 +106,7 @@ public static class CoaXisMessageBox
                 AutoScroll = true,
                 WrapContents = false,
                 Padding = new Padding(20, 20, 20, 10),
-                Tag = "Background"
+                SurfaceRole = CoaXisSurfaceRole.Background
             };
             if (icon.ResourceName != null)
             {
@@ -131,7 +131,7 @@ public static class CoaXisMessageBox
                 WrapContents = false,
                 Height = 62,
                 Padding = new Padding(12, 8, 12, 8),
-                Tag = "Background"
+                SurfaceRole = CoaXisSurfaceRole.Background
             };
             for (int i = choices.Length - 1; i >= 0; i--)
             {
@@ -141,7 +141,7 @@ public static class CoaXisMessageBox
                     DialogResult = choices[i].Result,
                     MinimumSize = new Size(86, 34),
                     AutoSize = true,
-                    Tag = i == 0 ? "Primary" : null
+                    Variant = i == 0 ? CoaXisButtonVariant.Primary : CoaXisButtonVariant.Secondary
                 };
                 _buttonBar.Controls.Add(button);
                 if (i == 0)

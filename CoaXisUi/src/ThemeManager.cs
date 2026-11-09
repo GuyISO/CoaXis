@@ -4,9 +4,11 @@ using System.Windows.Forms;
 
 namespace CoaXis.Ui;
 
-/// <summary>
-/// CoaXis UI の配色を定義する。
-/// </summary>
+/// <summary>CoaXis UIの色とフォントを定義する。</summary>
+/// <remarks>
+/// 独自テーマは必須の色を実装し、各色の組み合わせで文字や操作状態を判別できるコントラストを確保する。
+/// フォントはコントロール間で共有されるため、テーマ適用中に破棄せず、ライブラリ側でも破棄しない。
+/// </remarks>
 public abstract class Theme
 {
     private static readonly Font DefaultStandardFont = new("Segoe UI", 9F, FontStyle.Regular);
@@ -14,25 +16,25 @@ public abstract class Theme
     private static readonly Font DefaultBrandFont = new("Segoe UI", 16F, FontStyle.Bold);
     private static readonly Font DefaultTitleFont = new("Segoe UI", 15F, FontStyle.Bold);
 
-    /// <summary>通常のコントロールのフォントを取得する。</summary>
+    /// <summary>本文と通常コントロールに使用する共有フォントを取得する。</summary>
     public virtual Font StandardFont => DefaultStandardFont;
 
-    /// <summary>ボタンのフォントを取得する。</summary>
+    /// <summary>ボタンに使用する共有フォントを取得する。</summary>
     public virtual Font ButtonFont => DefaultButtonFont;
 
-    /// <summary>ブランド見出しのフォントを取得する。</summary>
+    /// <summary>ブランド見出しに使用する共有フォントを取得する。</summary>
     public virtual Font BrandFont => DefaultBrandFont;
 
-    /// <summary>タイトルバーのアプリケーション名のフォントを取得する。</summary>
+    /// <summary>タイトルバーのアプリケーション名に使用する共有フォントを取得する。</summary>
     public virtual Font TitleFont => DefaultTitleFont;
 
-    /// <summary>アプリケーションの背景色を取得する。</summary>
+    /// <summary>ウィンドウや背景領域に使う色を取得する。</summary>
     public abstract Color Background { get; }
 
-    /// <summary>カードや入力欄の背景色を取得する。</summary>
+    /// <summary>カードなど、背景から一段分けた面に使う色を取得する。</summary>
     public abstract Color Surface { get; }
 
-    /// <summary>テキストや選択項目を入力する領域の背景色を取得する。</summary>
+    /// <summary>編集可能な入力領域の背景色を取得する。</summary>
     public virtual Color InputBackground => Surface;
 
     /// <summary>未選択のチェック欄にマウスを重ねたときの背景色を取得する。</summary>
@@ -47,7 +49,7 @@ public abstract class Theme
     /// <summary>通常の文字色を取得する。</summary>
     public abstract Color Text { get; }
 
-    /// <summary>操作のアクセントカラーを取得する。</summary>
+    /// <summary>主要操作、選択項目、アクセントに使う色を取得する。</summary>
     public abstract Color Primary { get; }
 
     /// <summary>通常ボタンの背景色を取得する。</summary>
@@ -62,19 +64,22 @@ public abstract class Theme
     /// <summary>補助情報の文字色を取得する。</summary>
     public abstract Color MutedText { get; }
 
-    /// <summary>選択項目の背景色を取得する。</summary>
+    /// <summary>データグリッドなどで選択中の項目に使う背景色を取得する。</summary>
     public abstract Color Selection { get; }
 
     /// <summary>選択されていないグリッドヘッダーの背景色を取得する。</summary>
     public abstract Color GridHeader { get; }
 
-    /// <summary>タイトルバーの背景色を取得する。</summary>
+    /// <summary>共通タイトルバーの背景色を取得する。</summary>
     public abstract Color Header { get; }
 
-    /// <summary>タイトルバーのボタンに重ねるホバー色を取得する。</summary>
+    /// <summary>タイトルバーのボタンにポインターを重ねたときの色を取得する。</summary>
     public abstract Color HeaderHover { get; }
 
-    /// <summary>スクロールバーに適用するWindowsのテーマ名を取得する。nullは既定のテーマを表す。</summary>
+    /// <summary>
+    /// スクロールバーに適用するWindowsのテーマ名を取得する。
+    /// <see langword="null"/>の場合はWindowsの既定テーマを使用する。
+    /// </summary>
     public virtual string ScrollBarThemeName => null;
 }
 
@@ -186,9 +191,11 @@ public sealed class DarkTheme : Theme
     public override string ScrollBarThemeName => "DarkMode_Explorer";
 }
 
-/// <summary>
-/// フォームとその子コントロールへ共通テーマを適用する。
-/// </summary>
+/// <summary>アプリケーション全体で現在のテーマを管理し、CoaXisコントロールへ適用する。</summary>
+/// <remarks>
+/// テーマはプロセス内で共有される。<see cref="SetTheme(Theme)"/>はWinFormsのUIスレッドから呼び出す。
+/// ハンドル作成済みの<see cref="CoaXisForm"/>は切替時に更新される。
+/// </remarks>
 public static class ThemeManager
 {
     private static Theme _currentTheme = new DarkTheme();
@@ -209,7 +216,7 @@ public static class ThemeManager
     /// <summary>現在のテーマを取得する。</summary>
     public static Theme CurrentTheme => _currentTheme;
 
-    /// <summary>以降のテーマ適用で使用するテーマを設定する。</summary>
+    /// <summary>プロセス共通のテーマを設定し、表示中のCoaXisフォームへ適用する。</summary>
     /// <param name="theme">適用するテーマ。</param>
     public static void SetTheme(Theme theme)
     {

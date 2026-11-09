@@ -6,6 +6,8 @@ namespace CoaXis.Ui;
 /// <summary>CoaXisテーマの表形式レイアウトパネル。</summary>
 public sealed class CoaXisTableLayoutPanel : TableLayoutPanel, ICoaXisThemedControl
 {
+    private CoaXisSurfaceRole _surfaceRole;
+
     /// <summary>表形式レイアウトパネルを作成する。</summary>
     public CoaXisTableLayoutPanel() => ThemeManager.Apply(this);
 
@@ -14,17 +16,22 @@ public sealed class CoaXisTableLayoutPanel : TableLayoutPanel, ICoaXisThemedCont
     {
         Font = theme.StandardFont;
         ForeColor = theme.Text;
-        BackColor = Tag is string tag && tag == "Background" ? theme.Background : theme.Surface;
+        BackColor = _surfaceRole == CoaXisSurfaceRole.Background ? theme.Background : theme.Surface;
     }
 
-    /// <summary>テーマの背景種別を指定する。</summary>
-    [DefaultValue(null)]
-    public new object Tag
+    /// <summary>パネルの背景の役割を取得または設定する。</summary>
+    [DefaultValue(CoaXisSurfaceRole.Surface)]
+    public CoaXisSurfaceRole SurfaceRole
     {
-        get => base.Tag;
+        get => _surfaceRole;
         set
         {
-            base.Tag = value;
+            if (_surfaceRole == value)
+            {
+                return;
+            }
+
+            _surfaceRole = value;
             ThemeManager.Apply(this);
         }
     }
