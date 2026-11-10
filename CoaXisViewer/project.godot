@@ -30,6 +30,10 @@ window/subwindows/embed_subwindows=false
 
 project/assembly_name="CoaXisViewer"
 
+[gui]
+
+theme/custom="uid://dmg2kdse377xj"
+
 [input]
 
 translate_camera_left={

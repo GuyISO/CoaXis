@@ -1,0 +1,6 @@
+[gd_resource type="Theme" format=3 uid="uid://dmg2kdse377xj"]
+
+[ext_resource type="FontFile" uid="uid://bkld7l500480i" path="res://assets/font/segoeui.ttf" id="1_isbac"]
+
+[resource]
+default_font = ExtResource("1_isbac")
