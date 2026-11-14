@@ -47,19 +47,23 @@ public partial class ModelPropertyTree : Tree
 	{
 		base._Ready();
 		ButtonClicked += OnButtonClicked;
+		ItemActivated += OnItemActivated;
 		Application.Model.Property.Visual.VisibilityResolved += OnPropertyVisibilityResolved;
 		Application.Model.Property.State.ValueNotified += OnPropertyValueNotified;
 		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityPropertyTreeVisibleNotified;
+		Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
 	}
 
 	public override void _ExitTree()
 	{
 		ButtonClicked -= OnButtonClicked;
+		ItemActivated -= OnItemActivated;
 		Application.Model.Property.Visual.VisibilityResolved -= OnPropertyVisibilityResolved;
 		Application.Model.Property.State.ValueNotified -= OnPropertyValueNotified;
 		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityPropertyTreeVisibleNotified;
+		Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
 		base._ExitTree();
 	}
 
@@ -83,7 +87,7 @@ public partial class ModelPropertyTree : Tree
 					return;
 				}
 
-				Application.Ui.Menu.ShowModelEntityMenu(_entityId);
+				ModelEntityRowBehavior.ShowContextMenu(_entityId);
 			}
 			else
 			{
@@ -115,6 +119,7 @@ public partial class ModelPropertyTree : Tree
 
 		TreeItem rootItem = CreateItem();
 		rootItem.SetText(0, entity.Name);
+		ModelEntityRowBehavior.ApplySelectionHighlight(rootItem, _entityId, ModelEntityRowBehavior.GetSelectionColor());
 		Texture2D entityIcon = Application.Asset.Icon.GetModelIcon(entity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
 		rootItem.SetIcon(0, entityIcon);
 		rootItem.AddButton(0, GetEntityPropertyIcon(entity), id: PropertyButtonId, disabled: entity.Properties.Count == 0);
@@ -177,6 +182,25 @@ public partial class ModelPropertyTree : Tree
 		}
 
 		Application.Model.Property.Registry.Get(propertyId)?.ToggleVisibility();
+	}
+
+	/// <summary>
+	/// Entityの選択状態が変更されたとき、ルート行の背景色を更新する。
+	/// </summary>
+	private void OnSelectionChanged()
+	{
+		ModelEntityRowBehavior.ApplySelectionHighlight(_rootItem, _entityId, ModelEntityRowBehavior.GetSelectionColor());
+	}
+
+	/// <summary>
+	/// ルートの ModelEntity 行がアクティブ化されたとき、Manipulate 操作を通知する。
+	/// </summary>
+	private void OnItemActivated()
+	{
+		if (_rootItem != null && _entityId != Guid.Empty && GetSelected() == _rootItem)
+		{
+			ModelEntityRowBehavior.Manipulate(_entityId);
+		}
 	}
 
 	/// <summary>

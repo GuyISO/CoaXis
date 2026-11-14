@@ -69,6 +69,7 @@ public partial class SelectionUi : PanelContainer
         _buttonToggle.Pressed += OnButtonTogglePressed;
         _buttonClear.Pressed += OnButtonClearPressed;
         _tree.GuiInput += OnTreeGuiInput;
+        _tree.ItemActivated += OnTreeItemActivated;
     }
 
     /// <summary>
@@ -82,6 +83,7 @@ public partial class SelectionUi : PanelContainer
         _buttonToggle.Pressed -= OnButtonTogglePressed;
         _buttonClear.Pressed -= OnButtonClearPressed;
         _tree.GuiInput -= OnTreeGuiInput;
+        _tree.ItemActivated -= OnTreeItemActivated;
     }
 
     /// <summary>
@@ -182,7 +184,15 @@ public partial class SelectionUi : PanelContainer
             return;
         }
 
-        Application.Ui.Menu.ShowModelEntityMenu(entityId);
+        ModelEntityRowBehavior.ShowContextMenu(entityId);
+    }
+
+    /// <summary>
+    /// Tree の項目がアクティブ化されたときのイベントハンドラ
+    /// </summary>
+    private void OnTreeItemActivated()
+    {
+        ModelEntityRowBehavior.Manipulate(TryGetEntityId(_tree.GetSelected()));
     }
 
     /// <summary>
@@ -275,12 +285,14 @@ public partial class SelectionUi : PanelContainer
             return;
         }
 
+        Color selectedColor = ModelEntityRowBehavior.GetSelectionColor();
         for (int i = 0; i < _selectedEntityIds.Count; i++)
         {
             Guid entityId = _selectedEntityIds[i];
             ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
             TreeItem item = _tree.CreateItem(root);
             item.SetText(0, modelEntity?.Name ?? entityId.ToString());
+            ModelEntityRowBehavior.ApplySelectionHighlight(item, entityId, selectedColor);
 
             // ModelEntityに紐づくアイコンを表示する
             Texture2D icon = Application.Asset.Icon.GetModelIcon(modelEntity?.IconId ?? string.Empty, Constant.Ui.Tree.HierarchyVisibleIconSize);

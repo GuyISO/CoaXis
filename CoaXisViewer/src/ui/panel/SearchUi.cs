@@ -55,6 +55,7 @@ public partial class SearchUi : PanelContainer
         _entityName.TextChanged += OnTextChanged;
         _propertyValue.TextChanged += OnTextChanged;
         _results.ItemSelected += OnResultSelected;
+        _results.ItemActivated += OnResultActivated;
         _results.GuiInput += OnResultsGuiInput;
         _selectAll.Pressed += OnSelectAll;
         Application.Model.Entity.Registry.Registered += OnRegistryChanged;
@@ -73,6 +74,7 @@ public partial class SearchUi : PanelContainer
         _entityName.TextChanged -= OnTextChanged;
         _propertyValue.TextChanged -= OnTextChanged;
         _results.ItemSelected -= OnResultSelected;
+        _results.ItemActivated -= OnResultActivated;
         _results.GuiInput -= OnResultsGuiInput;
         _selectAll.Pressed -= OnSelectAll;
         Application.Model.Entity.Registry.Registered -= OnRegistryChanged;
@@ -127,6 +129,14 @@ public partial class SearchUi : PanelContainer
         _results.DeselectAll();
     }
 
+    private void OnResultActivated(long index)
+    {
+        if (TryGetResultId((int)index, out Guid entityId))
+        {
+            ModelEntityRowBehavior.Manipulate(entityId);
+        }
+    }
+
     private void OnResultsGuiInput(InputEvent @event)
     {
         if (@event is not InputEventMouseButton mouseButton
@@ -139,7 +149,7 @@ public partial class SearchUi : PanelContainer
         int index = _results.GetItemAtPosition(mouseButton.Position, true);
         if (index >= 0 && TryGetResultId(index, out Guid entityId))
         {
-            Application.Ui.Menu.ShowModelEntityMenu(entityId);
+            ModelEntityRowBehavior.ShowContextMenu(entityId);
         }
     }
 
@@ -220,7 +230,7 @@ public partial class SearchUi : PanelContainer
 
     private void UpdateSelectionIndicators()
     {
-        Color selectedColor = Color.FromHtml(Application.Setting.Current.Color.HierarchySelectedColor);
+        Color selectedColor = ModelEntityRowBehavior.GetSelectionColor();
         for (int i = 0; i < _results.ItemCount; i++)
         {
             if (!TryGetResultId(i, out Guid id))
@@ -228,9 +238,7 @@ public partial class SearchUi : PanelContainer
                 continue;
             }
 
-            _results.SetItemCustomBgColor(i, Application.Model.Entity.Selection.Contains(id)
-                ? selectedColor
-                : Colors.Transparent);
+            ModelEntityRowBehavior.ApplySelectionHighlight(_results, i, id, selectedColor);
         }
     }
 
