@@ -50,7 +50,6 @@ public partial class ModelEntityMeasurementHub : BaseHub
     {
         SubscribeEvents();
         EnsureMeasurementVisuals();
-        ApplySettings();
     }
 
     public override void _ExitTree()
@@ -79,7 +78,6 @@ public partial class ModelEntityMeasurementHub : BaseHub
     {
         Application.Model.Entity.Pick.HandlingModeNotified += OnModelEntityPickHandlingModeNotified;
         Application.Model.Entity.Pick.ResultNotified += OnModelEntityPickResultNotified;
-        Application.Setting.SettingsNotified += ApplySettings;
     }
 
     /// <summary>
@@ -89,7 +87,6 @@ public partial class ModelEntityMeasurementHub : BaseHub
     {
         Application.Model.Entity.Pick.HandlingModeNotified -= OnModelEntityPickHandlingModeNotified;
         Application.Model.Entity.Pick.ResultNotified -= OnModelEntityPickResultNotified;
-        Application.Setting.SettingsNotified -= ApplySettings;
     }
 
     /// <summary>
@@ -188,19 +185,6 @@ public partial class ModelEntityMeasurementHub : BaseHub
     #endregion
 
     #region Helpers
-
-    /// <summary>
-    /// 設定値を反映する。
-    /// </summary>
-    private void ApplySettings()
-    {
-        if (_lineMaterial == null || !GodotObject.IsInstanceValid(_lineMaterial))
-        {
-            return;
-        }
-
-        _lineMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Current.Color.MeasurementLineColor);
-    }
 
     /// <summary>
     /// 現在の測定結果を計算する。

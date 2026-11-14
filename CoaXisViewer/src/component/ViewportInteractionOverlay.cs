@@ -18,7 +18,7 @@ public partial class ViewportInteractionOverlay : Control
 	private const float ArcballCrossAngularSize = 0.24f;
 	private const int ArcballCrossCurveSegments = 8;
 
-	// オーバーレイの線の色、設定から読み込み　_Ready 後に ApplySettings() で初期化する
+	// オーバーレイの線の色。設定から読み込み、_Ready で初期化する
 	private Color _lineColor;
 
 	// 関連ノードのキャッシュ
@@ -88,7 +88,6 @@ public partial class ViewportInteractionOverlay : Control
 	/// </summary>
 	private void SubscribeApplicationEvents()
 	{
-		Application.Setting.SettingsNotified += ApplySettings;
 		Application.Viewport.Camera.RotationNotified += OnRotationNotified;
 		Application.Viewport.Interaction.ModeNotified += OnInteractionModeNotified;
 		Application.Viewport.Interaction.ArcballRadiusNotified += OnArcballRadiusNotified;
@@ -101,7 +100,6 @@ public partial class ViewportInteractionOverlay : Control
 	/// </summary>
 	private void UnsubscribeApplicationEvents()
 	{
-		Application.Setting.SettingsNotified -= ApplySettings;
 		Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
 		Application.Viewport.Interaction.ModeNotified -= OnInteractionModeNotified;
 		Application.Viewport.Interaction.ArcballRadiusNotified -= OnArcballRadiusNotified;

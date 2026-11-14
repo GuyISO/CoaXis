@@ -10,6 +10,9 @@ public partial class AssetMaterialHub : BaseHub
     /// <summary>選択強調マテリアルのパス。</summary>
     private const string SelectedMaterialPath = "res://assets/material/selected.tres";
 
+    /// <summary>選択色を HDR 発光として表示する強度。</summary>
+    private const float SelectedMaterialEmissionEnergyMultiplier = 2.86f;
+
     /// <summary>選択強調マテリアル。</summary>
     private Material _selectedMaterial;
 
@@ -25,37 +28,11 @@ public partial class AssetMaterialHub : BaseHub
 
     #region Lifecycle
 
-    public override void _Ready()
-    {
-        SubscribeApplicationEvents();
-    }
-
     public override void _ExitTree()
     {
-        UnsubscribeApplicationEvents();
         _selectedMaterial = null;
 
         base._ExitTree();
-    }
-
-    #endregion
-
-    #region Events
-
-    /// <summary>
-    /// Application イベントの購読を開始する。
-    /// </summary>
-    private void SubscribeApplicationEvents()
-    {
-        Application.Setting.SettingsNotified += ApplySettings;
-    }
-
-    /// <summary>
-    /// Application イベントの購読を解除する。
-    /// </summary>
-    private void UnsubscribeApplicationEvents()
-    {
-        Application.Setting.SettingsNotified -= ApplySettings;
     }
 
     #endregion
@@ -90,14 +67,6 @@ public partial class AssetMaterialHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// 設定値を反映する。
-    /// </summary>
-    private void ApplySettings()
-    {
-        ApplySelectedMaterialColor();
-    }
-
-    /// <summary>
     /// 選択中のマテリアルに設定される色を適用する。
     /// </summary>
     private void ApplySelectedMaterialColor()
@@ -107,7 +76,10 @@ public partial class AssetMaterialHub : BaseHub
             return;
         }
 
-        standardMaterial.AlbedoColor = Color.FromHtml(Application.Setting.Current.Color.SelectedMaterialColor);
+        Color selectedColor = Color.FromHtml(Application.Setting.Current.Color.SelectedMaterialColor);
+        standardMaterial.AlbedoColor = selectedColor;
+        standardMaterial.Emission = selectedColor;
+        standardMaterial.EmissionEnergyMultiplier = SelectedMaterialEmissionEnergyMultiplier;
     }
 
     #endregion

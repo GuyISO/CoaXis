@@ -23,7 +23,6 @@ public partial class MessageUi : PanelContainer
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
-        OnSettingsNotified();
     }
 
     public override void _ExitTree()
@@ -51,7 +50,6 @@ public partial class MessageUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Log.Logged += OnLogged;
-        Application.Setting.SettingsNotified += OnSettingsNotified;
     }
 
     /// <summary>
@@ -60,7 +58,6 @@ public partial class MessageUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Log.Logged -= OnLogged;
-        Application.Setting.SettingsNotified -= OnSettingsNotified;
     }
 
     /// <summary>
@@ -74,15 +71,6 @@ public partial class MessageUi : PanelContainer
             return;
         }
         AddLine(line);
-    }
-
-    /// <summary>
-    /// 設定変更通知を受けたときに表示を再整形する
-    /// </summary>
-    private void OnSettingsNotified()
-    {
-        TrimBufferToMaxLines();
-        RefreshLabelText();
     }
 
     #endregion

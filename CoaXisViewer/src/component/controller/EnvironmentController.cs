@@ -9,36 +9,12 @@ public partial class EnvironmentController : WorldEnvironment
 
 	public override void _Ready()
 	{
-		SubscribeApplicationEvents();
 		ApplySettings();
-	}
-
-	public override void _ExitTree()
-	{
-		UnsubscribeApplicationEvents();
-
-		base._ExitTree();
 	}
 
 	#endregion
 
-	#region Events
-
-	/// <summary>
-	/// Applicationイベントの購読を開始する
-	/// </summary>
-	private void SubscribeApplicationEvents()
-	{
-		Application.Setting.SettingsNotified += ApplySettings;
-	}
-
-	/// <summary>
-	/// Applicationイベントの購読を解除する
-	/// </summary>
-	private void UnsubscribeApplicationEvents()
-	{
-		Application.Setting.SettingsNotified -= ApplySettings;
-	}
+	#region Helpers
 
 	/// <summary>
 	/// 設定値を反映する

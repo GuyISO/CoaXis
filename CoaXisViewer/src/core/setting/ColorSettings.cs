@@ -6,30 +6,36 @@ public sealed class ColorSettings
 {
     #region Properties
 
+    private const string DefaultEnvironmentBackgroundColor = "#202124FF";
+    private const string DefaultOverlayLineColor = "#4E95D9FF";
+    private const string DefaultHierarchySelectedColor = "#4E95D9FF";
+    private const string DefaultSelectedMaterialColor = "#4E95D9FF";
+    private const string DefaultMeasurementLineColor = "#4E95D9FF";
+
     /// <summary>
     /// WorldEnvironment の背景色。
     /// </summary>
-    public string EnvironmentBackgroundColor { get; set; } = "#202124FF";
+    public string EnvironmentBackgroundColor { get; set; } = DefaultEnvironmentBackgroundColor;
 
     /// <summary>
     /// ビューポートオーバーレイ（中心軸・アークボール）の線色。
     /// </summary>
-    public string OverlayLineColor { get; set; } = "#4E95D9FF";
+    public string OverlayLineColor { get; set; } = DefaultOverlayLineColor;
 
     /// <summary>
     /// 階層ツリーの選択行の背景色。
     /// </summary>
-    public string HierarchySelectedColor { get; set; } = "#4E95D9FF";
+    public string HierarchySelectedColor { get; set; } = DefaultHierarchySelectedColor;
 
     /// <summary>
     /// モデル選択ハイライト用マテリアルの色。
     /// </summary>
-    public string SelectedMaterialColor { get; set; } = "#4E95D9FF";
+    public string SelectedMaterialColor { get; set; } = DefaultSelectedMaterialColor;
 
     /// <summary>
     /// 測定ラインのマテリアル色。
     /// </summary>
-    public string MeasurementLineColor { get; set; } = "#4E95D9FF";
+    public string MeasurementLineColor { get; set; } = DefaultMeasurementLineColor;
 
     #endregion
 
@@ -40,11 +46,11 @@ public sealed class ColorSettings
     /// </summary>
     public void Normalize()
     {
-        if (string.IsNullOrWhiteSpace(EnvironmentBackgroundColor)) EnvironmentBackgroundColor = "#202124FF";
-        if (string.IsNullOrWhiteSpace(OverlayLineColor)) OverlayLineColor = "#4E95D9FF";
-        if (string.IsNullOrWhiteSpace(HierarchySelectedColor)) HierarchySelectedColor = "#4E95D9FF";
-        if (string.IsNullOrWhiteSpace(SelectedMaterialColor)) SelectedMaterialColor = "#4E95D9FF";
-        if (string.IsNullOrWhiteSpace(MeasurementLineColor)) MeasurementLineColor = "#4E95D9FF";
+        if (string.IsNullOrWhiteSpace(EnvironmentBackgroundColor)) EnvironmentBackgroundColor = DefaultEnvironmentBackgroundColor;
+        if (string.IsNullOrWhiteSpace(OverlayLineColor)) OverlayLineColor = DefaultOverlayLineColor;
+        if (string.IsNullOrWhiteSpace(HierarchySelectedColor)) HierarchySelectedColor = DefaultHierarchySelectedColor;
+        if (string.IsNullOrWhiteSpace(SelectedMaterialColor)) SelectedMaterialColor = DefaultSelectedMaterialColor;
+        if (string.IsNullOrWhiteSpace(MeasurementLineColor)) MeasurementLineColor = DefaultMeasurementLineColor;
     }
 
     #endregion

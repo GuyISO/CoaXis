@@ -41,18 +41,7 @@ public sealed class ViewerSettings
     /// <returns>安全に起動可能な最小設定</returns>
     public static ViewerSettings CreateDefault()
     {
-        return new ViewerSettings
-        {
-            Ipc = new IpcSettings
-            {
-                PipeName = Constant.Ipc.PipeName,
-                StartPipeServerOnReady = Constant.Ipc.StartPipeServerOnReady
-            },
-            Camera = new CameraSettings(),
-            Input = new InputSettings(),
-            Color = new ColorSettings(),
-            Ui = new UiSettings()
-        };
+        return new ViewerSettings();
     }
 
     /// <summary>

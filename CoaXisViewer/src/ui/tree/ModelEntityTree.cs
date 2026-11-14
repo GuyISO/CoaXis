@@ -99,7 +99,6 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void SubscribeApplicationEvents()
     {
-        Application.Setting.SettingsNotified += ApplySettings;
         Application.Model.Entity.Selection.Selected += OnModelEntitySelected;
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
         Application.Model.Entity.Registry.Registered += OnModelEntityRegistered;
@@ -117,7 +116,6 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void UnsubscribeApplicationEvents()
     {
-        Application.Setting.SettingsNotified -= ApplySettings;
         Application.Model.Entity.Selection.Selected -= OnModelEntitySelected;
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
         Application.Model.Entity.Registry.Registered -= OnModelEntityRegistered;

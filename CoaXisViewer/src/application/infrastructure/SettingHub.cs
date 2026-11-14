@@ -43,15 +43,6 @@ public partial class SettingHub : BaseHub
 
     #endregion
 
-    #region Signals
-
-    /// <summary>
-    /// 設定変更の通知。
-    /// </summary>
-    [Signal] public delegate void SettingsNotifiedEventHandler();
-
-    #endregion
-
     #region Lifecycle
 
     /// <summary>
@@ -93,7 +84,6 @@ public partial class SettingHub : BaseHub
             {
                 Current = loaded;
                 Application.Log.Info($"Settings: loaded from '{path}'.");
-                EmitSignal(SignalName.SettingsNotified);
                 return true;
             }
         }
@@ -113,7 +103,6 @@ public partial class SettingHub : BaseHub
             Application.Log.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
         }
 
-        EmitSignal(SignalName.SettingsNotified);
         return false;
     }
 
