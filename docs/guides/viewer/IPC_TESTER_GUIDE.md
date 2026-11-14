@@ -2,7 +2,7 @@
 
 ## 目的
 
-IPC Testerからモデル集合の読み込み・追加・削除・変更・読み出し要求を送り、Viewerの応答を確認する。要求へのResultを待つ間に先着した非同期通知は通信履歴に記録し、要求への応答は`correlationId`が一致する`Result`として識別する。Result受信後は接続を閉じるため、継続的な通知購読には対応しない。
+IPC Testerからモデル集合の読み込み・追加・削除・変更・読み出し要求を送り、Viewerの応答を確認する。接続中はViewerからの非同期通知を通信履歴に記録し、要求への応答は`correlationId`が一致する`Result`として識別する。
 
 ## 起動
 
@@ -10,10 +10,13 @@ IPC Testerからモデル集合の読み込み・追加・削除・変更・読�
 2. CoaXisViewerを起動する。Viewerは既定で `CoaXisViewerPipe` を待ち受ける。
 3. `dotnet run --project .\CoaXisIpcTester\CoaXis.IpcTester.csproj` を実行する。
 4. リポジトリ内の `samples` フォルダーを検出できた場合、モデル実体に `modelentity.csv`、属性に `modelproperty.csv`、操作テストデータに `modelset-test-data.json` が初期表示される。別の入力を使う場合は各「選択...」から変更する。
-5. 「ReplaceModelSetを送信」でCSVのモデル集合を読み込む。追加などの操作は要求選択欄から要求を選び、「選択した要求を送信」を押す。`ClearModelSet`はテストデータJSONなしで送信できる。
-6. `AddModelSet`の追加対象にはCSV内のEntityを親としているテストEntityと、その子Entity・Propertyを含む。同じ追加を再送するとID衝突で拒否される。`RemoveModelSet`はこの追加データを削除するので、追加後に実行すれば試験データを片付けられる。
-7. `ModifyModelSet`はCSV内のEntity位置・表示状態とProperty値・色を変更する。`ReadModelSet`はそのEntityとPropertyを指定IDで読み出す。サンプルIDは現行CSVに対応する。
-8. 左側の通信履歴から要求を選ぶと、送信JSONと応答JSONを確認できる。Read結果の`modelSet`も応答JSON欄で確認できる。
+5. 「接続」を押すとViewerからの通知を待ち受ける。未接続のまま要求を送信した場合も自動接続し、応答後も接続を維持する。「切断」で接続を閉じる。
+6. 「ReplaceModelSetを送信」でCSVのモデル集合を読み込む。追加などの操作は要求選択欄から要求を選び、「選択した要求を送信」を押す。`ClearModelSet`はテストデータJSONなしで送信できる。
+7. `AddModelSet`の追加対象にはCSV内のEntityを親としているテストEntityと、その子Entity・Propertyを含む。同じ追加を再送するとID衝突で拒否される。`RemoveModelSet`はこの追加データを削除するので、追加後に実行すれば試験データを片付けられる。
+8. `ModifyModelSet`はCSV内のEntity位置・表示状態とProperty値・色を変更する。`ReadModelSet`はそのEntityとPropertyを指定IDで読み出す。サンプルIDは現行CSVに対応する。
+9. 左側の通信履歴から要求や通知を選ぶと、送信JSONと受信JSONを確認できる。通知のJSONは「応答JSON」に表示される。Read結果の`modelSet`も応答JSON欄で確認できる。
+
+Viewerは同時に1クライアントだけ接続できる。別のクライアントを使うときはIPC Testerを切断する。
 
 ## ウィンドウとテーマ
 

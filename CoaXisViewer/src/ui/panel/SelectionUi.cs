@@ -11,6 +11,7 @@ public partial class SelectionUi : PanelContainer
 
     private readonly List<Guid> _selectedEntityIds = new();
     private bool _isUpdatingTree = false;
+    private bool _isRebuildQueued = false;
 
     // 関連ノードのキャッシュ
     private Tree _tree = null!;
@@ -69,6 +70,7 @@ public partial class SelectionUi : PanelContainer
         _buttonToggle.Pressed += OnButtonTogglePressed;
         _buttonClear.Pressed += OnButtonClearPressed;
         _tree.GuiInput += OnTreeGuiInput;
+        _tree.ItemSelected += OnTreeItemSelected;
         _tree.ItemActivated += OnTreeItemActivated;
     }
 
@@ -83,6 +85,7 @@ public partial class SelectionUi : PanelContainer
         _buttonToggle.Pressed -= OnButtonTogglePressed;
         _buttonClear.Pressed -= OnButtonClearPressed;
         _tree.GuiInput -= OnTreeGuiInput;
+        _tree.ItemSelected -= OnTreeItemSelected;
         _tree.ItemActivated -= OnTreeItemActivated;
     }
 
@@ -196,6 +199,25 @@ public partial class SelectionUi : PanelContainer
     }
 
     /// <summary>
+    /// Tree の項目が選択されたとき、対応する ModelEntity の Pick を通知する
+    /// </summary>
+    private void OnTreeItemSelected()
+    {
+        if (_isUpdatingTree)
+        {
+            return;
+        }
+
+        Guid entityId = TryGetEntityId(_tree.GetSelected());
+        if (entityId == Guid.Empty)
+        {
+            return;
+        }
+
+        Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(entityId));
+    }
+
+    /// <summary>
     /// 選択モード通知を受け取ったときに呼び出されるイベントハンドラ
     /// </summary>
     private void OnModeNotified()
@@ -227,7 +249,7 @@ public partial class SelectionUi : PanelContainer
             _selectedEntityIds.RemoveAt(index);
         }
 
-        RebuildTree();
+        QueueRebuildTree();
     }
 
     #endregion
@@ -261,6 +283,35 @@ public partial class SelectionUi : PanelContainer
         _buttonAdd.ButtonPressed = mode == ModelEntitySelectionMode.Add;
         _buttonRemove.ButtonPressed = mode == ModelEntitySelectionMode.Remove;
         _buttonToggle.ButtonPressed = mode == ModelEntitySelectionMode.Toggle;
+    }
+
+    /// <summary>
+    /// Tree の再構築を遅延キューへ積む
+    /// </summary>
+    private void QueueRebuildTree()
+    {
+        if (_isRebuildQueued)
+        {
+            return;
+        }
+
+        _isRebuildQueued = true;
+        // Tree の選択シグナル処理中は、その Tree を変更できない。
+        CallDeferred(MethodName.RebuildTreeDeferred);
+    }
+
+    /// <summary>
+    /// 遅延呼び出しで Tree を再構築する
+    /// </summary>
+    private void RebuildTreeDeferred()
+    {
+        _isRebuildQueued = false;
+        if (!IsInsideTree())
+        {
+            return;
+        }
+
+        RebuildTree();
     }
 
     /// <summary>

@@ -32,7 +32,7 @@ EntityのStatusは専用遷移メソッドで変更する。通常遷移は`Unlo
 
 TreeItemはUIが構築・保持し、Model DomainはUI Nodeを保持しない。Pick・Measurement・Load・Scene機能はEntity配下、Property LoadはProperty配下に置く。
 
-Entity共通メニューの`Manipulate`、またはEntityツリー項目のダブルクリックは、対象Entityに対するManipulate操作を通知する。ダブルクリックではカメラFitを行わず、Fitは共通メニューから実行できる。
+Entity共通メニューの`Manipulate`、またはEntityツリー項目のダブルクリックは、対象Entityに対するManipulate操作を通知する。ビューポートでは選択操作モード中にEntityを左ダブルクリックすると、通常のピック通知に加えて対象EntityのManipulate操作を通知する。空間の空白やドラッグではManipulate操作を通知しない。ダブルクリックではカメラFitを行わず、Fitは共通メニューから実行できる。
 
 Searchパネルは登録済みのEntity Type、PropertyType、Property ValueTypeをそれぞれ一覧から選択し、Entity NameとProperty Valueを入力してEntityを検索する。種類と値の型は完全一致、文字列は大文字小文字を区別しない部分一致で、空条件は指定なしとする。指定された条件はANDで組み合わせ、Property条件は同じ所属Property（子孫Propertyを含む）に一致する必要がある。Rootは結果に含めない。件数とアイコン付きのEntity名一覧を表示する。行選択はPickを通知し、Entityツリーと同様にAdd/Removeモードでは前回の行からの範囲を対象とする。全選択は既存のEntity選択集合を検索結果全体に置き換える。結果行の右クリックでは対象Entityの共通メニューを表示する。モデル集合やProperty値の変更時は結果を更新する。
 
@@ -67,4 +67,4 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 
 ## IPC Tester
 
-`CoaXisIpcTester`は外部クライアントとして`ReplaceModelSet`を送信する。要求のResultを待つ間に受信した非同期通知は通信履歴に記録する。Result受信後は接続を閉じるため、継続的な通知購読には対応しない。入力形式と操作手順は[IPC Tester手順](../guides/viewer/IPC_TESTER_GUIDE.md)を参照。
+`CoaXisIpcTester`は外部クライアントとしてモデル集合の要求を送信する。明示的な接続、または要求送信時の自動接続後は接続を維持し、Viewerから受信した非同期通知を通信履歴に記録する。要求に対応するResultは`correlationId`で識別し、要求と応答を履歴に記録する。入力形式と操作手順は[IPC Tester手順](../guides/viewer/IPC_TESTER_GUIDE.md)を参照。

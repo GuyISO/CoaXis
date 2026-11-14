@@ -15,6 +15,7 @@ public sealed partial class MainForm
     private CoaXis.Ui.CoaXisFlowLayoutPanel _connectionPanel;
     private CoaXis.Ui.CoaXisLabel _pipeNameLabel;
     private CoaXis.Ui.CoaXisTextBox _pipeName;
+    private CoaXis.Ui.CoaXisButton _connectionButton;
     private CoaXis.Ui.CoaXisLabel _connectionHintLabel;
     private CoaXis.Ui.CoaXisTableLayoutPanel _filePanel;
     private CoaXis.Ui.CoaXisLabel _entityLabel;
@@ -83,6 +84,7 @@ public sealed partial class MainForm
         _connectionPanel = new CoaXis.Ui.CoaXisFlowLayoutPanel();
         _pipeNameLabel = new CoaXis.Ui.CoaXisLabel();
         _pipeName = new CoaXis.Ui.CoaXisTextBox();
+        _connectionButton = new CoaXis.Ui.CoaXisButton();
         _connectionHintLabel = new CoaXis.Ui.CoaXisLabel();
         _filePanel = new CoaXis.Ui.CoaXisTableLayoutPanel();
         _entityLabel = new CoaXis.Ui.CoaXisLabel();
@@ -225,6 +227,7 @@ public sealed partial class MainForm
         _connectionPanel.AutoSize = true;
         _connectionPanel.Controls.Add(_pipeNameLabel);
         _connectionPanel.Controls.Add(_pipeName);
+        _connectionPanel.Controls.Add(_connectionButton);
         _connectionPanel.Controls.Add(_connectionHintLabel);
         _connectionPanel.Dock = System.Windows.Forms.DockStyle.Fill;
         _connectionPanel.Margin = new System.Windows.Forms.Padding(0, 0, 0, 12);
@@ -253,6 +256,14 @@ public sealed partial class MainForm
         _pipeName.TabIndex = 1;
         _pipeName.Text = "CoaXisViewerPipe";
         //
+        // _connectionButton
+        //
+        _connectionButton.AutoSize = true;
+        _connectionButton.Margin = new System.Windows.Forms.Padding(12, 0, 0, 0);
+        _connectionButton.Name = "_connectionButton";
+        _connectionButton.TabIndex = 2;
+        _connectionButton.Text = "接続";
+        //
         // _connectionHintLabel
         //
         _connectionHintLabel.AutoSize = true;
@@ -260,9 +271,9 @@ public sealed partial class MainForm
         _connectionHintLabel.Margin = new System.Windows.Forms.Padding(12, 7, 0, 0);
         _connectionHintLabel.Name = "_connectionHintLabel";
         _connectionHintLabel.Size = new System.Drawing.Size(128, 15);
-        _connectionHintLabel.TabIndex = 2;
+        _connectionHintLabel.TabIndex = 3;
         _connectionHintLabel.Role = CoaXis.Ui.CoaXisLabelRole.Muted;
-        _connectionHintLabel.Text = "Viewer起動後に送信";
+        _connectionHintLabel.Text = "接続中はViewerの通知を記録";
         //
         // _filePanel
         //

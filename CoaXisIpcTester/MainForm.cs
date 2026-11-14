@@ -15,6 +15,7 @@ namespace CoaXis.IpcTester;
 public sealed partial class MainForm : CoaXisForm
 {
     private readonly List<ExchangeRecord> _records = new();
+    private IpcClient _client;
 
     /// <summary>
     /// IPC接続先、ファイル選択、メッセージ履歴を配置する。
@@ -51,6 +52,7 @@ public sealed partial class MainForm : CoaXisForm
 
         _sendButton.Click += async (_, _) => await SendReplaceModelSetAsync();
         _sendRequestButton.Click += async (_, _) => await SendSelectedRequestAsync();
+        _connectionButton.Click += async (_, _) => await ToggleConnectionAsync();
         _selectEntityButton.Click += SelectEntityFile;
         _selectPropertyButton.Click += SelectPropertyFile;
         _selectTestDataButton.Click += SelectTestDataFile;
@@ -73,6 +75,97 @@ public sealed partial class MainForm : CoaXisForm
         }
 
         return base.ProcessCmdKey(ref msg, keyData);
+    }
+
+    protected override void OnFormClosed(FormClosedEventArgs e)
+    {
+        Disconnect();
+        base.OnFormClosed(e);
+    }
+
+    private async Task ToggleConnectionAsync()
+    {
+        _connectionButton.Enabled = false;
+        _sendButton.Enabled = false;
+        _sendRequestButton.Enabled = false;
+        try
+        {
+            if (_client != null)
+            {
+                Disconnect();
+                _status.Text = "Viewer未接続";
+            }
+            else
+            {
+                await ConnectAsync();
+            }
+        }
+        catch (Exception exception)
+        {
+            if (!IsDisposed)
+            {
+                _status.Text = $"接続失敗: {exception.Message}";
+                AddExchange("接続", "失敗", string.Empty, string.Empty, exception.Message);
+            }
+        }
+        finally
+        {
+            if (!IsDisposed)
+            {
+                _connectionButton.Enabled = true;
+                _sendButton.Enabled = true;
+                _sendRequestButton.Enabled = true;
+            }
+        }
+    }
+
+    private async Task ConnectAsync()
+    {
+        var client = new IpcClient(_pipeName.Text.Trim(), RecordNotification, OnConnectionLost);
+        _client = client;
+        _pipeName.Enabled = false;
+        _status.Text = "Viewerに接続中";
+        try
+        {
+            await client.ConnectAsync();
+            if (_client != client)
+            {
+                throw new IOException("Viewerとの接続が切断されました。");
+            }
+
+            _connectionButton.Text = "切断";
+            _status.Text = "Viewer接続中";
+        }
+        catch
+        {
+            if (_client == client)
+            {
+                Disconnect();
+            }
+            throw;
+        }
+    }
+
+    private void Disconnect()
+    {
+        IpcClient client = _client;
+        _client = null;
+        client?.Dispose();
+        if (!IsDisposed)
+        {
+            _pipeName.Enabled = true;
+            _connectionButton.Text = "接続";
+        }
+    }
+
+    private void OnConnectionLost(Exception exception)
+    {
+        Disconnect();
+        if (!IsDisposed)
+        {
+            _status.Text = $"接続切断: {exception.Message}";
+            AddExchange("接続", "切断", string.Empty, string.Empty, exception.Message);
+        }
     }
 
     private static string FindSamplePath(string fileName)
@@ -234,6 +327,7 @@ public sealed partial class MainForm : CoaXisForm
     {
         _sendButton.Enabled = false;
         _sendRequestButton.Enabled = false;
+        _connectionButton.Enabled = false;
         _requestJson.Clear();
         _responseJson.Clear();
         try
@@ -246,10 +340,21 @@ public sealed partial class MainForm : CoaXisForm
                 new JsonSerializerOptions(IpcJsonOptions.Default) { WriteIndented = true });
             _status.Text = progressMessage;
 
-            string responseJson = await IpcClient.SendAsync(
-                _pipeName.Text.Trim(),
-                request,
-                RecordNotification);
+            if (_client == null)
+            {
+                await ConnectAsync();
+            }
+
+            string responseJson;
+            try
+            {
+                responseJson = await _client.SendAsync(request);
+            }
+            catch
+            {
+                Disconnect();
+                throw;
+            }
             if (string.IsNullOrWhiteSpace(responseJson))
             {
                 throw new IOException("Viewerから応答がありませんでした。");
@@ -258,22 +363,29 @@ public sealed partial class MainForm : CoaXisForm
             string formattedResponse = FormatJson(responseJson);
             _responseJson.Text = formattedResponse;
             (string result, string message) = ReadResult(responseJson);
-            AddExchange(eventType, result, requestJson, formattedResponse, message);
+            AddExchange($"{eventType} → Result", result, requestJson, formattedResponse, message);
             _status.Text = $"{result}: {message}";
         }
         catch (Exception exception)
         {
-            string errorJson = JsonSerializer.Serialize(
-                new { error = exception.Message },
-                new JsonSerializerOptions { WriteIndented = true });
-            _responseJson.Text = errorJson;
-            AddExchange(eventType, "失敗", _requestJson.Text, errorJson, exception.Message);
-            _status.Text = $"失敗: {exception.Message}";
+            if (!IsDisposed)
+            {
+                string errorJson = JsonSerializer.Serialize(
+                    new { error = exception.Message },
+                    new JsonSerializerOptions { WriteIndented = true });
+                _responseJson.Text = errorJson;
+                AddExchange(eventType, "失敗", _requestJson.Text, errorJson, exception.Message);
+                _status.Text = $"失敗: {exception.Message}";
+            }
         }
         finally
         {
-            _sendButton.Enabled = true;
-            _sendRequestButton.Enabled = true;
+            if (!IsDisposed)
+            {
+                _sendButton.Enabled = true;
+                _sendRequestButton.Enabled = true;
+                _connectionButton.Enabled = true;
+            }
         }
     }
 
@@ -296,11 +408,19 @@ public sealed partial class MainForm : CoaXisForm
         }
 
         string detail = notification.EventType;
-        if (notification.EventType == IpcEventType.FromViewer.ModelEntitySelected &&
+        if (notification.Payload.ValueKind == JsonValueKind.Object &&
+            notification.EventType == IpcEventType.FromViewer.ModelEntitySelected &&
             notification.Payload.TryGetProperty("entityIds", out JsonElement entityIds) &&
             entityIds.ValueKind == JsonValueKind.Array)
         {
             detail = $"選択中のModelEntity: {entityIds.GetArrayLength()}件";
+        }
+        else if (notification.Payload.ValueKind == JsonValueKind.Object &&
+            notification.EventType == IpcEventType.FromViewer.ModelEntityManipulated &&
+            notification.Payload.TryGetProperty("entityId", out JsonElement entityId) &&
+            entityId.ValueKind == JsonValueKind.String)
+        {
+            detail = $"操作対象のModelEntity: {entityId.GetString()}";
         }
 
         AddExchange(
@@ -321,6 +441,10 @@ public sealed partial class MainForm : CoaXisForm
         ExchangeRecord record = _records[_history.SelectedIndex];
         _requestJson.Text = record.RequestJson;
         _responseJson.Text = record.ResponseJson;
+        if (record.Result == "通知")
+        {
+            SelectExchangeTab(false);
+        }
     }
 
     private static string FormatJson(string json)

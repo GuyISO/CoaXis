@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 /// <summary>
 /// アタッチされている3Dビューの入力を受け取り、ViewportEvent へ中継する
@@ -10,6 +11,7 @@ public partial class ViewportInteractionHandler : SubViewport
     private Vector2 _lastPosition = Vector2.Zero; // 移動量算出のために前フレームの操作座標を保持
     private Vector2 _startPosition = Vector2.Zero; // 操作開始点の座標を保持
     private bool _hasMoved = false; // ボタンを押してから移動操作したかのフラグ、マウスのクリックと移動の区別に使用
+    private bool _isDoubleClick = false;
     private Vector2 _screenCenter; // 画面中心座標のキャッシュ
 
     #endregion
@@ -145,6 +147,7 @@ public partial class ViewportInteractionHandler : SubViewport
             // ドラッグしているかどうかは、移動量が閾値を超えたかで判定するためここでは移動フラグをリセットして現在位置も更新しておく
             _hasMoved = false;
             _lastPosition = button.Position;
+            _isDoubleClick = button.DoubleClick;
             // 矩形選択の開始点を保存
             _startPosition = button.Position;
             Application.Viewport.Interaction.SetMode(ViewportInteractionMode.PickRect);
@@ -185,7 +188,7 @@ public partial class ViewportInteractionHandler : SubViewport
             else
             {
                 // ドラッグしていない場合は、クリックとみなして単一選択を行う
-                PickByPoint(button.Position);
+                PickByPoint(button.Position, _isDoubleClick);
             }
 
             Application.Viewport.Interaction.SetMode(ViewportInteractionMode.None);
@@ -495,10 +498,17 @@ public partial class ViewportInteractionHandler : SubViewport
     /// 画面上の指定された位置をクリックして、そこからレイキャストしてヒットしたオブジェクトを選択する
     /// </summary>
     /// <param name="screenPos">スクリーン座標</param>
-    private void PickByPoint(Vector2 screenPos)
+    /// <param name="isDoubleClick">ダブルクリックによるピックかどうか</param>
+    private void PickByPoint(Vector2 screenPos, bool isDoubleClick = false)
     {
         var pickResult = PickUtility.PickByRay(GetCamera3D(), screenPos);
+        bool shouldManipulate = isDoubleClick && Application.Model.Entity.Pick.HandlingMode == PickHandlingMode.Selection;
         Application.Model.Entity.Pick.NotifyResult(pickResult);
+
+        if (shouldManipulate && pickResult.HasHit && pickResult.EntityId != Guid.Empty)
+        {
+            Application.Model.Entity.Manipulate(pickResult.EntityId);
+        }
     }
 
     /// <summary>
