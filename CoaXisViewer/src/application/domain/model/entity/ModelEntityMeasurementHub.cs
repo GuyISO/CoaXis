@@ -347,6 +347,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
         _line.MaterialOverride = _lineMaterial = new StandardMaterial3D
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
+            NoDepthTest = true,
             AlbedoColor = Color.FromHtml(Application.Setting.Current.Color.MeasurementLineColor)
         };
 

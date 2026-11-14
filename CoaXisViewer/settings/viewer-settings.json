@@ -13,11 +13,11 @@
     "PointerRotationSpeedDeg": 90.0
   },
   "Color": {
-    "EnvironmentBackgroundColor": "#333366FF",
-    "OverlayLineColor": "#E7B1F6FF",
-    "HierarchySelectedColor": "#E7B1F6FF",
-    "SelectedMaterialColor": "#E7B1F6FF",
-    "MeasurementLineColor": "#FAD11FFF"
+    "EnvironmentBackgroundColor": "#202124FF",
+    "OverlayLineColor": "#4E95D9FF",
+    "HierarchySelectedColor": "#4E95D9FF",
+    "SelectedMaterialColor": "#4E95D9FF",
+    "MeasurementLineColor": "#4E95D9FF"
   },
   "Ui": {
     "MessageMaxLines": 50

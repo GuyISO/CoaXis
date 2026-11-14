@@ -9,27 +9,27 @@ public sealed class ColorSettings
     /// <summary>
     /// WorldEnvironment の背景色。
     /// </summary>
-    public string EnvironmentBackgroundColor { get; set; } = "#333366FF";
+    public string EnvironmentBackgroundColor { get; set; } = "#202124FF";
 
     /// <summary>
     /// ビューポートオーバーレイ（中心軸・アークボール）の線色。
     /// </summary>
-    public string OverlayLineColor { get; set; } = "#E7B1F6FF";
+    public string OverlayLineColor { get; set; } = "#4E95D9FF";
 
     /// <summary>
     /// 階層ツリーの選択行の背景色。
     /// </summary>
-    public string HierarchySelectedColor { get; set; } = "#E7B1F6FF";
+    public string HierarchySelectedColor { get; set; } = "#4E95D9FF";
 
     /// <summary>
     /// モデル選択ハイライト用マテリアルの色。
     /// </summary>
-    public string SelectedMaterialColor { get; set; } = "#E7B1F6FF";
+    public string SelectedMaterialColor { get; set; } = "#4E95D9FF";
 
     /// <summary>
     /// 測定ラインのマテリアル色。
     /// </summary>
-    public string MeasurementLineColor { get; set; } = "#FAD11FFF";
+    public string MeasurementLineColor { get; set; } = "#4E95D9FF";
 
     #endregion
 
@@ -40,11 +40,11 @@ public sealed class ColorSettings
     /// </summary>
     public void Normalize()
     {
-        if (string.IsNullOrWhiteSpace(EnvironmentBackgroundColor)) EnvironmentBackgroundColor = "#333366FF";
-        if (string.IsNullOrWhiteSpace(OverlayLineColor)) OverlayLineColor = "#E7B1F6FF";
-        if (string.IsNullOrWhiteSpace(HierarchySelectedColor)) HierarchySelectedColor = "#E7B1F6FF";
-        if (string.IsNullOrWhiteSpace(SelectedMaterialColor)) SelectedMaterialColor = "#E7B1F6FF";
-        if (string.IsNullOrWhiteSpace(MeasurementLineColor)) MeasurementLineColor = "#FAD11FFF";
+        if (string.IsNullOrWhiteSpace(EnvironmentBackgroundColor)) EnvironmentBackgroundColor = "#202124FF";
+        if (string.IsNullOrWhiteSpace(OverlayLineColor)) OverlayLineColor = "#4E95D9FF";
+        if (string.IsNullOrWhiteSpace(HierarchySelectedColor)) HierarchySelectedColor = "#4E95D9FF";
+        if (string.IsNullOrWhiteSpace(SelectedMaterialColor)) SelectedMaterialColor = "#4E95D9FF";
+        if (string.IsNullOrWhiteSpace(MeasurementLineColor)) MeasurementLineColor = "#4E95D9FF";
     }
 
     #endregion

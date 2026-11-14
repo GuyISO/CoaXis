@@ -1,0 +1,150 @@
+[gd_resource type="Theme" load_steps=12 format=3]
+
+[ext_resource type="FontFile" uid="uid://bkld7l500480i" path="res://assets/font/segoeui.ttf" id="1_isbac"]
+
+[sub_resource type="StyleBoxFlat" id="ButtonDisabled"]
+bg_color = Color(0.811765, 0.819608, 0.831373, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.823529, 0.854902, 0.886275, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="InputFocus"]
+bg_color = Color(0.94902, 0.952941, 0.956863, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.305882, 0.584314, 0.85098, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="ButtonHover"]
+bg_color = Color(0.34902, 0.388235, 0.427451, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.34902, 0.388235, 0.427451, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="ButtonNormal"]
+bg_color = Color(0.4, 0.443137, 0.486275, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.4, 0.443137, 0.486275, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="ButtonPressed"]
+bg_color = Color(0.301961, 0.337255, 0.376471, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.301961, 0.337255, 0.376471, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Input"]
+bg_color = Color(0.94902, 0.952941, 0.956863, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.823529, 0.854902, 0.886275, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="InputReadOnly"]
+bg_color = Color(0.811765, 0.819608, 0.831373, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.823529, 0.854902, 0.886275, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="Panel"]
+bg_color = Color(0.862745, 0.866667, 0.878431, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.823529, 0.854902, 0.886275, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="TabSelected"]
+bg_color = Color(0.862745, 0.866667, 0.878431, 1)
+border_width_bottom = 2
+border_color = Color(0.305882, 0.584314, 0.85098, 1)
+
+[sub_resource type="StyleBoxFlat" id="ProgressFill"]
+bg_color = Color(0.305882, 0.584314, 0.85098, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[resource]
+default_font = ExtResource("1_isbac")
+default_font_size = 14
+ProgressBar/styles/background = SubResource("Input")
+ProgressBar/styles/fill = SubResource("ProgressFill")
+TabBar/colors/font_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
+TabBar/styles/tab_selected = SubResource("TabSelected")
+TabContainer/colors/font_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
+TabContainer/styles/tab_selected = SubResource("TabSelected")
+ItemList/colors/selection_color = Color(0.862745, 0.921569, 0.980392, 1)
+ItemList/colors/font_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
+Tree/colors/selection_color = Color(0.862745, 0.921569, 0.980392, 1)
+Button/colors/font_color = Color(0.94902, 0.960784, 0.972549, 1)
+Button/colors/font_disabled_color = Color(0.376471, 0.376471, 0.376471, 1)
+Button/colors/font_hover_color = Color(0.94902, 0.960784, 0.972549, 1)
+Button/colors/font_pressed_color = Color(0.94902, 0.960784, 0.972549, 1)
+Button/styles/disabled = SubResource("ButtonDisabled")
+Button/styles/focus = SubResource("InputFocus")
+Button/styles/hover = SubResource("ButtonHover")
+Button/styles/normal = SubResource("ButtonNormal")
+Button/styles/pressed = SubResource("ButtonPressed")
+Control/colors/font_color = Color(0.12549, 0.12549, 0.12549, 1)
+Control/colors/font_disabled_color = Color(0.376471, 0.376471, 0.376471, 1)
+Control/colors/font_hover_color = Color(0.12549, 0.12549, 0.12549, 1)
+Control/colors/font_pressed_color = Color(0.12549, 0.12549, 0.12549, 1)
+LineEdit/colors/font_color = Color(0.12549, 0.12549, 0.12549, 1)
+LineEdit/colors/font_placeholder_color = Color(0.376471, 0.376471, 0.376471, 1)
+LineEdit/styles/focus = SubResource("InputFocus")
+LineEdit/styles/normal = SubResource("Input")
+LineEdit/styles/read_only = SubResource("InputReadOnly")
+Panel/styles/panel = SubResource("Panel")
+PanelContainer/styles/panel = SubResource("Panel")
+PopupPanel/styles/panel = SubResource("Panel")
+TextEdit/colors/font_color = Color(0.12549, 0.12549, 0.12549, 1)
+TextEdit/colors/font_placeholder_color = Color(0.376471, 0.376471, 0.376471, 1)
+TextEdit/styles/focus = SubResource("InputFocus")
+TextEdit/styles/normal = SubResource("Input")
+TextEdit/styles/read_only = SubResource("InputReadOnly")
