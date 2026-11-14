@@ -70,7 +70,7 @@ public partial class ModelSearchHub : BaseHub
     /// <param name="propertyType">Propertyの種類。空の場合は指定なし</param>
     /// <param name="propertyValueType">Propertyの値の型。空の場合は指定なし</param>
     /// <param name="propertyValue">Property値の部分文字列。空の場合は指定なし</param>
-    /// <returns>一致するEntityの識別子</returns>
+    /// <returns>Entityツリーの順序で並んだ、一致するEntityの識別子</returns>
     public IReadOnlyList<Guid> Find(string entityType, string entityName, string propertyType, string propertyValueType, string propertyValue)
     {
         bool hasPropertyFilter = !string.IsNullOrEmpty(propertyType)
@@ -96,14 +96,10 @@ public partial class ModelSearchHub : BaseHub
             }
         }
 
-        return Application.Model.Entity.Registry.Items.Values
-            .Where(entity => entity.Id != ViewerConstants.RootModelEntityId
-                && MatchesType(entity.Type, entityType)
+        return Application.Model.Entity.Registry.GetDescendants(ViewerConstants.RootModelEntityId)
+            .Where(entity => MatchesType(entity.Type, entityType)
                 && Contains(entity.Name, entityName)
                 && (!hasPropertyFilter || matchingEntityIds.Contains(entity.Id)))
-            .OrderBy(entity => entity.Name, StringComparer.OrdinalIgnoreCase)
-            .ThenBy(entity => entity.Type, StringComparer.Ordinal)
-            .ThenBy(entity => entity.Id)
             .Select(entity => entity.Id)
             .ToArray();
     }

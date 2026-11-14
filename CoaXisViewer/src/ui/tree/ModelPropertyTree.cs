@@ -22,12 +22,12 @@ public partial class ModelPropertyTree : Tree
 	/// <summary>
 	/// 表示切替ボタンのID
 	/// </summary>
-	private const int VisibilityButtonId = 1;
+	private const int VisibilityButtonId = ModelEntityRowBehavior.VisibilityButtonId;
 
 	/// <summary>
 	/// Property OverlayTree表示切替ボタンのID（Root行のみ）
 	/// </summary>
-	private const int PropertyButtonId = 2;
+	private const int PropertyButtonId = ModelEntityRowBehavior.PropertyButtonId;
 
 	/// <summary>
 	/// Particleテクスチャ表示ボタンのID（Particle指定のProperty行のみ）
@@ -155,24 +155,14 @@ public partial class ModelPropertyTree : Tree
 			return;
 		}
 
-		if (id == PropertyButtonId && item == _rootItem)
+		if (item == _rootItem)
 		{
-			if (_entityId != Guid.Empty)
-			{
-				Application.Ui.Property.ToggleModelEntityProperties(_entityId);
-			}
-
+			ModelEntityRowBehavior.HandleButtonClick(_entityId, id);
 			return;
 		}
 
 		if (id != VisibilityButtonId)
 		{
-			return;
-		}
-
-		if (item == _rootItem)
-		{
-			Application.Model.Entity.Registry.Get(_entityId)?.ToggleVisibility();
 			return;
 		}
 

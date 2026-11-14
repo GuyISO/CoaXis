@@ -15,8 +15,10 @@ public partial class SearchUi : PanelContainer
     private OptionButton _propertyValueType = null!;
     private LineEdit _propertyValue = null!;
     private Label _resultCount = null!;
-    private ItemList _results = null!;
+    private Tree _results = null!;
     private Button _selectAll = null!;
+    private readonly List<Guid> _resultIds = new();
+    private readonly Dictionary<Guid, TreeItem> _resultItems = new();
     private int _lastSelectedIndex = -1;
 
     #endregion
@@ -31,7 +33,7 @@ public partial class SearchUi : PanelContainer
         _propertyValueType = GetNode<OptionButton>("MarginContainer/VBoxContainer/Filters/PropertyValueType");
         _propertyValue = GetNode<LineEdit>("MarginContainer/VBoxContainer/Filters/PropertyValue");
         _resultCount = GetNode<Label>("MarginContainer/VBoxContainer/ResultCount");
-        _results = GetNode<ItemList>("MarginContainer/VBoxContainer/Results");
+        _results = GetNode<Tree>("MarginContainer/VBoxContainer/Results");
         _selectAll = GetNode<Button>("MarginContainer/VBoxContainer/SelectAll");
         SubscribeEvents();
         RefreshTypesAndResults();
@@ -56,6 +58,7 @@ public partial class SearchUi : PanelContainer
         _propertyValue.TextChanged += OnTextChanged;
         _results.ItemSelected += OnResultSelected;
         _results.ItemActivated += OnResultActivated;
+        _results.ButtonClicked += OnResultButtonClicked;
         _results.GuiInput += OnResultsGuiInput;
         _selectAll.Pressed += OnSelectAll;
         Application.Model.Entity.Registry.Registered += OnRegistryChanged;
@@ -64,6 +67,9 @@ public partial class SearchUi : PanelContainer
         Application.Model.Property.State.ValueNotified += OnPropertyValueChanged;
         Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
+        Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
+        Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityButtonsChanged;
+        Application.Model.Entity.State.Collapsed += OnEntityButtonsChanged;
     }
 
     private void UnsubscribeEvents()
@@ -75,6 +81,7 @@ public partial class SearchUi : PanelContainer
         _propertyValue.TextChanged -= OnTextChanged;
         _results.ItemSelected -= OnResultSelected;
         _results.ItemActivated -= OnResultActivated;
+        _results.ButtonClicked -= OnResultButtonClicked;
         _results.GuiInput -= OnResultsGuiInput;
         _selectAll.Pressed -= OnSelectAll;
         Application.Model.Entity.Registry.Registered -= OnRegistryChanged;
@@ -83,6 +90,9 @@ public partial class SearchUi : PanelContainer
         Application.Model.Property.State.ValueNotified -= OnPropertyValueChanged;
         Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
+        Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
+        Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityButtonsChanged;
+        Application.Model.Entity.State.Collapsed -= OnEntityButtonsChanged;
     }
 
     private void OnTypeSelected(long index) => RefreshResults();
@@ -97,23 +107,22 @@ public partial class SearchUi : PanelContainer
 
     private void OnSelectionCleared() => _lastSelectedIndex = -1;
 
-    private void OnResultSelected(long index)
+    private void OnResultSelected()
     {
-        if (TryGetResultId((int)index, out Guid entityId))
+        TreeItem item = _results.GetSelected();
+        if (TryGetResultId(item, out Guid entityId))
         {
+            int index = item.GetIndex();
             ModelEntitySelectionMode mode = Application.Model.Entity.Selection.Mode;
             if ((mode == ModelEntitySelectionMode.Add || mode == ModelEntitySelectionMode.Remove)
-                && _lastSelectedIndex >= 0 && _lastSelectedIndex < _results.ItemCount)
+                && _lastSelectedIndex >= 0 && _lastSelectedIndex < _resultIds.Count)
             {
                 var ids = new List<Guid>();
-                int start = Math.Min(_lastSelectedIndex, (int)index);
-                int end = Math.Max(_lastSelectedIndex, (int)index);
+                int start = Math.Min(_lastSelectedIndex, index);
+                int end = Math.Max(_lastSelectedIndex, index);
                 for (int i = start; i <= end; i++)
                 {
-                    if (TryGetResultId(i, out Guid rangeEntityId))
-                    {
-                        ids.Add(rangeEntityId);
-                    }
+                    ids.Add(_resultIds[i]);
                 }
 
                 Application.Model.Entity.Pick.NotifyResults(PickUtility.PickByEntityIds(ids));
@@ -123,17 +132,23 @@ public partial class SearchUi : PanelContainer
                 Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(entityId));
             }
 
-            _lastSelectedIndex = (int)index;
+            _lastSelectedIndex = index;
         }
-
-        _results.DeselectAll();
     }
 
-    private void OnResultActivated(long index)
+    private void OnResultActivated()
     {
-        if (TryGetResultId((int)index, out Guid entityId))
+        if (TryGetResultId(_results.GetSelected(), out Guid entityId))
         {
             ModelEntityRowBehavior.Manipulate(entityId);
+        }
+    }
+
+    private void OnResultButtonClicked(TreeItem item, long column, long buttonId, long mouseButtonIndex)
+    {
+        if (column == 0 && TryGetResultId(item, out Guid entityId))
+        {
+            ModelEntityRowBehavior.HandleButtonClick(entityId, buttonId);
         }
     }
 
@@ -146,8 +161,8 @@ public partial class SearchUi : PanelContainer
             return;
         }
 
-        int index = _results.GetItemAtPosition(mouseButton.Position, true);
-        if (index >= 0 && TryGetResultId(index, out Guid entityId))
+        TreeItem item = _results.GetItemAtPosition(mouseButton.Position);
+        if (item != null && TryGetResultId(item, out Guid entityId))
         {
             ModelEntityRowBehavior.ShowContextMenu(entityId);
         }
@@ -155,16 +170,32 @@ public partial class SearchUi : PanelContainer
 
     private void OnSelectAll()
     {
-        var ids = new List<Guid>();
-        for (int i = 0; i < _results.ItemCount; i++)
+        Application.Model.Entity.Selection.Set(_resultIds.ToArray());
+    }
+
+    private void OnEntityVisibilityResolved(string entityId)
+    {
+        if (Guid.TryParse(entityId, out Guid id) && _resultItems.TryGetValue(id, out TreeItem item))
         {
-            if (TryGetResultId(i, out Guid entityId))
+            ModelEntity entity = Application.Model.Entity.Registry.Get(id);
+            if (entity != null)
             {
-                ids.Add(entityId);
+                ModelEntityRowBehavior.UpdateVisibilityButton(item, entity);
             }
         }
+    }
 
-        Application.Model.Entity.Selection.Set(ids.ToArray());
+    private void OnEntityButtonsChanged(string entityId)
+    {
+        if (Guid.TryParse(entityId, out Guid id) && _resultItems.TryGetValue(id, out TreeItem item))
+        {
+            ModelEntity entity = Application.Model.Entity.Registry.Get(id);
+            if (entity != null)
+            {
+                Dictionary<Guid, int> counts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(entity);
+                ModelEntityRowBehavior.RebuildButtons(item, entity, ModelEntityRowBehavior.ResolvePropertyCount(entity, counts));
+            }
+        }
     }
 
     #endregion
@@ -209,6 +240,10 @@ public partial class SearchUi : PanelContainer
             GetSelectedType(_propertyType), GetSelectedType(_propertyValueType), _propertyValue.Text);
         _lastSelectedIndex = -1;
         _results.Clear();
+        _resultIds.Clear();
+        _resultItems.Clear();
+        TreeItem root = _results.CreateItem();
+        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
         foreach (Guid id in ids)
         {
             ModelEntity entity = Application.Model.Entity.Registry.Get(id);
@@ -218,38 +253,44 @@ public partial class SearchUi : PanelContainer
                 continue;
             }
 
-            Texture2D icon = Application.Asset.Icon.GetModelIcon(entity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
-            int index = _results.AddItem(entity.Name, icon);
-            _results.SetItemMetadata(index, id.ToString());
+            Texture2D icon = ModelEntityRowBehavior.GetIndentedIcon(entity);
+            TreeItem item = _results.CreateItem(root);
+            item.SetText(0, entity.Name);
+            item.SetIcon(0, icon);
+            item.SetMetadata(0, id.ToString());
+            ModelEntityRowBehavior.RebuildButtons(item, entity, ModelEntityRowBehavior.ResolvePropertyCount(entity, propertySubtreeCounts));
+            _resultIds.Add(id);
+            _resultItems.Add(id, item);
         }
 
-        _resultCount.Text = $"Results: {_results.ItemCount}";
-        _selectAll.Disabled = _results.ItemCount == 0;
+        _resultCount.Text = $"Results: {_resultIds.Count}";
+        _selectAll.Disabled = _resultIds.Count == 0;
         UpdateSelectionIndicators();
     }
 
     private void UpdateSelectionIndicators()
     {
         Color selectedColor = ModelEntityRowBehavior.GetSelectionColor();
-        for (int i = 0; i < _results.ItemCount; i++)
+        foreach (KeyValuePair<Guid, TreeItem> pair in _resultItems)
         {
-            if (!TryGetResultId(i, out Guid id))
-            {
-                continue;
-            }
-
-            ModelEntityRowBehavior.ApplySelectionHighlight(_results, i, id, selectedColor);
+            ModelEntityRowBehavior.ApplySelectionHighlight(pair.Value, pair.Key, selectedColor);
         }
     }
 
-    private bool TryGetResultId(int index, out Guid entityId)
+    private static bool TryGetResultId(TreeItem item, out Guid entityId)
     {
-        if (Guid.TryParse(_results.GetItemMetadata(index).AsString(), out entityId))
+        entityId = Guid.Empty;
+        if (item == null)
+        {
+            return false;
+        }
+
+        if (Guid.TryParse(item.GetMetadata(0).AsString(), out entityId) && entityId != Guid.Empty)
         {
             return true;
         }
 
-        Application.Log.Warn($"SearchUi: Invalid result identifier at index {index}.");
+        Application.Log.Warn("SearchUi: Invalid result identifier.");
         return false;
     }
 

@@ -22,9 +22,6 @@ public partial class ModelEntityTree : Tree
     // ユーザー操作による選択か、内部的なプログラムによる選択かを判定するフラグ
     private bool _ispublicSelection = false;
 
-    private const int VisibilityButtonId = 1;
-    private const int PropertyButtonId = 2;
-
     #endregion
 
     #region Lifecycle
@@ -162,15 +159,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        switch (buttonId)
-        {
-            case VisibilityButtonId:
-                HandleVisibleButtonClicked(item);
-                break;
-            case PropertyButtonId:
-                HandlePropertyButtonClicked(item);
-                break;
-        }
+        ModelEntityRowBehavior.HandleButtonClick(TryGetEntityId(item), buttonId);
     }
 
     /// <summary>
@@ -266,57 +255,8 @@ public partial class ModelEntityTree : Tree
         TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
         if (treeItem != null)
         {
-            UpdateVisibilityButton(treeItem, modelEntity);
+            ModelEntityRowBehavior.UpdateVisibilityButton(treeItem, modelEntity);
         }
-    }
-
-    /// <summary>
-    /// Visibility設定と解決済み実効表示を使って、TreeItemの表示ボタンを更新する。
-    /// </summary>
-    /// <param name="treeItem">表示ボタンを持つTreeItem</param>
-    /// <param name="modelEntity">表示状態の正本を持つModelEntity</param>
-    private static void UpdateVisibilityButton(TreeItem treeItem, ModelEntity modelEntity)
-    {
-        Texture2D buttonIcon = Application.Asset.Icon.GetVisibility(
-            modelEntity.Visibility,
-            modelEntity.IsVisible,
-            Constant.Ui.Tree.HierarchyVisibleIconSize);
-        int visibilityButtonIndex = treeItem.GetButtonById(0, VisibilityButtonId);
-        if (visibilityButtonIndex < 0)
-        {
-            return;
-        }
-
-        treeItem.SetButton(0, visibilityButtonIndex, buttonIcon);
-    }
-
-    /// <summary>
-    /// Property の有無に応じて、Property ボタン（左）と Visibility ボタン（右）を再構築する。
-    /// </summary>
-    /// <param name="treeItem">ボタンを持つTreeItem</param>
-    /// <param name="modelEntity">ボタン状態の正本を持つModelEntity</param>
-    private static void RebuildButtons(TreeItem treeItem, ModelEntity modelEntity, int propertyCount)
-    {
-        // ボタン位置は追加順で決まるため、IDで特定して全削除してから並べ直す。
-        foreach (int buttonId in new[] { PropertyButtonId, VisibilityButtonId })
-        {
-            int index = treeItem.GetButtonById(0, buttonId);
-            if (index >= 0)
-            {
-                treeItem.EraseButton(0, index);
-            }
-        }
-
-        Texture2D propertyIcon = Application.Asset.Icon.GetProperty(
-            propertyCount,
-            modelEntity.IsPropertyTreeVisible,
-            Constant.Ui.Tree.HierarchyVisibleIconSize);
-        treeItem.AddButton(0, propertyIcon, id: PropertyButtonId, disabled: modelEntity.Properties.Count == 0);
-        Texture2D visibilityIcon = Application.Asset.Icon.GetVisibility(
-            modelEntity.Visibility,
-            modelEntity.IsVisible,
-            Constant.Ui.Tree.HierarchyVisibleIconSize);
-        treeItem.AddButton(0, visibilityIcon, id: VisibilityButtonId);
     }
 
     /// <summary>
@@ -330,14 +270,14 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(root);
+        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(root);
         foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
         {
             ModelEntity modelEntity = Application.Model.Entity.Registry.Get(pair.Key);
             if (modelEntity != null && propertySubtreeCounts.TryGetValue(pair.Key, out int subtreeCount))
             {
                 int propertyCount = modelEntity.IsCollapsed ? subtreeCount : modelEntity.PropertyCountRecursive;
-                RebuildButtons(pair.Value, modelEntity, propertyCount);
+                ModelEntityRowBehavior.RebuildButtons(pair.Value, modelEntity, propertyCount);
             }
         }
     }
@@ -357,8 +297,8 @@ public partial class ModelEntityTree : Tree
         ModelEntity modelEntity = Application.Model.Entity.Registry.Get(parsedEntityId);
         if (modelEntity != null)
         {
-            Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(modelEntity);
-            RebuildButtons(treeItem, modelEntity, ResolvePropertyCount(modelEntity, propertySubtreeCounts));
+            Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(modelEntity);
+            ModelEntityRowBehavior.RebuildButtons(treeItem, modelEntity, ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts));
         }
     }
 
@@ -380,8 +320,8 @@ public partial class ModelEntityTree : Tree
             return;
         }
         bool isCollapsed = modelEntity.IsCollapsed;
-        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(modelEntity);
-        RebuildButtons(item, modelEntity, ResolvePropertyCount(modelEntity, propertySubtreeCounts));
+        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(modelEntity);
+        ModelEntityRowBehavior.RebuildButtons(item, modelEntity, ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts));
         // すでに折り畳み状態が一致している場合は自分が発した通知による変更の可能性があり何もしない
         if (item.IsCollapsed() == isCollapsed)
         {
@@ -437,7 +377,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
+        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
         AddToTree(Application.Model.Entity.Registry.Root.Id, Guid.Empty, propertySubtreeCounts);
     }
 
@@ -480,7 +420,7 @@ public partial class ModelEntityTree : Tree
 
         _rootModelEntity = rootModelEntity;
 
-        Dictionary<Guid, int> propertySubtreeCounts = BuildPropertySubtreeCounts(_rootModelEntity);
+        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(_rootModelEntity);
         AddToTree(_rootModelEntity.Id, Guid.Empty, propertySubtreeCounts);
     }
     
@@ -526,8 +466,8 @@ public partial class ModelEntityTree : Tree
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（Property表示・Visibility切替） ---
-        int propertyCount = ResolvePropertyCount(modelEntity, propertySubtreeCounts);
-        RebuildButtons(treeItem, modelEntity, propertyCount);
+        int propertyCount = ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts);
+        ModelEntityRowBehavior.RebuildButtons(treeItem, modelEntity, propertyCount);
 
         // EntityId と TreeItem の対応を登録
         treeItem.SetMeta("EntityId", entityId.ToString());
@@ -546,61 +486,6 @@ public partial class ModelEntityTree : Tree
             // ModelNode のみをツリーに追加する
             AddToTree(childModelEntity.Id, entityId, propertySubtreeCounts);
         }
-    }
-
-    /// <summary>
-    /// 指定したEntityと各子孫Entityが持つProperty数の合計を作成する。
-    /// </summary>
-    /// <param name="root">集計対象のルートEntity</param>
-    /// <returns>Entity IDごとの部分木内Property総数</returns>
-    private static Dictionary<Guid, int> BuildPropertySubtreeCounts(ModelEntity root)
-    {
-        Dictionary<Guid, int> counts = new();
-        HashSet<Guid> visited = new();
-        AddPropertySubtreeCounts(root, counts, visited);
-        return counts;
-    }
-
-    /// <summary>
-    /// 折り畳み状態に応じたPropertyボタン表示数を取得する。
-    /// </summary>
-    /// <param name="modelEntity">表示数を求めるEntity</param>
-    /// <param name="propertySubtreeCounts">Entityごとの部分木内Property総数</param>
-    /// <returns>Propertyボタンに表示する数</returns>
-    private static int ResolvePropertyCount(
-        ModelEntity modelEntity,
-        IReadOnlyDictionary<Guid, int> propertySubtreeCounts)
-    {
-        return modelEntity.IsCollapsed
-            ? propertySubtreeCounts.GetValueOrDefault(modelEntity.Id, modelEntity.PropertyCountRecursive)
-            : modelEntity.PropertyCountRecursive;
-    }
-
-    /// <summary>
-    /// Entityと子孫のProperty数を再帰的に集計する。
-    /// </summary>
-    /// <param name="modelEntity">集計対象のEntity</param>
-    /// <param name="counts">Entity IDごとの集計結果</param>
-    /// <param name="visited">重複・循環参照による二重集計を防ぐ集合</param>
-    /// <returns>対象Entityの部分木内Property総数</returns>
-    private static int AddPropertySubtreeCounts(
-        ModelEntity modelEntity,
-        Dictionary<Guid, int> counts,
-        HashSet<Guid> visited)
-    {
-        if (modelEntity == null || !visited.Add(modelEntity.Id))
-        {
-            return 0;
-        }
-
-        int count = modelEntity.PropertyCountRecursive;
-        foreach (ModelEntity child in modelEntity.Children)
-        {
-            count = checked(count + AddPropertySubtreeCounts(child, counts, visited));
-        }
-
-        counts[modelEntity.Id] = count;
-        return count;
     }
 
     /// <summary>
@@ -847,46 +732,6 @@ public partial class ModelEntityTree : Tree
         {
             ancestor.Collapsed = false;
         }
-    }
-
-    /// <summary>
-    /// TreeItem の VisibleButton がクリックされたときの処理を行う
-    /// </summary>
-    /// <param name="item">クリックされた TreeItem</param>
-    private void HandleVisibleButtonClicked(TreeItem item)
-    {
-        Guid entityId = TryGetEntityId(item);
-        if (entityId == Guid.Empty)
-        {
-            Application.Log.Warn("ModelTree: clicked item has no associated entity.");
-            return;
-        }
-
-        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
-        if (modelEntity == null)
-        {
-            Application.Log.Warn($"ModelEntityTree: visibility target not found. entityId='{entityId}'");
-            return;
-        }
-
-        // 表示切替要求は対象ModelEntityへ直接渡し、変更と通知はEntityの状態アクセサーに集約する。
-        modelEntity.ToggleVisibility();
-    }
-
-    /// <summary>
-    /// TreeItem の Property ボタンがクリックされたとき、対応する ModelEntity の Property OverlayTree 表示を切り替える
-    /// </summary>
-    /// <param name="item">クリックされた TreeItem</param>
-    private void HandlePropertyButtonClicked(TreeItem item)
-    {
-        Guid entityId = TryGetEntityId(item);
-        if (entityId == Guid.Empty)
-        {
-            Application.Log.Warn("ModelEntityTree: clicked property button item has no associated entity.");
-            return;
-        }
-
-        Application.Ui.Property.ToggleModelEntityProperties(entityId);
     }
 
     #endregion

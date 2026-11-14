@@ -2,6 +2,8 @@
 
 [ext_resource type="Script" path="res://src/ui/panel/SearchUi.cs" id="1_search"]
 
+[sub_resource type="StyleBoxEmpty" id="StyleBoxEmpty_selection"]
+
 [node name="Search" type="PanelContainer"]
 custom_minimum_size = Vector2(480, 480)
 anchors_preset = 15
@@ -79,10 +81,15 @@ placeholder_text = "Property value contains"
 [node name="ResultCount" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 
-[node name="Results" type="ItemList" parent="MarginContainer/VBoxContainer"]
+[node name="Results" type="Tree" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_styles/selected = SubResource("StyleBoxEmpty_selection")
+theme_override_styles/selected_focus = SubResource("StyleBoxEmpty_selection")
 allow_reselect = true
+hide_root = true
+hide_folding = true
+auto_tooltip = false
 
 [node name="SelectAll" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
