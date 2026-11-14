@@ -132,6 +132,7 @@ public partial class UiWindowHub : BaseHub
             MinimizeDisabled = true,
             MaximizeDisabled = true
         };
+        Application.Ui.Theme.ApplyTo(window);
         _windowCache[cacheKey] = window;
         window.TreeExited += () => OnWindowTreeExited(cacheKey, window);
 

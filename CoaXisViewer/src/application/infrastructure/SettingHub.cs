@@ -10,7 +10,7 @@ using System.Text.Json;
 /// 読み込み優先順位は次の通り。
 /// 1) 実行ファイルと同階層の settings/viewer-settings.json
 /// 2) 実行ファイルと同階層の viewer-settings.json
-/// 3) user://settings/viewer-settings.json（書き込みフォールバック）
+/// 3) user://settings/viewer-settings.json（読み書きフォールバック）
 ///
 /// 実行ファイル近傍に設定ファイルを置くことで、ビルド後の配布物でも
 /// 再ビルド不要で設定変更できる運用を想定している。
@@ -21,6 +21,9 @@ public partial class SettingHub : BaseHub
 
     /// <summary>外部設定ファイル名。配置先ディレクトリは実行環境に応じて決定する。</summary>
     private const string SettingsFileName = "viewer-settings.json";
+
+    /// <summary>現在の設定を書き戻すファイルパス。</summary>
+    private string _settingsPath = string.Empty;
 
     /// <summary>読み込み時に JSON 側の大文字小文字差異を吸収する。</summary>
     private static readonly JsonSerializerOptions ReadOptions = new JsonSerializerOptions
@@ -70,8 +73,8 @@ public partial class SettingHub : BaseHub
     /// </returns>
     public bool Reload()
     {
-        // 候補を優先順位順に列挙する。
-        string[] candidates = BuildExternalCandidates();
+        _settingsPath = string.Empty;
+        string[] candidates = BuildSettingsCandidates();
 
         foreach (string path in candidates)
         {
@@ -83,6 +86,7 @@ public partial class SettingHub : BaseHub
             if (TryRead(path, out ViewerSettings loaded))
             {
                 Current = loaded;
+                _settingsPath = path;
                 Application.Log.Info($"Settings: loaded from '{path}'.");
                 return true;
             }
@@ -91,19 +95,62 @@ public partial class SettingHub : BaseHub
         // 既存ファイルが読めない場合は安全側で既定値を採用する。
         Current = ViewerSettings.CreateDefault();
 
-        // 次回以降の編集基点を残すため、書ける場所に既定ファイルを生成する。
-        if (TryWriteDefault(candidates[0], Current, out string writtenPath) ||
-            TryWriteDefault(candidates[1], Current, out writtenPath) ||
-            TryWriteDefault(GetUserSettingsPath(), Current, out writtenPath))
+        foreach (string path in candidates)
         {
-            Application.Log.Info($"Settings: default file created at '{writtenPath}'.");
-        }
-        else
-        {
-            Application.Log.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
+            if (!TryWriteSettings(path, Current))
+            {
+                continue;
+            }
+
+            _settingsPath = path;
+            Application.Log.Info($"Settings: default file created at '{path}'.");
+            return false;
         }
 
+        Application.Log.Warn("Settings: failed to create default settings file. Using in-memory defaults.");
         return false;
+    }
+
+    /// <summary>
+    /// 現在の設定を読み込み元のファイルへ保存する。
+    /// </summary>
+    /// <returns>保存できた場合は true。</returns>
+    public bool Save()
+    {
+        string[] destinations = string.IsNullOrWhiteSpace(_settingsPath)
+            ? BuildSettingsCandidates()
+            : new[] { _settingsPath };
+
+        foreach (string path in destinations)
+        {
+            if (!TryWriteSettings(path, Current))
+            {
+                continue;
+            }
+
+            _settingsPath = path;
+            Application.Log.Info($"Settings: saved to '{path}'.");
+            return true;
+        }
+
+        Application.Log.Warn("Settings: failed to save viewer settings.");
+        return false;
+    }
+
+    /// <summary>
+    /// ライトテーマの設定を更新して保存する。
+    /// </summary>
+    /// <param name="useLightTheme">ライトテーマを使用する場合は true。</param>
+    /// <returns>設定を保存できた場合は true。</returns>
+    public bool SetLightTheme(bool useLightTheme)
+    {
+        if (Current.Ui.UseLightTheme == useLightTheme)
+        {
+            return true;
+        }
+
+        Current.Ui.UseLightTheme = useLightTheme;
+        return Save();
     }
 
     #endregion
@@ -143,19 +190,15 @@ public partial class SettingHub : BaseHub
     }
 
     /// <summary>
-    /// 既定設定ファイルを書き込む。
+    /// 設定ファイルを書き込む。
     /// </summary>
     /// <param name="path">出力先ファイルパス</param>
     /// <param name="settings">出力する設定値</param>
-    /// <param name="writtenPath">書き込み成功時の実パス</param>
     /// <returns>書き込み成功時は true</returns>
-    private static bool TryWriteDefault(string path, ViewerSettings settings, out string writtenPath)
+    private static bool TryWriteSettings(string path, ViewerSettings settings)
     {
-        writtenPath = string.Empty;
-
         try
         {
-            // settings ディレクトリが未作成でも起動時に自動生成できるようにする。
             string directory = Path.GetDirectoryName(path);
             if (!string.IsNullOrWhiteSpace(directory))
             {
@@ -164,27 +207,27 @@ public partial class SettingHub : BaseHub
 
             string json = JsonSerializer.Serialize(settings, WriteOptions);
             File.WriteAllText(path, json);
-            writtenPath = path;
             return true;
         }
         catch (Exception ex)
         {
-            Application.Log.Warn($"Settings: failed to write default file '{path}'. {ex.Message}");
+            Application.Log.Warn($"Settings: failed to write '{path}'. {ex.Message}");
             return false;
         }
     }
 
     /// <summary>
-    /// 外部設定ファイル探索候補を優先順で返す。
+    /// 設定ファイル探索候補を優先順で返す。
     /// </summary>
     /// <returns>先頭ほど優先度が高い候補パス配列</returns>
-    private static string[] BuildExternalCandidates()
+    private static string[] BuildSettingsCandidates()
     {
         string baseDir = ResolveBaseDirectory();
         return new[]
         {
             Path.Combine(baseDir, "settings", SettingsFileName),
-            Path.Combine(baseDir, SettingsFileName)
+            Path.Combine(baseDir, SettingsFileName),
+            GetUserSettingsPath()
         };
     }
 

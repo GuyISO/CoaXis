@@ -2,9 +2,6 @@
 
 [ext_resource type="Script" uid="uid://cqf7jel4l6pjq" path="res://src/ui/panel/ViewportUi.cs" id="1_vtpwr"]
 
-[sub_resource type="Theme" id="Theme_iww46"]
-default_font_size = 0
-
 [node name="Viewport" type="PanelContainer" unique_id=1128003110]
 custom_minimum_size = Vector2(280, 0)
 anchors_preset = 15
@@ -20,14 +17,9 @@ script = ExtResource("1_vtpwr")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 6
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=62594949]
 layout_mode = 2
-theme_override_constants/separation = 4
 alignment = 1
 
 [node name="GridContainer3" type="GridContainer" parent="MarginContainer/VBoxContainer" unique_id=19912793]
@@ -45,7 +37,7 @@ size_flags_horizontal = 3
 horizontal_alignment = 2
 vertical_alignment = 1
 
-[node name="ColorRect2" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=1402923992]
+[node name="SeparatorMode" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1402923992]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 
@@ -55,14 +47,12 @@ columns = 2
 
 [node name="LabelTitileProjection" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=2000178488]
 layout_mode = 2
-theme = SubResource("Theme_iww46")
 text = "Projection"
 vertical_alignment = 1
 
 [node name="LabelValueProjection" type="Label" parent="MarginContainer/VBoxContainer/GridContainer" unique_id=1677999638]
 layout_mode = 2
 size_flags_horizontal = 3
-theme = SubResource("Theme_iww46")
 horizontal_alignment = 2
 vertical_alignment = 1
 
@@ -71,7 +61,7 @@ layout_mode = 2
 tooltip_text = "平行投影と透視投影を切り替えます"
 text = "ToggleProjection"
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=1058617193]
+[node name="SeparatorProjection" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1058617193]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 
@@ -229,7 +219,7 @@ min_value = 5.0
 max_value = 120.0
 value = 35.0
 
-[node name="ColorRect3" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=1960033863]
+[node name="SeparatorCameraFit" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=1960033863]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 
@@ -247,6 +237,7 @@ text = "FitToSelection
 [node name="ButtonAlignNormal" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1752955195]
 layout_mode = 2
 tooltip_text = "選択した面に垂直にビューを移動します"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "AlignNormal"
 
@@ -280,6 +271,7 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "表示レイヤーの表示状態を切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 button_pressed = true
 text = "Visible"
@@ -288,6 +280,7 @@ text = "Visible"
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "非表示レイヤーの表示状態を切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Invisible"
 
@@ -305,6 +298,7 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "表示レイヤーの表示状態を切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 button_pressed = true
 text = "Visible"
@@ -313,5 +307,6 @@ text = "Visible"
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "非表示レイヤーの表示状態を切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Invisible"

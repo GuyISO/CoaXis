@@ -13,6 +13,11 @@ public sealed class UiSettings
     /// </summary>
     public int MessageMaxLines { get; set; } = DefaultMessageMaxLines;
 
+    /// <summary>
+    /// ライトテーマを使用するかどうか。
+    /// </summary>
+    public bool UseLightTheme { get; set; }
+
     #endregion
     
     #region Methods

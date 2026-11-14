@@ -6,7 +6,6 @@
 [ext_resource type="PackedScene" uid="uid://cmde2bylb3cu1" path="res://scenes/ui/measurement_ui.tscn" id="4_g4gva"]
 [ext_resource type="PackedScene" uid="uid://bpcl2jg87jpcu" path="res://scenes/ui/command_ui.tscn" id="5_cki6e"]
 [ext_resource type="PackedScene" uid="uid://crt7sb6bahnhp" path="res://scenes/viewport/viewport_container.tscn" id="5_y2duu"]
-[ext_resource type="Script" uid="uid://omno51y3idbw" path="res://src/ui/label/FpsUi.cs" id="6_5i13y"]
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/selection_ui.tscn" id="6_npq5x"]
 [ext_resource type="PackedScene" uid="uid://bfdie23q7sox" path="res://scenes/ui/camera_state_ui.tscn" id="7_57r0r"]
 [ext_resource type="PackedScene" uid="uid://djb751h7aic7h" path="res://scenes/ui/visual_ui.tscn" id="7_xrtxh"]
@@ -22,6 +21,9 @@
 [ext_resource type="Texture2D" uid="uid://c174ftwnqq58o" path="res://assets/icon/ui/search.svg" id="19_search_icon"]
 [ext_resource type="Texture2D" uid="uid://cgc5sow0ehspb" path="res://assets/icon/ui/visual.svg" id="20_visual"]
 [ext_resource type="Texture2D" uid="uid://d4ds251jfwjso" path="res://assets/icon/ui/camera_state.svg" id="21_camera_state"]
+[ext_resource type="PackedScene" path="res://scenes/ui/ipc_ui.tscn" id="22_ipc"]
+[ext_resource type="Texture2D" uid="uid://cb0wl2p6ug23o" path="res://assets/icon/ui/ipc.svg" id="23_ipc_icon"]
+[ext_resource type="Script" path="res://src/ui/button/ThemeToggleButton.cs" id="24_theme_toggle"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -87,7 +89,6 @@ split_offset = -200
 [node name="EmbeddedModelEntityTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=119731503]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/v_separation = 1
 allow_reselect = true
 allow_search = false
 hide_root = true
@@ -95,7 +96,6 @@ script = ExtResource("10_57r0r")
 
 [node name="EmbeddedModelPropertyTree" type="Tree" parent="VBoxContainer/HBoxContainer/Screen/HSplitContainer/VSplitContainer" unique_id=316986411]
 layout_mode = 2
-theme_override_constants/v_separation = 1
 allow_reselect = true
 allow_search = false
 script = ExtResource("12_bn6oc")
@@ -172,6 +172,20 @@ text = ""
 icon = ExtResource("21_camera_state")
 _container = ExtResource("7_57r0r")
 
+[node name="ButtonShowIpcUi" parent="VBoxContainer/HBoxContainer/RightBar" instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "IPC
+IPCの接続状態と送受信履歴を表示します"
+text = ""
+icon = ExtResource("23_ipc_icon")
+_container = ExtResource("22_ipc")
+
+[node name="ThemeToggleButton" type="Button" parent="VBoxContainer/HBoxContainer/RightBar"]
+layout_mode = 2
+theme_type_variation = "CoaXisToggleButton"
+text = "Dark"
+script = ExtResource("24_theme_toggle")
+
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1245432863]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -183,16 +197,9 @@ layout_mode = 2
 
 [node name="LabelPipe" type="Label" parent="VBoxContainer/BottomBar" unique_id=271860447]
 layout_mode = 2
-theme_override_font_sizes/font_size = 24
 vertical_alignment = 2
 script = ExtResource("9_bn6oc")
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]
 layout_mode = 2
 size_flags_horizontal = 3
-
-[node name="LabelFps" type="Label" parent="VBoxContainer/BottomBar" unique_id=886535964]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-vertical_alignment = 2
-script = ExtResource("6_5i13y")

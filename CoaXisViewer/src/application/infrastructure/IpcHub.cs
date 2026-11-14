@@ -29,6 +29,10 @@ public partial class IpcHub : BaseHub
     private const int MainThreadTimeoutMilliseconds = 2000;
     /// <summary>IPCメッセージの送信元名。</summary>
     private const string ViewerSourceName = "Viewer";
+    /// <summary>保持する送受信履歴の最大件数。</summary>
+    private const int HistoryLimit = 500;
+    /// <summary>メインスレッドで保持する送受信履歴。</summary>
+    private readonly Queue<HistoryEntry> _history = new();
 
     /// <summary>IPC用の名前付きパイプサーバー。</summary>
     private NamedPipeServerStream _pipeServer;
@@ -40,6 +44,12 @@ public partial class IpcHub : BaseHub
     private ConnectionSession _activeConnection;
     /// <summary>モデルイベントを購読済みかどうか。</summary>
     private bool _modelEventsSubscribed;
+    /// <summary>最後に起動したパイプの名前。</summary>
+    private string _pipeName;
+    /// <summary>メインスレッドに反映済みの接続状態。</summary>
+    private bool _isClientConnected;
+    /// <summary>古いサーバーからの接続状態通知を区別する世代。</summary>
+    private int _serverGeneration;
 
     #endregion
 
@@ -56,7 +66,13 @@ public partial class IpcHub : BaseHub
     /// <summary>
     /// NamedPipeクライアントが現在接続中かどうかを取得する。
     /// </summary>
-    public bool IsClientConnected => _pipeServer?.IsConnected ?? false;
+    public bool IsClientConnected => _isClientConnected;
+
+    /// <summary>稼働中または最後に起動したパイプの名前を取得する。</summary>
+    public string PipeName => _pipeName ?? Application.Setting.Current.Ipc.PipeName;
+
+    /// <summary>送受信履歴を古い順に取得する。</summary>
+    public HistoryEntry[] History => _history.ToArray();
 
     #endregion
 
@@ -89,6 +105,9 @@ public partial class IpcHub : BaseHub
     /// <param name="errorCode">失敗時の標準化エラーコード</param>
     [Signal] public delegate void MessageHandledEventHandler(string eventType, bool ok, string errorCode);
 
+    /// <summary>送受信履歴の変更を通知する。</summary>
+    [Signal] public delegate void HistoryNotifiedEventHandler();
+
     #endregion
 
     #region Lifecycle
@@ -106,16 +125,38 @@ public partial class IpcHub : BaseHub
     {
         SubscribeModelEvents();
 
+        bool historyChanged = false;
         while (_pendingNotifications.TryDequeue(out PendingNotification notification))
         {
             if (notification.Type == PendingNotificationType.ClientStatus)
             {
+                if (notification.Generation != _serverGeneration || !IsPipeServerRunning)
+                {
+                    continue;
+                }
+
+                _isClientConnected = notification.IsConnected;
                 EmitSignal(SignalName.ClientStatus, notification.IsConnected);
             }
             else
             {
-                EmitSignal(SignalName.MessageReceived, notification.EventType);
+                if (_history.Count == HistoryLimit)
+                {
+                    _history.Dequeue();
+                }
+
+                _history.Enqueue(new HistoryEntry(notification.Timestamp, notification.Type == PendingNotificationType.MessageSent, notification.EventType));
+                historyChanged = true;
+                if (notification.Type == PendingNotificationType.MessageReceived)
+                {
+                    EmitSignal(SignalName.MessageReceived, notification.EventType);
+                }
             }
+        }
+
+        if (historyChanged)
+        {
+            EmitSignal(SignalName.HistoryNotified);
         }
 
         // 受信スレッドが溜めたリクエストを、メインスレッド上で順番にドメイン層へ振り分ける
@@ -248,7 +289,9 @@ public partial class IpcHub : BaseHub
 
         _cts = new CancellationTokenSource();
         CancellationToken token = _cts.Token;
-        _listenTask = Task.Run(() => AcceptLoopAsync(pipeName, token), token);
+        _pipeName = pipeName;
+        int generation = ++_serverGeneration;
+        _listenTask = Task.Run(() => AcceptLoopAsync(pipeName, generation, token), token);
 
         Application.Log.Info($"Ipc: server started on pipe '{pipeName}'.");
         
@@ -280,6 +323,12 @@ public partial class IpcHub : BaseHub
 
         _cts.Dispose();
         _cts = null;
+        ++_serverGeneration;
+        if (_isClientConnected)
+        {
+            _isClientConnected = false;
+            EmitSignal(SignalName.ClientStatus, false);
+        }
 
         Application.Log.Info("Ipc: server stopped.");
 
@@ -293,7 +342,7 @@ public partial class IpcHub : BaseHub
     /// <summary>
     /// クライアント接続を待ち受け、切断されるたびに次の接続待ちへ戻る。
     /// </summary>
-    private async Task AcceptLoopAsync(string pipeName, CancellationToken token)
+    private async Task AcceptLoopAsync(string pipeName, int generation, CancellationToken token)
     {
         while (!token.IsCancellationRequested)
         {
@@ -309,14 +358,14 @@ public partial class IpcHub : BaseHub
                 _pipeServer = pipe;
 
                 await pipe.WaitForConnectionAsync(token).ConfigureAwait(false);
-                _pendingNotifications.Enqueue(PendingNotification.ClientStatusChanged(true));
+                _pendingNotifications.Enqueue(PendingNotification.ClientStatusChanged(true, generation));
                 try
                 {
                     await HandleConnectionAsync(pipe, token).ConfigureAwait(false);
                 }
                 finally
                 {
-                    _pendingNotifications.Enqueue(PendingNotification.ClientStatusChanged(false));
+                    _pendingNotifications.Enqueue(PendingNotification.ClientStatusChanged(false, generation));
                 }
             }
             catch (OperationCanceledException)
@@ -346,7 +395,8 @@ public partial class IpcHub : BaseHub
             NewLine = "\n"
         };
 
-        var connection = new ConnectionSession(writer);
+        var connection = new ConnectionSession(writer, eventType =>
+            _pendingNotifications.Enqueue(PendingNotification.MessageSent(eventType)));
         Volatile.Write(ref _activeConnection, connection);
         Task writeTask = connection.WriteLoopAsync(token);
         try
@@ -491,6 +541,8 @@ public partial class IpcHub : BaseHub
     {
         /// <summary>接続先の書き込みストリーム。</summary>
         private readonly StreamWriter _writer;
+        /// <summary>送信完了を受信スレッド側へ記録するコールバック。</summary>
+        private readonly Action<string> _onMessageSent;
         /// <summary>応答と通知を順番に送るキュー。</summary>
         private readonly Channel<OutboundMessage> _outgoing = Channel.CreateUnbounded<OutboundMessage>(
             new UnboundedChannelOptions
@@ -503,9 +555,11 @@ public partial class IpcHub : BaseHub
         /// 接続セッションの書き込み先を設定する。
         /// </summary>
         /// <param name="writer">接続に対応するストリームライター</param>
-        public ConnectionSession(StreamWriter writer)
+        /// <param name="onMessageSent">書き込み完了時の通知</param>
+        public ConnectionSession(StreamWriter writer, Action<string> onMessageSent)
         {
             _writer = writer;
+            _onMessageSent = onMessageSent;
         }
 
         /// <summary>
@@ -544,6 +598,7 @@ public partial class IpcHub : BaseHub
                     {
                         string json = JsonSerializer.Serialize(message.Envelope, IpcJsonOptions.Default);
                         await _writer.WriteLineAsync(json).ConfigureAwait(false);
+                        _onMessageSent(message.Envelope.EventType ?? string.Empty);
                         message.Completion?.TrySetResult(true);
                     }
                     catch (Exception exception) when (exception is IOException or ObjectDisposedException)
@@ -666,10 +721,11 @@ public partial class IpcHub : BaseHub
     private enum PendingNotificationType
     {
         ClientStatus,
-        MessageReceived
+        MessageReceived,
+        MessageSent
     }
 
-    /// <summary>受信タスクからメインスレッドへ渡すIPC通知。</summary>
+    /// <summary>IPCタスクからメインスレッドへ渡すIPC通知。</summary>
     private readonly struct PendingNotification
     {
         /// <summary>通知の種類。</summary>
@@ -678,23 +734,57 @@ public partial class IpcHub : BaseHub
         public bool IsConnected { get; }
         /// <summary>受信メッセージのイベント種別。</summary>
         public string EventType { get; }
+        /// <summary>送受信を検出した時刻。</summary>
+        public DateTimeOffset Timestamp { get; }
+        /// <summary>接続状態通知のサーバー世代。</summary>
+        public int Generation { get; }
 
-        private PendingNotification(PendingNotificationType type, bool isConnected, string eventType)
+        private PendingNotification(PendingNotificationType type, bool isConnected, string eventType, int generation)
         {
             Type = type;
             IsConnected = isConnected;
             EventType = eventType;
+            Timestamp = DateTimeOffset.Now;
+            Generation = generation;
         }
 
         /// <summary>クライアント接続状態通知を生成する。</summary>
         /// <param name="isConnected">接続中の場合は true</param>
-        public static PendingNotification ClientStatusChanged(bool isConnected) =>
-            new(PendingNotificationType.ClientStatus, isConnected, string.Empty);
+        /// <param name="generation">サーバーの世代</param>
+        public static PendingNotification ClientStatusChanged(bool isConnected, int generation) =>
+            new(PendingNotificationType.ClientStatus, isConnected, string.Empty, generation);
 
         /// <summary>受信メッセージ通知を生成する。</summary>
         /// <param name="eventType">イベント種別。解析できない場合は空文字列</param>
         public static PendingNotification MessageReceived(string eventType) =>
-            new(PendingNotificationType.MessageReceived, false, eventType);
+            new(PendingNotificationType.MessageReceived, false, eventType, 0);
+
+        /// <summary>送信完了通知を生成する。</summary>
+        /// <param name="eventType">送信したイベント種別</param>
+        public static PendingNotification MessageSent(string eventType) =>
+            new(PendingNotificationType.MessageSent, false, eventType, 0);
+    }
+
+    /// <summary>IPCの送受信履歴の1件。</summary>
+    public readonly struct HistoryEntry
+    {
+        /// <summary>送受信を検出した時刻。</summary>
+        public DateTimeOffset Timestamp { get; }
+        /// <summary>送信の場合はtrue、受信の場合はfalse。</summary>
+        public bool IsSent { get; }
+        /// <summary>イベント種別。解析できない場合は空文字列。</summary>
+        public string EventType { get; }
+
+        /// <summary>履歴項目を生成する。</summary>
+        /// <param name="timestamp">送受信を検出した時刻</param>
+        /// <param name="isSent">送信の場合はtrue</param>
+        /// <param name="eventType">イベント種別</param>
+        public HistoryEntry(DateTimeOffset timestamp, bool isSent, string eventType)
+        {
+            Timestamp = timestamp;
+            IsSent = isSent;
+            EventType = eventType;
+        }
     }
 
     #endregion

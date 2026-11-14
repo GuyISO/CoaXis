@@ -11,6 +11,7 @@ public partial class MessageUi : PanelContainer
 
     // 関連ノードのキャッシュ
     private RichTextLabel _label;
+    private Label _fpsLabel;
 
     // ログのバッファ
     private readonly StringBuilder _buffer = new StringBuilder();
@@ -19,12 +20,36 @@ public partial class MessageUi : PanelContainer
 
     #region Lifecycle
 
+    /// <summary>
+    /// 子ノードを取得してApplicationイベントを購読する
+    /// </summary>
     public override void _Ready()
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
     }
 
+    /// <summary>
+    /// FPS 表示を更新する
+    /// </summary>
+    /// <param name="delta">前フレームからの経過秒</param>
+    public override void _Process(double delta)
+    {
+        if (_fpsLabel == null)
+        {
+            return;
+        }
+
+        string text = $"FPS: {Engine.GetFramesPerSecond()}";
+        if (_fpsLabel.Text != text)
+        {
+            _fpsLabel.Text = text;
+        }
+    }
+
+    /// <summary>
+    /// Applicationイベントの購読を解除する
+    /// </summary>
     public override void _ExitTree()
     {
         UnsubscribeApplicationEvents();
@@ -41,7 +66,8 @@ public partial class MessageUi : PanelContainer
     /// </summary>
     private void EnsureChildNodes()
     {
-        _label = GetNodeOrNull<RichTextLabel>("RichTextLabel");
+        _label = GetNodeOrNull<RichTextLabel>("VBoxContainer/RichTextLabel");
+        _fpsLabel = GetNodeOrNull<Label>("VBoxContainer/FpsLabel");
     }
 
     /// <summary>

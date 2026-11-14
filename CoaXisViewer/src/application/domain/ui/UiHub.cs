@@ -15,6 +15,8 @@ public partial class UiHub : BaseHub
 	public UiPropertyHub Property { get; }
 	/// <summary>ウィンドウハブを取得する。</summary>
 	public UiWindowHub Window { get; }
+	/// <summary>UIテーマを管理するハブを取得する。</summary>
+	public UiThemeHub Theme { get; }
 
 	#endregion
 
@@ -32,6 +34,7 @@ public partial class UiHub : BaseHub
 		Menu = AddModule<UiMenuHub>("Menu");
 		Property = AddModule<UiPropertyHub>("Property");
 		Window = AddModule<UiWindowHub>("Window");
+		Theme = AddModule<UiThemeHub>("Theme");
 	}
 
 	#endregion

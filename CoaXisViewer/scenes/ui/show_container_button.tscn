@@ -5,6 +5,6 @@
 [node name="ButtonShowContainer" type="Button" unique_id=1859494691]
 tooltip_text = "ToolTip"
 focus_mode = 0
-theme_override_font_sizes/font_size = 24
+theme_type_variation = "CoaXisToggleButton"
 text = "Text"
 script = ExtResource("1_nujh8")

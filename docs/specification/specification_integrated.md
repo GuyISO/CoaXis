@@ -1,6 +1,6 @@
 # CoaXis Viewer・Protocol仕様
 
-最終更新: 2026-10-27
+最終更新: 2026-11-15
 
 この文書は、本リポジトリで管理するCoaXisViewer・CoaXisProtocol・CoaXisIpcTesterの現行仕様を記す。その他のCoaXisアプリケーションとSceneBuilderは対象外。Viewerが使うモデルシーンは外部で生成する。
 
@@ -9,6 +9,8 @@
 ### 起動と構成
 
 Godot AutoLoadは`Application`のみ。Infrastructure（Log、Setting、Asset、Ipc、Input）とDomain（Command、Model、Ui、Viewport）の各Hubを構成する。モデル機能は`Application.Model.Entity`と`Application.Model.Property`に分かれる。
+
+UIテーマはDarkを既定とし、右側ツールバーの切替ボタンからLight/Darkを切り替える。選択状態は`ViewerSettings.Ui.UseLightTheme`として`viewer-settings.json`へ保存し、次回起動時に復元する。テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
 
 ### ModelEntity
 
@@ -52,6 +54,7 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 
 - Named PipeでUTF-8の1行1JSONメッセージを送受信する。
 - `IpcHub`はNamed Pipeの接続・受信・送信、メインスレッドへの要求振り分け、応答エンベロープ生成を担う。ドメイン状態は所有せず、ModelEntity選択通知ではSelectionHubの変更通知を受けて現在のID集合をProtocol payloadへ変換し、Manipulate操作通知ではEntity Hubから対象IDを受け取る。
+- ViewerのIPCパネルはパイプ名、サーバー停止・接続待ち・接続中の状態と、送受信の時刻・方向・イベント種別を表示する。履歴はパネルを閉じてもViewerの実行中は保持し、直近500件に制限する。受信は解析不能なメッセージも記録し、送信は書き込み完了時に記録する。payloadやメッセージ本文は保持しない。
 - Viewerは各要求のバージョンが空でないことと、メジャーバージョン一致を検査する。起動時のバージョン照会は行わない。
 - Viewerが処理する要求は`ReplaceModelSet`、`ClearModelSet`、`AddModelSet`、`RemoveModelSet`、`ModifyModelSet`、`ReadModelSet`。その他の未対応要求には`UNSUPPORTED_EVENT_TYPE`を返す。
 - 接続中のIPCクライアントがある状態で選択ID集合が実際に変わると、Viewerは`ModelEntitySelected`を送信する。payloadの`entityIds`は変更後の全選択IDを昇順で含み、全解除時は空配列となる。同じ選択集合を再指定した場合は通知しない。接続開始時点の選択状態は別途通知しない。

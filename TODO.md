@@ -13,6 +13,8 @@ IPCの状態確認UI作成する
 ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介してカメラを表示できるようにする、各Viewportごとに独立したカメラ制御を可能にする
 FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
 
+ライトテーマ切替
+
 ## 3D表示関係
 コマンド化、IPC化進める
 
@@ -23,6 +25,8 @@ FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
     フローティングor右側でタブから選んで使用できるように配置する
 Treeの切り出し
     Treeを独立したUIコンポーネントとして切り出し、他のUIからも再利用可能にする
+
+ライトテーマ追加
 
 ## 今後を考えて
 

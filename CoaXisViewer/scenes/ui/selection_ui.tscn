@@ -17,20 +17,14 @@ script = ExtResource("1_w3c6j")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 6
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=62594949]
 layout_mode = 2
-theme_override_constants/separation = 4
 alignment = 1
 
 [node name="Tree" type="Tree" parent="MarginContainer/VBoxContainer" unique_id=639312814]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(1, 1, 1, 1)
 hide_folding = true
 hide_root = true
 auto_tooltip = false
@@ -43,6 +37,7 @@ alignment = 1
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "モデル選択[Set]モードに切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Set"
 
@@ -50,6 +45,7 @@ text = "Set"
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "モデル選択[Add]モードに切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Add"
 
@@ -57,6 +53,7 @@ text = "Add"
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "モデル選択[Remove]モードに切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Remove"
 
@@ -64,6 +61,7 @@ text = "Remove"
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "モデル選択[Toggle]モードに切り替えます"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Toggle"
 

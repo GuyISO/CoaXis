@@ -17,14 +17,9 @@ script = ExtResource("1_1r4nc")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 6
 
 [node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=62594949]
 layout_mode = 2
-theme_override_constants/separation = 4
 alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1678572172]
@@ -41,7 +36,7 @@ layout_mode = 2
 text = "Point1"
 vertical_alignment = 1
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=892245789]
+[node name="Separator" type="HSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=892245789]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 
@@ -145,6 +140,7 @@ vertical_alignment = 1
 [node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=1566134602]
 layout_mode = 2
 tooltip_text = "測定点を取得します"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Pick"
 
@@ -162,7 +158,7 @@ layout_mode = 2
 text = "Point2"
 vertical_alignment = 1
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=1672983332]
+[node name="Separator" type="HSeparator" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=1672983332]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 
@@ -266,6 +262,7 @@ vertical_alignment = 1
 [node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=845942979]
 layout_mode = 2
 tooltip_text = "測定点を取得します"
+theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Pick"
 
@@ -274,7 +271,7 @@ layout_mode = 2
 tooltip_text = "測定点を消去します"
 text = "Clear"
 
-[node name="ColorRect" type="ColorRect" parent="MarginContainer/VBoxContainer" unique_id=406113100]
+[node name="Separator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=406113100]
 custom_minimum_size = Vector2(0, 1)
 layout_mode = 2
 

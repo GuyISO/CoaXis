@@ -17,10 +17,6 @@ script = ExtResource("1_lf2al")
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
-theme_override_constants/margin_left = 6
-theme_override_constants/margin_top = 6
-theme_override_constants/margin_right = 6
-theme_override_constants/margin_bottom = 6
 
 [node name="Tree" type="Tree" parent="MarginContainer" unique_id=665551789]
 layout_mode = 2
