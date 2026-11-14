@@ -15,11 +15,6 @@ IPCの状態確認UI作成する
 ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介してカメラを表示できるようにする、各Viewportごとに独立したカメラ制御を可能にする
 FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
 
-検索機能を付ける
-    ModelEntityのTypeはコンボボックス、Nameはテキスト入力で検索可能にする
-    ModelPropertyも検索可能にする
-    検索結果一覧で示し、そこから選択可能にする
-
 ## 3D表示関係
 コマンド化、IPC化進める
 

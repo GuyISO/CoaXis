@@ -17,6 +17,7 @@ ModelEntityとModelPropertyのアイコンは`IconId`で指定し、アイコン
 | 型 | 責務 |
 |---|---|
 | `ModelSetHub` | Entity・Propertyをまたぐ全件置換、部分追加/置換、連鎖削除を調整する。DTO検証はFactory、各Registry更新はEntity/PropertyのLoadHubへ委譲する。 |
+| `ModelSearchHub` | Entityと所属Propertyの条件を組み合わせ、一致するEntity IDを検索する。 |
 | `ModelEntityLoadHub` | 検証済みEntityの追加/同一ID置換/削除、Node接続とシーンロード開始を管理する。 |
 | `ModelPropertyLoadHub` | 検証済みPropertyの追加/同一ID置換/連鎖削除を管理する。 |
 | `ModelFactory` | Entity/Property DTOをMapperで内部モデルへ変換し、IDと階層を検証してModelSetまたは部分更新用モデルを生成する。 |
@@ -30,6 +31,8 @@ ModelEntityとModelPropertyのアイコンは`IconId`で指定し、アイコン
 EntityのStatusは専用遷移メソッドで変更する。通常遷移は`Unloaded→Initialized→Registered→Loading→Loaded|LoadFailed`、ScenePathが空なら`Registered→Loaded`、破棄は`Registered|Loading|Loaded|LoadFailed→Disposed`。`IsVisible`はVisibility設定と親階層から導出する。Replace/Addでは、各Entityの親が同時に存在するEntityまたはRootであり、親IDをたどってRootへ到達することを検証する。各Propertyの親IDは空でなく、同時に存在するEntityまたはPropertyを指し、その親階層がEntityへ到達することを検証する。Entity/Property間のID重複を含め、階層を解決できない入力は要求全体を拒否し、部分反映やRegistryへの孤児保持を行わない。
 
 TreeItemはUIが構築・保持し、Model DomainはUI Nodeを保持しない。Pick・Measurement・Load・Scene機能はEntity配下、Property LoadはProperty配下に置く。
+
+Searchパネルは登録済みのEntity Type、PropertyType、Property ValueTypeをそれぞれ一覧から選択し、Entity NameとProperty Valueを入力してEntityを検索する。種類と値の型は完全一致、文字列は大文字小文字を区別しない部分一致で、空条件は指定なしとする。指定された条件はANDで組み合わせ、Property条件は同じ所属Property（子孫Propertyを含む）に一致する必要がある。Rootは結果に含めない。件数とアイコン付きのEntity名一覧を表示する。行選択はPickを通知し、Entityツリーと同様にAdd/Removeモードでは前回の行からの範囲を対象とする。全選択は既存のEntity選択集合を検索結果全体に置き換える。結果行の右クリックでは対象Entityの共通メニューを表示する。モデル集合やProperty値の変更時は結果を更新する。
 
 ### Scene
 

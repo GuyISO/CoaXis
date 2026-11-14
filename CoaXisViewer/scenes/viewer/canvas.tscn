@@ -13,6 +13,7 @@
 [ext_resource type="Script" uid="uid://c5r05kmp1e5iv" path="res://src/ui/label/PipeUi.cs" id="9_bn6oc"]
 [ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/EmbeddedModelEntityTree.cs" id="10_57r0r"]
 [ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbeddedModelPropertyTree.cs" id="12_bn6oc"]
+[ext_resource type="PackedScene" path="res://scenes/ui/search_ui.tscn" id="13_search"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -64,6 +65,12 @@ layout_mode = 2
 tooltip_text = "選択状態パネルを表示します"
 text = "Selection"
 _container = ExtResource("6_npq5x")
+
+[node name="ButtonShowSearchUi" parent="VBoxContainer/TopBar" instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "モデル検索パネルを表示します"
+text = "Search"
+_container = ExtResource("13_search")
 
 [node name="ButtonShowVisualUi" parent="VBoxContainer/TopBar" unique_id=1569197903 instance=ExtResource("1_0wdie")]
 layout_mode = 2

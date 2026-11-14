@@ -15,6 +15,8 @@ public partial class ModelHub : BaseHub
     public ModelPropertyHub Property { get; }
     /// <summary>EntityとPropertyにまたがるモデル集合操作を取得する。</summary>
     public ModelSetHub ModelSet { get; }
+    /// <summary>Entityと所属Propertyの検索機能を取得する。</summary>
+    public ModelSearchHub Search { get; }
 
     #endregion
 
@@ -32,6 +34,7 @@ public partial class ModelHub : BaseHub
         Entity = AddModule<ModelEntityHub>("Entity");
         Property = AddModule<ModelPropertyHub>("Property");
         ModelSet = AddModule<ModelSetHub>("Set");
+        Search = AddModule<ModelSearchHub>("Search");
     }
 
     #endregion
