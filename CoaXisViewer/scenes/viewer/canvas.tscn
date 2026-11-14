@@ -178,6 +178,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
+visible = false
 layout_mode = 2
 
 [node name="LabelPipe" type="Label" parent="VBoxContainer/BottomBar" unique_id=271860447]

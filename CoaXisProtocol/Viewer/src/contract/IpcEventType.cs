@@ -37,6 +37,9 @@ public static class IpcEventType
     {
         /// <summary>選択通知</summary>
         public const string ModelEntitySelected = "ModelEntitySelected";
+
+        /// <summary>モデル実体のManipulate操作通知</summary>
+        public const string ModelEntityManipulated = "ModelEntityManipulated";
     }
 
     /// <summary>

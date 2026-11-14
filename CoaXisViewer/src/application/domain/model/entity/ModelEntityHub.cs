@@ -1,3 +1,6 @@
+using Godot;
+using System;
+
 /// <summary>
 /// ModelEntity 関連モジュールの構成を管理するハブ。
 /// </summary>
@@ -32,6 +35,10 @@ public partial class ModelEntityHub : BaseHub
 
     #region Signals
 
+    /// <summary>指定Entityに対するManipulate操作の通知。</summary>
+    /// <param name="entityId">操作対象のEntity識別子</param>
+    [Signal] public delegate void ManipulatedEventHandler(string entityId);
+
     #endregion
 
     #region Lifecycle
@@ -59,6 +66,21 @@ public partial class ModelEntityHub : BaseHub
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// 指定Entityに対するManipulate操作を通知する。
+    /// </summary>
+    /// <param name="entityId">操作対象のEntity識別子</param>
+    public void Manipulate(Guid entityId)
+    {
+        if (entityId == Guid.Empty || Registry.Get(entityId) == null)
+        {
+            Application.Log.Warn($"ModelEntity: manipulate target not found. entityId='{entityId}'");
+            return;
+        }
+
+        EmitSignal(SignalName.Manipulated, entityId.ToString());
+    }
 
     #endregion
 

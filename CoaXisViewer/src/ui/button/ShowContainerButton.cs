@@ -16,10 +16,10 @@ public partial class ShowContainerButton : Button
 
     public override void _Ready()
     {
+        ToggleMode = true;
         SubscribeUiEvents();
+        OnWindowVisibilityNotified();
     }
-
-    #endregion
 
     public override void _ExitTree()
     {
@@ -28,16 +28,28 @@ public partial class ShowContainerButton : Button
         base._ExitTree();
     }
 
+    #endregion
+
     #region Events
 
     private void SubscribeUiEvents()
     {
         Pressed += OnPressed;
+        Application.Ui.Window.WindowVisibilityNotified += OnWindowVisibilityNotified;
     }
 
     private void UnsubscribeUiEvents()
     {
         Pressed -= OnPressed;
+        Application.Ui.Window.WindowVisibilityNotified -= OnWindowVisibilityNotified;
+    }
+
+    /// <summary>
+    /// 表示ウィンドウの状態通知を受けて、このボタンの押下状態を同期する。
+    /// </summary>
+    private void OnWindowVisibilityNotified()
+    {
+        ButtonPressed = Application.Ui.Window.IsContainerVisible(_container);
     }
 
     /// <summary>

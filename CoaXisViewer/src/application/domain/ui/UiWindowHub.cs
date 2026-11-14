@@ -20,6 +20,17 @@ public partial class UiWindowHub : BaseHub
 
     #region Signals
 
+    /// <summary>表示ウィンドウの状態が変化したことを通知する。</summary>
+    [Signal] public delegate void WindowVisibilityNotifiedEventHandler();
+
+    /// <summary>
+    /// 表示ウィンドウの状態変更を通知する。
+    /// </summary>
+    private void NotifyWindowVisibility()
+    {
+        EmitSignal(SignalName.WindowVisibilityNotified);
+    }
+
     #endregion
 
     #region Lifecycle
@@ -36,6 +47,7 @@ public partial class UiWindowHub : BaseHub
         if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow) && cachedWindow == window)
         {
             _windowCache.Remove(cacheKey);
+            NotifyWindowVisibility();
         }
     }
 
@@ -66,6 +78,7 @@ public partial class UiWindowHub : BaseHub
                 cachedWindow.Show();
                 cachedWindow.GrabFocus();
                 container.QueueFree();
+                NotifyWindowVisibility();
                 return;
             }
 
@@ -73,6 +86,31 @@ public partial class UiWindowHub : BaseHub
         }
 
         ShowWindow(container, cacheKey);
+    }
+
+    /// <summary>
+    /// 指定されたUIシーンのウィンドウが表示中かどうかを返す。
+    /// </summary>
+    /// <param name="scene">表示状態を確認するUIシーン。</param>
+    /// <returns>ウィンドウが表示中の場合は true。</returns>
+    public bool IsContainerVisible(PackedScene scene)
+    {
+        if (scene == null)
+        {
+            Application.Log.Warn("UiWindowHub: scene is null.");
+            return false;
+        }
+
+        string cacheKey = scene.ResourcePath;
+        if (string.IsNullOrWhiteSpace(cacheKey))
+        {
+            Application.Log.Warn("UiWindowHub: scene resource path is empty.");
+            return false;
+        }
+
+        return _windowCache.TryGetValue(cacheKey, out UiWindow window)
+            && GodotObject.IsInstanceValid(window)
+            && window.Visible;
     }
 
     #endregion
@@ -101,7 +139,7 @@ public partial class UiWindowHub : BaseHub
         window.SetContainer(container);
         window.Show();
         window.GrabFocus();
-
+        NotifyWindowVisibility();
     }
 
     /// <summary>

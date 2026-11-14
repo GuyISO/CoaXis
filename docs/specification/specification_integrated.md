@@ -32,6 +32,8 @@ EntityのStatusは専用遷移メソッドで変更する。通常遷移は`Unlo
 
 TreeItemはUIが構築・保持し、Model DomainはUI Nodeを保持しない。Pick・Measurement・Load・Scene機能はEntity配下、Property LoadはProperty配下に置く。
 
+Entity共通メニューの`Manipulate`、またはEntityツリー項目のダブルクリックは、対象Entityに対するManipulate操作を通知する。ダブルクリックではカメラFitを行わず、Fitは共通メニューから実行できる。
+
 Searchパネルは登録済みのEntity Type、PropertyType、Property ValueTypeをそれぞれ一覧から選択し、Entity NameとProperty Valueを入力してEntityを検索する。種類と値の型は完全一致、文字列は大文字小文字を区別しない部分一致で、空条件は指定なしとする。指定された条件はANDで組み合わせ、Property条件は同じ所属Property（子孫Propertyを含む）に一致する必要がある。Rootは結果に含めない。件数とアイコン付きのEntity名一覧を表示する。行選択はPickを通知し、Entityツリーと同様にAdd/Removeモードでは前回の行からの範囲を対象とする。全選択は既存のEntity選択集合を検索結果全体に置き換える。結果行の右クリックでは対象Entityの共通メニューを表示する。モデル集合やProperty値の変更時は結果を更新する。
 
 ### Scene
@@ -45,11 +47,12 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 ## IPC
 
 - Named PipeでUTF-8の1行1JSONメッセージを送受信する。
-- `IpcHub`はNamed Pipeの接続・受信・送信、メインスレッドへの要求振り分け、応答エンベロープ生成を担う。ドメイン状態は所有せず、ModelEntity選択通知ではSelectionHubの変更通知を受けて現在のID集合をProtocol payloadへ変換する。
+- `IpcHub`はNamed Pipeの接続・受信・送信、メインスレッドへの要求振り分け、応答エンベロープ生成を担う。ドメイン状態は所有せず、ModelEntity選択通知ではSelectionHubの変更通知を受けて現在のID集合をProtocol payloadへ変換し、Manipulate操作通知ではEntity Hubから対象IDを受け取る。
 - Viewerは各要求のバージョンが空でないことと、メジャーバージョン一致を検査する。起動時のバージョン照会は行わない。
 - Viewerが処理する要求は`ReplaceModelSet`、`ClearModelSet`、`AddModelSet`、`RemoveModelSet`、`ModifyModelSet`、`ReadModelSet`。その他の未対応要求には`UNSUPPORTED_EVENT_TYPE`を返す。
 - 接続中のIPCクライアントがある状態で選択ID集合が実際に変わると、Viewerは`ModelEntitySelected`を送信する。payloadの`entityIds`は変更後の全選択IDを昇順で含み、全解除時は空配列となる。同じ選択集合を再指定した場合は通知しない。接続開始時点の選択状態は別途通知しない。
-- `ModelEntitySelected`は要求への応答ではないため`correlationId`はnull。Viewerは応答と通知を同一接続上の単一送信キューから直列に書き込む。IPCクライアントは`Result`の`correlationId`で要求応答を識別し、非同期通知と区別する。
+- 接続中のIPCクライアントがある状態でManipulate操作が行われると、操作ごとに`ModelEntityManipulated`を送信する。payloadの`entityId`は操作対象のEntity ID。未接続時の操作は蓄積・再送しない。
+- `ModelEntitySelected`と`ModelEntityManipulated`は要求への応答ではないため`correlationId`はnull。Viewerは応答と通知を同一接続上の単一送信キューから直列に書き込む。IPCクライアントは`Result`の`correlationId`で要求応答を識別し、非同期通知と区別する。
 - 要求への応答は`Result`イベントで返し、`correlationId`に要求の`eventId`を設定する。payloadは共通して`ok`、`request`、`errorCode`、`message`を持つ。
 - `ReplaceModelSet`のpayloadには`entities`と`properties`が必須。`entities`は1件以上、`properties`は空配列を許可する。Root Entity自体はViewerが常に保持するためpayloadに含めず、Rootを親とするEntityの`parentId`にはProtocolの`ViewerConstants.RootModelEntityId`（`00000000-0000-0000-0000-000000000001`）を指定する。`AddModelSet`でも同じIDをRootの親参照に使用する。全Entity/Propertyの親参照とRootへの到達を含め、両方を検証してから現在のモデル集合を置換する。
 - Entity・Propertyの生成と階層検証は既存モデルの置換前に完了する。不正なpayloadには`INVALID_PAYLOAD`を返し、現在のモデル集合は変更しない。Entityの`position`は有限値3要素、`rotation`は有限値4要素かつゼロでないクォータニオンとする。DTOで省略した値は既定値を使うが、明示的な`null`や不正な配列は拒否する。

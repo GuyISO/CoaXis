@@ -50,12 +50,22 @@ public partial class ModelEntityMenu : BaseMenu
 	/// <param name="nativeMenu">ネイティブメニューの Rid</param>
 	protected override void BuildMenuItems(Rid nativeMenu)
 	{
+		NativeMenu.Singleton.AddItem(nativeMenu, "Manipulate", Callable.From<Variant>(HandleManipulateMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "Fit", Callable.From<Variant>(HandleFitMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "Emphasize", Callable.From<Variant>(HandleEmphasizeMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "Spin", Callable.From<Variant>(HandleSpinMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "TreeCentering", Callable.From<Variant>(HandleTreeCenteringMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "Show Property", Callable.From<Variant>(HandleShowPropertyMenuItemPressed));
 		NativeMenu.Singleton.AddItem(nativeMenu, "Hide Property", Callable.From<Variant>(HandleHidePropertyMenuItemPressed));
+	}
+
+	/// <summary>
+	/// 対象の ModelEntity に対するManipulate操作を通知する。
+	/// </summary>
+	/// <param name="tag">NativeMenuのコールバック引数</param>
+	private void HandleManipulateMenuItemPressed(Variant tag)
+	{
+		Application.Model.Entity.Manipulate(_targetEntityId);
 	}
 
 	/// <summary>

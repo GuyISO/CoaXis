@@ -174,11 +174,11 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
-    /// ツリー項目がアクティブ化されたとき、選択中のモデルを画面に収める
+    /// ツリー項目がアクティブ化されたとき、対象モデルのManipulate操作を通知する
     /// </summary>
     private void OnItemActivated()
     {
-        HandleFitRequested(GetSelected());
+        Application.Model.Entity.Manipulate(TryGetEntityId(GetSelected()));
     }
 
     /// <summary>
@@ -887,38 +887,6 @@ public partial class ModelEntityTree : Tree
         }
 
         Application.Ui.Property.ToggleModelEntityProperties(entityId);
-    }
-
-    /// <summary>
-    /// TreeItem のFit要求を受けたとき、対応するモデルが画面に収まるよう表示する
-    /// </summary>
-    /// <param name="item">対象の TreeItem</param>
-    private void HandleFitRequested(TreeItem item)
-    {
-        ModelNode modelNode = GetModelNode(item);
-        if (modelNode == null)
-        {
-            return;
-        }
-
-        Node3D[] fitTargetNodes = new Node3D[] { modelNode };
-        Application.Viewport.Camera.Fit(fitTargetNodes, true);
-    }
-
-    /// <summary>
-    /// TreeItem に対応する ModelNode を取得する
-    /// </summary>
-    /// <param name="item">対象の TreeItem</param>
-    /// <returns>対応する ModelNode。取得できない場合は null</returns>
-    private static ModelNode GetModelNode(TreeItem item)
-    {
-        Guid entityId = TryGetEntityId(item);
-        if (entityId == Guid.Empty)
-        {
-            return null;
-        }
-
-        return Application.Model.Entity.Registry.Get(entityId)?.Node;
     }
 
     #endregion

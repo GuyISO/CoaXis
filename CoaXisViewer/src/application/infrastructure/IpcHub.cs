@@ -38,8 +38,8 @@ public partial class IpcHub : BaseHub
     private Task _listenTask;
     /// <summary>現在接続中のクライアントへ書き込む送信セッション。</summary>
     private ConnectionSession _activeConnection;
-    /// <summary>選択状態通知イベントを購読済みかどうか。</summary>
-    private bool _selectionEventsSubscribed;
+    /// <summary>モデルイベントを購読済みかどうか。</summary>
+    private bool _modelEventsSubscribed;
 
     #endregion
 
@@ -104,7 +104,7 @@ public partial class IpcHub : BaseHub
 
     public override void _Process(double delta)
     {
-        SubscribeSelectionEvents();
+        SubscribeModelEvents();
 
         while (_pendingNotifications.TryDequeue(out PendingNotification notification))
         {
@@ -134,7 +134,7 @@ public partial class IpcHub : BaseHub
 
     public override void _ExitTree()
     {
-        UnsubscribeSelectionEvents();
+        UnsubscribeModelEvents();
         StopPipeServer();
 
         base._ExitTree();
@@ -145,32 +145,34 @@ public partial class IpcHub : BaseHub
     #region Events
 
     /// <summary>
-    /// 選択状態変更イベントの購読を開始する。
+    /// モデルイベントの購読を開始する。
     /// ModelHubはIpcHubより後に構築されるため、Process開始後に一度だけ購読する。
     /// </summary>
-    private void SubscribeSelectionEvents()
+    private void SubscribeModelEvents()
     {
-        if (_selectionEventsSubscribed)
+        if (_modelEventsSubscribed)
         {
             return;
         }
 
         Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
-        _selectionEventsSubscribed = true;
+        Application.Model.Entity.Manipulated += OnEntityManipulated;
+        _modelEventsSubscribed = true;
     }
 
     /// <summary>
-    /// 選択状態変更イベントの購読を解除する。
+    /// モデルイベントの購読を解除する。
     /// </summary>
-    private void UnsubscribeSelectionEvents()
+    private void UnsubscribeModelEvents()
     {
-        if (!_selectionEventsSubscribed)
+        if (!_modelEventsSubscribed)
         {
             return;
         }
 
         Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
-        _selectionEventsSubscribed = false;
+        Application.Model.Entity.Manipulated -= OnEntityManipulated;
+        _modelEventsSubscribed = false;
     }
 
     /// <summary>
@@ -197,6 +199,35 @@ public partial class IpcHub : BaseHub
         if (!connection.TryEnqueue(notification))
         {
             Application.Log.Warn("Ipc: unable to queue ModelEntitySelected notification.");
+        }
+    }
+
+    /// <summary>
+    /// Manipulate操作を接続中のIPCクライアントへ通知する。
+    /// </summary>
+    /// <param name="entityIdText">操作対象のEntity識別子</param>
+    private void OnEntityManipulated(string entityIdText)
+    {
+        if (!Guid.TryParse(entityIdText, out Guid entityId) || entityId == Guid.Empty)
+        {
+            Application.Log.Warn($"Ipc: invalid manipulated entity ID '{entityIdText}'.");
+            return;
+        }
+
+        ConnectionSession connection = Volatile.Read(ref _activeConnection);
+        if (connection == null)
+        {
+            return;
+        }
+
+        var payload = new ModelEntityManipulatedPayload { EntityId = entityId };
+        IpcEnvelope notification = IpcEnvelopeBuilder.Create(
+            IpcEventType.FromViewer.ModelEntityManipulated,
+            ViewerSourceName,
+            payload);
+        if (!connection.TryEnqueue(notification))
+        {
+            Application.Log.Warn("Ipc: unable to queue ModelEntityManipulated notification.");
         }
     }
 
