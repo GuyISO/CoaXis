@@ -14,6 +14,14 @@
 [ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/EmbeddedModelEntityTree.cs" id="10_57r0r"]
 [ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbeddedModelPropertyTree.cs" id="12_bn6oc"]
 [ext_resource type="PackedScene" path="res://scenes/ui/search_ui.tscn" id="13_search"]
+[ext_resource type="Texture2D" uid="uid://dhyc73hgnwlkb" path="res://assets/icon/ui/message.svg" id="14_message"]
+[ext_resource type="Texture2D" uid="uid://dq2o0w4njcqbh" path="res://assets/icon/ui/viewport.svg" id="15_viewport"]
+[ext_resource type="Texture2D" uid="uid://bqeoq3ag4qnvb" path="res://assets/icon/ui/measurement.svg" id="16_measurement"]
+[ext_resource type="Texture2D" uid="uid://in58x75yvd7h" path="res://assets/icon/ui/command.svg" id="17_command"]
+[ext_resource type="Texture2D" uid="uid://5eiltmlxwx2r" path="res://assets/icon/ui/selection.svg" id="18_selection"]
+[ext_resource type="Texture2D" uid="uid://c174ftwnqq58o" path="res://assets/icon/ui/search.svg" id="19_search_icon"]
+[ext_resource type="Texture2D" uid="uid://cgc5sow0ehspb" path="res://assets/icon/ui/visual.svg" id="20_visual"]
+[ext_resource type="Texture2D" uid="uid://d4ds251jfwjso" path="res://assets/icon/ui/camera_state.svg" id="21_camera_state"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -33,56 +41,8 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TopBar" type="HBoxContainer" parent="VBoxContainer" unique_id=338852457]
-custom_minimum_size = Vector2(0, 32)
+visible = false
 layout_mode = 2
-
-[node name="ButtonShowMessageUi" parent="VBoxContainer/TopBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "システムメッセージパネルを表示します"
-text = "Message"
-_container = ExtResource("2_y2duu")
-
-[node name="ButtonShowViewportUi" parent="VBoxContainer/TopBar" unique_id=176539602 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "ビュー情報パネルを表示します"
-text = "Viewport"
-_container = ExtResource("3_6a6xr")
-
-[node name="ButtonShowMeasurementUi" parent="VBoxContainer/TopBar" unique_id=2090190786 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "計測パネルを表示します"
-text = "Measurement"
-_container = ExtResource("4_g4gva")
-
-[node name="ButtonShowCommandUi" parent="VBoxContainer/TopBar" unique_id=116854459 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "コマンド実行履歴パネルを表示します"
-text = "Command"
-_container = ExtResource("5_cki6e")
-
-[node name="ButtonShowSelectionUi" parent="VBoxContainer/TopBar" unique_id=1742956550 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "選択状態パネルを表示します"
-text = "Selection"
-_container = ExtResource("6_npq5x")
-
-[node name="ButtonShowSearchUi" parent="VBoxContainer/TopBar" instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "モデル検索パネルを表示します"
-text = "Search"
-_container = ExtResource("13_search")
-
-[node name="ButtonShowVisualUi" parent="VBoxContainer/TopBar" unique_id=1569197903 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "表示状態パネルを表示します"
-text = "Visual"
-_container = ExtResource("7_xrtxh")
-
-[node name="ButtonShowCameraStateUi" parent="VBoxContainer/TopBar" unique_id=70280956 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "カメラ状態パネルを表示します"
-text = "CameraState"
-_container = ExtResource("7_57r0r")
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
 layout_mode = 2
@@ -94,7 +54,6 @@ size_flags_vertical = 3
 
 [node name="LeftBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=1440387980]
 visible = false
-custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/LeftBar" unique_id=1507152929]
@@ -147,9 +106,71 @@ size_flags_horizontal = 3
 mouse_filter = 2
 
 [node name="RightBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=617452991]
-visible = false
-custom_minimum_size = Vector2(48, 0)
 layout_mode = 2
+
+[node name="ButtonShowMessageUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Message
+システムメッセージパネルを表示します"
+text = ""
+icon = ExtResource("14_message")
+_container = ExtResource("2_y2duu")
+
+[node name="ButtonShowViewportUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=176539602 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Viewport
+ビュー情報パネルを表示します"
+text = ""
+icon = ExtResource("15_viewport")
+_container = ExtResource("3_6a6xr")
+
+[node name="ButtonShowMeasurementUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=2090190786 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Measurement
+計測パネルを表示します"
+text = ""
+icon = ExtResource("16_measurement")
+_container = ExtResource("4_g4gva")
+
+[node name="ButtonShowCommandUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=116854459 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Command
+コマンド実行履歴パネルを表示します"
+text = ""
+icon = ExtResource("17_command")
+_container = ExtResource("5_cki6e")
+
+[node name="ButtonShowSelectionUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1742956550 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Selection
+選択状態パネルを表示します"
+text = ""
+icon = ExtResource("18_selection")
+_container = ExtResource("6_npq5x")
+
+[node name="ButtonShowSearchUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=538020480 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Search
+モデル検索パネルを表示します"
+text = ""
+icon = ExtResource("19_search_icon")
+_container = ExtResource("13_search")
+
+[node name="ButtonShowVisualUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1569197903 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Visual
+表示状態パネルを表示します"
+text = ""
+icon = ExtResource("20_visual")
+_container = ExtResource("7_xrtxh")
+
+[node name="ButtonShowCameraStateUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=70280956 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "CameraState
+カメラ状態パネルを表示します"
+text = ""
+icon = ExtResource("21_camera_state")
+_container = ExtResource("7_57r0r")
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1245432863]
 layout_mode = 2
@@ -157,7 +178,6 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
-custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
 
 [node name="LabelPipe" type="Label" parent="VBoxContainer/BottomBar" unique_id=271860447]
