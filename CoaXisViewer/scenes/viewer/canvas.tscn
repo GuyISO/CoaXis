@@ -81,23 +81,6 @@ _container = ExtResource("7_57r0r")
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="LabelPipe" type="Label" parent="VBoxContainer/TopBar" unique_id=271860447]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-vertical_alignment = 2
-script = ExtResource("9_bn6oc")
-
-[node name="BlankPanel2" type="Panel" parent="VBoxContainer/TopBar" unique_id=1366037303]
-custom_minimum_size = Vector2(4, 0)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="LabelFps" type="Label" parent="VBoxContainer/TopBar" unique_id=886535964]
-layout_mode = 2
-theme_override_font_sizes/font_size = 24
-vertical_alignment = 2
-script = ExtResource("6_5i13y")
-
 [node name="HBoxContainer" type="HBoxContainer" parent="VBoxContainer" unique_id=536581596]
 layout_mode = 2
 size_flags_vertical = 3
@@ -167,10 +150,21 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
-visible = false
 custom_minimum_size = Vector2(0, 32)
 layout_mode = 2
+
+[node name="LabelPipe" type="Label" parent="VBoxContainer/BottomBar" unique_id=271860447]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 2
+script = ExtResource("9_bn6oc")
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="LabelFps" type="Label" parent="VBoxContainer/BottomBar" unique_id=886535964]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+vertical_alignment = 2
+script = ExtResource("6_5i13y")
