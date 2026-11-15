@@ -21,6 +21,9 @@ public partial class UiThemeHub : BaseHub
 	/// <summary>CoaXisブランドカラーを保持するTheme内の型名。</summary>
 	private const string BrandThemeType = "CoaXisBrand";
 
+	/// <summary>標準文字色を保持するTheme内の型名。</summary>
+	private const string ControlThemeType = "Control";
+
 	/// <summary>CoaXisプライマリカラーを保持するTheme内の項目名。</summary>
 	private const string PrimaryColorName = "primary";
 
@@ -55,6 +58,9 @@ public partial class UiThemeHub : BaseHub
 
 	/// <summary>現在のテーマに設定されたCoaXisプライマリカラー。</summary>
 	public Color PrimaryColor => GetThemeColor(PrimaryColorName, BrandThemeType);
+
+	/// <summary>現在のテーマに設定された標準文字色。</summary>
+	public Color TextColor => GetThemeColor("font_color", ControlThemeType);
 
 	/// <summary>現在のテーマに設定されたEnvironment背景色。</summary>
 	public Color EnvironmentBackgroundColor => GetThemeColor(EnvironmentBackgroundColorName, EnvironmentThemeType);

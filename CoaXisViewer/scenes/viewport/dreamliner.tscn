@@ -3,6 +3,7 @@
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_mn7mg"]
 resource_name = "Material.002"
 cull_mode = 2
+shading_mode = 0
 albedo_color = Color(0.09332606, 0.09332606, 0.09332606, 1)
 roughness = 0.9979835
 
@@ -43,6 +44,7 @@ shadow_mesh = SubResource("ArrayMesh_beey7")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_av6ai"]
 resource_name = "Material.003"
 cull_mode = 2
+shading_mode = 0
 albedo_color = Color(0.9063318, 0.9063318, 0.9063318, 1)
 roughness = 0.80404085
 
@@ -83,6 +85,7 @@ shadow_mesh = SubResource("ArrayMesh_d62v4")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ew0yi"]
 resource_name = "Rear_Rudder__0"
 cull_mode = 2
+shading_mode = 0
 roughness = 0.6
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_iotcb"]
@@ -258,6 +261,7 @@ shadow_mesh = SubResource("ArrayMesh_nfl0n")
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_tba3p"]
 resource_name = "Material.001"
 cull_mode = 2
+shading_mode = 0
 albedo_color = Color(0.9063318, 0.9063318, 0.9063318, 1)
 roughness = 0.82111454
 

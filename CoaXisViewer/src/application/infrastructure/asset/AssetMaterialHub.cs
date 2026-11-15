@@ -10,11 +10,17 @@ public partial class AssetMaterialHub : BaseHub
     /// <summary>選択強調マテリアルのパス。</summary>
     private const string SelectedMaterialPath = "res://assets/material/selected.tres";
 
+    /// <summary>軸ナビゲータマテリアルのパス。</summary>
+    private const string NavigatorMaterialPath = "res://assets/material/navigator.tres";
+
     /// <summary>選択色を HDR 発光として表示する強度。</summary>
     private const float SelectedMaterialEmissionEnergyMultiplier = 2.86f;
 
     /// <summary>選択強調マテリアル。</summary>
     private Material _selectedMaterial;
+
+    /// <summary>軸ナビゲータマテリアル。</summary>
+    private StandardMaterial3D _navigatorMaterial;
 
     #endregion
 
@@ -34,6 +40,7 @@ public partial class AssetMaterialHub : BaseHub
     public override void _ExitTree()
     {
         _selectedMaterial = null;
+        _navigatorMaterial = null;
 
         base._ExitTree();
     }
@@ -75,6 +82,25 @@ public partial class AssetMaterialHub : BaseHub
     public void UpdateSelectedColor(Color primaryColor)
     {
         ApplySelectedMaterialColor(primaryColor);
+    }
+
+    /// <summary>
+    /// 軸ナビゲータマテリアルにテーマ文字色を反映する。
+    /// </summary>
+    /// <param name="textColor">適用するテーマ文字色。</param>
+    public void UpdateNavigatorColor(Color textColor)
+    {
+        if (_navigatorMaterial == null)
+        {
+            _navigatorMaterial = GD.Load<StandardMaterial3D>(NavigatorMaterialPath);
+            if (_navigatorMaterial == null)
+            {
+                Application.Log.Warn($"AssetService: material load failed. path='{NavigatorMaterialPath}'");
+                return;
+            }
+        }
+
+        _navigatorMaterial.AlbedoColor = textColor;
     }
 
     #endregion

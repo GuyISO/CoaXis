@@ -1,13 +1,11 @@
 [gd_scene format=4 uid="uid://dan222xlokome"]
 
+[ext_resource type="Material" uid="uid://c8etwe5dh3etf" path="res://assets/material/navigator.tres" id="1_qrq07"]
 [ext_resource type="PackedScene" uid="uid://c48iefv166wer" path="res://scenes/viewport/dreamliner.tscn" id="2_760fb"]
-
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_5a0cl"]
-albedo_color = Color(0.5019608, 0.5019608, 0.5019608, 1)
-roughness = 0.5
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_ke0an"]
 resource_name = "鋼_-_サテン"
+shading_mode = 0
 albedo_color = Color(0.627451, 0.627451, 0.627451, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_083gc"]
@@ -41,8 +39,6 @@ _surfaces = [{
 blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_083gc")
 
-[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_115ws"]
-
 [sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_rgvk7"]
 points = PackedVector3Array(-0.25, 0.25, 0.5, -0.25, -0.25, 0.5, 0.25, 0.25, 0.5, 0.25, -0.25, 0.5)
 
@@ -54,6 +50,7 @@ points = PackedVector3Array(-0.25, 0.25, 0.5, -0.25, 0.5, 0.25, -0.5, 0.25, 0.25
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_7xeer"]
 resource_name = "鋼_-_サテン"
+shading_mode = 0
 albedo_color = Color(0.627451, 0.627451, 0.627451, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_upar2"]
@@ -90,6 +87,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_upar2")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rgvk7"]
+shading_mode = 0
 albedo_color = Color(1, 0.49803922, 0.49803922, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_8rpfg"]
@@ -111,6 +109,7 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_upar2")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_oa02d"]
+shading_mode = 0
 albedo_color = Color(0.49803922, 1, 0.49803922, 1)
 
 [sub_resource type="ArrayMesh" id="ArrayMesh_h6lax"]
@@ -132,22 +131,22 @@ blend_shape_mode = 0
 shadow_mesh = SubResource("ArrayMesh_upar2")
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_d4k57"]
+shading_mode = 0
 albedo_color = Color(0.49803922, 0.49803922, 1, 1)
 
 [sub_resource type="SphereMesh" id="SphereMesh_80ub8"]
 
 [sub_resource type="StandardMaterial3D" id="StandardMaterial3D_82k7i"]
+shading_mode = 0
 albedo_color = Color(0.12156863, 0.12156863, 0.12156863, 1)
 
 [node name="AirplaneAxis" type="Node3D" unique_id=459054826]
 
 [node name="Dice" type="MeshInstance3D" parent="." unique_id=150417365]
 layers = 2
-material_override = SubResource("StandardMaterial3D_5a0cl")
-transparency = 0.5
-cast_shadow = 0
+material_override = ExtResource("1_qrq07")
+transparency = 0.65
 mesh = SubResource("ArrayMesh_760fb")
-surface_material_override/0 = SubResource("StandardMaterial3D_115ws")
 
 [node name="Cube" type="Node3D" parent="." unique_id=540999522]
 
@@ -158,7 +157,6 @@ collision_mask = 2
 [node name="Label3D" type="Label3D" parent="Cube/0, 0, 0" unique_id=166784477]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
-transparency = 0.2
 double_sided = false
 text = "AFT"
 font_size = 46
@@ -174,7 +172,6 @@ collision_mask = 2
 [node name="Label3D" type="Label3D" parent="Cube/0, 180, 0" unique_id=1817025608]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
-transparency = 0.2
 double_sided = false
 text = "FWD"
 font_size = 46
@@ -190,7 +187,6 @@ collision_mask = 2
 [node name="Label3D" type="Label3D" parent="Cube/90, 180, 0" unique_id=679063772]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
-transparency = 0.2
 double_sided = false
 text = "LWR"
 font_size = 46
@@ -206,7 +202,6 @@ collision_mask = 2
 [node name="Label3D" type="Label3D" parent="Cube/-90, 0, 0" unique_id=665958380]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
-transparency = 0.2
 double_sided = false
 text = "UPR
 "
@@ -223,7 +218,6 @@ collision_mask = 2
 [node name="Label3D" type="Label3D" parent="Cube/0, -90, 0" unique_id=1233380915]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
-transparency = 0.2
 double_sided = false
 text = "LH"
 font_size = 46
@@ -239,7 +233,6 @@ collision_mask = 2
 [node name="Label3D" type="Label3D" parent="Cube/0, 90, 0" unique_id=823956200]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0.51)
 layers = 2
-transparency = 0.2
 double_sided = false
 text = "RH"
 font_size = 46

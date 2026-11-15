@@ -89,6 +89,7 @@ public partial class AxisNavigator : Control
 	private void SubscribeApplicationEvents()
 	{
 		Application.Viewport.Camera.RotationNotified += OnRotationNotified;
+		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
 	}
 
 	/// <summary>
@@ -97,6 +98,7 @@ public partial class AxisNavigator : Control
 	private void UnsubscribeApplicationEvents()
 	{
 		Application.Viewport.Camera.RotationNotified -= OnRotationNotified;
+		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
 	}
 
 	/// <summary>
@@ -105,11 +107,44 @@ public partial class AxisNavigator : Control
 	private void SyncInitialState()
 	{
 		OnRotationNotified();
+		ApplyThemeToLabels();
 	}
 
 	private void OnRotationNotified()
 	{
 		_focalPoint.Quaternion = Application.Viewport.Camera.Rotation;
+	}
+
+	/// <summary>
+	/// 現在のテーマを軸ナビゲータのラベルへ適用する。
+	/// </summary>
+	private void OnThemeChanged()
+	{
+		ApplyThemeToLabels();
+	}
+
+	/// <summary>
+	/// AirplaneAxis配下の文字色と補色のアウトライン色を更新する。
+	/// </summary>
+	private void ApplyThemeToLabels()
+	{
+		Color textColor = Application.Ui.Theme.TextColor;
+		Application.Asset.Material.UpdateNavigatorColor(textColor);
+		Color outlineColor = new(
+			1f - textColor.R,
+			1f - textColor.G,
+			1f - textColor.B,
+			textColor.A);
+		Node3D airplaneAxis = _subViewport.GetNode<Node3D>("AirplaneAxis");
+
+		foreach (Node node in airplaneAxis.FindChildren("*", nameof(Label3D), true, false))
+		{
+			if (node is Label3D label)
+			{
+				label.Modulate = textColor;
+				label.OutlineModulate = outlineColor;
+			}
+		}
 	}
 
 	#endregion
