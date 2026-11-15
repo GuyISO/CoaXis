@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://cogu4usoxwast" path="res://src/ui/button/ShowContainerButton.cs" id="1_nujh8"]
 
-[node name="ButtonShowContainer" type="Button" unique_id=1859494691]
+[node name="ShowContainerButton" type="Button" unique_id=1859494691]
 tooltip_text = "ToolTip"
 focus_mode = 0
 theme_type_variation = "CoaXisToggleButton"

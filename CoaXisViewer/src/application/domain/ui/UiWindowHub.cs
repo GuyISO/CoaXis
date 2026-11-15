@@ -113,6 +113,32 @@ public partial class UiWindowHub : BaseHub
             && window.Visible;
     }
 
+    /// <summary>
+    /// 指定されたUIシーンのウィンドウを閉じる。
+    /// </summary>
+    /// <param name="scene">閉じるUIシーン。</param>
+    public void Close(PackedScene scene)
+    {
+        if (scene == null || string.IsNullOrWhiteSpace(scene.ResourcePath))
+        {
+            Application.Log.Warn("UiWindowHub: scene or its resource path is invalid.");
+            return;
+        }
+
+        string cacheKey = scene.ResourcePath;
+        if (_windowCache.TryGetValue(cacheKey, out UiWindow window))
+        {
+            _windowCache.Remove(cacheKey);
+            if (GodotObject.IsInstanceValid(window))
+            {
+                window.Hide();
+                window.QueueFree();
+            }
+
+            NotifyWindowVisibility();
+        }
+    }
+
     #endregion
 
     #region Helpers

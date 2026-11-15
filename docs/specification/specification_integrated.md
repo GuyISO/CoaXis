@@ -10,7 +10,9 @@
 
 Godot AutoLoadは`Application`のみ。Infrastructure（Log、Setting、Asset、Ipc、Input）とDomain（Command、Model、Ui、Viewport）の各Hubを構成する。モデル機能は`Application.Model.Entity`と`Application.Model.Property`に分かれる。
 
-UIテーマの選択はDarkを既定とし、テーマ識別子を`ViewerSettings.Ui.ThemeId`として`viewer-settings.json`へ保存して次回起動時に復元する。現在は`dark`と`light`をサポートし、テーマ識別子とThemeリソースの対応表から適用する。右側ツールバーの切替ボタンはLight/Darkの二択を維持する。ユーザー設定が保持するのはテーマ識別子であり、配色・スタイルはThemeリソースが所有する。オーバーレイ線、Entity選択、選択マテリアル、測定線は`CoaXisBrand.primary`を参照し、テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
+UIテーマの選択はDarkを既定とし、テーマ識別子を`ViewerSettings.Ui.ThemeId`として`viewer-settings.json`へ保存して次回起動時に復元する。現在は`dark`と`light`をサポートし、テーマ識別子とThemeリソースの対応表から適用する。右側ツールバーの切替ボタンは現在のテーマをアイコンで示し、Light/Darkの二択を維持する。ユーザー設定が保持するのはテーマ識別子であり、配色・スタイルはThemeリソースが所有する。オーバーレイ線、Entity選択、選択マテリアル、測定線は`CoaXisBrand.primary`を参照し、テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
+
+右側ツールバーの各パネルボタンは、対応するウィンドウが閉じているときは開き、開いているときは閉じる。ウィンドウの閉じるボタンで閉じた場合も、ツールバーの押下状態に反映する。
 
 旧設定の`UseLightTheme`からテーマ識別子への移行と、旧`Color`設定の除去は、既存の設定ファイルを読み込むための互換処理である。現在の設定形式やテーマ選択の仕組みとして新たに使用しない。
 
@@ -35,7 +37,7 @@ WinFormsの`Header`、`HeaderHover`、`GridHeader`や、GodotのTreeアイコン
 
 ViewerのThemeリソース契約は、ビルド不要のGodot headlessテストで検証できる。リポジトリルートから`godot --headless --path .\\CoaXisViewer --script res://tests/theme_contract_test.gd`を実行し、各テーマの必須色とカスタムStyleBoxを確認する。
 
-Viewerのアイコン素材はアプリケーション用を除き白を基準とする。Treeのモデル・表示・Propertyアイコンと個数バッジはThemeの色を用い、テーマ切替時に既存行も更新する。Visibilityは実効表示時と非表示時を白系・黒系の反転色で区別し、非表示アイコンは縁なしでDarkでは黒、Lightでは白にする。継承アイコンは丸で囲まない上向き矢印とし、継承して非表示の場合は斜線を付ける。Propertyボタンは共通のアイコンを使い、Propertyありでは行の文字色、OverlayTree表示中は`CoaXisBrand.primary`、Propertyなしは無効色で表示する。個数バッジは`badge_background`を背景、行の文字色を文字に使い、Lightでは背景を透過する。Particle画像は白を基準とし、Tree上のParticleアイコンと3Dパーティクルは引き続き`particleColor`を使用する。
+Viewerのアイコン素材はアプリケーション用を除き白を基準とする。Treeのモデル・表示・Propertyアイコンと個数バッジはThemeの色を用い、テーマ切替時に既存行も更新する。Visibilityは実効表示時と非表示時を白系・黒系の反転色で区別し、非表示アイコンは縁なしでDarkでは黒、Lightでは白にする。継承アイコンは親方向を示すL字の上向き矢印とし、継承して非表示の場合は斜線を付ける。Propertyボタンは共通のアイコンを使い、Propertyありでは行の文字色、OverlayTree表示中は`CoaXisBrand.primary`、Propertyなしは無効色で表示する。個数バッジは`badge_background`を背景、行の文字色を文字に使い、Lightでは背景を透過する。Particle画像は白を基準とし、Tree上のParticleアイコンと3Dパーティクルは引き続き`particleColor`を使用する。
 
 メッセージパネルは起動時からのInfo以上のログを表示する。`LogHub`が改行を含むメッセージを行単位で保持し、`ViewerSettings.Ui.MessageMaxLines`で指定された直近の行数に制限する。パネルを閉じても履歴は実行中保持される。Debugログは従来どおりパネルに表示しない。
 

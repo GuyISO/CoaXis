@@ -23,7 +23,9 @@
 [ext_resource type="Texture2D" uid="uid://d4ds251jfwjso" path="res://assets/icon/ui/camera_state.svg" id="21_camera_state"]
 [ext_resource type="PackedScene" path="res://scenes/ui/ipc_ui.tscn" id="22_ipc"]
 [ext_resource type="Texture2D" uid="uid://cb0wl2p6ug23o" path="res://assets/icon/ui/ipc.svg" id="23_ipc_icon"]
-[ext_resource type="Script" uid="uid://wat54nvcjgdj" path="res://src/ui/button/ThemeToggleButton.cs" id="24_theme_toggle"]
+[ext_resource type="Script" uid="uid://wat54nvcjgdj" path="res://src/ui/button/ToggleThemeButton.cs" id="24_theme_toggle"]
+[ext_resource type="Texture2D" uid="uid://b3eqeb0foq5rk" path="res://assets/icon/ui/theme_light.svg" id="25_theme_light"]
+[ext_resource type="Texture2D" uid="uid://eloesx77fpra" path="res://assets/icon/ui/theme_dark.svg" id="26_theme_dark"]
 
 [node name="Canvas" type="Control" unique_id=1312684224]
 layout_mode = 3
@@ -108,55 +110,55 @@ mouse_filter = 2
 [node name="RightBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=617452991]
 layout_mode = 2
 
-[node name="ButtonShowSelectionUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1742956550 instance=ExtResource("1_0wdie")]
+[node name="ShowSelectionUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1742956550 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Selection
-選択状態パネルを表示します"
+選択状態パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("18_selection")
 _container = ExtResource("6_npq5x")
 
-[node name="ButtonShowSearchUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=538020480 instance=ExtResource("1_0wdie")]
+[node name="ShowSearchUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=538020480 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Search
-モデル検索パネルを表示します"
+モデル検索パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("19_search_icon")
 _container = ExtResource("13_search")
 
-[node name="ButtonShowMeasurementUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=2090190786 instance=ExtResource("1_0wdie")]
+[node name="ShowMeasurementUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=2090190786 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Measurement
-計測パネルを表示します"
+計測パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("16_measurement")
 _container = ExtResource("4_g4gva")
 
-[node name="ButtonShowViewportUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=176539602 instance=ExtResource("1_0wdie")]
+[node name="ShowViewportUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=176539602 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Viewport
-ビュー情報パネルを表示します"
+ビュー情報パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("15_viewport")
 _container = ExtResource("3_6a6xr")
 
-[node name="ButtonShowVisualUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1569197903 instance=ExtResource("1_0wdie")]
+[node name="ShowVisualUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1569197903 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Visual
-表示状態パネルを表示します"
+表示状態パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("20_visual")
 _container = ExtResource("7_xrtxh")
 
-[node name="ButtonShowCameraStateUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=70280956 instance=ExtResource("1_0wdie")]
+[node name="ShowCameraStateUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=70280956 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "CameraState
-カメラ状態パネルを表示します"
+カメラ状態パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("21_camera_state")
@@ -167,38 +169,41 @@ layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
 
-[node name="ThemeToggleButton" type="Button" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=28738584]
-layout_mode = 2
-theme_type_variation = &"CoaXisToggleButton"
-text = "Dark"
-script = ExtResource("24_theme_toggle")
-
-[node name="ButtonShowMessageUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
+[node name="ShowMessageUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Message
-システムメッセージパネルを表示します"
+システムメッセージパネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("14_message")
 _container = ExtResource("2_y2duu")
 
-[node name="ButtonShowCommandUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=116854459 instance=ExtResource("1_0wdie")]
+[node name="ShowCommandUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=116854459 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Command
-コマンド実行履歴パネルを表示します"
+コマンド実行履歴パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("17_command")
 _container = ExtResource("5_cki6e")
 
-[node name="ButtonShowIpcUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1258190384 instance=ExtResource("1_0wdie")]
+[node name="ShowIpcUiButton" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1258190384 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "IPC
-IPCの接続状態と送受信履歴を表示します"
+IPCの接続状態と送受信履歴パネルの表示を切り替えます"
 theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("23_ipc_icon")
 _container = ExtResource("22_ipc")
+
+[node name="ToggleThemeButton" type="Button" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=28738584]
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"CoaXisToggleButton"
+icon = ExtResource("26_theme_dark")
+script = ExtResource("24_theme_toggle")
+_lightIcon = ExtResource("25_theme_light")
+_darkIcon = ExtResource("26_theme_dark")
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
 visible = false

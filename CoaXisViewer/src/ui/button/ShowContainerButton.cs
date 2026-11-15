@@ -1,8 +1,7 @@
 using Godot;
-using System;
 
 /// <summary>
-/// UiService に対して Containerを継承したUIの表示を要求するボタンへアタッチして使用する
+/// Containerを継承したUIウィンドウの表示を切り替えるボタン。
 /// </summary>
 public partial class ShowContainerButton : Button
 {
@@ -49,7 +48,7 @@ public partial class ShowContainerButton : Button
     /// </summary>
     private void OnWindowVisibilityNotified()
     {
-        ButtonPressed = Application.Ui.Window.IsContainerVisible(_container);
+        SetPressedNoSignal(Application.Ui.Window.IsContainerVisible(_container));
     }
 
     /// <summary>
@@ -60,11 +59,18 @@ public partial class ShowContainerButton : Button
         if (_container == null)
         {
             Application.Log.Warn("ShowContainerButton: Container is not assigned.");
+            SetPressedNoSignal(false);
             return;
         }
 
-        // UiWindowService に対してコンテナの表示を要求する
-        Application.Ui.Window.Show(_container.Instantiate<Container>());
+        if (Application.Ui.Window.IsContainerVisible(_container))
+        {
+            Application.Ui.Window.Close(_container);
+        }
+        else
+        {
+            Application.Ui.Window.Show(_container.Instantiate<Container>());
+        }
     }
 
     #endregion
