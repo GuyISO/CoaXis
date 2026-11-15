@@ -10,9 +10,32 @@
 
 Godot AutoLoadは`Application`のみ。Infrastructure（Log、Setting、Asset、Ipc、Input）とDomain（Command、Model、Ui、Viewport）の各Hubを構成する。モデル機能は`Application.Model.Entity`と`Application.Model.Property`に分かれる。
 
-UIテーマはDarkを既定とし、テーマ識別子を`ViewerSettings.Ui.ThemeId`として`viewer-settings.json`へ保存し、次回起動時に復元する。現在は`dark`と`light`をサポートし、テーマ識別子とThemeリソースの対応表から適用する。右側ツールバーの切替ボタンはLight/Darkの二択を維持する。旧設定の`UseLightTheme`は読み込み時にテーマ識別子へ移行し、`Color`設定は除去して設定ファイルへ保存する。描画色はThemeが所有し、オーバーレイ線、Entity選択、選択マテリアル、測定線は`CoaXisBrand.primary`を参照する。テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
+UIテーマの選択はDarkを既定とし、テーマ識別子を`ViewerSettings.Ui.ThemeId`として`viewer-settings.json`へ保存して次回起動時に復元する。現在は`dark`と`light`をサポートし、テーマ識別子とThemeリソースの対応表から適用する。右側ツールバーの切替ボタンはLight/Darkの二択を維持する。ユーザー設定が保持するのはテーマ識別子であり、配色・スタイルはThemeリソースが所有する。オーバーレイ線、Entity選択、選択マテリアル、測定線は`CoaXisBrand.primary`を参照し、テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
 
-Viewerのアイコン素材はアプリケーション用を除き白を基準とする。Treeのモデル・表示・Propertyアイコンと個数バッジはThemeの色を用い、テーマ切替時に既存行も更新する。Visibilityは実効表示時と非表示時を白系・黒系の反転色で区別し、非表示アイコンは縁なしでDarkでは黒、Lightでは白にする。継承して非表示の場合は斜線付きアイコンを使う。Propertyボタンは共通のアイコンを使い、Propertyありでは行の文字色、OverlayTree表示中は`CoaXisBrand.primary`、Propertyなしは無効色で表示する。個数バッジは`badge_background`を背景、行の文字色を文字に使い、Lightでは背景を透過する。Particle画像は白を基準とし、Tree上のParticleアイコンと3Dパーティクルは引き続き`particleColor`を使用する。
+旧設定の`UseLightTheme`からテーマ識別子への移行と、旧`Color`設定の除去は、既存の設定ファイルを読み込むための互換処理である。現在の設定形式やテーマ選択の仕組みとして新たに使用しない。
+
+#### UIテーマ役割の対応
+
+ViewerのGodot ThemeとWinForms共通UIの`CoaXis.Ui.Theme`は、描画基盤が異なるため同じリソースや値を共有しない。次の対応は配色を設計・レビューするときの意味上の対応であり、各プラットフォーム固有のスタイルを同一化する契約ではない。
+
+| 意味上の役割 | Viewer（Godot Theme） | WinForms（`CoaXis.Ui.Theme`） |
+|---|---|---|
+| ウィンドウ背景 | シーンやルートControlのStyleBox（共通の背景トークンなし） | `Background` |
+| コンテナー面 | `Panel/styles/panel`、`PanelContainer/styles/panel` | `Surface` |
+| 入力領域 | `LineEdit` / `TextEdit`の`styles/normal` | `InputBackground` |
+| 読み取り専用の表示領域 | `LineEdit` / `TextEdit`の`styles/read_only` | `DisplayBackground` |
+| 通常・補助文字 | `Control/colors/font_color`、コントロール固有の文字色 | `Text`、`MutedText` |
+| アクセント・主要操作 | `CoaXisBrand/colors/primary`、`CoaXisToggleButton/styles/pressed` | `Primary`、`CoaXisButtonVariant.Primary` |
+| 選択状態 | `Tree` / `ItemList`の`colors/selection_color` | `Selection` |
+| 境界・区切り | StyleBoxの`border_color`、`Separator/styles/separator` | `Border` |
+| モデル状態色 | `CoaXisModelStatus/colors/<ModelStatus>` | 共通役割なし。アプリケーション固有 |
+| 3D環境背景 | `CoaXisEnvironment/colors/background` | 対応なし |
+
+WinFormsの`Header`、`HeaderHover`、`GridHeader`や、GodotのTreeアイコン色・個別コントロール用StyleBoxなどは、対応する意味が一対一でないプラットフォーム固有の役割として扱う。両テーマの色値を変更するときは、この表の意味を基準に視覚的な整合性を確認する。
+
+ViewerのThemeリソース契約は、ビルド不要のGodot headlessテストで検証できる。リポジトリルートから`godot --headless --path .\\CoaXisViewer --script res://tests/theme_contract_test.gd`を実行し、各テーマの必須色とカスタムStyleBoxを確認する。
+
+Viewerのアイコン素材はアプリケーション用を除き白を基準とする。Treeのモデル・表示・Propertyアイコンと個数バッジはThemeの色を用い、テーマ切替時に既存行も更新する。Visibilityは実効表示時と非表示時を白系・黒系の反転色で区別し、非表示アイコンは縁なしでDarkでは黒、Lightでは白にする。継承アイコンは丸で囲まない上向き矢印とし、継承して非表示の場合は斜線を付ける。Propertyボタンは共通のアイコンを使い、Propertyありでは行の文字色、OverlayTree表示中は`CoaXisBrand.primary`、Propertyなしは無効色で表示する。個数バッジは`badge_background`を背景、行の文字色を文字に使い、Lightでは背景を透過する。Particle画像は白を基準とし、Tree上のParticleアイコンと3Dパーティクルは引き続き`particleColor`を使用する。
 
 メッセージパネルは起動時からのInfo以上のログを表示する。`LogHub`が改行を含むメッセージを行単位で保持し、`ViewerSettings.Ui.MessageMaxLines`で指定された直近の行数に制限する。パネルを閉じても履歴は実行中保持される。Debugログは従来どおりパネルに表示しない。
 

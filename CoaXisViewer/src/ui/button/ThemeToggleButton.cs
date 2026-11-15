@@ -39,7 +39,7 @@ public partial class ThemeToggleButton : Button
     private void OnToggled(bool useLightTheme)
     {
         Application.Ui.Theme.SetTheme(
-            useLightTheme ? UiSettings.LightThemeId : UiSettings.DefaultThemeId);
+            useLightTheme ? UiSettings.LightThemeId : UiSettings.DarkThemeId);
         UpdateDisplay(useLightTheme);
     }
 

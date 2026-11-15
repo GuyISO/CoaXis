@@ -236,7 +236,7 @@ public partial class SettingHub : BaseHub
                 {
                     ui[nameof(UiSettings.ThemeId)] = useLightTheme
                         ? UiSettings.LightThemeId
-                        : UiSettings.DefaultThemeId;
+                        : UiSettings.DarkThemeId;
                 }
                 else if (ui[legacyPropertyName] is not JsonValue legacyValue
                     || !legacyValue.TryGetValue(out bool _))

@@ -9,14 +9,19 @@ public sealed class UiSettings
     public const int MinMessageMaxLines = 1;
 
     /// <summary>
-    /// 既定テーマの識別子。
+    /// ダークテーマの識別子。
     /// </summary>
-    public const string DefaultThemeId = "dark";
+    public const string DarkThemeId = "dark";
 
     /// <summary>
     /// ライトテーマの識別子。
     /// </summary>
     public const string LightThemeId = "light";
+
+    /// <summary>
+    /// 既定テーマの識別子。
+    /// </summary>
+    public const string DefaultThemeId = DarkThemeId;
 
     /// <summary>
     /// メッセージパネルに保持する最大行数。

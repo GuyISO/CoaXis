@@ -36,7 +36,7 @@ public partial class UiThemeHub : BaseHub
 	/// <summary>テーマ識別子とThemeリソースパスの対応表。</summary>
 	private static readonly Dictionary<string, string> ThemeResourcePaths = new()
 	{
-		[UiSettings.DefaultThemeId] = DarkThemePath,
+		[UiSettings.DarkThemeId] = DarkThemePath,
 		[UiSettings.LightThemeId] = LightThemePath,
 	};
 
