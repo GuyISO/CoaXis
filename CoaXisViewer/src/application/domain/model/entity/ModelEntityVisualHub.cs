@@ -57,6 +57,7 @@ public partial class ModelEntityVisualHub : BaseHub
 		Application.Model.Entity.State.VisibilityNotified += OnVisibilityNotified;
 		Application.Model.Entity.State.StatusNotified += OnStatusNotified;
 		Application.Model.Entity.Selection.Selected += OnSelected;
+		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
 	}
 
 	/// <summary>
@@ -68,6 +69,15 @@ public partial class ModelEntityVisualHub : BaseHub
 		Application.Model.Entity.State.VisibilityNotified -= OnVisibilityNotified;
 		Application.Model.Entity.State.StatusNotified -= OnStatusNotified;
 		Application.Model.Entity.Selection.Selected -= OnSelected;
+		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
+	}
+
+	/// <summary>
+	/// テーマ切替後、選択ハイライトマテリアルの色を更新する。
+	/// </summary>
+	private void OnThemeChanged()
+	{
+		Application.Asset.Material.UpdateSelectedColor(Application.Ui.Theme.PrimaryColor);
 	}
 
 	/// <summary>
@@ -245,7 +255,7 @@ public partial class ModelEntityVisualHub : BaseHub
 	/// <param name="enable">ハイライトを有効にする場合はtrue、ハイライトを解除する場合はfalse</param>
 	private static void HighlightMesh(ModelNode modelNode, bool enable = true)
 	{
-		Material selectedMaterial = Application.Asset.Material.GetSelected();
+		Material selectedMaterial = Application.Asset.Material.GetSelected(Application.Ui.Theme.PrimaryColor);
 
 		if (enable)
 		{

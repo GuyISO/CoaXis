@@ -10,7 +10,7 @@
 
 Godot AutoLoadは`Application`のみ。Infrastructure（Log、Setting、Asset、Ipc、Input）とDomain（Command、Model、Ui、Viewport）の各Hubを構成する。モデル機能は`Application.Model.Entity`と`Application.Model.Property`に分かれる。
 
-UIテーマはDarkを既定とし、右側ツールバーの切替ボタンからLight/Darkを切り替える。選択状態は`ViewerSettings.Ui.UseLightTheme`として`viewer-settings.json`へ保存し、次回起動時に復元する。テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
+UIテーマはDarkを既定とし、テーマ識別子を`ViewerSettings.Ui.ThemeId`として`viewer-settings.json`へ保存し、次回起動時に復元する。現在は`dark`と`light`をサポートし、テーマ識別子とThemeリソースの対応表から適用する。右側ツールバーの切替ボタンはLight/Darkの二択を維持する。旧設定の`UseLightTheme`は読み込み時にテーマ識別子へ移行し、`Color`設定は除去して設定ファイルへ保存する。描画色はThemeが所有し、オーバーレイ線、Entity選択、選択マテリアル、測定線は`CoaXisBrand.primary`を参照する。テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
 
 ### ModelEntity
 

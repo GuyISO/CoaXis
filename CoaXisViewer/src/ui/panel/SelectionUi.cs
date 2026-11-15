@@ -105,6 +105,7 @@ public partial class SelectionUi : PanelContainer
 		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityButtonsChanged;
 		Application.Model.Entity.State.Collapsed += OnEntityButtonsChanged;
 		Application.Model.Property.Registry.Changed += OnPropertyRegistryChanged;
+		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
 	}
 
 	/// <summary>
@@ -120,6 +121,19 @@ public partial class SelectionUi : PanelContainer
 		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityButtonsChanged;
 		Application.Model.Entity.State.Collapsed -= OnEntityButtonsChanged;
 		Application.Model.Property.Registry.Changed -= OnPropertyRegistryChanged;
+		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
+	}
+
+	/// <summary>
+	/// テーマ切替後、選択行の背景色を更新する。
+	/// </summary>
+	private void OnThemeChanged()
+	{
+		Color selectionColor = ModelEntityRowBehavior.GetSelectionColor();
+		foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
+		{
+		    ModelEntityRowBehavior.ApplySelectionHighlight(pair.Value, pair.Key, selectionColor);
+		}
 	}
 
 	/// <summary>

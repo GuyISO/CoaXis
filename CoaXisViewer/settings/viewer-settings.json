@@ -16,14 +16,8 @@
     "ZoomFactor": 1,
     "PointerRotationSpeedDeg": 90
   },
-  "Color": {
-    "OverlayLineColor": "#4E95D9FF",
-    "HierarchySelectedColor": "#4E95D9FF",
-    "SelectedMaterialColor": "#4E95D9FF",
-    "MeasurementLineColor": "#4E95D9FF"
-  },
   "Ui": {
     "MessageMaxLines": 50,
-    "UseLightTheme": false
+    "ThemeId": "light"
   }
 }

@@ -1,5 +1,6 @@
 using Godot;
 using System;
+using System.Collections.Generic;
 
 /// <summary>
 /// Viewer全体のUIテーマを管理するハブ。
@@ -14,46 +15,55 @@ public partial class UiThemeHub : BaseHub
     /// <summary>ライトテーマのリソースパス。</summary>
     private const string LightThemePath = "res://assets/theme/coaxis_light.tres";
 
+    /// <summary>ModelStatusに対応する色を保持するTheme内の型名。</summary>
+    private const string ModelStatusThemeType = "CoaXisModelStatus";
+
+    /// <summary>CoaXisブランドカラーを保持するTheme内の型名。</summary>
+    private const string BrandThemeType = "CoaXisBrand";
+
+    /// <summary>CoaXisプライマリカラーを保持するTheme内の項目名。</summary>
+    private const string PrimaryColorName = "primary";
+
     /// <summary>Theme内でEnvironment用の色を保持する型名。</summary>
     private const string EnvironmentThemeType = "CoaXisEnvironment";
 
     /// <summary>Environmentの背景色を保持するTheme内の項目名。</summary>
     private const string EnvironmentBackgroundColorName = "background";
 
-    /// <summary>ダークテーマのリソース。</summary>
-    private Theme _darkTheme;
+    /// <summary>テーマ識別子とThemeリソースパスの対応表。</summary>
+    private static readonly Dictionary<string, string> ThemeResourcePaths = new()
+    {
+        [UiSettings.DefaultThemeId] = DarkThemePath,
+        [UiSettings.LightThemeId] = LightThemePath,
+    };
 
-    /// <summary>ライトテーマのリソース。</summary>
-    private Theme _lightTheme;
+    /// <summary>読み込んだテーマリソース。</summary>
+    private readonly Dictionary<string, Theme> _themes = new();
 
     #endregion
 
     #region Properties
 
-    /// <summary>現在ライトテーマを使用しているかどうか。</summary>
-    public bool IsLightTheme => Application.Setting.Current.Ui.UseLightTheme;
+    /// <summary>現在適用中のテーマ識別子。</summary>
+    public string CurrentThemeId { get; private set; } = UiSettings.DefaultThemeId;
 
     /// <summary>現在適用中のテーマリソース。</summary>
     public Theme CurrentTheme { get; private set; }
 
+    /// <summary>現在のテーマに設定されたCoaXisプライマリカラー。</summary>
+    public Color PrimaryColor => GetThemeColor(PrimaryColorName, BrandThemeType);
+
     /// <summary>現在のテーマに設定されたEnvironment背景色。</summary>
-    public Color EnvironmentBackgroundColor
+    public Color EnvironmentBackgroundColor => GetThemeColor(EnvironmentBackgroundColorName, EnvironmentThemeType);
+
+    /// <summary>
+    /// 指定されたモデル状態に対応する色を現在のテーマから取得する。
+    /// </summary>
+    /// <param name="status">色を取得するモデル状態。</param>
+    /// <returns>現在のテーマに定義された状態色。</returns>
+    public Color GetModelStatusColor(ModelStatus status)
     {
-        get
-        {
-            if (CurrentTheme == null)
-            {
-                throw new InvalidOperationException("The current UI theme has not been loaded.");
-            }
-
-            if (!CurrentTheme.HasColor(EnvironmentBackgroundColorName, EnvironmentThemeType))
-            {
-                throw new InvalidOperationException(
-                    $"Theme color '{EnvironmentBackgroundColorName}' is missing from '{EnvironmentThemeType}'.");
-            }
-
-            return CurrentTheme.GetColor(EnvironmentBackgroundColorName, EnvironmentThemeType);
-        }
+        return GetThemeColor(status.ToString(), ModelStatusThemeType);
     }
 
     #endregion
@@ -72,9 +82,21 @@ public partial class UiThemeHub : BaseHub
     /// </summary>
     public override void _Ready()
     {
-        _darkTheme = LoadTheme(DarkThemePath);
-        _lightTheme = LoadTheme(LightThemePath);
-        ApplyTheme(IsLightTheme);
+        foreach (KeyValuePair<string, string> themeResource in ThemeResourcePaths)
+        {
+            _themes.Add(themeResource.Key, LoadTheme(themeResource.Value));
+        }
+
+        string themeId = Application.Setting.Current.Ui.ThemeId;
+        if (!_themes.ContainsKey(themeId))
+        {
+            Application.Log.Warn(
+                $"Settings: unknown theme identifier '{themeId}'. Falling back to '{UiSettings.DefaultThemeId}'.");
+            themeId = UiSettings.DefaultThemeId;
+            Application.Setting.SetTheme(themeId);
+        }
+
+        ApplyTheme(themeId);
     }
 
     #endregion
@@ -86,14 +108,19 @@ public partial class UiThemeHub : BaseHub
     #region Methods
 
     /// <summary>
-    /// テーマを切り替えて設定を保存する。
+    /// 指定テーマを適用して設定を保存する。
     /// </summary>
-    /// <param name="useLightTheme">ライトテーマを使用する場合は true。</param>
+    /// <param name="themeId">適用するテーマの識別子。</param>
     /// <returns>設定を保存できた場合は true。</returns>
-    public bool SetLightTheme(bool useLightTheme)
+    public bool SetTheme(string themeId)
     {
-        bool saved = Application.Setting.SetLightTheme(useLightTheme);
-        ApplyTheme(useLightTheme);
+        if (!_themes.ContainsKey(themeId))
+        {
+            throw new ArgumentException($"Unknown theme identifier: '{themeId}'.", nameof(themeId));
+        }
+
+        bool saved = Application.Setting.SetTheme(themeId);
+        ApplyTheme(themeId);
         return saved;
     }
 
@@ -116,12 +143,34 @@ public partial class UiThemeHub : BaseHub
     #region Helpers
 
     /// <summary>
+    /// 現在のThemeから必須色を取得する。
+    /// </summary>
+    /// <param name="colorName">Theme内の色名。</param>
+    /// <param name="themeType">色を定義したTheme型名。</param>
+    /// <returns>Themeに定義された色。</returns>
+    private Color GetThemeColor(string colorName, string themeType)
+    {
+        if (CurrentTheme == null)
+        {
+            throw new InvalidOperationException("The current UI theme has not been loaded.");
+        }
+
+        if (!CurrentTheme.HasColor(colorName, themeType))
+        {
+            throw new InvalidOperationException($"Theme color '{colorName}' is missing from '{themeType}'.");
+        }
+
+        return CurrentTheme.GetColor(colorName, themeType);
+    }
+
+    /// <summary>
     /// 選択テーマをViewport、メインウィンドウ、UIサブウィンドウへ適用する。
     /// </summary>
-    /// <param name="useLightTheme">ライトテーマを使用する場合は true。</param>
-    private void ApplyTheme(bool useLightTheme)
+    /// <param name="themeId">適用するテーマの識別子。</param>
+    private void ApplyTheme(string themeId)
     {
-        CurrentTheme = useLightTheme ? _lightTheme : _darkTheme;
+        CurrentThemeId = themeId;
+        CurrentTheme = _themes[themeId];
         RenderingServer.SetDefaultClearColor(EnvironmentBackgroundColor);
         Window rootWindow = GetTree().Root;
         rootWindow.Theme = CurrentTheme;

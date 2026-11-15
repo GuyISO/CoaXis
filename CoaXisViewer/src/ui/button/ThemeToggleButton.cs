@@ -13,7 +13,7 @@ public partial class ThemeToggleButton : Button
     public override void _Ready()
     {
         ToggleMode = true;
-        ButtonPressed = Application.Ui.Theme.IsLightTheme;
+        ButtonPressed = Application.Ui.Theme.CurrentThemeId == UiSettings.LightThemeId;
         UpdateDisplay(ButtonPressed);
         Toggled += OnToggled;
     }
@@ -38,7 +38,8 @@ public partial class ThemeToggleButton : Button
     /// <param name="useLightTheme">ライトテーマを使用する場合は true。</param>
     private void OnToggled(bool useLightTheme)
     {
-        Application.Ui.Theme.SetLightTheme(useLightTheme);
+        Application.Ui.Theme.SetTheme(
+            useLightTheme ? UiSettings.LightThemeId : UiSettings.DefaultThemeId);
         UpdateDisplay(useLightTheme);
     }
 

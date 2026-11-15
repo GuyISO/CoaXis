@@ -70,6 +70,7 @@ public partial class SearchUi : PanelContainer
         Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
         Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityButtonsChanged;
         Application.Model.Entity.State.Collapsed += OnEntityButtonsChanged;
+        Application.Ui.Theme.ThemeChanged += OnThemeChanged;
     }
 
     private void UnsubscribeEvents()
@@ -93,6 +94,7 @@ public partial class SearchUi : PanelContainer
         Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
         Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityButtonsChanged;
         Application.Model.Entity.State.Collapsed -= OnEntityButtonsChanged;
+        Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
     }
 
     private void OnTypeSelected(long index) => RefreshResults();
@@ -104,6 +106,8 @@ public partial class SearchUi : PanelContainer
     private void OnPropertyValueChanged(string propertyId) => RefreshResults();
 
     private void OnSelectionChanged() => UpdateSelectionIndicators();
+
+    private void OnThemeChanged() => UpdateSelectionIndicators();
 
     private void OnSelectionCleared() => _lastSelectedIndex = -1;
 

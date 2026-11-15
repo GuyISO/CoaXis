@@ -18,7 +18,7 @@ public partial class ViewportInteractionOverlay : Control
 	private const float ArcballCrossAngularSize = 0.24f;
 	private const int ArcballCrossCurveSegments = 8;
 
-	// オーバーレイの線の色。設定から読み込み、_Ready で初期化する
+	// オーバーレイの線の色。テーマから読み込み、_Ready で初期化する
 	private Color _lineColor;
 
 	// 関連ノードのキャッシュ
@@ -46,7 +46,7 @@ public partial class ViewportInteractionOverlay : Control
 	{
 		EnsureChildNodes();
 		SubscribeApplicationEvents();
-		ApplySettings();
+		ApplyThemeColor();
 		SyncInitialState();
 	}
 
@@ -93,6 +93,7 @@ public partial class ViewportInteractionOverlay : Control
 		Application.Viewport.Interaction.ArcballRadiusNotified += OnArcballRadiusNotified;
 		Application.Viewport.Interaction.ArcballHandleNotified += OnArcballHandleNotified;
 		Application.Viewport.Interaction.PickRectNotified += OnPickRectNotified;
+		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
 	}
 
 	/// <summary>
@@ -105,6 +106,15 @@ public partial class ViewportInteractionOverlay : Control
 		Application.Viewport.Interaction.ArcballRadiusNotified -= OnArcballRadiusNotified;
 		Application.Viewport.Interaction.ArcballHandleNotified -= OnArcballHandleNotified;
 		Application.Viewport.Interaction.PickRectNotified -= OnPickRectNotified;
+		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
+	}
+
+	/// <summary>
+	/// テーマ切替後、オーバーレイの色を更新する。
+	/// </summary>
+	private void OnThemeChanged()
+	{
+		ApplyThemeColor();
 	}
 
 	/// <summary>
@@ -433,11 +443,11 @@ public partial class ViewportInteractionOverlay : Control
 	}
 
 	/// <summary>
-	/// 設定値を反映する
+	/// 現在のテーマ色を反映する。
 	/// </summary>
-	private void ApplySettings()
+	private void ApplyThemeColor()
 	{
-		ChangeColor(Color.FromHtml(Application.Setting.Current.Color.OverlayLineColor));
+		ChangeColor(Application.Ui.Theme.PrimaryColor);
 	}
 
 	#endregion

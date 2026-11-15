@@ -30,7 +30,7 @@ public partial class ModelEntityTree : Tree
     {
         SubscribeUiEvents();
         SubscribeApplicationEvents();
-        ApplySettings();
+        ApplyThemeColors();
     }
 
     public override void _ExitTree()
@@ -152,6 +152,16 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     private void OnThemeChanged()
     {
+        ApplyThemeColors();
+    }
+
+    /// <summary>
+    /// 現在のテーマ色をモデル行へ適用する。
+    /// </summary>
+    private void ApplyThemeColors()
+    {
+        _selectedColor = Application.Ui.Theme.PrimaryColor;
+
         foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
         {
             ModelEntity modelEntity = Application.Model.Entity.Registry.Get(pair.Key);
@@ -160,6 +170,8 @@ public partial class ModelEntityTree : Tree
                 pair.Value.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
             }
         }
+
+        ReapplySelectedRowColors();
     }
 
     /// <summary>
@@ -506,26 +518,9 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
-    /// 設定値を反映する
-    /// </summary>
-    private void ApplySettings()
-    {
-        _selectedColor = Color.FromHtml(Application.Setting.Current.Color.HierarchySelectedColor);
-        ReapplySelectedRowColors();
-    }
-
     private static Color ResolveTextColor(ModelStatus status)
     {
-        bool isLightTheme = Application.Ui.Theme.IsLightTheme;
-        return status switch
-        {
-            ModelStatus.Loading => isLightTheme ? new Color(0.4f, 0.4f, 0.4f) : new Color(0.5f, 0.5f, 0.5f),
-            ModelStatus.Loaded => isLightTheme ? new Color(0.12549f, 0.12549f, 0.12549f) : Colors.White,
-            ModelStatus.LoadFailed => isLightTheme ? new Color(0.65f, 0.15f, 0.15f) : new Color(1.0f, 0.5f, 0.5f),
-            ModelStatus.Initialized => isLightTheme ? Colors.Black : new Color(0.94902f, 0.960784f, 0.972549f),
-            ModelStatus.Registered => isLightTheme ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.75f, 0.75f, 0.75f),
-            _ => isLightTheme ? Colors.Black : new Color(0.94902f, 0.960784f, 0.972549f),
-        };
+        return Application.Ui.Theme.GetModelStatusColor(status);
     }
 
     /// <summary>

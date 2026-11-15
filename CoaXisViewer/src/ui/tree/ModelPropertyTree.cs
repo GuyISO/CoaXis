@@ -53,6 +53,7 @@ public partial class ModelPropertyTree : Tree
 		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityPropertyTreeVisibleNotified;
 		Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
+		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
 	}
 
 	public override void _ExitTree()
@@ -64,6 +65,7 @@ public partial class ModelPropertyTree : Tree
 		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityPropertyTreeVisibleNotified;
 		Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
+		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
 		base._ExitTree();
 	}
 
@@ -178,6 +180,22 @@ public partial class ModelPropertyTree : Tree
 	/// Entityの選択状態が変更されたとき、ルート行の背景色を更新する。
 	/// </summary>
 	private void OnSelectionChanged()
+	{
+		ApplyRootSelectionHighlight();
+	}
+
+	/// <summary>
+	/// テーマ切替後、ルート行の背景色を更新する。
+	/// </summary>
+	private void OnThemeChanged()
+	{
+		ApplyRootSelectionHighlight();
+	}
+
+	/// <summary>
+	/// Entityルート行へ現在の選択色を適用する。
+	/// </summary>
+	private void ApplyRootSelectionHighlight()
 	{
 		ModelEntityRowBehavior.ApplySelectionHighlight(_rootItem, _entityId, ModelEntityRowBehavior.GetSelectionColor());
 	}

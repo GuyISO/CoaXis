@@ -1,7 +1,7 @@
 using Godot;
 
 /// <summary>
-/// マテリアルの取得と設定反映を管理するハブ。
+/// マテリアルの取得と指定色の反映を管理するハブ。
 /// </summary>
 public partial class AssetMaterialHub : BaseHub
 {
@@ -28,6 +28,9 @@ public partial class AssetMaterialHub : BaseHub
 
     #region Lifecycle
 
+    /// <summary>
+    /// マテリアル参照を解放する。
+    /// </summary>
     public override void _ExitTree()
     {
         _selectedMaterial = null;
@@ -37,29 +40,41 @@ public partial class AssetMaterialHub : BaseHub
 
     #endregion
 
+    #region Events
+
+    #endregion
+
     #region Methods
 
     /// <summary>
     /// ハイライト表示用のマテリアルを取得する。
     /// </summary>
+    /// <param name="primaryColor">選択ハイライトに適用するCoaXisプライマリカラー。</param>
     /// <returns>選択ハイライト用マテリアル。取得失敗時は null</returns>
-    public Material GetSelected()
+    public Material GetSelected(Color primaryColor)
     {
-        if (_selectedMaterial != null)
-        {
-            return _selectedMaterial;
-        }
-
-        _selectedMaterial = GD.Load<Material>(SelectedMaterialPath);
         if (_selectedMaterial == null)
         {
-            Application.Log.Warn($"AssetService: material load failed. path='{SelectedMaterialPath}'");
-            return null;
+            _selectedMaterial = GD.Load<Material>(SelectedMaterialPath);
+            if (_selectedMaterial == null)
+            {
+                Application.Log.Warn($"AssetService: material load failed. path='{SelectedMaterialPath}'");
+                return null;
+            }
         }
 
-        ApplySelectedMaterialColor();
+        ApplySelectedMaterialColor(primaryColor);
 
         return _selectedMaterial;
+    }
+
+    /// <summary>
+    /// キャッシュ済みの選択マテリアルへ色を反映する。
+    /// </summary>
+    /// <param name="primaryColor">適用するCoaXisプライマリカラー。</param>
+    public void UpdateSelectedColor(Color primaryColor)
+    {
+        ApplySelectedMaterialColor(primaryColor);
     }
 
     #endregion
@@ -69,14 +84,13 @@ public partial class AssetMaterialHub : BaseHub
     /// <summary>
     /// 選択中のマテリアルに設定される色を適用する。
     /// </summary>
-    private void ApplySelectedMaterialColor()
+    private void ApplySelectedMaterialColor(Color selectedColor)
     {
         if (_selectedMaterial is not StandardMaterial3D standardMaterial)
         {
             return;
         }
 
-        Color selectedColor = Color.FromHtml(Application.Setting.Current.Color.SelectedMaterialColor);
         standardMaterial.AlbedoColor = selectedColor;
         standardMaterial.Emission = selectedColor;
         standardMaterial.EmissionEnergyMultiplier = SelectedMaterialEmissionEnergyMultiplier;

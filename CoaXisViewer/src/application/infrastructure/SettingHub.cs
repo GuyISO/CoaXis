@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Nodes;
 
 /// <summary>
 /// 外部設定の読み込みとアプリケーションへの提供を管理するハブ。
@@ -83,10 +84,15 @@ public partial class SettingHub : BaseHub
                 continue;
             }
 
-            if (TryRead(path, out ViewerSettings loaded))
+            if (TryRead(path, out ViewerSettings loaded, out bool migrated))
             {
                 Current = loaded;
                 _settingsPath = path;
+                if (migrated)
+                {
+                    Save();
+                }
+
                 Application.Log.Info($"Settings: loaded from '{path}'.");
                 return true;
             }
@@ -138,18 +144,23 @@ public partial class SettingHub : BaseHub
     }
 
     /// <summary>
-    /// ライトテーマの設定を更新して保存する。
+    /// UIテーマの識別子を更新して保存する。
     /// </summary>
-    /// <param name="useLightTheme">ライトテーマを使用する場合は true。</param>
+    /// <param name="themeId">適用するテーマの識別子。</param>
     /// <returns>設定を保存できた場合は true。</returns>
-    public bool SetLightTheme(bool useLightTheme)
+    public bool SetTheme(string themeId)
     {
-        if (Current.Ui.UseLightTheme == useLightTheme)
+        if (string.IsNullOrWhiteSpace(themeId))
+        {
+            throw new ArgumentException("A theme identifier is required.", nameof(themeId));
+        }
+
+        if (string.Equals(Current.Ui.ThemeId, themeId, StringComparison.Ordinal))
         {
             return true;
         }
 
-        Current.Ui.UseLightTheme = useLightTheme;
+        Current.Ui.ThemeId = themeId;
         return Save();
     }
 
@@ -163,13 +174,15 @@ public partial class SettingHub : BaseHub
     /// <param name="path">読み込み対象ファイルパス</param>
     /// <param name="settings">読み込み結果（失敗時は既定値）</param>
     /// <returns>読み込み成功時は true</returns>
-    private static bool TryRead(string path, out ViewerSettings settings)
+    private static bool TryRead(string path, out ViewerSettings settings, out bool migrated)
     {
         settings = ViewerSettings.CreateDefault();
+        migrated = false;
 
         try
         {
             string json = File.ReadAllText(path);
+            json = MigrateLegacySettings(json, out migrated);
             ViewerSettings loaded = JsonSerializer.Deserialize<ViewerSettings>(json, ReadOptions);
 
             if (loaded == null)
@@ -187,6 +200,75 @@ public partial class SettingHub : BaseHub
             Application.Log.Warn($"Settings: failed to read '{path}'. {ex.Message}");
             return false;
         }
+    }
+
+    /// <summary>
+    /// 旧テーマ設定を識別子へ変換し、テーマへ移した色項目を設定から除去する。
+    /// </summary>
+    /// <param name="json">読み込んだ設定JSON。</param>
+    /// <param name="migrated">旧項目を変換または除去した場合は true。</param>
+    /// <returns>変換後のJSON。</returns>
+    private static string MigrateLegacySettings(string json, out bool migrated)
+    {
+        migrated = false;
+        JsonNode rootNode = JsonNode.Parse(json);
+        if (rootNode is not JsonObject root)
+        {
+            return json;
+        }
+
+        string colorPropertyName = FindPropertyName(root, "Color");
+        if (colorPropertyName != null)
+        {
+            root.Remove(colorPropertyName);
+            migrated = true;
+        }
+
+        string uiPropertyName = FindPropertyName(root, "Ui");
+        if (uiPropertyName != null && root[uiPropertyName] is JsonObject ui)
+        {
+            string legacyPropertyName = FindPropertyName(ui, "UseLightTheme");
+            if (legacyPropertyName != null)
+            {
+                if (ui[legacyPropertyName] is JsonValue legacyThemeValue
+                    && legacyThemeValue.TryGetValue(out bool useLightTheme)
+                    && FindPropertyName(ui, nameof(UiSettings.ThemeId)) == null)
+                {
+                    ui[nameof(UiSettings.ThemeId)] = useLightTheme
+                        ? UiSettings.LightThemeId
+                        : UiSettings.DefaultThemeId;
+                }
+                else if (ui[legacyPropertyName] is not JsonValue legacyValue
+                    || !legacyValue.TryGetValue(out bool _))
+                {
+                    Application.Log.Warn("Settings: ignoring invalid legacy 'UseLightTheme' value.");
+                }
+
+                ui.Remove(legacyPropertyName);
+                migrated = true;
+            }
+        }
+
+        return migrated ? root.ToJsonString(WriteOptions) : json;
+    }
+
+    /// <summary>
+    /// 指定したJSONオブジェクトから大文字小文字を無視してプロパティ名を検索する。
+    /// </summary>
+    /// <param name="jsonObject">検索対象のJSONオブジェクト。</param>
+    /// <param name="propertyName">検索するプロパティ名。</param>
+    /// <returns>見つかった実際のプロパティ名。存在しない場合は null。</returns>
+    private static string FindPropertyName(JsonObject jsonObject, string propertyName)
+    {
+        foreach (var property in jsonObject)
+        {
+            if (string.Equals(property.Key, propertyName, StringComparison.OrdinalIgnoreCase))
+            {
+                return property.Key;
+            }
+        }
+
+        return null;
     }
 
     /// <summary>

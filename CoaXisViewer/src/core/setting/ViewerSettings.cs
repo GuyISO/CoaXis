@@ -22,11 +22,6 @@ public sealed class ViewerSettings
     public InputSettings Input { get; set; } = new InputSettings();
 
     /// <summary>
-    /// UI・描画に関する色設定セクション。
-    /// </summary>
-    public ColorSettings Color { get; set; } = new ColorSettings();
-
-    /// <summary>
     /// UI一般の挙動に関する設定セクション。
     /// </summary>
     public UiSettings Ui { get; set; } = new UiSettings();
@@ -55,8 +50,6 @@ public sealed class ViewerSettings
         Camera.Normalize();
         Input ??= new InputSettings();
         Input.Normalize();
-        Color ??= new ColorSettings();
-        Color.Normalize();
         Ui ??= new UiSettings();
         Ui.Normalize();
     }

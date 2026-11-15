@@ -55,7 +55,7 @@ internal static class ModelEntityRowBehavior
     /// </summary>
     public static Color GetSelectionColor()
     {
-        return Color.FromHtml(Application.Setting.Current.Color.HierarchySelectedColor);
+        return Application.Ui.Theme.PrimaryColor;
     }
 
     /// <summary>

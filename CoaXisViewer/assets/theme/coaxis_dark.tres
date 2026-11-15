@@ -120,6 +120,18 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="StyleBoxFlat" id="TreePanel"]
+bg_color = Color(0.145098, 0.14902, 0.160784, 0.82)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.254902, 0.262745, 0.278431, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
 [sub_resource type="StyleBoxFlat" id="ScrollTrack"]
 bg_color = Color(0.090196, 0.094118, 0.101961, 1)
 content_margin_left = 4.0
@@ -219,6 +231,14 @@ Button/styles/hover = SubResource("ButtonHover")
 Button/styles/normal = SubResource("ButtonNormal")
 Button/styles/pressed = SubResource("ButtonPressed")
 CoaXisEnvironment/colors/background = Color(0.12549, 0.129412, 0.141176, 1)
+CoaXisBrand/colors/primary = Color(0.305882, 0.584314, 0.85098, 1)
+CoaXisModelStatus/colors/Unloaded = Color(0.94902, 0.960784, 0.972549, 1)
+CoaXisModelStatus/colors/Initialized = Color(0.94902, 0.960784, 0.972549, 1)
+CoaXisModelStatus/colors/Registered = Color(0.75, 0.75, 0.75, 1)
+CoaXisModelStatus/colors/Loading = Color(0.5, 0.5, 0.5, 1)
+CoaXisModelStatus/colors/Loaded = Color(1, 1, 1, 1)
+CoaXisModelStatus/colors/LoadFailed = Color(1, 0.5, 0.5, 1)
+CoaXisModelStatus/colors/Disposed = Color(0.94902, 0.960784, 0.972549, 1)
 CoaXisSearchResultTree/base_type = &"Tree"
 CoaXisSearchResultTree/styles/selected = SubResource("SearchTreeSelection")
 CoaXisSearchResultTree/styles/selected_focus = SubResource("SearchTreeSelection")
@@ -269,7 +289,7 @@ Tree/colors/font_selected_color = Color(0.94902, 0.960784, 0.972549, 1)
 Tree/colors/selection_color = Color(0.227451, 0.239216, 0.258824, 1)
 Tree/colors/title_button_color = Color(0.94902, 0.960784, 0.972549, 1)
 Tree/constants/v_separation = 1
-Tree/styles/panel = SubResource("Panel")
+Tree/styles/panel = SubResource("TreePanel")
 Tree/styles/title_button_hover = SubResource("TreeTitleHover")
 Tree/styles/title_button_normal = SubResource("TreeTitleNormal")
 Tree/styles/title_button_pressed = SubResource("TreeTitlePressed")

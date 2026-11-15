@@ -78,6 +78,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
     {
         Application.Model.Entity.Pick.HandlingModeNotified += OnModelEntityPickHandlingModeNotified;
         Application.Model.Entity.Pick.ResultNotified += OnModelEntityPickResultNotified;
+        Application.Ui.Theme.ThemeChanged += OnThemeChanged;
     }
 
     /// <summary>
@@ -87,6 +88,18 @@ public partial class ModelEntityMeasurementHub : BaseHub
     {
         Application.Model.Entity.Pick.HandlingModeNotified -= OnModelEntityPickHandlingModeNotified;
         Application.Model.Entity.Pick.ResultNotified -= OnModelEntityPickResultNotified;
+        Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
+    }
+
+    /// <summary>
+    /// テーマ切替後、既存の測定線へプライマリカラーを再適用する。
+    /// </summary>
+    private void OnThemeChanged()
+    {
+        if (_lineMaterial != null && GodotObject.IsInstanceValid(_lineMaterial))
+        {
+            _lineMaterial.AlbedoColor = Application.Ui.Theme.PrimaryColor;
+        }
     }
 
     /// <summary>
@@ -332,7 +345,7 @@ public partial class ModelEntityMeasurementHub : BaseHub
         {
             ShadingMode = BaseMaterial3D.ShadingModeEnum.Unshaded,
             NoDepthTest = true,
-            AlbedoColor = Color.FromHtml(Application.Setting.Current.Color.MeasurementLineColor)
+            AlbedoColor = Application.Ui.Theme.PrimaryColor
         };
 
         _visualRoot.AddChild(_line);

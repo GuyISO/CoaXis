@@ -9,14 +9,24 @@ public sealed class UiSettings
     public const int MinMessageMaxLines = 1;
 
     /// <summary>
+    /// 既定テーマの識別子。
+    /// </summary>
+    public const string DefaultThemeId = "dark";
+
+    /// <summary>
+    /// ライトテーマの識別子。
+    /// </summary>
+    public const string LightThemeId = "light";
+
+    /// <summary>
     /// メッセージパネルに保持する最大行数。
     /// </summary>
     public int MessageMaxLines { get; set; } = DefaultMessageMaxLines;
 
     /// <summary>
-    /// ライトテーマを使用するかどうか。
+    /// 使用するUIテーマの識別子。
     /// </summary>
-    public bool UseLightTheme { get; set; }
+    public string ThemeId { get; set; } = DefaultThemeId;
 
     #endregion
     
@@ -27,6 +37,11 @@ public sealed class UiSettings
     /// </summary>
     public void Normalize()
     {
+        if (string.IsNullOrWhiteSpace(ThemeId))
+        {
+            ThemeId = DefaultThemeId;
+        }
+
         if (MessageMaxLines < MinMessageMaxLines)
         {
             MessageMaxLines = DefaultMessageMaxLines;
