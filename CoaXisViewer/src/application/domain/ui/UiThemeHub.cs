@@ -62,14 +62,14 @@ public partial class UiThemeHub : BaseHub
 	/// <summary>Treeアイコンの通常色。</summary>
 	public Color TreeIconColor => GetThemeColor("normal", TreeIconThemeType);
 
-	/// <summary>Treeアイコンの無効・非表示色。</summary>
+	/// <summary>Treeアイコンの無効色。</summary>
 	public Color TreeIconMutedColor => GetThemeColor("muted", TreeIconThemeType);
 
-	/// <summary>Treeアイコンの強調色。</summary>
-	public Color TreeIconAccentColor => GetThemeColor("accent", TreeIconThemeType);
+	/// <summary>Treeの非表示アイコンの色。</summary>
+	public Color TreeVisibilityHiddenColor => GetThemeColor("visibility_hidden", TreeIconThemeType);
 
-	/// <summary>Treeアイコンのバッジ文字色。</summary>
-	public Color TreeIconBadgeTextColor => GetThemeColor("badge_text", TreeIconThemeType);
+	/// <summary>Treeアイコンのバッジ背景色。</summary>
+	public Color TreeIconBadgeBackgroundColor => GetThemeColor("badge_background", TreeIconThemeType);
 
 	/// <summary>
 	/// 指定されたモデル状態に対応する色を現在のテーマから取得する。

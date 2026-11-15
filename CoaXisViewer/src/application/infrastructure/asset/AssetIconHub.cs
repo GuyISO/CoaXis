@@ -17,12 +17,8 @@ public partial class AssetIconHub : BaseHub
     private const string VisibleIconPath = "res://assets/icon/visibility/visible.svg";
     /// <summary>非表示アイコンのパス。</summary>
     private const string InvisibleIconPath = "res://assets/icon/visibility/invisible.svg";
-    /// <summary>Propertyなしアイコンのパス。</summary>
-    private const string PropertyNoneIconPath = "res://assets/icon/property/none.svg";
-    /// <summary>Propertyあり・OverlayTree非表示アイコンのパス。</summary>
-    private const string PropertyHiddenIconPath = "res://assets/icon/property/hidden.svg";
-    /// <summary>Propertyあり・OverlayTree表示中アイコンのパス。</summary>
-    private const string PropertyShownIconPath = "res://assets/icon/property/shown.svg";
+    /// <summary>Propertyアイコンのパス。</summary>
+    private const string PropertyIconPath = "res://assets/icon/property/hidden.svg";
 
     /// <summary>ProtocolアイコンIDとViewerアセットの対応表。</summary>
     private static readonly Dictionary<string, string> ModelIconPaths = new(System.StringComparer.OrdinalIgnoreCase)
@@ -106,39 +102,24 @@ public partial class AssetIconHub : BaseHub
     }
 
     /// <summary>
-    /// ModelEntityのPropertyの有無とOverlayTree表示状態に対応するアイコンを取得する。
-    /// </summary>
-    /// <param name="hasProperty">Propertyを持つ場合は true</param>
-    /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
-    /// <param name="color">アイコンの描画色</param>
-    /// <param name="size">返却アイコンのサイズ</param>
-    /// <returns>取得したアイコン、失敗時は null</returns>
-    public Texture2D GetProperty(bool hasProperty, bool isTreeVisible, Color color, int size = 24)
-    {
-        string path = !hasProperty ? PropertyNoneIconPath : isTreeVisible ? PropertyShownIconPath : PropertyHiddenIconPath;
-        return GetThemedByPath(path, size, color);
-    }
-
-    /// <summary>
     /// Propertyの個数バッジを右下に重ねたアイコンを取得する。個数が0以下の場合はバッジなし。
     /// </summary>
     /// <param name="count">Propertyの個数。999を超える場合は「999+」と表示する</param>
-    /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
     /// <param name="color">アイコンの描画色</param>
     /// <param name="badgeBackground">バッジの背景色</param>
     /// <param name="badgeForeground">バッジの文字色</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    public Texture2D GetProperty(int count, bool isTreeVisible, Color color, Color badgeBackground, Color badgeForeground, int size = 24)
+    public Texture2D GetProperty(int count, Color color, Color badgeBackground, Color badgeForeground, int size = 24)
     {
-        Texture2D baseIcon = GetProperty(count > 0, isTreeVisible, color, size);
+        Texture2D baseIcon = GetThemedByPath(PropertyIconPath, size, color);
         if (count <= 0 || baseIcon == null)
         {
             return baseIcon;
         }
 
         string text = count > 999 ? "999+" : count.ToString();
-        string key = $"property-badge|{isTreeVisible}|{text}|{size}|{color.ToHtml()}|{badgeBackground.ToHtml()}|{badgeForeground.ToHtml()}";
+        string key = $"property-badge|{text}|{size}|{color.ToHtml()}|{badgeBackground.ToHtml()}|{badgeForeground.ToHtml()}";
         if (_iconCache.TryGetValue(key, out Texture2D cached))
         {
             return cached;

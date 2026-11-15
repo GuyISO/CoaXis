@@ -19,6 +19,8 @@ public partial class ModelPropertyTree : Tree
 	/// </summary>
 	private TreeItem _rootItem;
 
+	private bool _isNotifyingRootPick;
+
 	/// <summary>
 	/// 表示切替ボタンのID
 	/// </summary>
@@ -46,26 +48,12 @@ public partial class ModelPropertyTree : Tree
 	public override void _Ready()
 	{
 		base._Ready();
-		ButtonClicked += OnButtonClicked;
-		ItemActivated += OnItemActivated;
-		Application.Model.Property.Visual.VisibilityResolved += OnPropertyVisibilityResolved;
-		Application.Model.Property.State.ValueNotified += OnPropertyValueNotified;
-		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
-		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityPropertyTreeVisibleNotified;
-		Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
-		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
+		SubscribeEvents();
 	}
 
 	public override void _ExitTree()
 	{
-		ButtonClicked -= OnButtonClicked;
-		ItemActivated -= OnItemActivated;
-		Application.Model.Property.Visual.VisibilityResolved -= OnPropertyVisibilityResolved;
-		Application.Model.Property.State.ValueNotified -= OnPropertyValueNotified;
-		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
-		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityPropertyTreeVisibleNotified;
-		Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
-		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
+		UnsubscribeEvents();
 		base._ExitTree();
 	}
 
@@ -108,6 +96,12 @@ public partial class ModelPropertyTree : Tree
 	/// <param name="entityId">表示対象の ModelEntity の識別子</param>
 	public void Show(Guid entityId)
 	{
+		// 自身のPickを受けた埋め込みツリーが、操作中の行を再生成しないようにする。
+		if (_isNotifyingRootPick && entityId == _entityId)
+		{
+			return;
+		}
+
 		_entityId = entityId;
 		Clear();
 		_rootItem = null;
@@ -146,6 +140,53 @@ public partial class ModelPropertyTree : Tree
 	#endregion
 
 	#region Events
+
+	private void SubscribeEvents()
+	{
+		ButtonClicked += OnButtonClicked;
+		ItemSelected += OnItemSelected;
+		ItemActivated += OnItemActivated;
+		Application.Model.Property.Visual.VisibilityResolved += OnPropertyVisibilityResolved;
+		Application.Model.Property.State.ValueNotified += OnPropertyValueNotified;
+		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
+		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityPropertyTreeVisibleNotified;
+		Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
+		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
+	}
+
+	private void UnsubscribeEvents()
+	{
+		ButtonClicked -= OnButtonClicked;
+		ItemSelected -= OnItemSelected;
+		ItemActivated -= OnItemActivated;
+		Application.Model.Property.Visual.VisibilityResolved -= OnPropertyVisibilityResolved;
+		Application.Model.Property.State.ValueNotified -= OnPropertyValueNotified;
+		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
+		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityPropertyTreeVisibleNotified;
+		Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
+		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
+	}
+
+	/// <summary>
+	/// ルートのEntity行が選択されたとき、Pickを通知する。
+	/// </summary>
+	private void OnItemSelected()
+	{
+		if (_rootItem == null || _entityId == Guid.Empty || GetSelected() != _rootItem)
+		{
+			return;
+		}
+
+		_isNotifyingRootPick = true;
+		try
+		{
+			Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(_entityId));
+		}
+		finally
+		{
+			_isNotifyingRootPick = false;
+		}
+	}
 
 	/// <summary>
 	/// TreeItem のボタンがクリックされたとき、表示切替ボタンならPropertyの表示設定を切り替える

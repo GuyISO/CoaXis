@@ -108,11 +108,6 @@ corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="Panel"]
 bg_color = Color(0.862745, 0.866667, 0.878431, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.823529, 0.854902, 0.886275, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -120,11 +115,6 @@ corner_radius_bottom_left = 3
 
 [sub_resource type="StyleBoxFlat" id="TreePanel"]
 bg_color = Color(0.862745, 0.866667, 0.878431, 0.82)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.823529, 0.854902, 0.886275, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -252,12 +242,12 @@ MarginContainer/constants/margin_top = 6
 MarginContainer/constants/margin_right = 6
 MarginContainer/constants/margin_bottom = 6
 VBoxContainer/constants/separation = 4
-CoaXisEnvironment/colors/background = Color(0.94902, 0.952941, 0.956863, 1)
+CoaXisEnvironment/colors/background = Color(0.886275, 0.890196, 0.898039, 1)
 CoaXisBrand/colors/primary = Color(0.305882, 0.584314, 0.85098, 1)
 CoaXisTreeIcon/colors/normal = Color(0.12549, 0.12549, 0.12549, 1)
 CoaXisTreeIcon/colors/muted = Color(0.4, 0.4, 0.4, 1)
-CoaXisTreeIcon/colors/accent = Color(0.105882, 0.337255, 0.568627, 1)
-CoaXisTreeIcon/colors/badge_text = Color(0.94902, 0.952941, 0.956863, 1)
+CoaXisTreeIcon/colors/visibility_hidden = Color(1, 1, 1, 1)
+CoaXisTreeIcon/colors/badge_background = Color(0, 0, 0, 0)
 CoaXisModelStatus/colors/Unloaded = Color(0, 0, 0, 1)
 CoaXisModelStatus/colors/Initialized = Color(0, 0, 0, 1)
 CoaXisModelStatus/colors/Registered = Color(0.25, 0.25, 0.25, 1)

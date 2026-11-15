@@ -77,8 +77,9 @@ internal static class ModelEntityRowBehavior
     /// <returns>着色済みアイコン</returns>
     public static Texture2D GetVisibilityIcon(ModelVisibility visibility, bool isVisible)
     {
-        Color color = isVisible ? Application.Ui.Theme.TreeIconColor : Application.Ui.Theme.TreeIconMutedColor;
-        return Application.Asset.Icon.GetVisibility(visibility, isVisible, color, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Color color = isVisible ? Application.Ui.Theme.TreeIconColor : Application.Ui.Theme.TreeVisibilityHiddenColor;
+        return Application.Asset.Icon.GetVisibility(
+            visibility, isVisible, color, Constant.Ui.Tree.HierarchyVisibleIconSize);
     }
 
     /// <summary>
@@ -86,13 +87,16 @@ internal static class ModelEntityRowBehavior
     /// </summary>
     /// <param name="count">Propertyの個数</param>
     /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
+    /// <param name="textColor">行の文字色。nullの場合はテーマの通常色</param>
+    /// <param name="hasProperty">直接のPropertyの有無。nullの場合は個数から判定</param>
     /// <returns>着色済みアイコン</returns>
-    public static Texture2D GetPropertyIcon(int count, bool isTreeVisible)
+    public static Texture2D GetPropertyIcon(int count, bool isTreeVisible, Color? textColor = null, bool? hasProperty = null)
     {
         UiThemeHub theme = Application.Ui.Theme;
-        Color color = count <= 0 ? theme.TreeIconMutedColor : isTreeVisible ? theme.TreeIconAccentColor : theme.TreeIconColor;
-        return Application.Asset.Icon.GetProperty(count, isTreeVisible, color,
-            theme.TreeIconColor, theme.TreeIconBadgeTextColor, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Color foreground = textColor ?? theme.TreeIconColor;
+        Color color = !(hasProperty ?? count > 0) ? theme.TreeIconMutedColor : isTreeVisible ? theme.PrimaryColor : foreground;
+        return Application.Asset.Icon.GetProperty(count, color,
+            theme.TreeIconBadgeBackgroundColor, foreground, Constant.Ui.Tree.HierarchyVisibleIconSize);
     }
 
     /// <summary>
@@ -119,7 +123,8 @@ internal static class ModelEntityRowBehavior
     /// <param name="item">ボタンを持つ行</param>
     /// <param name="entity">表示状態の正本</param>
     /// <param name="propertyCount">Propertyボタンに表示する数</param>
-    public static void RebuildButtons(TreeItem item, ModelEntity entity, int propertyCount)
+    /// <param name="textColor">行の文字色。nullの場合はテーマの通常色</param>
+    public static void RebuildButtons(TreeItem item, ModelEntity entity, int propertyCount, Color? textColor = null)
     {
         foreach (int buttonId in new[] { PropertyButtonId, VisibilityButtonId })
         {
@@ -130,7 +135,7 @@ internal static class ModelEntityRowBehavior
             }
         }
 
-        Texture2D propertyIcon = GetPropertyIcon(propertyCount, entity.IsPropertyTreeVisible);
+        Texture2D propertyIcon = GetPropertyIcon(propertyCount, entity.IsPropertyTreeVisible, textColor, entity.Properties.Count > 0);
         item.AddButton(0, propertyIcon, id: PropertyButtonId, disabled: entity.Properties.Count == 0);
         Texture2D visibilityIcon = GetVisibilityIcon(entity.Visibility, entity.IsVisible);
         item.AddButton(0, visibilityIcon, id: VisibilityButtonId);
@@ -158,7 +163,8 @@ internal static class ModelEntityRowBehavior
     /// <param name="entity">行が表すEntity</param>
     /// <param name="propertyCount">Propertyボタンに表示する数</param>
     /// <param name="indented">階層の深さに応じた余白を付ける場合は true</param>
-    public static void UpdateThemeIcons(TreeItem item, ModelEntity entity, int propertyCount, bool indented)
+    /// <param name="textColor">行の文字色。nullの場合はテーマの通常色</param>
+    public static void UpdateThemeIcons(TreeItem item, ModelEntity entity, int propertyCount, bool indented, Color? textColor = null)
     {
         item.SetIcon(0, indented
             ? GetIndentedIcon(entity)
@@ -167,7 +173,7 @@ internal static class ModelEntityRowBehavior
         int propertyIndex = item.GetButtonById(0, PropertyButtonId);
         if (propertyIndex >= 0)
         {
-            item.SetButton(0, propertyIndex, GetPropertyIcon(propertyCount, entity.IsPropertyTreeVisible));
+            item.SetButton(0, propertyIndex, GetPropertyIcon(propertyCount, entity.IsPropertyTreeVisible, textColor, entity.Properties.Count > 0));
         }
 
         UpdateVisibilityButton(item, entity);

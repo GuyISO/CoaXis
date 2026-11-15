@@ -170,7 +170,7 @@ public partial class ModelEntityTree : Tree
             {
                 pair.Value.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
                 ModelEntityRowBehavior.UpdateThemeIcons(pair.Value, modelEntity,
-                    ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, counts), false);
+                    ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, counts), false, ResolveTextColor(modelEntity.Status));
             }
         }
 
@@ -309,7 +309,7 @@ public partial class ModelEntityTree : Tree
             if (modelEntity != null && propertySubtreeCounts.TryGetValue(pair.Key, out int subtreeCount))
             {
                 int propertyCount = modelEntity.IsCollapsed ? subtreeCount : modelEntity.PropertyCountRecursive;
-                ModelEntityRowBehavior.RebuildButtons(pair.Value, modelEntity, propertyCount);
+                ModelEntityRowBehavior.RebuildButtons(pair.Value, modelEntity, propertyCount, ResolveTextColor(modelEntity.Status));
             }
         }
     }
@@ -330,7 +330,7 @@ public partial class ModelEntityTree : Tree
         if (modelEntity != null)
         {
             Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(modelEntity);
-            ModelEntityRowBehavior.RebuildButtons(treeItem, modelEntity, ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts));
+            ModelEntityRowBehavior.RebuildButtons(treeItem, modelEntity, ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts), ResolveTextColor(modelEntity.Status));
         }
     }
 
@@ -353,7 +353,7 @@ public partial class ModelEntityTree : Tree
         }
         bool isCollapsed = modelEntity.IsCollapsed;
         Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(modelEntity);
-        ModelEntityRowBehavior.RebuildButtons(item, modelEntity, ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts));
+        ModelEntityRowBehavior.RebuildButtons(item, modelEntity, ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts), ResolveTextColor(modelEntity.Status));
         // すでに折り畳み状態が一致している場合は自分が発した通知による変更の可能性があり何もしない
         if (item.IsCollapsed() == isCollapsed)
         {
@@ -379,8 +379,21 @@ public partial class ModelEntityTree : Tree
         {
             return;
         }
-        treeItem.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
-        treeItem.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
+        Color textColor = ResolveTextColor(modelEntity.Status);
+        treeItem.SetCustomColor(0, textColor);
+        int propertyIndex = treeItem.GetButtonById(0, ModelEntityRowBehavior.PropertyButtonId);
+        if (propertyIndex >= 0)
+        {
+            int count = modelEntity.PropertyCountRecursive;
+            if (modelEntity.IsCollapsed)
+            {
+                Dictionary<Guid, int> counts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(modelEntity);
+                count = ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, counts);
+            }
+
+            treeItem.SetButton(0, propertyIndex,
+                ModelEntityRowBehavior.GetPropertyIcon(count, modelEntity.IsPropertyTreeVisible, textColor, modelEntity.Properties.Count > 0));
+        }
     }
 
     /// <summary>
@@ -499,7 +512,7 @@ public partial class ModelEntityTree : Tree
 
         // --- 右側ボタン（Property表示・Visibility切替） ---
         int propertyCount = ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, propertySubtreeCounts);
-        ModelEntityRowBehavior.RebuildButtons(treeItem, modelEntity, propertyCount);
+        ModelEntityRowBehavior.RebuildButtons(treeItem, modelEntity, propertyCount, ResolveTextColor(modelEntity.Status));
 
         // EntityId と TreeItem の対応を登録
         treeItem.SetMeta("EntityId", entityId.ToString());
