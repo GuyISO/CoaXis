@@ -105,14 +105,14 @@ public partial class Application : BaseHub
     }
 
     /// <summary>
-    /// ドメイン系モジュールを初期化する。
-    /// 依存関係の考慮は不要なため順序は自由である。
+    /// ドメイン系モジュールを依存順に初期化する。
+    /// Modelの初期化でテーマ色を参照するため、Uiを先に追加する。
     /// </summary>
     private void EnsureDomainModules()
     {
         _command = AddModule<CommandHub>("Command");
-        _model = AddModule<ModelHub>("Model");
         _ui = AddModule<UiHub>("Ui");
+        _model = AddModule<ModelHub>("Model");
         _viewport = AddModule<ViewportHub>("Viewport");
     }
 

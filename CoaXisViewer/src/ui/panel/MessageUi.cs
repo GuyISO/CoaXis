@@ -1,6 +1,4 @@
 using Godot;
-using System;
-using System.Text;
 
 /// <summary>
 /// 実行中にコンソール表示の代わりを担う簡易パネル
@@ -13,9 +11,6 @@ public partial class MessageUi : PanelContainer
     private RichTextLabel _label;
     private Label _fpsLabel;
 
-    // ログのバッファ
-    private readonly StringBuilder _buffer = new StringBuilder();
-
     #endregion
 
     #region Lifecycle
@@ -27,6 +22,7 @@ public partial class MessageUi : PanelContainer
     {
         EnsureChildNodes();
         SubscribeApplicationEvents();
+        RefreshLabelText();
     }
 
     /// <summary>
@@ -89,14 +85,15 @@ public partial class MessageUi : PanelContainer
     /// <summary>
     /// ログ出力と同時に画面へログを表示する
     /// </summary>
-    /// <param name="line">記録されたメッセージ</param>
+    /// <param name="level">ログレベル。</param>
+    /// <param name="line">記録されたメッセージ。</param>
     private void OnLogged(int level, string line)
     {
         if (level < (int)LogLevel.Info)
         {
             return;
         }
-        AddLine(line);
+        RefreshLabelText();
     }
 
     #endregion
@@ -104,51 +101,7 @@ public partial class MessageUi : PanelContainer
     #region Helpers
 
     /// <summary>
-    /// 1行ログを画面へ追加する
-    /// </summary>
-    /// <param name="text">追加する文字列</param>
-    private void AddLine(string text)
-    {
-        if (_label == null)
-            return;
-
-        if (_buffer.Length > 0)
-            _buffer.Append('\n');
-
-        _buffer.Append(text);
-        TrimBufferToMaxLines();
-        RefreshLabelText();
-    }
-
-    /// <summary>
-    /// バッファ行数を上限まで切り詰める
-    /// </summary>
-    private void TrimBufferToMaxLines()
-    {
-        int maxLines = Application.Setting.Current.Ui.MessageMaxLines;
-
-        if (maxLines < UiSettings.MinMessageMaxLines)
-        {
-            maxLines = UiSettings.DefaultMessageMaxLines;
-        }
-
-        // 行数制限
-        var lines = _buffer.ToString().Split('\n', StringSplitOptions.RemoveEmptyEntries);
-        if (lines.Length > maxLines)
-        {
-            _buffer.Clear();
-            for (int i = lines.Length - maxLines; i < lines.Length; i++)
-            {
-                if (_buffer.Length > 0)
-                    _buffer.Append('\n');
-
-                _buffer.Append(lines[i]);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 現在バッファをラベルへ反映する
+    /// 現在のログ履歴をラベルへ反映する
     /// </summary>
     private void RefreshLabelText()
     {
@@ -157,7 +110,7 @@ public partial class MessageUi : PanelContainer
             return;
         }
 
-        _label.Text = _buffer.ToString();
+        _label.Text = string.Join("\n", Application.Log.History);
         _label.ScrollToLine(Mathf.Max(_label.GetLineCount() - 1, 0));
     }
 

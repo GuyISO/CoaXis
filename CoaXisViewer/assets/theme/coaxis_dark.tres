@@ -120,6 +120,67 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="StyleBoxFlat" id="ProgressFill"]
+bg_color = Color(0.305882, 0.584314, 0.85098, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabber"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.305882, 0.321569, 0.34902, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabberHover"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.415686, 0.443137, 0.482353, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabberPressed"]
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+bg_color = Color(0.305882, 0.584314, 0.85098, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollTrack"]
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+bg_color = Color(0.090196, 0.094118, 0.101961, 1)
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxLine" id="SeparatorLine"]
+color = Color(0.254902, 0.262745, 0.278431, 1)
+grow_begin = 0.0
+grow_end = 0.0
+
+[sub_resource type="StyleBoxFlat" id="TabSelected"]
+bg_color = Color(0.145098, 0.14902, 0.160784, 1)
+border_width_bottom = 2
+border_color = Color(0.305882, 0.584314, 0.85098, 1)
+
 [sub_resource type="StyleBoxFlat" id="TreePanel"]
 bg_color = Color(0.145098, 0.14902, 0.160784, 0.82)
 border_width_left = 1
@@ -131,67 +192,6 @@ corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="ScrollTrack"]
-bg_color = Color(0.090196, 0.094118, 0.101961, 1)
-content_margin_left = 4.0
-content_margin_top = 4.0
-content_margin_right = 4.0
-content_margin_bottom = 4.0
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="ScrollGrabber"]
-bg_color = Color(0.305882, 0.321569, 0.34902, 1)
-content_margin_left = 5.0
-content_margin_top = 5.0
-content_margin_right = 5.0
-content_margin_bottom = 5.0
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="ScrollGrabberHover"]
-bg_color = Color(0.415686, 0.443137, 0.482353, 1)
-content_margin_left = 5.0
-content_margin_top = 5.0
-content_margin_right = 5.0
-content_margin_bottom = 5.0
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="ScrollGrabberPressed"]
-bg_color = Color(0.305882, 0.584314, 0.85098, 1)
-content_margin_left = 5.0
-content_margin_top = 5.0
-content_margin_right = 5.0
-content_margin_bottom = 5.0
-corner_radius_top_left = 4
-corner_radius_top_right = 4
-corner_radius_bottom_right = 4
-corner_radius_bottom_left = 4
-
-[sub_resource type="StyleBoxFlat" id="ProgressFill"]
-bg_color = Color(0.305882, 0.584314, 0.85098, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxLine" id="SeparatorLine"]
-color = Color(0.254902, 0.262745, 0.278431, 1)
-grow_begin = 0.0
-grow_end = 0.0
-
-[sub_resource type="StyleBoxFlat" id="TabSelected"]
-bg_color = Color(0.145098, 0.14902, 0.160784, 1)
-border_width_bottom = 2
-border_color = Color(0.305882, 0.584314, 0.85098, 1)
 
 [sub_resource type="StyleBoxFlat" id="TreeTitleHover"]
 bg_color = Color(0.203922, 0.211765, 0.227451, 1)
@@ -230,15 +230,15 @@ Button/styles/focus = SubResource("ButtonFocus")
 Button/styles/hover = SubResource("ButtonHover")
 Button/styles/normal = SubResource("ButtonNormal")
 Button/styles/pressed = SubResource("ButtonPressed")
-CoaXisEnvironment/colors/background = Color(0.12549, 0.129412, 0.141176, 1)
 CoaXisBrand/colors/primary = Color(0.305882, 0.584314, 0.85098, 1)
-CoaXisModelStatus/colors/Unloaded = Color(0.94902, 0.960784, 0.972549, 1)
-CoaXisModelStatus/colors/Initialized = Color(0.94902, 0.960784, 0.972549, 1)
-CoaXisModelStatus/colors/Registered = Color(0.75, 0.75, 0.75, 1)
-CoaXisModelStatus/colors/Loading = Color(0.5, 0.5, 0.5, 1)
-CoaXisModelStatus/colors/Loaded = Color(1, 1, 1, 1)
-CoaXisModelStatus/colors/LoadFailed = Color(1, 0.5, 0.5, 1)
+CoaXisEnvironment/colors/background = Color(0.12549, 0.129412, 0.141176, 1)
 CoaXisModelStatus/colors/Disposed = Color(0.94902, 0.960784, 0.972549, 1)
+CoaXisModelStatus/colors/Initialized = Color(0.94902, 0.960784, 0.972549, 1)
+CoaXisModelStatus/colors/LoadFailed = Color(1, 0.5, 0.5, 1)
+CoaXisModelStatus/colors/Loaded = Color(1, 1, 1, 1)
+CoaXisModelStatus/colors/Loading = Color(0.5, 0.5, 0.5, 1)
+CoaXisModelStatus/colors/Registered = Color(0.75, 0.75, 0.75, 1)
+CoaXisModelStatus/colors/Unloaded = Color(0.94902, 0.960784, 0.972549, 1)
 CoaXisSearchResultTree/base_type = &"Tree"
 CoaXisSearchResultTree/styles/selected = SubResource("SearchTreeSelection")
 CoaXisSearchResultTree/styles/selected_focus = SubResource("SearchTreeSelection")
@@ -265,11 +265,11 @@ PanelContainer/styles/panel = SubResource("Panel")
 PopupPanel/styles/panel = SubResource("Panel")
 ProgressBar/styles/background = SubResource("Input")
 ProgressBar/styles/fill = SubResource("ProgressFill")
-ScrollBar/styles/scroll = SubResource("ScrollTrack")
-ScrollBar/styles/scroll_focus = SubResource("ScrollTrack")
 ScrollBar/styles/grabber = SubResource("ScrollGrabber")
 ScrollBar/styles/grabber_highlight = SubResource("ScrollGrabberHover")
 ScrollBar/styles/grabber_pressed = SubResource("ScrollGrabberPressed")
+ScrollBar/styles/scroll = SubResource("ScrollTrack")
+ScrollBar/styles/scroll_focus = SubResource("ScrollTrack")
 Separator/constants/separation = 0
 Separator/styles/separator = SubResource("SeparatorLine")
 TabBar/colors/font_selected_color = Color(0.94902, 0.960784, 0.972549, 1)

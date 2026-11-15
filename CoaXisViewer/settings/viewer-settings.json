@@ -18,6 +18,6 @@
   },
   "Ui": {
     "MessageMaxLines": 50,
-    "ThemeId": "light"
+    "ThemeId": "dark"
   }
 }

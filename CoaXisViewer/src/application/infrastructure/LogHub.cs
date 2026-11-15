@@ -1,5 +1,6 @@
 ﻿using Godot;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 /// <summary>
@@ -30,10 +31,15 @@ public partial class LogHub : BaseHub
     private string _logFilePath = string.Empty;
     /// <summary>ファイルログの有効フラグ。</summary>
     private bool _enableFileLog = false;
+    /// <summary>メッセージパネルに表示するログ行。</summary>
+    private readonly Queue<string> _history = new();
 
     #endregion
 
     #region Properties
+
+    /// <summary>メッセージパネル用のログ行を古い順に取得する。</summary>
+    public string[] History => _history.ToArray();
 
     #endregion
 
@@ -97,6 +103,11 @@ public partial class LogHub : BaseHub
             _fileWriter.Flush();
         }
 
+        if (level >= LogLevel.Info)
+        {
+            AddToHistory(message);
+        }
+
         // Signalの発行
         EmitSignal(SignalName.Logged, (int)level, message);
     }
@@ -128,6 +139,28 @@ public partial class LogHub : BaseHub
     #endregion
 
     #region Helpers
+
+    /// <summary>表示対象のメッセージを行単位で保持し、設定された上限に収める。</summary>
+    /// <param name="message">記録するメッセージ。</param>
+    private void AddToHistory(string message)
+    {
+        int maxLines = Application.Instance != null && Application.Setting != null
+            ? Application.Setting.Current.Ui.MessageMaxLines
+            : UiSettings.DefaultMessageMaxLines;
+        if (maxLines < UiSettings.MinMessageMaxLines)
+        {
+            maxLines = UiSettings.DefaultMessageMaxLines;
+        }
+
+        foreach (string line in (message ?? string.Empty).Split('\n'))
+        {
+            _history.Enqueue(line);
+            while (_history.Count > maxLines)
+            {
+                _history.Dequeue();
+            }
+        }
+    }
 
     #endregion
 }

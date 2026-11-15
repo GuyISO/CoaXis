@@ -132,7 +132,7 @@ public partial class SelectionUi : PanelContainer
 		Color selectionColor = ModelEntityRowBehavior.GetSelectionColor();
 		foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
 		{
-		    ModelEntityRowBehavior.ApplySelectionHighlight(pair.Value, pair.Key, selectionColor);
+			ModelEntityRowBehavior.ApplySelectionHighlight(pair.Value, pair.Key, selectionColor);
 		}
 	}
 

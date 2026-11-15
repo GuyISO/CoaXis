@@ -43,6 +43,7 @@ grow_horizontal = 2
 grow_vertical = 2
 
 [node name="TopBar" type="HBoxContainer" parent="VBoxContainer" unique_id=338852457]
+visible = false
 layout_mode = 2
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/TopBar" unique_id=1039855954]
@@ -54,6 +55,7 @@ layout_mode = 2
 size_flags_vertical = 3
 
 [node name="LeftBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=1440387980]
+visible = false
 layout_mode = 2
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/LeftBar" unique_id=1507152929]
@@ -106,42 +108,6 @@ mouse_filter = 2
 [node name="RightBar" type="VBoxContainer" parent="VBoxContainer/HBoxContainer" unique_id=617452991]
 layout_mode = 2
 
-[node name="ButtonShowMessageUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "Message
-システムメッセージパネルを表示します"
-theme_type_variation = &"CoaXisToggleButton"
-text = ""
-icon = ExtResource("14_message")
-_container = ExtResource("2_y2duu")
-
-[node name="ButtonShowViewportUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=176539602 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "Viewport
-ビュー情報パネルを表示します"
-theme_type_variation = &"CoaXisToggleButton"
-text = ""
-icon = ExtResource("15_viewport")
-_container = ExtResource("3_6a6xr")
-
-[node name="ButtonShowMeasurementUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=2090190786 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "Measurement
-計測パネルを表示します"
-theme_type_variation = &"CoaXisToggleButton"
-text = ""
-icon = ExtResource("16_measurement")
-_container = ExtResource("4_g4gva")
-
-[node name="ButtonShowCommandUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=116854459 instance=ExtResource("1_0wdie")]
-layout_mode = 2
-tooltip_text = "Command
-コマンド実行履歴パネルを表示します"
-theme_type_variation = &"CoaXisToggleButton"
-text = ""
-icon = ExtResource("17_command")
-_container = ExtResource("5_cki6e")
-
 [node name="ButtonShowSelectionUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1742956550 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "Selection
@@ -159,6 +125,24 @@ theme_type_variation = &"CoaXisToggleButton"
 text = ""
 icon = ExtResource("19_search_icon")
 _container = ExtResource("13_search")
+
+[node name="ButtonShowMeasurementUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=2090190786 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Measurement
+計測パネルを表示します"
+theme_type_variation = &"CoaXisToggleButton"
+text = ""
+icon = ExtResource("16_measurement")
+_container = ExtResource("4_g4gva")
+
+[node name="ButtonShowViewportUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=176539602 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Viewport
+ビュー情報パネルを表示します"
+theme_type_variation = &"CoaXisToggleButton"
+text = ""
+icon = ExtResource("15_viewport")
+_container = ExtResource("3_6a6xr")
 
 [node name="ButtonShowVisualUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1569197903 instance=ExtResource("1_0wdie")]
 layout_mode = 2
@@ -178,6 +162,35 @@ text = ""
 icon = ExtResource("21_camera_state")
 _container = ExtResource("7_57r0r")
 
+[node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1245432863]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="ThemeToggleButton" type="Button" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=28738584]
+layout_mode = 2
+theme_type_variation = &"CoaXisToggleButton"
+text = "Dark"
+script = ExtResource("24_theme_toggle")
+
+[node name="ButtonShowMessageUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1859494691 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Message
+システムメッセージパネルを表示します"
+theme_type_variation = &"CoaXisToggleButton"
+text = ""
+icon = ExtResource("14_message")
+_container = ExtResource("2_y2duu")
+
+[node name="ButtonShowCommandUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=116854459 instance=ExtResource("1_0wdie")]
+layout_mode = 2
+tooltip_text = "Command
+コマンド実行履歴パネルを表示します"
+theme_type_variation = &"CoaXisToggleButton"
+text = ""
+icon = ExtResource("17_command")
+_container = ExtResource("5_cki6e")
+
 [node name="ButtonShowIpcUi" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1258190384 instance=ExtResource("1_0wdie")]
 layout_mode = 2
 tooltip_text = "IPC
@@ -187,18 +200,8 @@ text = ""
 icon = ExtResource("23_ipc_icon")
 _container = ExtResource("22_ipc")
 
-[node name="ThemeToggleButton" type="Button" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=28738584]
-layout_mode = 2
-theme_type_variation = &"CoaXisToggleButton"
-text = "Dark"
-script = ExtResource("24_theme_toggle")
-
-[node name="BlankPanel" type="Panel" parent="VBoxContainer/HBoxContainer/RightBar" unique_id=1245432863]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
+visible = false
 layout_mode = 2
 
 [node name="LabelPipe" type="Label" parent="VBoxContainer/BottomBar" unique_id=271860447]
