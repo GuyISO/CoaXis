@@ -122,7 +122,7 @@ public partial class ModelPropertyTree : Tree
 		TreeItem rootItem = CreateItem();
 		rootItem.SetText(0, entity.Name);
 		ModelEntityRowBehavior.ApplySelectionHighlight(rootItem, _entityId, ModelEntityRowBehavior.GetSelectionColor());
-		Texture2D entityIcon = Application.Asset.Icon.GetModelIcon(entity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
+		Texture2D entityIcon = ModelEntityRowBehavior.GetModelIcon(entity.IconId);
 		rootItem.SetIcon(0, entityIcon);
 		rootItem.AddButton(0, GetEntityPropertyIcon(entity), id: PropertyButtonId, disabled: entity.Properties.Count == 0);
 		rootItem.AddButton(0, GetEntityVisibilityIcon(entity), id: VisibilityButtonId);
@@ -185,11 +185,32 @@ public partial class ModelPropertyTree : Tree
 	}
 
 	/// <summary>
-	/// テーマ切替後、ルート行の背景色を更新する。
+	/// テーマ切替後、背景色とParticle以外のアイコンを更新する。
 	/// </summary>
 	private void OnThemeChanged()
 	{
 		ApplyRootSelectionHighlight();
+		ModelEntity entity = Application.Model.Entity.Registry.Get(_entityId);
+		if (_rootItem != null && entity != null)
+		{
+			ModelEntityRowBehavior.UpdateThemeIcons(_rootItem, entity, entity.PropertyCountRecursive, false);
+		}
+
+		foreach (System.Collections.Generic.KeyValuePair<Guid, TreeItem> pair in _propertyItems)
+		{
+			ModelProperty property = Application.Model.Property.Registry.Get(pair.Key);
+			if (property == null)
+			{
+				continue;
+			}
+
+			pair.Value.SetIcon(0, ModelEntityRowBehavior.GetModelIcon(property.IconId));
+			int index = pair.Value.GetButtonById(0, VisibilityButtonId);
+			if (index >= 0)
+			{
+				pair.Value.SetButton(0, index, GetVisibilityIcon(property));
+			}
+		}
 	}
 
 	/// <summary>
@@ -225,7 +246,11 @@ public partial class ModelPropertyTree : Tree
 		ModelProperty property = Application.Model.Property.Registry.Get(parsedId);
 		if (property != null)
 		{
-			item.SetButton(0, 0, GetVisibilityIcon(property));
+			int index = item.GetButtonById(0, VisibilityButtonId);
+			if (index >= 0)
+			{
+				item.SetButton(0, index, GetVisibilityIcon(property));
+			}
 		}
 	}
 
@@ -298,10 +323,7 @@ public partial class ModelPropertyTree : Tree
 	/// </summary>
 	private static Texture2D GetEntityVisibilityIcon(ModelEntity entity)
 	{
-		return Application.Asset.Icon.GetVisibility(
-			entity.Visibility,
-			entity.IsVisible,
-			Constant.Ui.Tree.HierarchyVisibleIconSize);
+		return ModelEntityRowBehavior.GetVisibilityIcon(entity.Visibility, entity.IsVisible);
 	}
 
 	/// <summary>
@@ -309,10 +331,7 @@ public partial class ModelPropertyTree : Tree
 	/// </summary>
 	private static Texture2D GetEntityPropertyIcon(ModelEntity entity)
 	{
-		return Application.Asset.Icon.GetProperty(
-			entity.PropertyCountRecursive,
-			entity.IsPropertyTreeVisible,
-			Constant.Ui.Tree.HierarchyVisibleIconSize);
+		return ModelEntityRowBehavior.GetPropertyIcon(entity.PropertyCountRecursive, entity.IsPropertyTreeVisible);
 	}
 
 	/// <summary>
@@ -330,10 +349,7 @@ public partial class ModelPropertyTree : Tree
 	/// </summary>
 	private static Texture2D GetVisibilityIcon(ModelProperty property)
 	{
-		return Application.Asset.Icon.GetVisibility(
-			property.Visibility,
-			property.IsVisible,
-			Constant.Ui.Tree.HierarchyVisibleIconSize);
+		return ModelEntityRowBehavior.GetVisibilityIcon(property.Visibility, property.IsVisible);
 	}
 
 	/// <summary>
@@ -392,7 +408,7 @@ public partial class ModelPropertyTree : Tree
 		propertyItem.SetText(0, GetPropertyText(property));
 		if (!string.IsNullOrEmpty(property.IconId))
 		{
-			Texture2D icon = Application.Asset.Icon.GetModelIcon(property.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
+			Texture2D icon = ModelEntityRowBehavior.GetModelIcon(property.IconId);
 			if (icon != null)
 			{
 				propertyItem.SetIcon(0, icon);

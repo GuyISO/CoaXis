@@ -107,7 +107,21 @@ public partial class SearchUi : PanelContainer
 
     private void OnSelectionChanged() => UpdateSelectionIndicators();
 
-    private void OnThemeChanged() => UpdateSelectionIndicators();
+    private void OnThemeChanged()
+    {
+        Dictionary<Guid, int> counts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
+        foreach (KeyValuePair<Guid, TreeItem> pair in _resultItems)
+        {
+            ModelEntity entity = Application.Model.Entity.Registry.Get(pair.Key);
+            if (entity != null)
+            {
+                ModelEntityRowBehavior.UpdateThemeIcons(pair.Value, entity,
+                    ModelEntityRowBehavior.ResolvePropertyCount(entity, counts), true);
+            }
+        }
+
+        UpdateSelectionIndicators();
+    }
 
     private void OnSelectionCleared() => _lastSelectedIndex = -1;
 

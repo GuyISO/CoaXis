@@ -30,6 +30,9 @@ public partial class UiThemeHub : BaseHub
 	/// <summary>Environmentの背景色を保持するTheme内の項目名。</summary>
 	private const string EnvironmentBackgroundColorName = "background";
 
+	/// <summary>Treeアイコン用の色を保持するTheme内の型名。</summary>
+	private const string TreeIconThemeType = "CoaXisTreeIcon";
+
 	/// <summary>テーマ識別子とThemeリソースパスの対応表。</summary>
 	private static readonly Dictionary<string, string> ThemeResourcePaths = new()
 	{
@@ -55,6 +58,18 @@ public partial class UiThemeHub : BaseHub
 
 	/// <summary>現在のテーマに設定されたEnvironment背景色。</summary>
 	public Color EnvironmentBackgroundColor => GetThemeColor(EnvironmentBackgroundColorName, EnvironmentThemeType);
+
+	/// <summary>Treeアイコンの通常色。</summary>
+	public Color TreeIconColor => GetThemeColor("normal", TreeIconThemeType);
+
+	/// <summary>Treeアイコンの無効・非表示色。</summary>
+	public Color TreeIconMutedColor => GetThemeColor("muted", TreeIconThemeType);
+
+	/// <summary>Treeアイコンの強調色。</summary>
+	public Color TreeIconAccentColor => GetThemeColor("accent", TreeIconThemeType);
+
+	/// <summary>Treeアイコンのバッジ文字色。</summary>
+	public Color TreeIconBadgeTextColor => GetThemeColor("badge_text", TreeIconThemeType);
 
 	/// <summary>
 	/// 指定されたモデル状態に対応する色を現在のテーマから取得する。

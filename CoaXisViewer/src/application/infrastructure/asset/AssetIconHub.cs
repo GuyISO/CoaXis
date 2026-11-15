@@ -91,9 +91,10 @@ public partial class AssetIconHub : BaseHub
     /// </summary>
     /// <param name="visibility">モデルが持つ表示設定</param>
     /// <param name="isVisible">実際にモデルが表示されている場合は true</param>
+    /// <param name="color">アイコンの描画色</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    public Texture2D GetVisibility(ModelVisibility visibility, bool isVisible, int size = 24)
+    public Texture2D GetVisibility(ModelVisibility visibility, bool isVisible, Color color, int size = 24)
     {
         string path = visibility switch
         {
@@ -101,7 +102,7 @@ public partial class AssetIconHub : BaseHub
             ModelVisibility.Invisible => InvisibleIconPath,
             _ => isVisible ? InheritVisibleIconPath : InheritInvisibleIconPath,
         };
-        return GetByPath(path, size);
+        return GetThemedByPath(path, size, color);
     }
 
     /// <summary>
@@ -109,12 +110,13 @@ public partial class AssetIconHub : BaseHub
     /// </summary>
     /// <param name="hasProperty">Propertyを持つ場合は true</param>
     /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
+    /// <param name="color">アイコンの描画色</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    public Texture2D GetProperty(bool hasProperty, bool isTreeVisible, int size = 24)
+    public Texture2D GetProperty(bool hasProperty, bool isTreeVisible, Color color, int size = 24)
     {
         string path = !hasProperty ? PropertyNoneIconPath : isTreeVisible ? PropertyShownIconPath : PropertyHiddenIconPath;
-        return GetByPath(path, size);
+        return GetThemedByPath(path, size, color);
     }
 
     /// <summary>
@@ -122,18 +124,21 @@ public partial class AssetIconHub : BaseHub
     /// </summary>
     /// <param name="count">Propertyの個数。999を超える場合は「999+」と表示する</param>
     /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
+    /// <param name="color">アイコンの描画色</param>
+    /// <param name="badgeBackground">バッジの背景色</param>
+    /// <param name="badgeForeground">バッジの文字色</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>取得したアイコン、失敗時は null</returns>
-    public Texture2D GetProperty(int count, bool isTreeVisible, int size = 24)
+    public Texture2D GetProperty(int count, bool isTreeVisible, Color color, Color badgeBackground, Color badgeForeground, int size = 24)
     {
-        Texture2D baseIcon = GetProperty(count > 0, isTreeVisible, size);
+        Texture2D baseIcon = GetProperty(count > 0, isTreeVisible, color, size);
         if (count <= 0 || baseIcon == null)
         {
             return baseIcon;
         }
 
         string text = count > 999 ? "999+" : count.ToString();
-        string key = $"property-badge|{isTreeVisible}|{text}|{size}";
+        string key = $"property-badge|{isTreeVisible}|{text}|{size}|{color.ToHtml()}|{badgeBackground.ToHtml()}|{badgeForeground.ToHtml()}";
         if (_iconCache.TryGetValue(key, out Texture2D cached))
         {
             return cached;
@@ -142,16 +147,22 @@ public partial class AssetIconHub : BaseHub
         Image image = baseIcon.GetImage();
         if (image == null)
         {
+            Application.Log.Warn("AssetIconHub: property badge base image is null.");
             return baseIcon;
         }
 
         if (image.IsCompressed())
         {
-            image.Decompress();
+            Error error = image.Decompress();
+            if (error != Error.Ok)
+            {
+                Application.Log.Warn($"AssetIconHub: property badge decompression failed. error={error}");
+                return baseIcon;
+            }
         }
 
         image.Convert(Image.Format.Rgba8);
-        DrawBadge(image, text);
+        DrawBadge(image, text, badgeBackground, badgeForeground);
         Texture2D badged = ImageTexture.CreateFromImage(image);
         _iconCache[key] = badged;
         return badged;
@@ -161,9 +172,10 @@ public partial class AssetIconHub : BaseHub
     /// ModelEntityまたはModelPropertyのアイコンIDに対応する画像を取得する。
     /// </summary>
     /// <param name="iconId">Protocolで定義されたアイコンID</param>
+    /// <param name="color">アイコンの描画色</param>
     /// <param name="size">返却アイコンのサイズ</param>
     /// <returns>対応するアイコン。Noneの場合は null</returns>
-    public Texture2D GetModelIcon(string iconId, int size = 16)
+    public Texture2D GetModelIcon(string iconId, Color color, int size = 16)
     {
         if (string.IsNullOrEmpty(iconId))
         {
@@ -180,7 +192,7 @@ public partial class AssetIconHub : BaseHub
             throw new System.InvalidOperationException($"Model icon ID '{iconId}' has no Viewer asset mapping.");
         }
 
-        return GetByPath(path, size);
+        return GetThemedByPath(path, size, color);
     }
 
     /// <summary>
@@ -212,7 +224,7 @@ public partial class AssetIconHub : BaseHub
     /// <summary>
     /// 画像の右下に、文字列を持つバッジを直接描画する。
     /// </summary>
-    private static void DrawBadge(Image image, string text)
+    private static void DrawBadge(Image image, string text, Color background, Color foreground)
     {
         const int glyphWidth = 3;
         const int glyphHeight = 5;
@@ -229,7 +241,6 @@ public partial class AssetIconHub : BaseHub
             return;
         }
 
-        Color background = new Color(0.1f, 0.1f, 0.1f, 0.9f);
         for (int y = top; y < top + badgeHeight; y++)
         {
             for (int x = left; x < left + badgeWidth; x++)
@@ -260,12 +271,61 @@ public partial class AssetIconHub : BaseHub
                     {
                         for (int sx = 0; sx < scale; sx++)
                         {
-                            image.SetPixel(originX + gx * scale + sx, originY + gy * scale + sy, Colors.White);
+                            image.SetPixel(originX + gx * scale + sx, originY + gy * scale + sy, foreground);
                         }
                     }
                 }
             }
         }
+    }
+
+    /// <summary>
+    /// 白いアイコンを指定色で着色し、色とサイズごとにキャッシュする。
+    /// </summary>
+    private Texture2D GetThemedByPath(string path, int size, Color color)
+    {
+        string key = $"themed|{path}|{size}|{color.ToHtml()}";
+        if (_iconCache.TryGetValue(key, out Texture2D cached))
+        {
+            return cached;
+        }
+
+        Texture2D source = GetByPath(path, size);
+        if (source == null)
+        {
+            return null;
+        }
+
+        Image image = source.GetImage();
+        if (image == null)
+        {
+            Application.Log.Warn($"AssetIconHub: icon image is null. path='{path}'");
+            return null;
+        }
+
+        if (image.IsCompressed())
+        {
+            Error error = image.Decompress();
+            if (error != Error.Ok)
+            {
+                Application.Log.Warn($"AssetIconHub: icon decompression failed. path='{path}', error={error}");
+                return null;
+            }
+        }
+
+        image.Convert(Image.Format.Rgba8);
+        for (int y = 0; y < image.GetHeight(); y++)
+        {
+            for (int x = 0; x < image.GetWidth(); x++)
+            {
+                float alpha = image.GetPixel(x, y).A * color.A;
+                image.SetPixel(x, y, new Color(color.R, color.G, color.B, alpha));
+            }
+        }
+
+        Texture2D result = ImageTexture.CreateFromImage(image);
+        _iconCache[key] = result;
+        return result;
     }
 
     /// <summary>

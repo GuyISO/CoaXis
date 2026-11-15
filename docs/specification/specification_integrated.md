@@ -12,6 +12,8 @@ Godot AutoLoadは`Application`のみ。Infrastructure（Log、Setting、Asset、
 
 UIテーマはDarkを既定とし、テーマ識別子を`ViewerSettings.Ui.ThemeId`として`viewer-settings.json`へ保存し、次回起動時に復元する。現在は`dark`と`light`をサポートし、テーマ識別子とThemeリソースの対応表から適用する。右側ツールバーの切替ボタンはLight/Darkの二択を維持する。旧設定の`UseLightTheme`は読み込み時にテーマ識別子へ移行し、`Color`設定は除去して設定ファイルへ保存する。描画色はThemeが所有し、オーバーレイ線、Entity選択、選択マテリアル、測定線は`CoaXisBrand.primary`を参照する。テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
 
+Viewerのアイコン素材はアプリケーション用を除き白を基準とする。Treeのモデル・表示・Propertyアイコンと個数バッジはThemeの`CoaXisTreeIcon`に定義した通常・非表示・強調色などを用い、テーマ切替時に既存行も更新する。Particle画像は白を基準とし、Tree上のParticleアイコンと3Dパーティクルは引き続き`particleColor`を使用する。
+
 メッセージパネルは起動時からのInfo以上のログを表示する。`LogHub`が改行を含むメッセージを行単位で保持し、`ViewerSettings.Ui.MessageMaxLines`で指定された直近の行数に制限する。パネルを閉じても履歴は実行中保持される。Debugログは従来どおりパネルに表示しない。
 
 ### ModelEntity

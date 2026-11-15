@@ -21,7 +21,7 @@ internal static class ModelEntityRowBehavior
     /// <returns>階層に応じた余白を持つアイコン</returns>
     public static Texture2D GetIndentedIcon(ModelEntity entity)
     {
-        Texture2D icon = Application.Asset.Icon.GetModelIcon(entity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D icon = GetModelIcon(entity.IconId);
         IReadOnlyList<ModelEntity> ancestors = Application.Model.Entity.Registry.GetAncestors(entity.Id);
         int depth = ancestors.Count;
         if (depth > 0 && ancestors[depth - 1].Id == ViewerConstants.RootModelEntityId)
@@ -59,6 +59,43 @@ internal static class ModelEntityRowBehavior
     }
 
     /// <summary>
+    /// 現在のテーマ色でモデルアイコンを取得する。
+    /// </summary>
+    /// <param name="iconId">モデルのアイコンID</param>
+    /// <returns>着色済みアイコン</returns>
+    public static Texture2D GetModelIcon(string iconId)
+    {
+        return Application.Asset.Icon.GetModelIcon(
+            iconId, Application.Ui.Theme.TreeIconColor, Constant.Ui.Tree.HierarchyVisibleIconSize);
+    }
+
+    /// <summary>
+    /// 実効表示状態に応じたテーマ色でVisibilityアイコンを取得する。
+    /// </summary>
+    /// <param name="visibility">モデルの表示設定</param>
+    /// <param name="isVisible">実効表示状態</param>
+    /// <returns>着色済みアイコン</returns>
+    public static Texture2D GetVisibilityIcon(ModelVisibility visibility, bool isVisible)
+    {
+        Color color = isVisible ? Application.Ui.Theme.TreeIconColor : Application.Ui.Theme.TreeIconMutedColor;
+        return Application.Asset.Icon.GetVisibility(visibility, isVisible, color, Constant.Ui.Tree.HierarchyVisibleIconSize);
+    }
+
+    /// <summary>
+    /// Propertyの状態に応じたテーマ色でバッジ付きアイコンを取得する。
+    /// </summary>
+    /// <param name="count">Propertyの個数</param>
+    /// <param name="isTreeVisible">OverlayTreeが表示されている場合は true</param>
+    /// <returns>着色済みアイコン</returns>
+    public static Texture2D GetPropertyIcon(int count, bool isTreeVisible)
+    {
+        UiThemeHub theme = Application.Ui.Theme;
+        Color color = count <= 0 ? theme.TreeIconMutedColor : isTreeVisible ? theme.TreeIconAccentColor : theme.TreeIconColor;
+        return Application.Asset.Icon.GetProperty(count, isTreeVisible, color,
+            theme.TreeIconColor, theme.TreeIconBadgeTextColor, Constant.Ui.Tree.HierarchyVisibleIconSize);
+    }
+
+    /// <summary>
     /// Tree上の ModelEntity 行へ選択状態に応じた背景色を適用する。
     /// </summary>
     /// <param name="item">背景色を適用する TreeItem</param>
@@ -93,11 +130,9 @@ internal static class ModelEntityRowBehavior
             }
         }
 
-        Texture2D propertyIcon = Application.Asset.Icon.GetProperty(
-            propertyCount, entity.IsPropertyTreeVisible, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D propertyIcon = GetPropertyIcon(propertyCount, entity.IsPropertyTreeVisible);
         item.AddButton(0, propertyIcon, id: PropertyButtonId, disabled: entity.Properties.Count == 0);
-        Texture2D visibilityIcon = Application.Asset.Icon.GetVisibility(
-            entity.Visibility, entity.IsVisible, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D visibilityIcon = GetVisibilityIcon(entity.Visibility, entity.IsVisible);
         item.AddButton(0, visibilityIcon, id: VisibilityButtonId);
     }
 
@@ -111,10 +146,31 @@ internal static class ModelEntityRowBehavior
         int index = item.GetButtonById(0, VisibilityButtonId);
         if (index >= 0)
         {
-            Texture2D icon = Application.Asset.Icon.GetVisibility(
-                entity.Visibility, entity.IsVisible, Constant.Ui.Tree.HierarchyVisibleIconSize);
+            Texture2D icon = GetVisibilityIcon(entity.Visibility, entity.IsVisible);
             item.SetButton(0, index, icon);
         }
+    }
+
+    /// <summary>
+    /// 行のアイコンとボタンを現在のテーマ色で更新する。
+    /// </summary>
+    /// <param name="item">更新対象の行</param>
+    /// <param name="entity">行が表すEntity</param>
+    /// <param name="propertyCount">Propertyボタンに表示する数</param>
+    /// <param name="indented">階層の深さに応じた余白を付ける場合は true</param>
+    public static void UpdateThemeIcons(TreeItem item, ModelEntity entity, int propertyCount, bool indented)
+    {
+        item.SetIcon(0, indented
+            ? GetIndentedIcon(entity)
+            : GetModelIcon(entity.IconId));
+
+        int propertyIndex = item.GetButtonById(0, PropertyButtonId);
+        if (propertyIndex >= 0)
+        {
+            item.SetButton(0, propertyIndex, GetPropertyIcon(propertyCount, entity.IsPropertyTreeVisible));
+        }
+
+        UpdateVisibilityButton(item, entity);
     }
 
     /// <summary>

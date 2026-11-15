@@ -125,14 +125,21 @@ public partial class SelectionUi : PanelContainer
 	}
 
 	/// <summary>
-	/// テーマ切替後、選択行の背景色を更新する。
+	/// テーマ切替後、選択行の背景色とアイコンを更新する。
 	/// </summary>
 	private void OnThemeChanged()
 	{
 		Color selectionColor = ModelEntityRowBehavior.GetSelectionColor();
+		Dictionary<Guid, int> counts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
 		foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
 		{
 			ModelEntityRowBehavior.ApplySelectionHighlight(pair.Value, pair.Key, selectionColor);
+			ModelEntity entity = Application.Model.Entity.Registry.Get(pair.Key);
+			if (entity != null)
+			{
+				ModelEntityRowBehavior.UpdateThemeIcons(pair.Value, entity,
+					ModelEntityRowBehavior.ResolvePropertyCount(entity, counts), true);
+			}
 		}
 	}
 

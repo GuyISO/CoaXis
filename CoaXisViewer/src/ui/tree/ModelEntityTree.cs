@@ -148,7 +148,7 @@ public partial class ModelEntityTree : Tree
     }
 
     /// <summary>
-    /// テーマ切替後、各モデル行の状態色を現在のテーマに合わせて更新する。
+    /// テーマ切替後、各モデル行の状態色とアイコンを更新する。
     /// </summary>
     private void OnThemeChanged()
     {
@@ -162,12 +162,15 @@ public partial class ModelEntityTree : Tree
     {
         _selectedColor = Application.Ui.Theme.PrimaryColor;
 
+        Dictionary<Guid, int> counts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
         foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
         {
             ModelEntity modelEntity = Application.Model.Entity.Registry.Get(pair.Key);
             if (modelEntity != null)
             {
                 pair.Value.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
+                ModelEntityRowBehavior.UpdateThemeIcons(pair.Value, modelEntity,
+                    ModelEntityRowBehavior.ResolvePropertyCount(modelEntity, counts), false);
             }
         }
 
@@ -491,7 +494,7 @@ public partial class ModelEntityTree : Tree
         treeItem.SetText(0, modelEntity.Name);
 
         // --- 左側アイコン（ModelEntity に紐づくモデルアイコン） ---
-        Texture2D icon = Application.Asset.Icon.GetModelIcon(modelEntity.IconId, Constant.Ui.Tree.HierarchyVisibleIconSize);
+        Texture2D icon = ModelEntityRowBehavior.GetModelIcon(modelEntity.IconId);
         treeItem.SetIcon(0, icon);
 
         // --- 右側ボタン（Property表示・Visibility切替） ---
