@@ -14,6 +14,12 @@ public partial class UiThemeHub : BaseHub
     /// <summary>ライトテーマのリソースパス。</summary>
     private const string LightThemePath = "res://assets/theme/coaxis_light.tres";
 
+    /// <summary>Theme内でEnvironment用の色を保持する型名。</summary>
+    private const string EnvironmentThemeType = "CoaXisEnvironment";
+
+    /// <summary>Environmentの背景色を保持するTheme内の項目名。</summary>
+    private const string EnvironmentBackgroundColorName = "background";
+
     /// <summary>ダークテーマのリソース。</summary>
     private Theme _darkTheme;
 
@@ -30,9 +36,32 @@ public partial class UiThemeHub : BaseHub
     /// <summary>現在適用中のテーマリソース。</summary>
     public Theme CurrentTheme { get; private set; }
 
+    /// <summary>現在のテーマに設定されたEnvironment背景色。</summary>
+    public Color EnvironmentBackgroundColor
+    {
+        get
+        {
+            if (CurrentTheme == null)
+            {
+                throw new InvalidOperationException("The current UI theme has not been loaded.");
+            }
+
+            if (!CurrentTheme.HasColor(EnvironmentBackgroundColorName, EnvironmentThemeType))
+            {
+                throw new InvalidOperationException(
+                    $"Theme color '{EnvironmentBackgroundColorName}' is missing from '{EnvironmentThemeType}'.");
+            }
+
+            return CurrentTheme.GetColor(EnvironmentBackgroundColorName, EnvironmentThemeType);
+        }
+    }
+
     #endregion
 
     #region Signals
+
+    /// <summary>UIテーマが切り替わったことを通知する。</summary>
+    [Signal] public delegate void ThemeChangedEventHandler();
 
     #endregion
 
@@ -87,22 +116,24 @@ public partial class UiThemeHub : BaseHub
     #region Helpers
 
     /// <summary>
-    /// 選択テーマをメインウィンドウとUIサブウィンドウへ適用する。
+    /// 選択テーマをViewport、メインウィンドウ、UIサブウィンドウへ適用する。
     /// </summary>
     /// <param name="useLightTheme">ライトテーマを使用する場合は true。</param>
     private void ApplyTheme(bool useLightTheme)
     {
         CurrentTheme = useLightTheme ? _lightTheme : _darkTheme;
+        RenderingServer.SetDefaultClearColor(EnvironmentBackgroundColor);
         Window rootWindow = GetTree().Root;
         rootWindow.Theme = CurrentTheme;
-        ApplyThemeToWindows(rootWindow);
+        ApplyThemeToUiRoots(rootWindow);
+        EmitSignal(SignalName.ThemeChanged);
     }
 
     /// <summary>
-    /// SceneTree内の子ウィンドウへ現在のテーマを適用する。
+    /// SceneTree内のウィンドウと、親Controlを持たないUIルートへ現在のテーマを適用する。
     /// </summary>
     /// <param name="node">走査対象のノード。</param>
-    private void ApplyThemeToWindows(Node node)
+    private void ApplyThemeToUiRoots(Node node)
     {
         foreach (Node child in node.GetChildren())
         {
@@ -110,8 +141,12 @@ public partial class UiThemeHub : BaseHub
             {
                 window.Theme = CurrentTheme;
             }
+            else if (child is Control control && child.GetParent() is not Control)
+            {
+                control.Theme = CurrentTheme;
+            }
 
-            ApplyThemeToWindows(child);
+            ApplyThemeToUiRoots(child);
         }
     }
 

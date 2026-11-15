@@ -17,7 +17,6 @@
     "PointerRotationSpeedDeg": 90
   },
   "Color": {
-    "EnvironmentBackgroundColor": "#202124FF",
     "OverlayLineColor": "#4E95D9FF",
     "HierarchySelectedColor": "#4E95D9FF",
     "SelectedMaterialColor": "#4E95D9FF",

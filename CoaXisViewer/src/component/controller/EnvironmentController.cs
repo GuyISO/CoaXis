@@ -1,4 +1,5 @@
 using Godot;
+using System;
 
 /// <summary>
 /// 環境設定をWorldEnvironmentに反映するためのコントローラ
@@ -9,7 +10,43 @@ public partial class EnvironmentController : WorldEnvironment
 
 	public override void _Ready()
 	{
-		ApplySettings();
+		SubscribeThemeEvents();
+		ApplyTheme();
+	}
+
+	public override void _ExitTree()
+	{
+		UnsubscribeThemeEvents();
+
+		base._ExitTree();
+	}
+
+	#endregion
+
+	#region Events
+
+	/// <summary>
+	/// UIテーマ変更通知の購読を開始する。
+	/// </summary>
+	private void SubscribeThemeEvents()
+	{
+		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
+	}
+
+	/// <summary>
+	/// UIテーマ変更通知の購読を解除する。
+	/// </summary>
+	private void UnsubscribeThemeEvents()
+	{
+		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
+	}
+
+	/// <summary>
+	/// UIテーマが変更されたとき、Environment背景色を更新する。
+	/// </summary>
+	private void OnThemeChanged()
+	{
+		ApplyTheme();
 	}
 
 	#endregion
@@ -17,18 +54,17 @@ public partial class EnvironmentController : WorldEnvironment
 	#region Helpers
 
 	/// <summary>
-	/// 設定値を反映する
+	/// 現在のThemeに設定された背景色をWorldEnvironmentへ反映する。
 	/// </summary>
-	private void ApplySettings()
+	private void ApplyTheme()
 	{
-		Environment env = Environment;
+		Godot.Environment env = Environment;
 		if (env == null)
 		{
-			return;
+			throw new InvalidOperationException("WorldEnvironment has no Environment resource.");
 		}
 
-		ColorSettings c = Application.Setting.Current.Color;
-		env.BackgroundColor = Color.FromHtml(c.EnvironmentBackgroundColor);
+		env.BackgroundColor = Application.Ui.Theme.EnvironmentBackgroundColor;
 	}
 
 	#endregion

@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=20 format=3]
+[gd_resource type="Theme" load_steps=24 format=3]
 
 [ext_resource type="FontFile" uid="uid://bkld7l500480i" path="res://assets/font/segoeui.ttf" id="1_isbac"]
 [ext_resource type="FontFile" uid="uid://dixsr2ouqfw4t" path="res://assets/font/segoeuib.ttf" id="2_button_font"]
@@ -118,6 +118,50 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="StyleBoxFlat" id="ScrollTrack"]
+bg_color = Color(0.811765, 0.819608, 0.831373, 1)
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabber"]
+bg_color = Color(0.65098, 0.666667, 0.694118, 1)
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabberHover"]
+bg_color = Color(0.478431, 0.509804, 0.560784, 1)
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabberPressed"]
+bg_color = Color(0.305882, 0.584314, 0.85098, 1)
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
 [sub_resource type="StyleBoxFlat" id="TreeTitleNormal"]
 bg_color = Color(0.917647, 0.945098, 0.968627, 1)
 border_width_left = 1
@@ -168,6 +212,11 @@ default_font_size = 14
 Button/fonts/font = ExtResource("2_button_font")
 ProgressBar/styles/background = SubResource("Input")
 ProgressBar/styles/fill = SubResource("ProgressFill")
+ScrollBar/styles/scroll = SubResource("ScrollTrack")
+ScrollBar/styles/scroll_focus = SubResource("ScrollTrack")
+ScrollBar/styles/grabber = SubResource("ScrollGrabber")
+ScrollBar/styles/grabber_highlight = SubResource("ScrollGrabberHover")
+ScrollBar/styles/grabber_pressed = SubResource("ScrollGrabberPressed")
 TabBar/colors/font_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
 TabBar/styles/tab_selected = SubResource("TabSelected")
 TabContainer/colors/font_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
@@ -175,8 +224,14 @@ TabContainer/styles/tab_selected = SubResource("TabSelected")
 ItemList/colors/selection_color = Color(0.862745, 0.921569, 0.980392, 1)
 ItemList/colors/font_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
 Tree/colors/selection_color = Color(0.862745, 0.921569, 0.980392, 1)
+Tree/colors/font_color = Color(0.12549, 0.12549, 0.12549, 1)
+Tree/colors/font_hovered_color = Color(0.12549, 0.12549, 0.12549, 1)
+Tree/colors/font_hovered_dimmed_color = Color(0.12549, 0.12549, 0.12549, 1)
+Tree/colors/font_hovered_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
+Tree/colors/font_selected_color = Color(0.12549, 0.12549, 0.12549, 1)
 Tree/colors/title_button_color = Color(0.12549, 0.12549, 0.12549, 1)
 Tree/constants/v_separation = 1
+Tree/styles/panel = SubResource("Panel")
 Tree/styles/title_button_hover = SubResource("TreeTitleHover")
 Tree/styles/title_button_normal = SubResource("TreeTitleNormal")
 Tree/styles/title_button_pressed = SubResource("TreeTitlePressed")
@@ -185,6 +240,7 @@ MarginContainer/constants/margin_top = 6
 MarginContainer/constants/margin_right = 6
 MarginContainer/constants/margin_bottom = 6
 VBoxContainer/constants/separation = 4
+CoaXisEnvironment/colors/background = Color(0.94902, 0.952941, 0.956863, 1)
 Button/colors/font_color = Color(0.94902, 0.960784, 0.972549, 1)
 Button/colors/font_disabled_color = Color(0.376471, 0.376471, 0.376471, 1)
 Button/colors/font_hover_color = Color(0.94902, 0.960784, 0.972549, 1)

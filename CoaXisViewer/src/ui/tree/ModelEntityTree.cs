@@ -78,6 +78,7 @@ public partial class ModelEntityTree : Tree
         ButtonClicked += OnButtonClicked;
         ItemCollapsed += OnItemCollapsed;
         ItemActivated += OnItemActivated;
+        Application.Ui.Theme.ThemeChanged += OnThemeChanged;
     }
 
     /// <summary>
@@ -89,6 +90,7 @@ public partial class ModelEntityTree : Tree
         ButtonClicked -= OnButtonClicked;
         ItemCollapsed -= OnItemCollapsed;
         ItemActivated -= OnItemActivated;
+        Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
     }
     
     /// <summary>
@@ -143,6 +145,21 @@ public partial class ModelEntityTree : Tree
 
         HandleSelected(item);        
         _lastSelectedItem = item;
+    }
+
+    /// <summary>
+    /// テーマ切替後、各モデル行の状態色を現在のテーマに合わせて更新する。
+    /// </summary>
+    private void OnThemeChanged()
+    {
+        foreach (KeyValuePair<Guid, TreeItem> pair in _entityIdToTreeItem)
+        {
+            ModelEntity modelEntity = Application.Model.Entity.Registry.Get(pair.Key);
+            if (modelEntity != null)
+            {
+                pair.Value.SetCustomColor(0, ResolveTextColor(modelEntity.Status));
+            }
+        }
     }
 
     /// <summary>
@@ -499,14 +516,15 @@ public partial class ModelEntityTree : Tree
 
     private static Color ResolveTextColor(ModelStatus status)
     {
+        bool isLightTheme = Application.Ui.Theme.IsLightTheme;
         return status switch
         {
-            ModelStatus.Loading => new Color(0.5f, 0.5f, 0.5f),
-            ModelStatus.Loaded => Colors.White,
-            ModelStatus.LoadFailed => new Color(1.0f, 0.5f, 0.5f),
-            ModelStatus.Initialized => new Color(0.0f, 0.0f, 0.0f),
-            ModelStatus.Registered => new Color(0.25f, 0.25f, 0.25f),
-            _ => new Color(0.0f, 0.0f, 0.0f),
+            ModelStatus.Loading => isLightTheme ? new Color(0.4f, 0.4f, 0.4f) : new Color(0.5f, 0.5f, 0.5f),
+            ModelStatus.Loaded => isLightTheme ? new Color(0.12549f, 0.12549f, 0.12549f) : Colors.White,
+            ModelStatus.LoadFailed => isLightTheme ? new Color(0.65f, 0.15f, 0.15f) : new Color(1.0f, 0.5f, 0.5f),
+            ModelStatus.Initialized => isLightTheme ? Colors.Black : new Color(0.94902f, 0.960784f, 0.972549f),
+            ModelStatus.Registered => isLightTheme ? new Color(0.25f, 0.25f, 0.25f) : new Color(0.75f, 0.75f, 0.75f),
+            _ => isLightTheme ? Colors.Black : new Color(0.94902f, 0.960784f, 0.972549f),
         };
     }
 

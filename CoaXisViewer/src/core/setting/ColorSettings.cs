@@ -6,16 +6,10 @@ public sealed class ColorSettings
 {
     #region Properties
 
-    private const string DefaultEnvironmentBackgroundColor = "#202124FF";
     private const string DefaultOverlayLineColor = "#4E95D9FF";
     private const string DefaultHierarchySelectedColor = "#4E95D9FF";
     private const string DefaultSelectedMaterialColor = "#4E95D9FF";
     private const string DefaultMeasurementLineColor = "#4E95D9FF";
-
-    /// <summary>
-    /// WorldEnvironment の背景色。
-    /// </summary>
-    public string EnvironmentBackgroundColor { get; set; } = DefaultEnvironmentBackgroundColor;
 
     /// <summary>
     /// ビューポートオーバーレイ（中心軸・アークボール）の線色。
@@ -46,7 +40,6 @@ public sealed class ColorSettings
     /// </summary>
     public void Normalize()
     {
-        if (string.IsNullOrWhiteSpace(EnvironmentBackgroundColor)) EnvironmentBackgroundColor = DefaultEnvironmentBackgroundColor;
         if (string.IsNullOrWhiteSpace(OverlayLineColor)) OverlayLineColor = DefaultOverlayLineColor;
         if (string.IsNullOrWhiteSpace(HierarchySelectedColor)) HierarchySelectedColor = DefaultHierarchySelectedColor;
         if (string.IsNullOrWhiteSpace(SelectedMaterialColor)) SelectedMaterialColor = DefaultSelectedMaterialColor;

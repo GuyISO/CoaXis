@@ -1,4 +1,4 @@
-[gd_resource type="Theme" load_steps=20 format=3 uid="uid://dmg2kdse377xj"]
+[gd_resource type="Theme" format=3 uid="uid://dmg2kdse377xj"]
 
 [ext_resource type="FontFile" uid="uid://bkld7l500480i" path="res://assets/font/segoeui.ttf" id="1_isbac"]
 [ext_resource type="FontFile" uid="uid://dixsr2ouqfw4t" path="res://assets/font/segoeuib.ttf" id="2_button_font"]
@@ -10,18 +10,6 @@ border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.254902, 0.262745, 0.278431, 1)
-corner_radius_top_left = 3
-corner_radius_top_right = 3
-corner_radius_bottom_right = 3
-corner_radius_bottom_left = 3
-
-[sub_resource type="StyleBoxFlat" id="InputFocus"]
-bg_color = Color(0.090196, 0.094118, 0.101961, 1)
-border_width_left = 1
-border_width_top = 1
-border_width_right = 1
-border_width_bottom = 1
-border_color = Color(0.305882, 0.584314, 0.85098, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -75,8 +63,22 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
+[sub_resource type="StyleBoxEmpty" id="SearchTreeSelection"]
+
 [sub_resource type="StyleBoxFlat" id="PrimaryButton"]
 bg_color = Color(0.305882, 0.584314, 0.85098, 1)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+
+[sub_resource type="StyleBoxFlat" id="InputFocus"]
+bg_color = Color(0.090196, 0.094118, 0.101961, 1)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.305882, 0.584314, 0.85098, 1)
 corner_radius_top_left = 3
 corner_radius_top_right = 3
 corner_radius_bottom_right = 3
@@ -118,16 +120,77 @@ corner_radius_top_right = 3
 corner_radius_bottom_right = 3
 corner_radius_bottom_left = 3
 
-[sub_resource type="StyleBoxFlat" id="TreeTitleNormal"]
+[sub_resource type="StyleBoxFlat" id="ScrollTrack"]
+bg_color = Color(0.090196, 0.094118, 0.101961, 1)
+content_margin_left = 4.0
+content_margin_top = 4.0
+content_margin_right = 4.0
+content_margin_bottom = 4.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabber"]
+bg_color = Color(0.305882, 0.321569, 0.34902, 1)
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabberHover"]
+bg_color = Color(0.415686, 0.443137, 0.482353, 1)
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ScrollGrabberPressed"]
+bg_color = Color(0.305882, 0.584314, 0.85098, 1)
+content_margin_left = 5.0
+content_margin_top = 5.0
+content_margin_right = 5.0
+content_margin_bottom = 5.0
+corner_radius_top_left = 4
+corner_radius_top_right = 4
+corner_radius_bottom_right = 4
+corner_radius_bottom_left = 4
+
+[sub_resource type="StyleBoxFlat" id="ProgressFill"]
+bg_color = Color(0.305882, 0.584314, 0.85098, 1)
+corner_radius_top_left = 2
+corner_radius_top_right = 2
+corner_radius_bottom_right = 2
+corner_radius_bottom_left = 2
+
+[sub_resource type="StyleBoxLine" id="SeparatorLine"]
+color = Color(0.254902, 0.262745, 0.278431, 1)
+grow_begin = 0.0
+grow_end = 0.0
+
+[sub_resource type="StyleBoxFlat" id="TabSelected"]
 bg_color = Color(0.145098, 0.14902, 0.160784, 1)
+border_width_bottom = 2
+border_color = Color(0.305882, 0.584314, 0.85098, 1)
+
+[sub_resource type="StyleBoxFlat" id="TreeTitleHover"]
+bg_color = Color(0.203922, 0.211765, 0.227451, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.254902, 0.262745, 0.278431, 1)
 
-[sub_resource type="StyleBoxFlat" id="TreeTitleHover"]
-bg_color = Color(0.203922, 0.211765, 0.227451, 1)
+[sub_resource type="StyleBoxFlat" id="TreeTitleNormal"]
+bg_color = Color(0.145098, 0.14902, 0.160784, 1)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
@@ -142,44 +205,29 @@ border_width_right = 1
 border_width_bottom = 1
 border_color = Color(0.254902, 0.262745, 0.278431, 1)
 
-[sub_resource type="StyleBoxFlat" id="ProgressFill"]
-bg_color = Color(0.305882, 0.584314, 0.85098, 1)
-corner_radius_top_left = 2
-corner_radius_top_right = 2
-corner_radius_bottom_right = 2
-corner_radius_bottom_left = 2
-
-[sub_resource type="StyleBoxFlat" id="TabSelected"]
-bg_color = Color(0.145098, 0.14902, 0.160784, 1)
-border_width_bottom = 2
-border_color = Color(0.305882, 0.584314, 0.85098, 1)
-
-[sub_resource type="StyleBoxEmpty" id="SearchTreeSelection"]
-
-[sub_resource type="StyleBoxLine" id="SeparatorLine"]
-color = Color(0.254902, 0.262745, 0.278431, 1)
-thickness = 1
-grow_begin = 0.0
-grow_end = 0.0
-
 [resource]
 default_font = ExtResource("1_isbac")
 default_font_size = 14
-Button/fonts/font = ExtResource("2_button_font")
 Button/colors/font_color = Color(0.94902, 0.960784, 0.972549, 1)
 Button/colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
 Button/colors/font_hover_color = Color(0.94902, 0.960784, 0.972549, 1)
 Button/colors/font_pressed_color = Color(0.94902, 0.960784, 0.972549, 1)
+Button/fonts/font = ExtResource("2_button_font")
 Button/styles/disabled = SubResource("ButtonDisabled")
 Button/styles/focus = SubResource("ButtonFocus")
 Button/styles/hover = SubResource("ButtonHover")
 Button/styles/normal = SubResource("ButtonNormal")
 Button/styles/pressed = SubResource("ButtonPressed")
+CoaXisEnvironment/colors/background = Color(0.12549, 0.129412, 0.141176, 1)
+CoaXisSearchResultTree/base_type = &"Tree"
+CoaXisSearchResultTree/styles/selected = SubResource("SearchTreeSelection")
+CoaXisSearchResultTree/styles/selected_focus = SubResource("SearchTreeSelection")
+CoaXisToggleButton/base_type = &"Button"
+CoaXisToggleButton/styles/pressed = SubResource("PrimaryButton")
 Control/colors/font_color = Color(0.94902, 0.960784, 0.972549, 1)
 Control/colors/font_disabled_color = Color(0.690196, 0.690196, 0.690196, 1)
 Control/colors/font_hover_color = Color(0.94902, 0.960784, 0.972549, 1)
 Control/colors/font_pressed_color = Color(0.94902, 0.960784, 0.972549, 1)
-OptionButton/fonts/font = ExtResource("1_isbac")
 ItemList/colors/font_selected_color = Color(0.94902, 0.960784, 0.972549, 1)
 ItemList/colors/selection_color = Color(0.227451, 0.239216, 0.258824, 1)
 LineEdit/colors/font_color = Color(0.94902, 0.960784, 0.972549, 1)
@@ -187,11 +235,23 @@ LineEdit/colors/font_placeholder_color = Color(0.690196, 0.690196, 0.690196, 1)
 LineEdit/styles/focus = SubResource("InputFocus")
 LineEdit/styles/normal = SubResource("Input")
 LineEdit/styles/read_only = SubResource("InputReadOnly")
+MarginContainer/constants/margin_bottom = 6
+MarginContainer/constants/margin_left = 6
+MarginContainer/constants/margin_right = 6
+MarginContainer/constants/margin_top = 6
+OptionButton/fonts/font = ExtResource("1_isbac")
 Panel/styles/panel = SubResource("Panel")
 PanelContainer/styles/panel = SubResource("Panel")
 PopupPanel/styles/panel = SubResource("Panel")
 ProgressBar/styles/background = SubResource("Input")
 ProgressBar/styles/fill = SubResource("ProgressFill")
+ScrollBar/styles/scroll = SubResource("ScrollTrack")
+ScrollBar/styles/scroll_focus = SubResource("ScrollTrack")
+ScrollBar/styles/grabber = SubResource("ScrollGrabber")
+ScrollBar/styles/grabber_highlight = SubResource("ScrollGrabberHover")
+ScrollBar/styles/grabber_pressed = SubResource("ScrollGrabberPressed")
+Separator/constants/separation = 0
+Separator/styles/separator = SubResource("SeparatorLine")
 TabBar/colors/font_selected_color = Color(0.94902, 0.960784, 0.972549, 1)
 TabBar/styles/tab_selected = SubResource("TabSelected")
 TabContainer/colors/font_selected_color = Color(0.94902, 0.960784, 0.972549, 1)
@@ -201,21 +261,16 @@ TextEdit/colors/font_placeholder_color = Color(0.690196, 0.690196, 0.690196, 1)
 TextEdit/styles/focus = SubResource("InputFocus")
 TextEdit/styles/normal = SubResource("Input")
 TextEdit/styles/read_only = SubResource("InputReadOnly")
+Tree/colors/font_color = Color(0.94902, 0.960784, 0.972549, 1)
+Tree/colors/font_hovered_color = Color(0.94902, 0.960784, 0.972549, 1)
+Tree/colors/font_hovered_dimmed_color = Color(0.94902, 0.960784, 0.972549, 1)
+Tree/colors/font_hovered_selected_color = Color(0.94902, 0.960784, 0.972549, 1)
+Tree/colors/font_selected_color = Color(0.94902, 0.960784, 0.972549, 1)
 Tree/colors/selection_color = Color(0.227451, 0.239216, 0.258824, 1)
 Tree/colors/title_button_color = Color(0.94902, 0.960784, 0.972549, 1)
 Tree/constants/v_separation = 1
+Tree/styles/panel = SubResource("Panel")
 Tree/styles/title_button_hover = SubResource("TreeTitleHover")
 Tree/styles/title_button_normal = SubResource("TreeTitleNormal")
 Tree/styles/title_button_pressed = SubResource("TreeTitlePressed")
-CoaXisSearchResultTree/base_type = "Tree"
-CoaXisSearchResultTree/styles/selected = SubResource("SearchTreeSelection")
-CoaXisSearchResultTree/styles/selected_focus = SubResource("SearchTreeSelection")
-CoaXisToggleButton/base_type = "Button"
-CoaXisToggleButton/styles/pressed = SubResource("PrimaryButton")
-Separator/constants/separation = 0
-Separator/styles/separator = SubResource("SeparatorLine")
-MarginContainer/constants/margin_left = 6
-MarginContainer/constants/margin_top = 6
-MarginContainer/constants/margin_right = 6
-MarginContainer/constants/margin_bottom = 6
 VBoxContainer/constants/separation = 4
