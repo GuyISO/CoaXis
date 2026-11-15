@@ -422,6 +422,13 @@ public sealed partial class MainForm : CoaXisForm
         {
             detail = $"操作対象のModelEntity: {entityId.GetString()}";
         }
+        else if (notification.Payload.ValueKind == JsonValueKind.Object &&
+            notification.EventType == IpcEventType.FromViewer.ModelPropertyManipulated &&
+            notification.Payload.TryGetProperty("propertyId", out JsonElement propertyId) &&
+            propertyId.ValueKind == JsonValueKind.String)
+        {
+            detail = $"操作対象のModelProperty: {propertyId.GetString()}";
+        }
 
         AddExchange(
             notification.EventType,

@@ -6,9 +6,6 @@ ModelProertyTreeは、Containerの中に配置する形で使用する
 SettingもFacadeにして、各種設定を管理するHub
 Settingで設定可能にする必要のない項目が多すぎる、Settingは全体的に見直す
 
-ユーザー可変値はSettingでの一元管理でなく、各Hubが持つものを正とし、Settingはあくまで初期値やデフォルト値をHubに提供する役割にする
-
-IPCの状態確認UI作成する
 三面図などの複数Viewportに対応できるように、各Viewportごとに独立したカメラやオーバーレイを管理する仕組みを検討する
 ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介してカメラを表示できるようにする、各Viewportごとに独立したカメラ制御を可能にする
 FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
@@ -25,8 +22,6 @@ FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
     フローティングor右側でタブから選んで使用できるように配置する
 Treeの切り出し
     Treeを独立したUIコンポーネントとして切り出し、他のUIからも再利用可能にする
-
-ライトテーマ追加
 
 ## 今後を考えて
 

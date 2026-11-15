@@ -15,9 +15,11 @@ public partial class ModelEntityTree : Tree
 
     private readonly HashSet<TreeItem> _highlightedItems = new(); // 直近のRefreshAllHighlightsで着色した TreeItem の集合、差分更新の比較に使う
 
-    private ModelEntity _rootModelEntity; // このツリーのルートモデル実体のキャッシュ、シーン全体のルートではないことに注意
+    private Guid _rootEntityId = Guid.Empty;
 
     private Color _selectedColor;
+
+    private bool _isTreeReady;
 
     // ユーザー操作による選択か、内部的なプログラムによる選択かを判定するフラグ
     private bool _ispublicSelection = false;
@@ -31,6 +33,11 @@ public partial class ModelEntityTree : Tree
         SubscribeUiEvents();
         SubscribeApplicationEvents();
         ApplyThemeColors();
+        _isTreeReady = true;
+        if (_rootEntityId != Guid.Empty)
+        {
+            RebuildTreeFromRegistry();
+        }
     }
 
     public override void _ExitTree()
@@ -412,18 +419,21 @@ public partial class ModelEntityTree : Tree
         _highlightedItems.Clear();
         _lastSelectedItem = null;
 
-        if (Application.Model.Entity.Registry.Root == null)
+        ModelEntity rootModelEntity = _rootEntityId == Guid.Empty
+            ? Application.Model.Entity.Registry.Root
+            : Application.Model.Entity.Registry.Get(_rootEntityId);
+        if (rootModelEntity == null)
         {
             return;
         }
 
-        if (Application.Model.Entity.Registry.Get(Application.Model.Entity.Registry.Root.Id) == null)
+        if (Application.Model.Entity.Registry.Get(rootModelEntity.Id) == null)
         {
             return;
         }
 
-        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
-        AddToTree(Application.Model.Entity.Registry.Root.Id, Guid.Empty, propertySubtreeCounts);
+        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(rootModelEntity);
+        AddToTree(rootModelEntity.Id, Guid.Empty, propertySubtreeCounts);
     }
 
     /// <summary>
@@ -456,17 +466,23 @@ public partial class ModelEntityTree : Tree
 
     #region Methods
 
+    /// <summary>
+    /// 表示する ModelEntity の部分木を設定する。
+    /// </summary>
+    /// <param name="rootModelEntity">ツリーの起点となる ModelEntity</param>
     public void SetRoot(ModelEntity rootModelEntity)
     {
-        if (_rootModelEntity != null)
+        if (rootModelEntity == null || rootModelEntity.Id == Guid.Empty)
         {
+            Application.Log.Warn("ModelEntityTree: root entity is null or has an empty ID.");
             return;
         }
 
-        _rootModelEntity = rootModelEntity;
-
-        Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(_rootModelEntity);
-        AddToTree(_rootModelEntity.Id, Guid.Empty, propertySubtreeCounts);
+        _rootEntityId = rootModelEntity.Id;
+        if (_isTreeReady)
+        {
+            RebuildTreeFromRegistry();
+        }
     }
     
     #endregion

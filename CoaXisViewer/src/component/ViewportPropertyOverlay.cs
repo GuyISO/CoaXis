@@ -10,7 +10,7 @@ public partial class ViewportPropertyOverlay : Control
 {
     #region Fields
 
-    private readonly PackedScene _modelPropertyTreeScene = ResourceLoader.Load<PackedScene>("res://scenes/model_property_tree.tscn");
+    private readonly PackedScene _modelPropertyTreeScene = ResourceLoader.Load<PackedScene>("res://scenes/ui/model_property_tree.tscn");
     private readonly Dictionary<Guid, ModelPropertyTree> _propertyTrees = new();
     private readonly Dictionary<Guid, Vector3> _localAabbCenters = new();
 

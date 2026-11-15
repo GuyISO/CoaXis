@@ -1,3 +1,6 @@
+using System;
+using Godot;
+
 /// <summary>
 /// ModelProperty 関連モジュールの構成を管理するハブ。
 /// </summary>
@@ -22,6 +25,10 @@ public partial class ModelPropertyHub : BaseHub
 
     #region Signals
 
+    /// <summary>指定Propertyに対するManipulate操作の通知。</summary>
+    /// <param name="propertyId">操作対象のProperty識別子</param>
+    [Signal] public delegate void ManipulatedEventHandler(string propertyId);
+
     #endregion
 
     #region Lifecycle
@@ -44,6 +51,21 @@ public partial class ModelPropertyHub : BaseHub
     #endregion
 
     #region Methods
+
+    /// <summary>
+    /// 指定Propertyに対するManipulate操作を通知する。
+    /// </summary>
+    /// <param name="propertyId">操作対象のProperty識別子</param>
+    public void Manipulate(Guid propertyId)
+    {
+        if (propertyId == Guid.Empty || Registry.Get(propertyId) == null)
+        {
+            Application.Log.Warn($"ModelProperty: manipulate target not found. propertyId='{propertyId}'");
+            return;
+        }
+
+        EmitSignal(SignalName.Manipulated, propertyId.ToString());
+    }
 
     #endregion
 

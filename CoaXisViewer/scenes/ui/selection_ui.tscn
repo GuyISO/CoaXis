@@ -36,7 +36,7 @@ alignment = 1
 [node name="ButtonSet" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1780015491]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "モデル選択[Set]モードに切り替えます"
+tooltip_text = "クリックしたEntityだけを選択します。空白をクリックすると選択を解除します"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Set"
@@ -44,7 +44,7 @@ text = "Set"
 [node name="ButtonAdd" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=819598093]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "モデル選択[Add]モードに切り替えます"
+tooltip_text = "クリックしたEntityを現在の選択に追加します"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Add"
@@ -52,7 +52,7 @@ text = "Add"
 [node name="ButtonRemove" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=972580125]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "モデル選択[Remove]モードに切り替えます"
+tooltip_text = "クリックしたEntityを現在の選択から外します"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Remove"
@@ -60,7 +60,7 @@ text = "Remove"
 [node name="ButtonToggle" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1963583547]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "モデル選択[Toggle]モードに切り替えます"
+tooltip_text = "クリックしたEntityの選択と解除を切り替えます"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Toggle"

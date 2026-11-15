@@ -107,6 +107,7 @@ public partial class CommandUi : PanelContainer
     private void SubscribeApplicationEvents()
     {
         Application.Command.Executed += OnCommandExecuted;
+        Application.Ui.Theme.ThemeChanged += OnThemeChanged;
     }
 
     /// <summary>
@@ -115,6 +116,7 @@ public partial class CommandUi : PanelContainer
     private void UnsubscribeApplicationEvents()
     {
         Application.Command.Executed -= OnCommandExecuted;
+        Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
     }
 
     /// <summary>
@@ -124,6 +126,22 @@ public partial class CommandUi : PanelContainer
     {
         _isRequestingCursorMove = false;
         QueueRebuildTimelineTree();
+    }
+
+    /// <summary>
+    /// テーマ切替後に既存の履歴行の色を更新する
+    /// </summary>
+    private void OnThemeChanged()
+    {
+        TreeItem root = _tree.GetRoot();
+        TreeItem item = root?.GetFirstChild();
+        int cursor = Application.Command.Cursor;
+        while (item != null)
+        {
+            int index = (int)item.GetMetadata((int)TreeColumn.No);
+            ApplyStateColor(item, index, cursor);
+            item = item.GetNext();
+        }
     }
 
     /// <summary>
@@ -244,13 +262,8 @@ public partial class CommandUi : PanelContainer
                 item.SetText((int)TreeColumn.Description, command?.Description ?? string.Empty);
 
                 CommandExecutionState state = ResolveState(i, cursor);
-                Color color = ResolveStateColor(i, cursor);
                 item.SetText((int)TreeColumn.State, state.ToString());
-
-                for (int column = 0; column < _tree.Columns; column++)
-                {
-                    item.SetCustomColor(column, color);
-                }
+                ApplyStateColor(item, i, cursor);
 
                 if (i == cursor - 1)
                 {
@@ -306,16 +319,16 @@ public partial class CommandUi : PanelContainer
     }
 
     /// <summary>
-    /// 履歴インデックスに対応する表示色を返す
+    /// 履歴インデックスに対応する表示色を行に適用する
     /// </summary>
-    private Color ResolveStateColor(int index, int cursor)
+    private void ApplyStateColor(TreeItem item, int index, int cursor)
     {
-        if (index < cursor)
+        string colorName = index < cursor ? "do" : "undo";
+        Color color = _tree.GetThemeColor(colorName, "CoaXisCommand");
+        for (int column = 0; column < _tree.Columns; column++)
         {
-            return Color.FromHtml(Constant.Color.CommandDoColor);
+            item.SetCustomColor(column, color);
         }
-
-        return Color.FromHtml(Constant.Color.CommandUndoColor);
     }
 
     #endregion

@@ -4,6 +4,6 @@
   <path d="M64 10 110 36 64 62 18 36Z" fill="#7F7F7F"/>
   <path d="M18 36 64 62v53L18 88Z" fill="#7F7F7F"/>
   <path d="M110 36 64 62v53l46-27Z" fill="#7F7F7F"/>
-  <path d="M64 10 110 36v52l-46 27-46-27V36Z" fill="none" stroke="#4E95D9" stroke-linejoin="round" stroke-width="8"/>
-  <path d="m18 36 46 26 46-26M64 62v53" fill="none" stroke="#4E95D9" stroke-linejoin="round" stroke-width="8"/>
+  <path d="M64 10 110 36v52l-46 27-46-27V36Z" fill="none" stroke="#4E95D9" stroke-linejoin="round" stroke-width="16"/>
+  <path d="m18 36 46 26 46-26M64 62v53" fill="none" stroke="#4E95D9" stroke-linejoin="round" stroke-width="16"/>
 </svg>

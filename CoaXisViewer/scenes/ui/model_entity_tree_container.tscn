@@ -1,0 +1,19 @@
+[gd_scene format=3 uid="uid://bwfcquytk4vpm"]
+
+[ext_resource type="Script" uid="uid://dv8uk4frdgbv6" path="res://src/ui/tree/ModelEntityTree.cs" id="1_wojmw"]
+
+[node name="ModelEntity" type="PanelContainer" unique_id=473887224]
+custom_minimum_size = Vector2(100, 100)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="ModelEntityTree" type="Tree" parent="." unique_id=1031893956]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+allow_reselect = true
+allow_search = false
+script = ExtResource("1_wojmw")

@@ -25,6 +25,7 @@ alignment = 1
 [node name="Tree" type="Tree" parent="MarginContainer/VBoxContainer" unique_id=639312814]
 layout_mode = 2
 size_flags_vertical = 3
+tooltip_text = "保存した状態をダブルクリックして適用します"
 column_titles_visible = true
 hide_folding = true
 hide_root = true
@@ -37,7 +38,7 @@ alignment = 1
 [node name="ButtonSave" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1028921205]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "現在のカメラ状態を保存します"
+tooltip_text = "現在のカメラ状態をこのパネルに保存します。パネルを閉じると保存した状態は消えます"
 text = "Save"
 
 [node name="ButtonRemove" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=318344948]

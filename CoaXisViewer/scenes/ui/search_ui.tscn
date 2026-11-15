@@ -33,6 +33,7 @@ vertical_alignment = 1
 [node name="EntityType" type="OptionButton" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "Entityの種類を完全一致で絞り込みます。Allは指定なしです"
 
 [node name="EntityNameLabel" type="Label" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
@@ -42,6 +43,7 @@ vertical_alignment = 1
 [node name="EntityName" type="LineEdit" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "Entity名を大文字・小文字を区別せず部分一致で検索します"
 placeholder_text = "Entity name contains"
 
 [node name="PropertyTypeLabel" type="Label" parent="MarginContainer/VBoxContainer/Filters"]
@@ -52,6 +54,7 @@ vertical_alignment = 1
 [node name="PropertyType" type="OptionButton" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "所属Propertyの種類を完全一致で絞り込みます。Property条件は同じPropertyに対して判定します"
 
 [node name="PropertyValueTypeLabel" type="Label" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
@@ -61,6 +64,7 @@ vertical_alignment = 1
 [node name="PropertyValueType" type="OptionButton" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "所属Propertyの値の型を完全一致で絞り込みます。Allは指定なしです"
 
 [node name="PropertyValueLabel" type="Label" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
@@ -70,6 +74,7 @@ vertical_alignment = 1
 [node name="PropertyValue" type="LineEdit" parent="MarginContainer/VBoxContainer/Filters"]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "所属Propertyの値を大文字・小文字を区別せず部分一致で検索します"
 placeholder_text = "Property value contains"
 
 [node name="ResultCount" type="Label" parent="MarginContainer/VBoxContainer"]
@@ -86,4 +91,5 @@ auto_tooltip = false
 
 [node name="SelectAll" type="Button" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+tooltip_text = "現在の選択を検索結果の全Entityに置き換えます"
 text = "Select All"

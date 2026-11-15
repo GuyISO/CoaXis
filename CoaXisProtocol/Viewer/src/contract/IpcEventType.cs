@@ -40,6 +40,9 @@ public static class IpcEventType
 
         /// <summary>モデル実体のManipulate操作通知</summary>
         public const string ModelEntityManipulated = "ModelEntityManipulated";
+
+        /// <summary>モデル属性のManipulate操作通知</summary>
+        public const string ModelPropertyManipulated = "ModelPropertyManipulated";
     }
 
     /// <summary>

@@ -198,6 +198,7 @@ public partial class IpcHub : BaseHub
 
         Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
         Application.Model.Entity.Manipulated += OnEntityManipulated;
+        Application.Model.Property.Manipulated += OnPropertyManipulated;
         _modelEventsSubscribed = true;
     }
 
@@ -213,6 +214,7 @@ public partial class IpcHub : BaseHub
 
         Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
         Application.Model.Entity.Manipulated -= OnEntityManipulated;
+        Application.Model.Property.Manipulated -= OnPropertyManipulated;
         _modelEventsSubscribed = false;
     }
 
@@ -269,6 +271,35 @@ public partial class IpcHub : BaseHub
         if (!connection.TryEnqueue(notification))
         {
             Application.Log.Warn("Ipc: unable to queue ModelEntityManipulated notification.");
+        }
+    }
+
+    /// <summary>
+    /// PropertyのManipulate操作を接続中のIPCクライアントへ通知する。
+    /// </summary>
+    /// <param name="propertyIdText">操作対象のProperty識別子</param>
+    private void OnPropertyManipulated(string propertyIdText)
+    {
+        if (!Guid.TryParse(propertyIdText, out Guid propertyId) || propertyId == Guid.Empty)
+        {
+            Application.Log.Warn($"Ipc: invalid manipulated property ID '{propertyIdText}'.");
+            return;
+        }
+
+        ConnectionSession connection = Volatile.Read(ref _activeConnection);
+        if (connection == null)
+        {
+            return;
+        }
+
+        var payload = new ModelPropertyManipulatedPayload { PropertyId = propertyId };
+        IpcEnvelope notification = IpcEnvelopeBuilder.Create(
+            IpcEventType.FromViewer.ModelPropertyManipulated,
+            ViewerSourceName,
+            payload);
+        if (!connection.TryEnqueue(notification))
+        {
+            Application.Log.Warn("Ipc: unable to queue ModelPropertyManipulated notification.");
         }
     }
 

@@ -12,6 +12,8 @@ Godot AutoLoadは`Application`のみ。Infrastructure（Log、Setting、Asset、
 
 UIテーマの選択はDarkを既定とし、テーマ識別子を`ViewerSettings.Ui.ThemeId`として`viewer-settings.json`へ保存して次回起動時に復元する。現在は`dark`と`light`をサポートし、テーマ識別子とThemeリソースの対応表から適用する。右側ツールバーの切替ボタンは現在のテーマをアイコンで示し、Light/Darkの二択を維持する。ユーザー設定が保持するのはテーマ識別子であり、配色・スタイルはThemeリソースが所有する。オーバーレイ線、Entity選択、選択マテリアル、測定線は`CoaXisBrand.primary`を参照し、テーマ切替はメインウィンドウとUIサブウィンドウへ反映する。
 
+リッチテキストの標準文字色はテーマの標準文字色に揃える。コマンド履歴のDo・Undo行はそれぞれ`CoaXisCommand`の色を使い、テーマ切替時に既存行も更新する。
+
 右側ツールバーの各パネルボタンは、対応するウィンドウが閉じているときは開き、開いているときは閉じる。ウィンドウの閉じるボタンで閉じた場合も、ツールバーの押下状態に反映する。
 
 旧設定の`UseLightTheme`からテーマ識別子への移行と、旧`Color`設定の除去は、既存の設定ファイルを読み込むための互換処理である。現在の設定形式やテーマ選択の仕組みとして新たに使用しない。
@@ -39,7 +41,7 @@ ViewerのThemeリソース契約は、ビルド不要のGodot headlessテスト�
 
 Viewerのアイコン素材はアプリケーション用を除き白を基準とする。Treeのモデル・表示・Propertyアイコンと個数バッジはThemeの色を用い、テーマ切替時に既存行も更新する。Visibilityは実効表示時と非表示時を白系・黒系の反転色で区別し、非表示アイコンは縁なしでDarkでは黒、Lightでは白にする。継承アイコンは親方向を示すL字の上向き矢印とし、継承して非表示の場合は斜線を付ける。Propertyボタンは共通のアイコンを使い、Propertyありでは行の文字色、OverlayTree表示中は`CoaXisBrand.primary`、Propertyなしは無効色で表示する。個数バッジは`badge_background`を背景、行の文字色を文字に使い、Lightでは背景を透過する。Particle画像は白を基準とし、Tree上のParticleアイコンと3Dパーティクルは引き続き`particleColor`を使用する。
 
-メッセージパネルは起動時からのInfo以上のログを表示する。`LogHub`が改行を含むメッセージを行単位で保持し、`ViewerSettings.Ui.MessageMaxLines`で指定された直近の行数に制限する。パネルを閉じても履歴は実行中保持される。Debugログは従来どおりパネルに表示しない。
+メッセージパネルは起動時からのInfo以上のログを表示する。`LogHub`が改行を含むメッセージを行単位で保持し、`ViewerSettings.Ui.MessageMaxLines`で指定された直近の行数に制限する。パネルを閉じても履歴は実行中保持される。Debugログは従来どおりパネルに表示しない。ログの選択範囲はCoaXisBlueで表示し、右クリックメニューから選択文字列をコピーできる。
 
 ### ModelEntity
 
@@ -65,7 +67,7 @@ TreeItemはUIが構築・保持し、Model DomainはUI Nodeを保持しない。
 
 PropertyツリーのルートEntity行の選択は、そのEntityのPickを通知する。Property行の選択はEntityのPickを通知しない。
 
-Entity共通メニューの`Manipulate`、またはEntityツリー項目のダブルクリックは、対象Entityに対するManipulate操作を通知する。ビューポートでは選択操作モード中にEntityを左ダブルクリックすると、通常のピック通知に加えて対象EntityのManipulate操作を通知する。空間の空白やドラッグではManipulate操作を通知しない。ダブルクリックではカメラFitを行わず、Fitは共通メニューから実行できる。
+Entity共通メニューの`Manipulate`、またはEntityツリー項目のダブルクリックは、対象Entityに対するManipulate操作を通知する。PropertyツリーのProperty行のダブルクリックは、対象Propertyに対するManipulate操作を通知する。ビューポートでは選択操作モード中にEntityを左ダブルクリックすると、通常のピック通知に加えて対象EntityのManipulate操作を通知する。空間の空白やドラッグではManipulate操作を通知しない。ダブルクリックではカメラFitを行わず、Fitは共通メニューから実行できる。
 
 SelectionパネルとSearchパネルのEntity行には、Entityツリーと同じPropertyボタンとVisibilityボタンを表示する。Propertyボタンは対象のProperty OverlayTree表示を切り替え、直接のPropertyがない場合は無効とする。Visibilityボタンは対象の表示設定を切り替える。ボタンの表示はProperty数、折り畳み、OverlayTreeの表示状態および実効Visibilityに追従する。
 
@@ -84,13 +86,14 @@ Viewerは事前生成済みGodotシーン（`.scn` / `.tscn`）をロードす�
 ## IPC
 
 - Named PipeでUTF-8の1行1JSONメッセージを送受信する。
-- `IpcHub`はNamed Pipeの接続・受信・送信、メインスレッドへの要求振り分け、応答エンベロープ生成を担う。ドメイン状態は所有せず、ModelEntity選択通知ではSelectionHubの変更通知を受けて現在のID集合をProtocol payloadへ変換し、Manipulate操作通知ではEntity Hubから対象IDを受け取る。
+- `IpcHub`はNamed Pipeの接続・受信・送信、メインスレッドへの要求振り分け、応答エンベロープ生成を担う。ドメイン状態は所有せず、ModelEntity選択通知ではSelectionHubの変更通知を受けて現在のID集合をProtocol payloadへ変換し、Manipulate操作通知ではEntity/Property Hubから対象IDを受け取る。
 - ViewerのIPCパネルはパイプ名、サーバー停止・接続待ち・接続中の状態と、送受信の時刻・方向・イベント種別を表示する。履歴はパネルを閉じてもViewerの実行中は保持し、直近500件に制限する。受信は解析不能なメッセージも記録し、送信は書き込み完了時に記録する。payloadやメッセージ本文は保持しない。
 - Viewerは各要求のバージョンが空でないことと、メジャーバージョン一致を検査する。起動時のバージョン照会は行わない。
 - Viewerが処理する要求は`ReplaceModelSet`、`ClearModelSet`、`AddModelSet`、`RemoveModelSet`、`ModifyModelSet`、`ReadModelSet`。その他の未対応要求には`UNSUPPORTED_EVENT_TYPE`を返す。
 - 接続中のIPCクライアントがある状態で選択ID集合が実際に変わると、Viewerは`ModelEntitySelected`を送信する。payloadの`entityIds`は変更後の全選択IDを昇順で含み、全解除時は空配列となる。同じ選択集合を再指定した場合は通知しない。接続開始時点の選択状態は別途通知しない。
 - 接続中のIPCクライアントがある状態でManipulate操作が行われると、操作ごとに`ModelEntityManipulated`を送信する。payloadの`entityId`は操作対象のEntity ID。未接続時の操作は蓄積・再送しない。
-- `ModelEntitySelected`と`ModelEntityManipulated`は要求への応答ではないため`correlationId`はnull。Viewerは応答と通知を同一接続上の単一送信キューから直列に書き込む。IPCクライアントは`Result`の`correlationId`で要求応答を識別し、非同期通知と区別する。
+- 接続中のIPCクライアントがある状態でPropertyに対するManipulate操作が行われると、操作ごとに`ModelPropertyManipulated`を送信する。payloadの`propertyId`は操作対象のProperty ID。未接続時の操作は蓄積・再送しない。
+- `ModelEntitySelected`、`ModelEntityManipulated`、`ModelPropertyManipulated`は要求への応答ではないため`correlationId`はnull。Viewerは応答と通知を同一接続上の単一送信キューから直列に書き込む。IPCクライアントは`Result`の`correlationId`で要求応答を識別し、非同期通知と区別する。
 - 要求への応答は`Result`イベントで返し、`correlationId`に要求の`eventId`を設定する。payloadは共通して`ok`、`request`、`errorCode`、`message`を持つ。
 - `ReplaceModelSet`のpayloadには`entities`と`properties`が必須。`entities`は1件以上、`properties`は空配列を許可する。Root Entity自体はViewerが常に保持するためpayloadに含めず、Rootを親とするEntityの`parentId`にはProtocolの`ViewerConstants.RootModelEntityId`（`00000000-0000-0000-0000-000000000001`）を指定する。`AddModelSet`でも同じIDをRootの親参照に使用する。全Entity/Propertyの親参照とRootへの到達を含め、両方を検証してから現在のモデル集合を置換する。
 - Entity・Propertyの生成と階層検証は既存モデルの置換前に完了する。不正なpayloadには`INVALID_PAYLOAD`を返し、現在のモデル集合は変更しない。Entityの`position`は有限値3要素、`rotation`は有限値4要素かつゼロでないクォータニオンとする。DTOで省略した値は既定値を使うが、明示的な`null`や不正な配列は拒否する。

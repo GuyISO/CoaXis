@@ -26,3 +26,4 @@ scroll_following = true
 scroll_following_visible_characters = true
 autowrap_mode = 2
 selection_enabled = true
+context_menu_enabled = true

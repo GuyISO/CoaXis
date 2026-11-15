@@ -267,9 +267,17 @@ public partial class ModelPropertyTree : Tree
 	/// </summary>
 	private void OnItemActivated()
 	{
-		if (_rootItem != null && _entityId != Guid.Empty && GetSelected() == _rootItem)
+		TreeItem selectedItem = GetSelected();
+		if (_rootItem != null && _entityId != Guid.Empty && selectedItem == _rootItem)
 		{
 			ModelEntityRowBehavior.Manipulate(_entityId);
+			return;
+		}
+
+		if (selectedItem != null &&
+			Guid.TryParse(selectedItem.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid propertyId))
+		{
+			Application.Model.Property.Manipulate(propertyId);
 		}
 	}
 

@@ -70,7 +70,28 @@ public partial class UiWindowHub : BaseHub
             return;
         }
 
-        string cacheKey = GetContainerCacheKey(container);
+        Show(container, GetContainerCacheKey(container));
+    }
+
+    /// <summary>
+    /// 指定したキャッシュキーでコンテナを表示する。
+    /// </summary>
+    /// <param name="container">表示するコンテナ</param>
+    /// <param name="cacheKey">表示ウィンドウのキャッシュキー</param>
+    public void Show(Container container, string cacheKey)
+    {
+        if (container == null)
+        {
+            Application.Log.Warn("UiWindowHub: container is null.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(cacheKey))
+        {
+            Application.Log.Warn("UiWindowHub: cache key is empty.");
+            return;
+        }
+
         if (_windowCache.TryGetValue(cacheKey, out UiWindow cachedWindow))
         {
             if (GodotObject.IsInstanceValid(cachedWindow))
@@ -86,6 +107,38 @@ public partial class UiWindowHub : BaseHub
         }
 
         ShowWindow(container, cacheKey);
+    }
+
+    /// <summary>
+    /// 指定した ModelEntity を起点とするツリーを独立したウィンドウに表示する。
+    /// </summary>
+    /// <param name="entityId">ツリーの起点とする ModelEntity の識別子</param>
+    public void ShowModelEntityTree(Guid entityId)
+    {
+        if (entityId == Guid.Empty)
+        {
+            Application.Log.Warn("UiWindowHub: model entity tree root ID is empty.");
+            return;
+        }
+
+        ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
+        if (modelEntity == null)
+        {
+            Application.Log.Warn($"UiWindowHub: model entity tree root not found. entityId='{entityId}'");
+            return;
+        }
+
+        PackedScene scene = ResourceLoader.Load<PackedScene>("res://scenes/model_entity_tree_container.tscn");
+        if (scene == null)
+        {
+            Application.Log.Error("UiWindowHub: ModelEntityTreeContainer scene could not be loaded.");
+            return;
+        }
+
+        Container container = scene.Instantiate<Container>();
+        ModelEntityTree tree = container.GetNode<ModelEntityTree>("ModelEntityTree");
+        tree.SetRoot(modelEntity);
+        Show(container, $"ModelEntityTreeContainer:{entityId:N}");
     }
 
     /// <summary>

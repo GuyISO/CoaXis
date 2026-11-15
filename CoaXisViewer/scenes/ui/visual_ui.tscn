@@ -44,6 +44,7 @@ vertical_alignment = 1
 
 [node name="HSliderTransparency" type="HSlider" parent="MarginContainer/VBoxContainer" unique_id=962493079]
 layout_mode = 2
+tooltip_text = "モデル全体の透明度を調整します。0%は不透明、100%は透明です"
 max_value = 1.0
 step = 0.1
 value = 0.5
@@ -54,7 +55,7 @@ layout_mode = 2
 
 [node name="LabelApplyVisibilityToSelection" type="Label" parent="MarginContainer/VBoxContainer" unique_id=776223544]
 layout_mode = 2
-text = "ApplyVisibilityToSelection"
+text = "Selection Visibility"
 vertical_alignment = 1
 
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1330858884]
@@ -64,14 +65,17 @@ alignment = 1
 [node name="ButtonInherit" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=74740004]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "選択中のEntityの表示設定を親から継承します"
 text = "Inherit"
 
 [node name="ButtonVisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=502803084]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "選択中のEntityの表示設定をVisibleにします"
 text = "Visible"
 
 [node name="ButtonInvisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=389004104]
 layout_mode = 2
 size_flags_horizontal = 3
+tooltip_text = "選択中のEntityの表示設定をInvisibleにします"
 text = "Invisible"

@@ -139,14 +139,14 @@ vertical_alignment = 1
 
 [node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=1566134602]
 layout_mode = 2
-tooltip_text = "測定点を取得します"
+tooltip_text = "Point1の測定モードに切り替えます。ビューポートのモデルをクリックして測定点を指定します"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Pick"
 
 [node name="ButtonClear" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult1" unique_id=1785677978]
 layout_mode = 2
-tooltip_text = "測定点を消去します"
+tooltip_text = "Point1の測定結果を消去します"
 text = "Clear"
 
 [node name="VBoxContainerPickResult2" type="VBoxContainer" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1674100131]
@@ -261,14 +261,14 @@ vertical_alignment = 1
 
 [node name="ButtonPick" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=845942979]
 layout_mode = 2
-tooltip_text = "測定点を取得します"
+tooltip_text = "Point2の測定モードに切り替えます。ビューポートのモデルをクリックして測定点を指定します"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Pick"
 
 [node name="ButtonClear" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer/VBoxContainerPickResult2" unique_id=772489631]
 layout_mode = 2
-tooltip_text = "測定点を消去します"
+tooltip_text = "Point2の測定結果を消去します"
 text = "Clear"
 
 [node name="Separator" type="HSeparator" parent="MarginContainer/VBoxContainer" unique_id=406113100]
@@ -298,7 +298,9 @@ vertical_alignment = 1
 
 [node name="LabelTitileAngle" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=790441461]
 layout_mode = 2
-text = "Angle"
+mouse_filter = 1
+tooltip_text = "2つの測定点の面法線がなす角度"
+text = "Normal Angle"
 vertical_alignment = 1
 
 [node name="LabelValueAngle" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=648600448]
@@ -314,6 +316,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileDeltaX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1054462616]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "Point2からPoint1を引いた位置差"
 text = "DeltaX"
 vertical_alignment = 1
 
@@ -330,6 +334,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileDeltaY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=1415066339]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "Point2からPoint1を引いた位置差"
 text = "DeltaY"
 vertical_alignment = 1
 
@@ -346,6 +352,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileDeltaZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer3" unique_id=820048307]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "Point2からPoint1を引いた位置差"
 text = "DeltaZ"
 vertical_alignment = 1
 

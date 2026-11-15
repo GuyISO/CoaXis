@@ -9,7 +9,6 @@
 [ext_resource type="PackedScene" uid="uid://d2n00g18ybdyf" path="res://scenes/ui/selection_ui.tscn" id="6_npq5x"]
 [ext_resource type="PackedScene" uid="uid://bfdie23q7sox" path="res://scenes/ui/camera_state_ui.tscn" id="7_57r0r"]
 [ext_resource type="PackedScene" uid="uid://djb751h7aic7h" path="res://scenes/ui/visual_ui.tscn" id="7_xrtxh"]
-[ext_resource type="Script" uid="uid://c5r05kmp1e5iv" path="res://src/ui/label/PipeUi.cs" id="9_bn6oc"]
 [ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/EmbeddedModelEntityTree.cs" id="10_57r0r"]
 [ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbeddedModelPropertyTree.cs" id="12_bn6oc"]
 [ext_resource type="PackedScene" path="res://scenes/ui/search_ui.tscn" id="13_search"]
@@ -206,13 +205,7 @@ _lightIcon = ExtResource("25_theme_light")
 _darkIcon = ExtResource("26_theme_dark")
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
-visible = false
 layout_mode = 2
-
-[node name="LabelPipe" type="Label" parent="VBoxContainer/BottomBar" unique_id=271860447]
-layout_mode = 2
-vertical_alignment = 2
-script = ExtResource("9_bn6oc")
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]
 layout_mode = 2

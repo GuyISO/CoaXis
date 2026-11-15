@@ -71,7 +71,9 @@ columns = 3
 
 [node name="LabelTitilePositionX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1371243210]
 layout_mode = 2
-text = "PositionX"
+mouse_filter = 1
+tooltip_text = "カメラ注視点の位置"
+text = "Target X"
 vertical_alignment = 1
 
 [node name="LabelValuePositionX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=274111136]
@@ -87,7 +89,9 @@ vertical_alignment = 1
 
 [node name="LabelTitilePositionY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=357605412]
 layout_mode = 2
-text = "PositionY"
+mouse_filter = 1
+tooltip_text = "カメラ注視点の位置"
+text = "Target Y"
 vertical_alignment = 1
 
 [node name="LabelValuePositionY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1179798322]
@@ -103,7 +107,9 @@ vertical_alignment = 1
 
 [node name="LabelTitilePositionZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=101175573]
 layout_mode = 2
-text = "PositionZ"
+mouse_filter = 1
+tooltip_text = "カメラ注視点の位置"
+text = "Target Z"
 vertical_alignment = 1
 
 [node name="LabelValuePositionZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=725205114]
@@ -119,6 +125,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileRotationX" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=284817832]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "カメラ注視点の回転（オイラー角）"
 text = "RotationX"
 vertical_alignment = 1
 
@@ -135,6 +143,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileRotationY" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=83970917]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "カメラ注視点の回転（オイラー角）"
 text = "RotationY"
 vertical_alignment = 1
 
@@ -151,6 +161,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileRotationZ" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1997315446]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "カメラ注視点の回転（オイラー角）"
 text = "RotationZ"
 vertical_alignment = 1
 
@@ -167,6 +179,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileSize" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=1562951672]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "平行投影時の表示サイズ"
 text = "Size"
 vertical_alignment = 1
 
@@ -183,6 +197,8 @@ vertical_alignment = 1
 
 [node name="LabelTitileDistance" type="Label" parent="MarginContainer/VBoxContainer/GridContainer2" unique_id=702687610]
 layout_mode = 2
+mouse_filter = 1
+tooltip_text = "カメラから注視点までの距離"
 text = "Distance"
 vertical_alignment = 1
 
@@ -215,6 +231,7 @@ vertical_alignment = 1
 
 [node name="HSliderFov" type="HSlider" parent="MarginContainer/VBoxContainer" unique_id=1050566436]
 layout_mode = 2
+tooltip_text = "透視投影時の視野角を調整します"
 min_value = 5.0
 max_value = 120.0
 value = 35.0
@@ -225,18 +242,17 @@ layout_mode = 2
 
 [node name="ButtonFitAllIn" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1566134602]
 layout_mode = 2
-tooltip_text = "モデル全体が画面に収まるようにカメラを調整します"
+tooltip_text = "現在表示されているモデル全体が画面に収まるようにカメラを調整します"
 text = "FitAllIn"
 
 [node name="ButtonFitToSelection" type="Button" parent="MarginContainer/VBoxContainer" unique_id=401644862]
 layout_mode = 2
-tooltip_text = "選択中のモデルが画面に収まるようにカメラを調整します"
-text = "FitToSelection
-"
+tooltip_text = "選択中のモデルのうち、現在表示されている部分が画面に収まるようにカメラを調整します"
+text = "FitToSelection"
 
 [node name="ButtonAlignNormal" type="Button" parent="MarginContainer/VBoxContainer" unique_id=1752955195]
 layout_mode = 2
-tooltip_text = "選択した面に垂直にビューを移動します"
+tooltip_text = "面をクリックすると、クリック位置を注視し、その面に垂直な向きにカメラを合わせます"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "AlignNormal"
@@ -245,13 +261,13 @@ text = "AlignNormal"
 layout_mode = 2
 alignment = 1
 
-[node name="ButtonRollRight" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1780015491]
+[node name="ButtonRollLeft" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1780015491]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "左に90度回転します"
 text = "RollLeft"
 
-[node name="ButtonRollLeft" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1453521557]
+[node name="ButtonRollRight" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1453521557]
 layout_mode = 2
 size_flags_horizontal = 3
 tooltip_text = "右に90度回転します"
@@ -270,7 +286,7 @@ alignment = 1
 [node name="ButtonLayerModelEntityVisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1305464635]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "表示レイヤーの表示状態を切り替えます"
+tooltip_text = "表示状態のEntityをビューポートに表示するか切り替えます。Entityの表示設定は変更しません"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 button_pressed = true
@@ -279,7 +295,7 @@ text = "Visible"
 [node name="ButtonLayerModelEntityInvisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer2" unique_id=1341091895]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "非表示レイヤーの表示状態を切り替えます"
+tooltip_text = "非表示状態のEntityをビューポートに表示するか切り替えます。Entityの表示設定は変更しません"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Invisible"
@@ -297,7 +313,7 @@ alignment = 1
 [node name="ButtonLayerModelPropertyVisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=905281917]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "表示レイヤーの表示状態を切り替えます"
+tooltip_text = "表示状態のPropertyの描画をビューポートに表示するか切り替えます。Propertyの表示設定は変更しません"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 button_pressed = true
@@ -306,7 +322,7 @@ text = "Visible"
 [node name="ButtonLayerModelPropertyInvisible" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer3" unique_id=1108740421]
 layout_mode = 2
 size_flags_horizontal = 3
-tooltip_text = "非表示レイヤーの表示状態を切り替えます"
+tooltip_text = "非表示状態のPropertyの描画をビューポートに表示するか切り替えます。Propertyの表示設定は変更しません"
 theme_type_variation = "CoaXisToggleButton"
 toggle_mode = true
 text = "Invisible"
