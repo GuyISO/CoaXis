@@ -21,6 +21,12 @@ public partial class UiThemeHub : BaseHub
 	/// <summary>CoaXisブランドカラーを保持するTheme内の型名。</summary>
 	private const string BrandThemeType = "CoaXisBrand";
 
+	/// <summary>独自カーソル用の色を保持するTheme内の型名。</summary>
+	private const string CursorThemeType = "CoaXisCursor";
+
+	/// <summary>独自カーソルの外枠色を保持するTheme内の項目名。</summary>
+	private const string CursorOutlineColorName = "outline";
+
 	/// <summary>標準文字色を保持するTheme内の型名。</summary>
 	private const string ControlThemeType = "Control";
 
@@ -192,11 +198,41 @@ public partial class UiThemeHub : BaseHub
 	{
 		CurrentThemeId = themeId;
 		CurrentTheme = _themes[themeId];
+		ApplyCursor();
 		RenderingServer.SetDefaultClearColor(EnvironmentBackgroundColor);
 		Window rootWindow = GetTree().Root;
 		rootWindow.Theme = CurrentTheme;
 		ApplyThemeToUiRoots(rootWindow);
 		EmitSignal(SignalName.ThemeChanged);
+	}
+
+	/// <summary>
+	/// CoaXisBlueの矢印カーソルを生成し、テーマに応じた外枠色で適用する。
+	/// </summary>
+	private void ApplyCursor()
+	{
+		Color primaryColor = PrimaryColor;
+		Color outlineColor = GetThemeColor(CursorOutlineColorName, CursorThemeType);
+		string cursorSvg = $$"""
+			<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+				<path d="M 3 2 L 3 25 L 9 19 L 14 29 L 19 27 L 14 16 L 23 16 Z"
+					fill="#{{primaryColor.ToHtml(false)}}"
+					stroke="#{{outlineColor.ToHtml(false)}}"
+					stroke-width="2"
+					stroke-linejoin="round" />
+			</svg>
+			""";
+		Image cursorImage = new();
+		Error error = cursorImage.LoadSvgFromString(cursorSvg);
+		if (error != Error.Ok)
+		{
+			throw new InvalidOperationException($"Could not create the custom cursor image: {error}.");
+		}
+
+		Input.SetCustomMouseCursor(
+			ImageTexture.CreateFromImage(cursorImage),
+			Input.CursorShape.Arrow,
+			new Vector2(3, 2));
 	}
 
 	/// <summary>

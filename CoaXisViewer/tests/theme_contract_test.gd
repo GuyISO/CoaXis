@@ -5,8 +5,14 @@ const THEMES: Dictionary = {
 	"light": "res://assets/theme/coaxis_light.tres",
 }
 
+const EXPECTED_CURSOR_OUTLINE_COLORS: Dictionary = {
+	"dark": Color(0.137255, 0.141176, 0.152941, 1),
+	"light": Color(0.898039, 0.901961, 0.909804, 1),
+}
+
 const REQUIRED_COLORS: Dictionary = {
 	"CoaXisBrand": ["primary"],
+	"CoaXisCursor": ["outline"],
 	"CoaXisCommand": ["do", "undo"],
 	"CoaXisEnvironment": ["background"],
 	"Control": ["font_color"],
@@ -26,6 +32,7 @@ const REQUIRED_COLORS: Dictionary = {
 const REQUIRED_STYLEBOXES: Dictionary = {
 	"CoaXisSearchResultTree": ["selected", "selected_focus"],
 	"CoaXisToggleButton": ["pressed"],
+	"OptionButton": ["normal", "hover", "pressed", "hover_pressed", "disabled", "focus"],
 }
 
 
@@ -52,6 +59,12 @@ func _run() -> void:
 						color_name,
 					])
 
+		if theme.has_color("outline", "CoaXisCursor"):
+			var cursor_outline: Color = theme.get_color("outline", "CoaXisCursor")
+			var expected_cursor_outline: Color = EXPECTED_CURSOR_OUTLINE_COLORS[theme_id]
+			if not cursor_outline.is_equal_approx(expected_cursor_outline):
+				failures.append("%s: 独自カーソルの外枠色がテーマHeader色と一致しません" % theme_id)
+
 		for theme_type in REQUIRED_STYLEBOXES:
 			for style_name in REQUIRED_STYLEBOXES[theme_type]:
 				if not theme.has_stylebox(style_name, theme_type):
@@ -60,6 +73,21 @@ func _run() -> void:
 						theme_type,
 						style_name,
 					])
+
+		var option_button := OptionButton.new()
+		option_button.theme = theme
+		root.add_child(option_button)
+		var input := theme.get_stylebox("normal", "LineEdit") as StyleBoxFlat
+		var read_only := theme.get_stylebox("read_only", "LineEdit") as StyleBoxFlat
+		for style_name in ["normal", "hover", "pressed", "hover_pressed", "disabled"]:
+			var style := option_button.get_theme_stylebox(style_name) as StyleBoxFlat
+			var expected := read_only if style_name == "disabled" else input
+			if style == null or expected == null or not style.bg_color.is_equal_approx(expected.bg_color):
+				failures.append("%s: OptionButtonの%s背景が入力欄と一致しません" % [theme_id, style_name])
+		for color_name in ["font_color", "font_focus_color", "font_hover_color", "font_hover_pressed_color", "font_pressed_color"]:
+			if not option_button.get_theme_color(color_name).is_equal_approx(theme.get_color("font_color", "LineEdit")):
+				failures.append("%s: OptionButtonの%sが入力欄の文字色と一致しません" % [theme_id, color_name])
+		option_button.free()
 
 		if theme.has_color("default_color", "RichTextLabel") and theme.has_color("font_color", "Control"):
 			if not theme.get_color("default_color", "RichTextLabel").is_equal_approx(theme.get_color("font_color", "Control")):
