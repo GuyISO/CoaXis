@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXisViewer", "CoaXisViewer\CoaXisViewer.csproj", "{46C6C668-B12F-4842-B877-05083FA3EA6C}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXis.Viewer", "CoaXis.Viewer\CoaXis.Viewer.csproj", "{46C6C668-B12F-4842-B877-05083FA3EA6C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXis.Protocol.Viewer", "CoaXis.Protocol.Viewer\CoaXis.Protocol.Viewer.csproj", "{54116508-7F01-4555-89C4-A093F001B970}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXis.IpcTester", "CoaXisIpcTester\CoaXis.IpcTester.csproj", "{C203681F-2B56-4555-98E0-B0374BA8C17E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXis.IpcTester", "CoaXis.IpcTester\CoaXis.IpcTester.csproj", "{C203681F-2B56-4555-98E0-B0374BA8C17E}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoaXis.Ui", "CoaXis.Ui\CoaXis.Ui.csproj", "{C6A7E9A0-54F1-4B44-90C8-1BF687447D4B}"
 EndProject

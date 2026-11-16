@@ -10,6 +10,7 @@ description: "Use when changing CoaXis architecture, state ownership, layer boun
 
 ## 実装上の不変条件
 
+- **モジュール名:** Viewer・IpcTester・SceneBuilderのモジュール名はそれぞれ `CoaXis.Viewer`・`CoaXis.IpcTester`・`CoaXis.SceneBuilder` とする。既存のIPC識別子は互換性を考慮し、名前変更に合わせて自動的に変更しない。
 - **Signal payload:** 自作の参照型は `RefCounted` を継承する。状態変更通知は値を載せず、対象を示す場合もIDのみ。一過性イベントは必要なpayloadを許容する。
 - **状態所有:** 状態Hubが正本を所有し、購読者は購読後にPropertyを読み、その後は通知に追従する。要求はHubの公開メソッドを呼び、AskState等で再通知させない。Node/UIに状態を複製しない。
 - **設定・描画:** Settingsは起動時に読み込み、Node/UIは初期化時に表示へ反映する。実行中の設定再読込による既存Node/UIへの動的反映や再描画は行わない。

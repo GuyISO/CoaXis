@@ -1,6 +1,6 @@
 # CoaXis.Protocol.Viewer
 
-`CoaXis.Protocol.Viewer` は、CoaXisViewerと外部クライアント間のIPCで共有する.NETクラスライブラリです。イベント名、メッセージ形式、payload DTOを共通化し、送信側と受信側で同じ型を使えるようにします。
+`CoaXis.Protocol.Viewer` は、CoaXis.Viewerと外部クライアント間のIPCで共有する.NETクラスライブラリです。イベント名、メッセージ形式、payload DTOを共通化し、送信側と受信側で同じ型を使えるようにします。
 
 ## 役割と範囲
 
@@ -124,4 +124,4 @@ if (message != null &&
 
 ## 動作確認
 
-Viewerとの接続、要求送信、応答・通知の確認には、リポジトリ内の[CoaXisIpcTesterガイド](../CoaXisIpcTester/README.md)を参照してください。
+Viewerとの接続、要求送信、応答・通知の確認には、リポジトリ内の[CoaXis.IpcTesterガイド](../CoaXis.IpcTester/README.md)を参照してください。

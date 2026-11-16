@@ -1,0 +1,82 @@
+﻿[
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider-lineset.unshaded.scn",
+    "visualUnshaded": true
+  },
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider-lineset.shaded.scn",
+    "visualUnshaded": false
+  },
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider.unshaded.scn",
+    "visualUnshaded": true
+  },
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-collider.shaded.scn",
+    "visualUnshaded": false
+  },
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-lineset.unshaded.scn",
+    "visualUnshaded": true
+  },
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual-lineset.shaded.scn",
+    "visualUnshaded": false
+  },
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.unshaded.scn",
+    "visualUnshaded": true
+  },
+  {
+    "visualGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.visual.shaded.scn",
+    "visualUnshaded": false
+  },
+  {
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.collider-lineset.unshaded.scn",
+    "visualUnshaded": true
+  },
+  {
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.collider-lineset.shaded.scn",
+    "visualUnshaded": false
+  },
+  {
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.collider.unshaded.scn",
+    "visualUnshaded": true
+  },
+  {
+    "colliderGlb": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/boeing787.glb",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.collider.shaded.scn",
+    "visualUnshaded": false
+  },
+  {
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.lineset.unshaded.scn",
+    "visualUnshaded": true
+  },
+  {
+    "lineSetJson": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/lineset.json",
+    "outputScn": "C:/Users/isogu/OneDrive/ドキュメント/CoaXis/samples/output/sample.lineset.shaded.scn",
+    "visualUnshaded": false
+  }
+]

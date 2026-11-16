@@ -2,13 +2,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Play (CoaXisViewer)",
+            "name": "Play (CoaXis.Viewer)",
             "type": "coreclr",
             "request": "launch",
             "preLaunchTask": "build",
             "program": "C:\\Development\\Godot\\Godot_v4.6.3-stable_mono_win64.exe",
             "args": [],
-            "cwd": "${workspaceFolder}\\CoaXisViewer",
+            "cwd": "${workspaceFolder}\\CoaXis.Viewer",
             "stopAtEntry": false,
         }
     ]
