@@ -10,7 +10,7 @@ CoaXis は、3D モデルの可視化と事前アセット生成を分離して�
   - 共通契約と IPC で使う DTO / 定義を管理するプロジェクト
 - CoaXisIpcTester
   - JSON/CSVや操作テストデータを使い、Viewerへモデル集合の読込・追加・削除・変更・読み出し要求を送り、要求と応答を確認するWindowsデスクトップツール
-- CoaXisUi
+- CoaXis.Ui
   - WinFormsアプリケーションで共通利用するテーマ、フォーム、ボタン、ナビゲーションレール、ロゴとSVGアイコンを提供するUIライブラリ。ブランドカラーはブルー `#4E95D9` とグレー `#7F7F7F`、フォントはSegoe UIに統一し、フラットデザインを基本とする。`CoaXisForm` を継承すると共通テーマが適用され、`CoaXisButton` や `CoaXisNavigationRail` を配置して利用できる。共有アセットは `CoaXisUiAssets` から参照できる
   - モニター間のDPI変更に対応するには、利用側のWinFormsプロジェクトで `ApplicationHighDpiMode` に `PerMonitorV2` を指定し、起動時に `ApplicationConfiguration.Initialize()` を呼ぶ
   - IpcTesterのフォームデザイナーではタブで各ページを切り替えて編集する。タブとレールのアイコンはデザイン時のプレビューで、実行時は通常のナビゲーションレールを使う。コンボボックスと表のサンプルはデザイン時専用のプレビューで、実行時のデータには混ざらない

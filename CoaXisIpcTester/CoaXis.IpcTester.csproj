@@ -10,7 +10,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\CoaXis.Protocol.Viewer\CoaXis.Protocol.Viewer.csproj" />
-    <ProjectReference Include="..\CoaXisUi\CoaXisUi.csproj" />
+    <ProjectReference Include="..\CoaXis.Ui\CoaXis.Ui.csproj" />
   </ItemGroup>
   <ItemGroup>
     <Compile Update="MainForm.cs">
