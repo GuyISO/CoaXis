@@ -9,7 +9,7 @@ IPC Testerからモデル集合の読み込み・追加・削除・変更・読�
 1. `dotnet build .\CoaXis.sln` を実行する。
 2. CoaXisViewerを起動する。Viewerは既定で `CoaXisViewerPipe` を待ち受ける。
 3. `dotnet run --project .\CoaXisIpcTester\CoaXis.IpcTester.csproj` を実行する。
-4. リポジトリ内の `samples` フォルダーを検出できた場合、モデル実体に `modelentity.csv`、属性に `modelproperty.csv`、操作テストデータに `modelset-test-data.json` が初期表示される。別の入力を使う場合は各「選択...」から変更する。
+4. `CoaXisIpcTester/samples` フォルダーを検出できた場合、モデル実体に `modelentity.csv`、属性に `modelproperty.csv`、操作テストデータに `modelset-test-data.json` が初期表示される。別の入力を使う場合は各「選択...」から変更する。
 5. 「接続」を押すとViewerからの通知を待ち受ける。未接続のまま要求を送信した場合も自動接続し、応答後も接続を維持する。「切断」で接続を閉じる。
 6. 「ReplaceModelSetを送信」でCSVのモデル集合を読み込む。追加などの操作は要求選択欄から要求を選び、「選択した要求を送信」を押す。`ClearModelSet`はテストデータJSONなしで送信できる。
 7. `AddModelSet`の追加対象にはCSV内のEntityを親としているテストEntityと、その子Entity・Propertyを含む。同じ追加を再送するとID衝突で拒否される。`RemoveModelSet`はこの追加データを削除するので、追加後に実行すれば試験データを片付けられる。
