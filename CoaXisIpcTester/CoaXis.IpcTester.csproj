@@ -9,7 +9,7 @@
     <Nullable>disable</Nullable>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CoaXisProtocol\Viewer\CoaXis.Protocol.Viewer.csproj" />
+    <ProjectReference Include="..\CoaXis.Protocol.Viewer\CoaXis.Protocol.Viewer.csproj" />
     <ProjectReference Include="..\CoaXisUi\CoaXisUi.csproj" />
   </ItemGroup>
   <ItemGroup>
