@@ -7,6 +7,9 @@ public partial class InputHub : BaseHub
 {
     #region Fields
 
+    /// <summary>入力によって一時的に設定した選択モード。</summary>
+    private ModelEntitySelectionMode? _selectionModeFromInput;
+
     #endregion
 
     #region Properties
@@ -26,6 +29,22 @@ public partial class InputHub : BaseHub
 
     public override void _Process(double delta)
     {
+        // 別ウィンドウのテキスト入力でカメラなどが操作されないようにする。
+        if (!GetTree().Root.HasFocus())
+        {
+            if (_selectionModeFromInput is ModelEntitySelectionMode mode)
+            {
+                if (Application.Model.Entity.Selection.Mode == mode)
+                {
+                    Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
+                }
+
+                _selectionModeFromInput = null;
+            }
+
+            return;
+        }
+
         // 押下中に状態を切り替えるボタンの入力処理
         HandleSelectModeInput("switch_selection_mode_add", ModelEntitySelectionMode.Add);
         HandleSelectModeInput("switch_selection_mode_remove", ModelEntitySelectionMode.Remove);
@@ -59,10 +78,19 @@ public partial class InputHub : BaseHub
         if (Input.IsActionJustPressed(actionName))
         {
             Application.Model.Entity.Selection.SetMode(assignMode);
+            _selectionModeFromInput = assignMode;
         }
-        else if (Input.IsActionJustReleased(actionName) && Application.Model.Entity.Selection.Mode == assignMode)
+        else if (Input.IsActionJustReleased(actionName))
         {
-            Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
+            if (Application.Model.Entity.Selection.Mode == assignMode)
+            {
+                Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
+            }
+
+            if (_selectionModeFromInput == assignMode)
+            {
+                _selectionModeFromInput = null;
+            }
         }
     }
 

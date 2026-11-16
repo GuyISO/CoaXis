@@ -112,6 +112,12 @@ public partial class AssetMaterialHub : BaseHub
     /// </summary>
     private void ApplySelectedMaterialColor(Color selectedColor)
     {
+        if (_selectedMaterial is ShaderMaterial shaderMaterial)
+        {
+            shaderMaterial.SetShaderParameter("highlight_color", selectedColor);
+            return;
+        }
+
         if (_selectedMaterial is not StandardMaterial3D standardMaterial)
         {
             return;

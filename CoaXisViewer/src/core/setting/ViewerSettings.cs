@@ -26,6 +26,11 @@ public sealed class ViewerSettings
     /// </summary>
     public UiSettings Ui { get; set; } = new UiSettings();
 
+    /// <summary>
+    /// パーティクル表示に関する設定セクション。
+    /// </summary>
+    public ParticleSettings Particle { get; set; } = new ParticleSettings();
+
     #endregion
 
     #region Methods
@@ -52,6 +57,8 @@ public sealed class ViewerSettings
         Input.Normalize();
         Ui ??= new UiSettings();
         Ui.Normalize();
+        Particle ??= new ParticleSettings();
+        Particle.Normalize();
     }
 
     #endregion

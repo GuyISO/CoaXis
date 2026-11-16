@@ -17,6 +17,8 @@ public partial class SearchUi : PanelContainer
     private Label _resultCount = null!;
     private Tree _results = null!;
     private Button _selectAll = null!;
+    private UiWindow _window;
+    private bool _restoreWindowUnfocusable;
     private readonly List<Guid> _resultIds = new();
     private readonly Dictionary<Guid, TreeItem> _resultItems = new();
     private int _lastSelectedIndex = -1;
@@ -35,6 +37,7 @@ public partial class SearchUi : PanelContainer
         _resultCount = GetNode<Label>("MarginContainer/VBoxContainer/ResultCount");
         _results = GetNode<Tree>("MarginContainer/VBoxContainer/Results");
         _selectAll = GetNode<Button>("MarginContainer/VBoxContainer/SelectAll");
+        _window = GetWindow() as UiWindow;
         SubscribeEvents();
         RefreshTypesAndResults();
     }
@@ -56,6 +59,12 @@ public partial class SearchUi : PanelContainer
         _propertyValueType.ItemSelected += OnTypeSelected;
         _entityName.TextChanged += OnTextChanged;
         _propertyValue.TextChanged += OnTextChanged;
+        _entityName.GuiInput += OnTextInputGuiInput;
+        _propertyValue.GuiInput += OnTextInputGuiInput;
+        if (_window != null)
+        {
+            _window.FocusExited += OnWindowFocusExited;
+        }
         _results.ItemSelected += OnResultSelected;
         _results.ItemActivated += OnResultActivated;
         _results.ButtonClicked += OnResultButtonClicked;
@@ -80,6 +89,13 @@ public partial class SearchUi : PanelContainer
         _propertyValueType.ItemSelected -= OnTypeSelected;
         _entityName.TextChanged -= OnTextChanged;
         _propertyValue.TextChanged -= OnTextChanged;
+        _entityName.GuiInput -= OnTextInputGuiInput;
+        _propertyValue.GuiInput -= OnTextInputGuiInput;
+        if (_window != null)
+        {
+            _window.FocusExited -= OnWindowFocusExited;
+            OnWindowFocusExited();
+        }
         _results.ItemSelected -= OnResultSelected;
         _results.ItemActivated -= OnResultActivated;
         _results.ButtonClicked -= OnResultButtonClicked;
@@ -100,6 +116,27 @@ public partial class SearchUi : PanelContainer
     private void OnTypeSelected(long index) => RefreshResults();
 
     private void OnTextChanged(string text) => RefreshResults();
+
+    private void OnTextInputGuiInput(InputEvent @event)
+    {
+        if (_window != null && _window.Unfocusable
+            && @event is InputEventMouseButton mouseButton && mouseButton.Pressed
+            && (mouseButton.ButtonIndex == MouseButton.Left || mouseButton.ButtonIndex == MouseButton.Right))
+        {
+            _restoreWindowUnfocusable = true;
+            _window.Unfocusable = false;
+            _window.GrabFocus();
+        }
+    }
+
+    private void OnWindowFocusExited()
+    {
+        if (_restoreWindowUnfocusable)
+        {
+            _restoreWindowUnfocusable = false;
+            _window.Unfocusable = true;
+        }
+    }
 
     private void OnRegistryChanged() => RefreshTypesAndResults();
 

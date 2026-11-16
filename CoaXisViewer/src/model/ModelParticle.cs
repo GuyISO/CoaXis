@@ -10,16 +10,11 @@ public partial class ModelParticle : GpuParticles3D
 {
 	#region Fields
 
-	// TODO: SettingHubの在り方検討後、定数を外部設定可能にする
-
 	/// <summary>指定色に乗じる発光倍率</summary>
-	private const float HdrIntensity = 3.5f;
+	private const float HdrIntensity = 3.0f;
 
 	/// <summary>色未指定時の既定色（発光倍率適用前）</summary>
 	private static readonly Color DefaultColor = Colors.White;
-
-	/// <summary>パーティクル1個あたりの描画数</summary>
-	private const int ParticleAmount = 12;
 
 	/// <summary>パーティクルの寿命（秒）</summary>
 	private const double ParticleLifetime = 0.5;
@@ -185,7 +180,7 @@ public partial class ModelParticle : GpuParticles3D
 
 		return new ModelParticle
 		{
-			Amount = ParticleAmount,
+			Amount = Application.Setting.Current.Particle.Amount,
 			Lifetime = ParticleLifetime,
 			ProcessMaterial = material,
 		};

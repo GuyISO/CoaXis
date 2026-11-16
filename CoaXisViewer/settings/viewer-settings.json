@@ -19,5 +19,8 @@
   "Ui": {
     "MessageMaxLines": 50,
     "ThemeId": "dark"
+  },
+  "Particle": {
+    "Amount": 12
   }
 }
