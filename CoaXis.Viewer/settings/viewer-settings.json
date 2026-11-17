@@ -22,5 +22,8 @@
   },
   "Particle": {
     "Amount": 12
+  },
+  "Environment": {
+    "GlowEnabled": true
   }
 }

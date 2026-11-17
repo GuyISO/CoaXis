@@ -54,7 +54,7 @@ public partial class EnvironmentController : WorldEnvironment
 	#region Helpers
 
 	/// <summary>
-	/// 現在のThemeに設定された背景色をWorldEnvironmentへ反映する。
+	/// Theme の背景色と Settings の Glow 設定を WorldEnvironment へ反映する。
 	/// </summary>
 	private void ApplyTheme()
 	{
@@ -65,6 +65,7 @@ public partial class EnvironmentController : WorldEnvironment
 		}
 
 		env.BackgroundColor = Application.Ui.Theme.EnvironmentBackgroundColor;
+		env.GlowEnabled = Application.Setting.Current.Environment.GlowEnabled;
 	}
 
 	#endregion

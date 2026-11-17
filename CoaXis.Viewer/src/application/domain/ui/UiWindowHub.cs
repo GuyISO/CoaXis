@@ -128,7 +128,7 @@ public partial class UiWindowHub : BaseHub
             return;
         }
 
-        PackedScene scene = ResourceLoader.Load<PackedScene>("res://scenes/model_entity_tree_container.tscn");
+        PackedScene scene = ResourceLoader.Load<PackedScene>("res://scenes/ui/model_entity_tree_container.tscn");
         if (scene == null)
         {
             Application.Log.Error("UiWindowHub: ModelEntityTreeContainer scene could not be loaded.");

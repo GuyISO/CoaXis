@@ -1,5 +1,10 @@
 # Viewer
 
+どこかにアプリケーションのバージョンを表示する
+
+向きを持ったPointに対応するsceneを作る
+
+
 Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする
 ModelProertyTreeは、Containerの中に配置する形で使用する
 

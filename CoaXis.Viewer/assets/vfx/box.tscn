@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://bip24234ww0pu"]
 
 [ext_resource type="Texture2D" uid="uid://cmhmgtpi0s72h" path="res://assets/icon/particle/kira.png" id="1_nmes0"]
-[ext_resource type="Script" path="res://src/component/scene/ModelParticle.cs" id="2_particle"]
 
 [sub_resource type="Curve" id="Curve_jyhfs"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.4979633, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
@@ -38,4 +37,3 @@ lifetime = 0.5
 visibility_aabb = AABB(-1.048352, -1.0364805, -1.0482299, 2.0720148, 2.0638666, 2.0962157)
 process_material = SubResource("ParticleProcessMaterial_0wfyh")
 draw_pass_1 = SubResource("QuadMesh_o6xl0")
-script = ExtResource("2_particle")

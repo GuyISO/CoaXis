@@ -16,12 +16,16 @@ public partial class SearchUi : PanelContainer
     private LineEdit _propertyValue = null!;
     private Label _resultCount = null!;
     private Tree _results = null!;
+    private Tree _propertyResults = null!;
     private Button _selectAll = null!;
     private UiWindow _window;
     private bool _restoreWindowUnfocusable;
     private readonly List<Guid> _resultIds = new();
     private readonly Dictionary<Guid, TreeItem> _resultItems = new();
+    private readonly Dictionary<Guid, TreeItem> _propertyResultEntityItems = new();
+    private readonly Dictionary<Guid, TreeItem> _propertyResultItems = new();
     private int _lastSelectedIndex = -1;
+    private TreeItem _lastSelectedPropertyItem;
 
     #endregion
 
@@ -36,6 +40,7 @@ public partial class SearchUi : PanelContainer
         _propertyValue = GetNode<LineEdit>("MarginContainer/VBoxContainer/Filters/PropertyValue");
         _resultCount = GetNode<Label>("MarginContainer/VBoxContainer/ResultCount");
         _results = GetNode<Tree>("MarginContainer/VBoxContainer/Results");
+        _propertyResults = GetNode<Tree>("MarginContainer/VBoxContainer/PropertyResults");
         _selectAll = GetNode<Button>("MarginContainer/VBoxContainer/SelectAll");
         _window = GetWindow() as UiWindow;
         SubscribeEvents();
@@ -69,6 +74,9 @@ public partial class SearchUi : PanelContainer
         _results.ItemActivated += OnResultActivated;
         _results.ButtonClicked += OnResultButtonClicked;
         _results.GuiInput += OnResultsGuiInput;
+        _propertyResults.CellSelected += OnPropertyResultSelected;
+        _propertyResults.ItemActivated += OnPropertyResultActivated;
+        _propertyResults.GuiInput += OnPropertyResultsGuiInput;
         _selectAll.Pressed += OnSelectAll;
         Application.Model.Entity.Registry.Registered += OnRegistryChanged;
         Application.Model.Entity.Registry.Cleared += OnRegistryChanged;
@@ -76,6 +84,8 @@ public partial class SearchUi : PanelContainer
         Application.Model.Property.State.ValueNotified += OnPropertyValueChanged;
         Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
+        Application.Model.Property.Selection.SelectionChanged += OnPropertySelectionChanged;
+        Application.Model.Property.Selection.Cleared += OnPropertySelectionCleared;
         Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
         Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityButtonsChanged;
         Application.Model.Entity.State.Collapsed += OnEntityButtonsChanged;
@@ -100,6 +110,9 @@ public partial class SearchUi : PanelContainer
         _results.ItemActivated -= OnResultActivated;
         _results.ButtonClicked -= OnResultButtonClicked;
         _results.GuiInput -= OnResultsGuiInput;
+        _propertyResults.CellSelected -= OnPropertyResultSelected;
+        _propertyResults.ItemActivated -= OnPropertyResultActivated;
+        _propertyResults.GuiInput -= OnPropertyResultsGuiInput;
         _selectAll.Pressed -= OnSelectAll;
         Application.Model.Entity.Registry.Registered -= OnRegistryChanged;
         Application.Model.Entity.Registry.Cleared -= OnRegistryChanged;
@@ -107,6 +120,8 @@ public partial class SearchUi : PanelContainer
         Application.Model.Property.State.ValueNotified -= OnPropertyValueChanged;
         Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
+        Application.Model.Property.Selection.SelectionChanged -= OnPropertySelectionChanged;
+        Application.Model.Property.Selection.Cleared -= OnPropertySelectionCleared;
         Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
         Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityButtonsChanged;
         Application.Model.Entity.State.Collapsed -= OnEntityButtonsChanged;
@@ -157,10 +172,41 @@ public partial class SearchUi : PanelContainer
             }
         }
 
+        foreach (KeyValuePair<Guid, TreeItem> pair in _propertyResultEntityItems)
+        {
+            ModelEntity entity = Application.Model.Entity.Registry.Get(pair.Key);
+            if (entity != null)
+            {
+                pair.Value.SetIcon(0, ModelEntityRowBehavior.GetModelIcon(entity.IconId));
+            }
+        }
+
+        foreach (KeyValuePair<Guid, TreeItem> pair in _propertyResultItems)
+        {
+            ModelProperty property = Application.Model.Property.Registry.Get(pair.Key);
+            if (property != null && !string.IsNullOrEmpty(property.IconId))
+            {
+                Texture2D icon = ModelEntityRowBehavior.GetModelIcon(property.IconId);
+                if (icon != null)
+                {
+                    pair.Value.SetIcon(0, icon);
+                }
+            }
+        }
+
         UpdateSelectionIndicators();
+        UpdatePropertySelectionIndicators();
     }
 
     private void OnSelectionCleared() => _lastSelectedIndex = -1;
+
+    private void OnPropertySelectionChanged() => UpdatePropertySelectionIndicators();
+
+    private void OnPropertySelectionCleared()
+    {
+        _lastSelectedPropertyItem = null;
+        UpdatePropertySelectionIndicators();
+    }
 
     private void OnResultSelected()
     {
@@ -188,6 +234,50 @@ public partial class SearchUi : PanelContainer
             }
 
             _lastSelectedIndex = index;
+        }
+    }
+
+    private void OnPropertyResultSelected()
+    {
+        TreeItem item = _propertyResults.GetSelected();
+        if (!TryGetPropertyResultId(item, out Guid propertyId))
+        {
+            return;
+        }
+
+        ModelSelectionMode mode = Application.Model.Selection.CurrentMode;
+        Guid[] ids = (mode == ModelSelectionMode.Add || mode == ModelSelectionMode.Remove)
+            && _lastSelectedPropertyItem != null
+            ? GetPropertyIdsInRange(_lastSelectedPropertyItem, item)
+            : new[] { propertyId };
+
+        switch (mode)
+        {
+            case ModelSelectionMode.Set:
+                Application.Model.Property.Selection.Set(ids);
+                break;
+            case ModelSelectionMode.Add:
+                Application.Model.Property.Selection.Add(ids);
+                break;
+            case ModelSelectionMode.Remove:
+                Application.Model.Property.Selection.Remove(ids);
+                break;
+            case ModelSelectionMode.Toggle:
+                Application.Model.Property.Selection.Toggle(ids);
+                break;
+            default:
+                Application.Log.Warn($"SearchUi: Unknown selection mode {mode}.");
+                break;
+        }
+
+        _lastSelectedPropertyItem = item;
+    }
+
+    private void OnPropertyResultActivated()
+    {
+        if (TryGetPropertyResultId(_propertyResults.GetSelected(), out Guid propertyId))
+        {
+            Application.Model.Property.Manipulate(propertyId);
         }
     }
 
@@ -220,6 +310,23 @@ public partial class SearchUi : PanelContainer
         if (item != null && TryGetResultId(item, out Guid entityId))
         {
             ModelEntityRowBehavior.ShowContextMenu(entityId);
+        }
+    }
+
+    private void OnPropertyResultsGuiInput(InputEvent @event)
+    {
+        if (@event is not InputEventMouseButton mouseButton
+            || mouseButton.ButtonIndex != MouseButton.Right
+            || !mouseButton.Pressed)
+        {
+            return;
+        }
+
+        TreeItem item = _propertyResults.GetItemAtPosition(mouseButton.Position);
+        if (TryGetPropertyResultId(item, out Guid propertyId))
+        {
+            Application.Ui.Menu.ShowModelPropertyMenu(
+                item.GetMeta("PropertyValue", Variant.CreateFrom(string.Empty)).AsString());
         }
     }
 
@@ -290,13 +397,23 @@ public partial class SearchUi : PanelContainer
 
     private void RefreshResults()
     {
+        string entityType = GetSelectedType(_entityType);
+        string entityName = _entityName.Text;
+        string propertyType = GetSelectedType(_propertyType);
+        string propertyValueType = GetSelectedType(_propertyValueType);
+        string propertyValue = _propertyValue.Text;
         IReadOnlyList<Guid> ids = Application.Model.Search.Find(
-            GetSelectedType(_entityType), _entityName.Text,
-            GetSelectedType(_propertyType), GetSelectedType(_propertyValueType), _propertyValue.Text);
+            entityType, entityName, propertyType, propertyValueType, propertyValue);
+        IReadOnlyList<Guid> propertyIds = Application.Model.Search.FindProperties(
+            entityType, entityName, propertyType, propertyValueType, propertyValue);
         _lastSelectedIndex = -1;
         _results.Clear();
         _resultIds.Clear();
         _resultItems.Clear();
+        _propertyResults.Clear();
+        _propertyResultEntityItems.Clear();
+        _propertyResultItems.Clear();
+        _lastSelectedPropertyItem = null;
         TreeItem root = _results.CreateItem();
         Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
         foreach (Guid id in ids)
@@ -318,9 +435,58 @@ public partial class SearchUi : PanelContainer
             _resultItems.Add(id, item);
         }
 
-        _resultCount.Text = $"Results: {_resultIds.Count}";
+        RefreshPropertyResults(propertyIds);
+        _resultCount.Text = $"Entities: {_resultIds.Count} | Properties: {_propertyResultItems.Count}";
         _selectAll.Disabled = _resultIds.Count == 0;
         UpdateSelectionIndicators();
+        UpdatePropertySelectionIndicators();
+    }
+
+    private void RefreshPropertyResults(IReadOnlyList<Guid> propertyIds)
+    {
+        TreeItem root = _propertyResults.CreateItem();
+        var entityItems = new Dictionary<Guid, TreeItem>();
+        foreach (Guid propertyId in propertyIds)
+        {
+            ModelProperty property = Application.Model.Property.Registry.Get(propertyId);
+            ModelEntity entity = Application.Model.Property.Registry.GetOwningEntity(propertyId);
+            if (property == null || entity == null)
+            {
+                Application.Log.Warn($"SearchUi: Property {propertyId} or its owning Entity no longer exists.");
+                continue;
+            }
+
+            if (!entityItems.TryGetValue(entity.Id, out TreeItem entityItem))
+            {
+                entityItem = _propertyResults.CreateItem(root);
+                entityItem.SetText(0, entity.Name);
+                Texture2D entityIcon = ModelEntityRowBehavior.GetModelIcon(entity.IconId);
+                if (entityIcon != null)
+                {
+                    entityItem.SetIcon(0, entityIcon);
+                }
+
+                entityItems.Add(entity.Id, entityItem);
+                _propertyResultEntityItems.Add(entity.Id, entityItem);
+            }
+
+            TreeItem item = _propertyResults.CreateItem(entityItem);
+            item.SetText(0, string.IsNullOrEmpty(property.Value)
+                ? property.PropertyType
+                : $"{property.PropertyType} : {property.Value}");
+            if (!string.IsNullOrEmpty(property.IconId))
+            {
+                Texture2D propertyIcon = ModelEntityRowBehavior.GetModelIcon(property.IconId);
+                if (propertyIcon != null)
+                {
+                    item.SetIcon(0, propertyIcon);
+                }
+            }
+
+            item.SetMeta("PropertyId", Variant.CreateFrom(property.Id.ToString()));
+            item.SetMeta("PropertyValue", Variant.CreateFrom(property.Value ?? string.Empty));
+            _propertyResultItems.Add(property.Id, item);
+        }
     }
 
     private void UpdateSelectionIndicators()
@@ -329,6 +495,67 @@ public partial class SearchUi : PanelContainer
         foreach (KeyValuePair<Guid, TreeItem> pair in _resultItems)
         {
             ModelEntityRowBehavior.ApplySelectionHighlight(pair.Value, pair.Key, selectedColor);
+        }
+    }
+
+    private void UpdatePropertySelectionIndicators()
+    {
+        Color selectedColor = ModelEntityRowBehavior.GetSelectionColor();
+        foreach (KeyValuePair<Guid, TreeItem> pair in _propertyResultItems)
+        {
+            if (Application.Model.Property.Selection.Contains(pair.Key))
+            {
+                pair.Value.SetCustomBgColor(0, selectedColor);
+            }
+            else
+            {
+                pair.Value.ClearCustomBgColor(0);
+            }
+        }
+    }
+
+    private Guid[] GetPropertyIdsInRange(TreeItem first, TreeItem last)
+    {
+        var items = new List<TreeItem>();
+        TreeItem root = _propertyResults.GetRoot();
+        if (root == null)
+        {
+            return TryGetPropertyResultId(last, out Guid id) ? new[] { id } : Array.Empty<Guid>();
+        }
+
+        CollectVisiblePropertyItems(root, items);
+        int firstIndex = items.IndexOf(first);
+        int lastIndex = items.IndexOf(last);
+        if (firstIndex < 0 || lastIndex < 0)
+        {
+            return TryGetPropertyResultId(last, out Guid id) ? new[] { id } : Array.Empty<Guid>();
+        }
+
+        var ids = new List<Guid>();
+        for (int i = Math.Min(firstIndex, lastIndex); i <= Math.Max(firstIndex, lastIndex); i++)
+        {
+            if (TryGetPropertyResultId(items[i], out Guid id))
+            {
+                ids.Add(id);
+            }
+        }
+
+        return ids.ToArray();
+    }
+
+    private void CollectVisiblePropertyItems(TreeItem item, List<TreeItem> items)
+    {
+        if (TryGetPropertyResultId(item, out _))
+        {
+            items.Add(item);
+        }
+
+        if (!item.Collapsed)
+        {
+            for (TreeItem child = item.GetFirstChild(); child != null; child = child.GetNext())
+            {
+                CollectVisiblePropertyItems(child, items);
+            }
         }
     }
 
@@ -347,6 +574,14 @@ public partial class SearchUi : PanelContainer
 
         Application.Log.Warn("SearchUi: Invalid result identifier.");
         return false;
+    }
+
+    private static bool TryGetPropertyResultId(TreeItem item, out Guid propertyId)
+    {
+        propertyId = Guid.Empty;
+        return item != null
+            && Guid.TryParse(item.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out propertyId)
+            && propertyId != Guid.Empty;
     }
 
     #endregion

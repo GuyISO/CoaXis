@@ -4,7 +4,7 @@ using System.Linq;
 using CoaXis.Protocol.Viewer;
 
 /// <summary>
-/// Entityと所属Propertyの条件からEntityを検索するハブ。
+/// Entityと所属Propertyの条件からEntityおよびPropertyを検索するハブ。
 /// </summary>
 public partial class ModelSearchHub : BaseHub
 {
@@ -81,9 +81,7 @@ public partial class ModelSearchHub : BaseHub
         {
             foreach (ModelProperty property in Application.Model.Property.Registry.Items.Values)
             {
-                if (!MatchesType(property.PropertyType, propertyType)
-                    || !MatchesType(property.ValueType, propertyValueType)
-                    || !Contains(property.Value, propertyValue))
+                if (!MatchesProperty(property, propertyType, propertyValueType, propertyValue))
                 {
                     continue;
                 }
@@ -97,11 +95,41 @@ public partial class ModelSearchHub : BaseHub
         }
 
         return Application.Model.Entity.Registry.GetDescendants(ViewerConstants.RootModelEntityId)
-            .Where(entity => MatchesType(entity.Type, entityType)
-                && Contains(entity.Name, entityName)
+            .Where(entity => MatchesEntity(entity, entityType, entityName)
                 && (!hasPropertyFilter || matchingEntityIds.Contains(entity.Id)))
             .Select(entity => entity.Id)
             .ToArray();
+    }
+
+    /// <summary>同じ検索条件に一致するModelPropertyの識別子を、EntityおよびProperty階層順で取得する。</summary>
+    /// <param name="entityType">所属Entityの種類。空の場合は指定なし</param>
+    /// <param name="entityName">所属Entity名の部分文字列。空の場合は指定なし</param>
+    /// <param name="propertyType">Propertyの種類。空の場合は指定なし</param>
+    /// <param name="propertyValueType">Propertyの値の型。空の場合は指定なし</param>
+    /// <param name="propertyValue">Property値の部分文字列。空の場合は指定なし</param>
+    /// <returns>すべての条件に一致するPropertyの識別子</returns>
+    public IReadOnlyList<Guid> FindProperties(
+        string entityType,
+        string entityName,
+        string propertyType,
+        string propertyValueType,
+        string propertyValue)
+    {
+        var propertyIds = new List<Guid>();
+        foreach (ModelEntity entity in Application.Model.Entity.Registry.GetDescendants(ViewerConstants.RootModelEntityId))
+        {
+            if (!MatchesEntity(entity, entityType, entityName))
+            {
+                continue;
+            }
+
+            foreach (ModelProperty property in entity.Properties)
+            {
+                AddMatchingProperties(property, propertyIds, propertyType, propertyValueType, propertyValue);
+            }
+        }
+
+        return propertyIds;
     }
 
     #endregion
@@ -112,6 +140,43 @@ public partial class ModelSearchHub : BaseHub
     private static bool MatchesType(string value, string filter)
     {
         return string.IsNullOrEmpty(filter) || string.Equals(value, filter, StringComparison.Ordinal);
+    }
+
+    /// <summary>Entityの種類と名前が検索条件に一致するかを判定する。</summary>
+    private static bool MatchesEntity(ModelEntity entity, string entityType, string entityName)
+    {
+        return MatchesType(entity.Type, entityType) && Contains(entity.Name, entityName);
+    }
+
+    /// <summary>Propertyの種類、値の型、値が検索条件に一致するかを判定する。</summary>
+    private static bool MatchesProperty(
+        ModelProperty property,
+        string propertyType,
+        string propertyValueType,
+        string propertyValue)
+    {
+        return MatchesType(property.PropertyType, propertyType)
+            && MatchesType(property.ValueType, propertyValueType)
+            && Contains(property.Value, propertyValue);
+    }
+
+    /// <summary>一致するPropertyとその子孫を、階層順に結果へ追加する。</summary>
+    private static void AddMatchingProperties(
+        ModelProperty property,
+        List<Guid> propertyIds,
+        string propertyType,
+        string propertyValueType,
+        string propertyValue)
+    {
+        if (MatchesProperty(property, propertyType, propertyValueType, propertyValue))
+        {
+            propertyIds.Add(property.Id);
+        }
+
+        foreach (ModelProperty child in property.Children)
+        {
+            AddMatchingProperties(child, propertyIds, propertyType, propertyValueType, propertyValue);
+        }
     }
 
     /// <summary>文字列が未指定または大文字小文字を区別せず部分一致するかを判定する。</summary>

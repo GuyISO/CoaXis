@@ -1,5 +1,3 @@
-// TODO: ちゃんと内容理解する
-
 using System;
 using System.Collections.Generic;
 using CoaXis.Protocol.Viewer;

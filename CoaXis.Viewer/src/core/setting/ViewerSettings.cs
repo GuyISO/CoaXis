@@ -31,6 +31,11 @@ public sealed class ViewerSettings
     /// </summary>
     public ParticleSettings Particle { get; set; } = new ParticleSettings();
 
+    /// <summary>
+    /// 3D環境表示に関する設定セクション。
+    /// </summary>
+    public EnvironmentSettings Environment { get; set; } = new EnvironmentSettings();
+
     #endregion
 
     #region Methods
@@ -59,6 +64,7 @@ public sealed class ViewerSettings
         Ui.Normalize();
         Particle ??= new ParticleSettings();
         Particle.Normalize();
+        Environment ??= new EnvironmentSettings();
     }
 
     #endregion

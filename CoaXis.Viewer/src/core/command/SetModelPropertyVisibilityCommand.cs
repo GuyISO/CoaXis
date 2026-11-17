@@ -1,14 +1,14 @@
-using System;
+﻿using System;
 
 /// <summary>
-/// ModelProperty の表示設定を変更する Undo/Redo 対応コマンド
+/// ModelProperty の表示設定を変更する Undo/Redo 対応コマンド、バッチで複数Propertyを変更することも可能
 /// </summary>
 public sealed partial class SetModelPropertyVisibilityCommand : BaseCommand
 {
     #region Fields
 
-    private readonly Guid _propertyId;
-    private readonly ModelVisibility _previousVisibility;
+    private readonly Guid[] _propertyIds;
+    private readonly ModelVisibility[] _previousVisibilities;
     private readonly ModelVisibility _nextVisibility;
 
     #endregion
@@ -30,9 +30,23 @@ public sealed partial class SetModelPropertyVisibilityCommand : BaseCommand
     /// <param name="propertyId">表示設定を変更するPropertyの識別子</param>
     /// <param name="nextVisibility">変更後の表示設定</param>
     public SetModelPropertyVisibilityCommand(Guid propertyId, ModelVisibility nextVisibility)
+        : this(new[] { propertyId }, nextVisibility)
     {
-        _propertyId = propertyId;
-        _previousVisibility = Application.Model.Property.Registry.Get(propertyId)?.Visibility ?? ModelVisibility.Inherit;
+    }
+
+    /// <summary>
+    /// コンストラクタ、指定された複数Propertyの表示設定を変更するコマンド
+    /// </summary>
+    /// <param name="propertyIds">表示設定を変更するPropertyの識別子の配列</param>
+    /// <param name="nextVisibility">変更後の表示設定</param>
+    public SetModelPropertyVisibilityCommand(Guid[] propertyIds, ModelVisibility nextVisibility)
+    {
+        _propertyIds = propertyIds ?? throw new ArgumentNullException(nameof(propertyIds));
+        _previousVisibilities = new ModelVisibility[_propertyIds.Length];
+        for (int i = 0; i < _propertyIds.Length; i++)
+        {
+            _previousVisibilities[i] = Application.Model.Property.Registry.Get(_propertyIds[i])?.Visibility ?? ModelVisibility.Inherit;
+        }
         _nextVisibility = nextVisibility;
     }
 
@@ -45,7 +59,10 @@ public sealed partial class SetModelPropertyVisibilityCommand : BaseCommand
     /// </summary>
     public override void Do()
     {
-        Apply("Do", _nextVisibility);
+        for (int i = 0; i < _propertyIds.Length; i++)
+        {
+            Apply("Do", _propertyIds[i], _nextVisibility);
+        }
     }
 
     /// <summary>
@@ -53,7 +70,10 @@ public sealed partial class SetModelPropertyVisibilityCommand : BaseCommand
     /// </summary>
     public override void Undo()
     {
-        Apply("Undo", _previousVisibility);
+        for (int i = 0; i < _propertyIds.Length; i++)
+        {
+            Apply("Undo", _propertyIds[i], _previousVisibilities[i]);
+        }
     }
 
     #endregion
@@ -63,12 +83,12 @@ public sealed partial class SetModelPropertyVisibilityCommand : BaseCommand
     /// <summary>
     /// 対象Propertyへ表示設定を適用する
     /// </summary>
-    private void Apply(string operation, ModelVisibility visibility)
+    private void Apply(string operation, Guid propertyId, ModelVisibility visibility)
     {
-        ModelProperty property = Application.Model.Property.Registry.Get(_propertyId);
+        ModelProperty property = Application.Model.Property.Registry.Get(propertyId);
         if (property == null)
         {
-            LogSkip(operation, $"property '{_propertyId}' is not registered.");
+            LogSkip(operation, $"property '{propertyId}' is not registered.");
             return;
         }
 

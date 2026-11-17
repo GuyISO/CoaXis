@@ -12,6 +12,12 @@ func _run() -> void:
 	root.add_child(window)
 	var search := load("res://scenes/ui/search_ui.tscn").instantiate() as Control
 	window.call("SetContainer", search)
+	var results := search.get_node("MarginContainer/VBoxContainer/Results") as Tree
+	var property_results := search.get_node("MarginContainer/VBoxContainer/PropertyResults") as Tree
+	if property_results.get_index() <= results.get_index():
+		failures.append("Property表示用ツリーがEntity表示用ツリーの下にありません")
+	if not property_results.hide_root:
+		failures.append("Property検索結果のグルーピング用ルートが非表示になっていません")
 	var entity_name := search.get_node("MarginContainer/VBoxContainer/Filters/EntityName") as LineEdit
 	var property_value := search.get_node("MarginContainer/VBoxContainer/Filters/PropertyValue") as LineEdit
 
@@ -42,7 +48,7 @@ func _run() -> void:
 
 	window.free()
 	if failures.is_empty():
-		print("Search UI focus contract passed.")
+		print("Search UI focus and result tree contracts passed.")
 		quit(0)
 		return
 

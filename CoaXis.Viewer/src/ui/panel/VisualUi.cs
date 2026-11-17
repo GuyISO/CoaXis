@@ -175,14 +175,22 @@ public partial class VisualUi : PanelContainer
     private void ApplyVisibilityToSelection(ModelVisibility visibility)
     {
         var selectedEntityIds = Application.Model.Entity.Selection.SelectedIds.ToArray();
-        if (selectedEntityIds.Length == 0)
+        var selectedPropertyIds = Application.Model.Property.Selection.SelectedIds.ToArray();
+        if (selectedEntityIds.Length == 0 && selectedPropertyIds.Length == 0)
         {
-            Application.Log.Warn("VisualUi: No models are selected.");
+            Application.Log.Warn("VisualUi: No models or properties are selected.");
             return;
         }
 
-        var command = new SetModelEntityVisibilityCommand(selectedEntityIds, visibility);
-        Application.Command.Execute(command);
+        if (selectedEntityIds.Length > 0)
+        {
+            Application.Command.Execute(new SetModelEntityVisibilityCommand(selectedEntityIds, visibility));
+        }
+
+        if (selectedPropertyIds.Length > 0)
+        {
+            Application.Command.Execute(new SetModelPropertyVisibilityCommand(selectedPropertyIds, visibility));
+        }
     }
 
     #endregion

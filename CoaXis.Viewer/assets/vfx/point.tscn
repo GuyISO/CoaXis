@@ -1,7 +1,6 @@
 [gd_scene format=3 uid="uid://cscokfo0ivsrl"]
 
 [ext_resource type="Texture2D" uid="uid://dv7jnqm1qdho8" path="res://assets/icon/particle/star.png" id="1_idfqd"]
-[ext_resource type="Script" uid="uid://c7v105h2mbc4s" path="res://src/component/scene/ModelParticle.cs" id="2_particle"]
 
 [sub_resource type="Curve" id="Curve_jyhfs"]
 _data = [Vector2(0, 0), 0.0, 0.0, 0, 0, Vector2(0.7331975, 1), 0.0, 0.0, 0, 0, Vector2(1, 0), 0.0, 0.0, 0, 0]
@@ -42,4 +41,3 @@ lifetime = 0.5
 visibility_aabb = AABB(-1.2935708, -1.3668134, -1.3709021, 2.6169648, 2.8527992, 2.6703305)
 process_material = SubResource("ParticleProcessMaterial_0wfyh")
 draw_pass_1 = SubResource("QuadMesh_o6xl0")
-script = ExtResource("2_particle")
