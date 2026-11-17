@@ -197,6 +197,7 @@ public partial class IpcHub : BaseHub
         }
 
         Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
+        Application.Model.Property.Selection.SelectionChanged += OnPropertySelectionChanged;
         Application.Model.Entity.Manipulated += OnEntityManipulated;
         Application.Model.Property.Manipulated += OnPropertyManipulated;
         _modelEventsSubscribed = true;
@@ -213,13 +214,14 @@ public partial class IpcHub : BaseHub
         }
 
         Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
+        Application.Model.Property.Selection.SelectionChanged -= OnPropertySelectionChanged;
         Application.Model.Entity.Manipulated -= OnEntityManipulated;
         Application.Model.Property.Manipulated -= OnPropertyManipulated;
         _modelEventsSubscribed = false;
     }
 
     /// <summary>
-    /// 選択状態が変わった場合、接続中のIPCクライアントへ最新の選択ID一覧を通知する。
+    /// Entityの選択状態が変わった場合、接続中のIPCクライアントへ最新の選択ID一覧を通知する。
     /// </summary>
     private void OnSelectionChanged()
     {
@@ -242,6 +244,33 @@ public partial class IpcHub : BaseHub
         if (!connection.TryEnqueue(notification))
         {
             Application.Log.Warn("Ipc: unable to queue ModelEntitySelected notification.");
+        }
+    }
+
+    /// <summary>
+    /// Propertyの選択状態が変わった場合、接続中のIPCクライアントへ最新の選択ID一覧を通知する。
+    /// </summary>
+    private void OnPropertySelectionChanged()
+    {
+        ConnectionSession connection = Volatile.Read(ref _activeConnection);
+        if (connection == null)
+        {
+            return;
+        }
+
+        var payload = new ModelPropertySelectedPayload
+        {
+            PropertyIds = Application.Model.Property.Selection.SelectedIds
+                .OrderBy(propertyId => propertyId)
+                .ToList()
+        };
+        IpcEnvelope notification = IpcEnvelopeBuilder.Create(
+            IpcEventType.FromViewer.ModelPropertySelected,
+            ViewerSourceName,
+            payload);
+        if (!connection.TryEnqueue(notification))
+        {
+            Application.Log.Warn("Ipc: unable to queue ModelPropertySelected notification.");
         }
     }
 

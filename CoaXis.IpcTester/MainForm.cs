@@ -416,6 +416,13 @@ public sealed partial class MainForm : CoaXisForm
             detail = $"選択中のModelEntity: {entityIds.GetArrayLength()}件";
         }
         else if (notification.Payload.ValueKind == JsonValueKind.Object &&
+            notification.EventType == IpcEventType.FromViewer.ModelPropertySelected &&
+            notification.Payload.TryGetProperty("propertyIds", out JsonElement propertyIds) &&
+            propertyIds.ValueKind == JsonValueKind.Array)
+        {
+            detail = $"選択中のModelProperty: {propertyIds.GetArrayLength()}件";
+        }
+        else if (notification.Payload.ValueKind == JsonValueKind.Object &&
             notification.EventType == IpcEventType.FromViewer.ModelEntityManipulated &&
             notification.Payload.TryGetProperty("entityId", out JsonElement entityId) &&
             entityId.ValueKind == JsonValueKind.String)

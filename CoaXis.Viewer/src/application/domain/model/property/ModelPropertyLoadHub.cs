@@ -159,6 +159,7 @@ public partial class ModelPropertyLoadHub : BaseHub
         }
         while (added);
 
+        Application.Model.Property.Selection.Remove(idsToDelete.ToArray());
         foreach (Guid propertyId in idsToDelete.OrderByDescending(GetDepth))
         {
             Application.Model.Property.Registry.Dispose(propertyId);

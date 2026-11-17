@@ -51,6 +51,7 @@ public partial class ModelSetHub : BaseHub
 
         EnsureRootEntityIsNotIncluded(modelSet.Entities);
 
+        Application.Model.Property.Selection.Clear();
         Application.Model.Property.Registry.Clear();
         Application.Model.Entity.Load.Clear();
         Application.Model.Entity.Load.AddOrReplacePrepared(modelSet.Entities);
@@ -67,6 +68,7 @@ public partial class ModelSetHub : BaseHub
         int removedEntityCount = Application.Model.Entity.Registry.Items.Keys
             .Count(entityId => entityId != ViewerConstants.RootModelEntityId);
 
+        Application.Model.Property.Selection.Clear();
         Application.Model.Property.Registry.Clear();
         Application.Model.Entity.Load.Clear();
         return removedEntityCount;

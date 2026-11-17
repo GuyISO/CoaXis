@@ -168,8 +168,8 @@ public partial class SearchUi : PanelContainer
         if (TryGetResultId(item, out Guid entityId))
         {
             int index = item.GetIndex();
-            ModelEntitySelectionMode mode = Application.Model.Entity.Selection.Mode;
-            if ((mode == ModelEntitySelectionMode.Add || mode == ModelEntitySelectionMode.Remove)
+            ModelSelectionMode mode = Application.Model.Selection.CurrentMode;
+            if ((mode == ModelSelectionMode.Add || mode == ModelSelectionMode.Remove)
                 && _lastSelectedIndex >= 0 && _lastSelectedIndex < _resultIds.Count)
             {
                 var ids = new List<Guid>();

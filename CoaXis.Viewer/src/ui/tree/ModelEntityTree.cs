@@ -646,7 +646,7 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        ModelEntitySelectionMode mode = Application.Model.Entity.Selection.Mode;
+        ModelSelectionMode mode = Application.Model.Selection.CurrentMode;
         bool shouldHandleAsRange = ShouldHandleAsRangeSelection(mode);
 
         if (!shouldHandleAsRange)
@@ -666,10 +666,10 @@ public partial class ModelEntityTree : Tree
     /// </summary>
     /// <param name="mode">現在の選択モード</param>
     /// <returns>範囲選択として扱う場合は true</returns>
-    private bool ShouldHandleAsRangeSelection(ModelEntitySelectionMode mode)
+    private bool ShouldHandleAsRangeSelection(ModelSelectionMode mode)
     {
         // AddモードやRemoveモードかつすでに何か選択中のアイテムがある場合は範囲選択として扱う
-        if (mode != ModelEntitySelectionMode.Add && mode != ModelEntitySelectionMode.Remove)
+        if (mode != ModelSelectionMode.Add && mode != ModelSelectionMode.Remove)
         {
             return false;
         }

@@ -35,8 +35,11 @@ public static class IpcEventType
     /// </summary>
     public static class FromViewer
     {
-        /// <summary>選択通知</summary>
+        /// <summary>モデル実体の選択通知</summary>
         public const string ModelEntitySelected = "ModelEntitySelected";
+
+        /// <summary>モデル属性の選択通知</summary>
+        public const string ModelPropertySelected = "ModelPropertySelected";
 
         /// <summary>モデル実体のManipulate操作通知</summary>
         public const string ModelEntityManipulated = "ModelEntityManipulated";

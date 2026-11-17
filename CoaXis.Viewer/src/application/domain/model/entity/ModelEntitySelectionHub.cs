@@ -4,21 +4,6 @@ using System.Linq;
 using System.Collections.Generic;
 
 /// <summary>
-/// モデルの選択モードを表す列挙型。
-/// </summary>
-public enum ModelEntitySelectionMode
-{
-    /// <summary>対象のみを選択するデフォルトの選択モード。</summary>
-    Set,
-    /// <summary>追加選択モード。</summary>
-    Add,
-    /// <summary>削除選択モード。</summary>
-    Remove,
-    /// <summary>トグル選択モード。</summary>
-    Toggle,
-}
-
-/// <summary>
 /// ModelEntity の選択状態と変更通知を管理するハブ。
 /// </summary>
 public partial class ModelEntitySelectionHub : BaseHub
@@ -32,9 +17,6 @@ public partial class ModelEntitySelectionHub : BaseHub
 
     #region Properties
 
-    /// <summary>現在の選択モードを取得する。</summary>
-    public ModelEntitySelectionMode Mode { get; private set; } = ModelEntitySelectionMode.Set;
-
     /// <summary>現在の選択実体IDのコレクションの複製を取得する。</summary>
     public IReadOnlyCollection<Guid> SelectedIds => _selectedIds.ToList().AsReadOnly();
 
@@ -44,9 +26,6 @@ public partial class ModelEntitySelectionHub : BaseHub
     #endregion
 
     #region Signals
-
-    /// <summary>選択モードの変更通知。</summary>
-    [Signal] public delegate void ModeNotifiedEventHandler();
 
     /// <summary>Entityの選択状態の変更通知。選択有無は Contains で参照する。</summary>
     [Signal] public delegate void SelectedEventHandler(string entityId);
@@ -111,30 +90,30 @@ public partial class ModelEntitySelectionHub : BaseHub
         // ピック結果が null または実体が null の場合、Setモードの場合は選択をクリアする、Hitしているかは選択においては関係ない
         if (pickResult == null || pickResult.EntityId == Guid.Empty)
         {
-            if (Mode == ModelEntitySelectionMode.Set)
+            if (Application.Model.Selection.CurrentMode == ModelSelectionMode.Set)
             {
-                Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
+                Application.Model.Selection.Clear();
             }
             return;
         }
 
         Guid entityId = pickResult.EntityId;
-        switch (Mode)
+        switch (Application.Model.Selection.CurrentMode)
         {
-            case ModelEntitySelectionMode.Set:
+            case ModelSelectionMode.Set:
                 Set(entityId);
                 break;
-            case ModelEntitySelectionMode.Add:
+            case ModelSelectionMode.Add:
                 Add(entityId);
                 break;
-            case ModelEntitySelectionMode.Remove:
+            case ModelSelectionMode.Remove:
                 Remove(entityId);
                 break;
-            case ModelEntitySelectionMode.Toggle:
+            case ModelSelectionMode.Toggle:
                 Toggle(entityId);
                 break;
             default:
-                Application.Log.Warn($"SelectionHub: Unknown selection mode {Mode}.");
+                Application.Log.Warn($"SelectionHub: Unknown selection mode {Application.Model.Selection.CurrentMode}.");
                 break;
         }
     }
@@ -152,9 +131,9 @@ public partial class ModelEntitySelectionHub : BaseHub
 
         if (pickResults == null || pickResults.Length == 0)
         {
-            if (Mode == ModelEntitySelectionMode.Set)
+            if (Application.Model.Selection.CurrentMode == ModelSelectionMode.Set)
             {
-                Clear(); // Setモードの場合、ピック結果がない場合は選択をクリアする
+                Application.Model.Selection.Clear();
             }
             return;
         }
@@ -167,29 +146,29 @@ public partial class ModelEntitySelectionHub : BaseHub
 
         if (entityIds.Length == 0)
         {
-            if (Mode == ModelEntitySelectionMode.Set)
+            if (Application.Model.Selection.CurrentMode == ModelSelectionMode.Set)
             {
-                Clear();
+                Application.Model.Selection.Clear();
             }
             return;
         }
 
-        switch (Mode)
+        switch (Application.Model.Selection.CurrentMode)
         {
-            case ModelEntitySelectionMode.Set:
+            case ModelSelectionMode.Set:
                 Set(entityIds);
                 break;
-            case ModelEntitySelectionMode.Add:
+            case ModelSelectionMode.Add:
                 Add(entityIds);
                 break;
-            case ModelEntitySelectionMode.Remove:
+            case ModelSelectionMode.Remove:
                 Remove(entityIds);
                 break;
-            case ModelEntitySelectionMode.Toggle:
+            case ModelSelectionMode.Toggle:
                 Toggle(entityIds);
                 break;
             default:
-                Application.Log.Warn($"SelectionHub: Unknown selection mode {Mode}.");
+                Application.Log.Warn($"SelectionHub: Unknown selection mode {Application.Model.Selection.CurrentMode}.");
                 break;
         }
     }
@@ -205,21 +184,6 @@ public partial class ModelEntitySelectionHub : BaseHub
     #endregion
 
     #region Methods
-
-    /// <summary>
-    /// 選択モードを設定する。
-    /// </summary>
-    /// <param name="mode">設定する選択モード</param>
-    public void SetMode(ModelEntitySelectionMode mode)
-    {
-        if (Mode != mode)
-        {
-            Mode = mode;
-            Application.Log.Debug($"SelectionHub: Selection mode changed to {Mode}.");
-        }
-
-        EmitSignal(SignalName.ModeNotified);
-    }
 
     /// <summary>
     /// 現在選択中の実体IDを元に、対応する Node3D 配列を取得する。
@@ -262,10 +226,32 @@ public partial class ModelEntitySelectionHub : BaseHub
             throw new ArgumentNullException(nameof(entityIds));
         }
 
-        var newSelectedIds = new HashSet<Guid>(entityIds.Where(entityId => entityId != Guid.Empty));
+        var newSelectedIds = new HashSet<Guid>();
+        foreach (Guid entityId in entityIds)
+        {
+            if (entityId == Guid.Empty)
+            {
+                continue;
+            }
+            if (!Application.Model.Entity.Registry.IsRegistered(entityId))
+            {
+                Application.Log.Warn($"EntitySelectionHub: Entity not found. entityId='{entityId}'");
+                continue;
+            }
+            newSelectedIds.Add(entityId);
+        }
+        if (newSelectedIds.Count == 0 && entityIds.Any(entityId => entityId != Guid.Empty))
+        {
+            return;
+        }
         if (_selectedIds.SetEquals(newSelectedIds))
         {
             return;
+        }
+
+        if (newSelectedIds.Count > 0)
+        {
+            Application.Model.Selection.PrepareEntitySelection();
         }
 
         Guid[] previousSelectedIds = _selectedIds.ToArray();
@@ -464,11 +450,19 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// </summary>
     private bool AddCore(Guid entityId)
     {
-        if (entityId == Guid.Empty || !_selectedIds.Add(entityId))
+        if (entityId == Guid.Empty || _selectedIds.Contains(entityId))
         {
             return false;
         }
 
+        if (!Application.Model.Entity.Registry.IsRegistered(entityId))
+        {
+            Application.Log.Warn($"EntitySelectionHub: Entity not found. entityId='{entityId}'");
+            return false;
+        }
+
+        Application.Model.Selection.PrepareEntitySelection();
+        _selectedIds.Add(entityId);
         EmitSignal(SignalName.Selected, entityId.ToString());
         Application.Log.Info($"Selected: {entityId}");
         return true;

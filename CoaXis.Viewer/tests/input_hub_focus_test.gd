@@ -13,7 +13,7 @@ func _run() -> void:
 		return
 
 	var camera := root.get_node("Application/Viewport/Camera")
-	var selection := root.get_node("Application/Model/Entity/Selection")
+	var selection := root.get_node("Application/Model/Selection")
 	root.grab_focus()
 	await create_timer(0.2).timeout
 	if not root.has_focus():
@@ -29,7 +29,7 @@ func _run() -> void:
 	await process_frame
 	if camera.get("Position") == initial_position:
 		failures.append("アクティブ時にカメラが移動しませんでした。")
-	if selection.get("Mode") != 1:
+	if selection.get("CurrentMode") != 1:
 		failures.append("アクティブ時に選択モードが切り替わりませんでした。")
 	Input.action_release("translate_camera_right")
 
@@ -41,7 +41,7 @@ func _run() -> void:
 	await create_timer(0.2).timeout
 	if root.has_focus() or not window.has_focus():
 		failures.append("別ウィンドウにフォーカスを切り替えられませんでした。")
-	if selection.get("Mode") != 0:
+	if selection.get("CurrentMode") != 0:
 		failures.append("フォーカス喪失後に一時的な選択モードが解除されませんでした。")
 	Input.action_release("switch_selection_mode_add")
 
@@ -59,7 +59,7 @@ func _run() -> void:
 		failures.append("非アクティブ時にカメラが移動しました。")
 	if camera.get("Rotation") != initial_rotation:
 		failures.append("非アクティブ時にカメラが回転しました。")
-	if selection.get("Mode") != 2:
+	if selection.get("CurrentMode") != 2:
 		failures.append("非アクティブ時にEscapeが処理されました。")
 
 	Input.action_release("translate_camera_right")
@@ -69,7 +69,7 @@ func _run() -> void:
 	await create_timer(0.2).timeout
 	if not root.has_focus():
 		failures.append("メインウィンドウにフォーカスが戻りませんでした。")
-	if selection.get("Mode") != 2:
+	if selection.get("CurrentMode") != 2:
 		failures.append("UIから設定した選択モードがフォーカス復帰時に変更されました。")
 	initial_position = camera.get("Position")
 	initial_rotation = camera.get("Rotation")

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using CoaXis.Protocol.Viewer;
 using Godot;
 
@@ -40,6 +41,9 @@ public partial class ModelPropertyTree : Tree
 	/// ModelProperty識別子と、対応する TreeItem の対応表
 	/// </summary>
 	private readonly System.Collections.Generic.Dictionary<Guid, TreeItem> _propertyItems = new();
+
+	private TreeItem _lastSelectedPropertyItem;
+	private readonly HashSet<TreeItem> _highlightedItems = new();
 
 	#endregion
 
@@ -106,6 +110,8 @@ public partial class ModelPropertyTree : Tree
 		Clear();
 		_rootItem = null;
 		_propertyItems.Clear();
+		_highlightedItems.Clear();
+		_lastSelectedPropertyItem = null;
 
 		ModelEntity entity = Application.Model.Entity.Registry.Get(_entityId);
 		if (entity == null)
@@ -115,7 +121,6 @@ public partial class ModelPropertyTree : Tree
 
 		TreeItem rootItem = CreateItem();
 		rootItem.SetText(0, entity.Name);
-		ModelEntityRowBehavior.ApplySelectionHighlight(rootItem, _entityId, ModelEntityRowBehavior.GetSelectionColor());
 		Texture2D entityIcon = ModelEntityRowBehavior.GetModelIcon(entity.IconId);
 		rootItem.SetIcon(0, entityIcon);
 		rootItem.AddButton(0, GetEntityPropertyIcon(entity), id: PropertyButtonId, disabled: entity.Properties.Count == 0);
@@ -127,6 +132,8 @@ public partial class ModelPropertyTree : Tree
 		{
 			AddPropertyToTree(property, rootItem);
 		}
+
+		RefreshSelectionHighlights();
 	}
 
 	/// <summary>
@@ -144,48 +151,92 @@ public partial class ModelPropertyTree : Tree
 	private void SubscribeEvents()
 	{
 		ButtonClicked += OnButtonClicked;
-		ItemSelected += OnItemSelected;
+		CellSelected += OnItemSelected;
+		ItemCollapsed += OnItemCollapsed;
 		ItemActivated += OnItemActivated;
 		Application.Model.Property.Visual.VisibilityResolved += OnPropertyVisibilityResolved;
 		Application.Model.Property.State.ValueNotified += OnPropertyValueNotified;
 		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified += OnEntityPropertyTreeVisibleNotified;
 		Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
+		Application.Model.Property.Selection.SelectionChanged += OnSelectionChanged;
+		Application.Model.Property.Selection.Cleared += OnPropertySelectionCleared;
 		Application.Ui.Theme.ThemeChanged += OnThemeChanged;
 	}
 
 	private void UnsubscribeEvents()
 	{
 		ButtonClicked -= OnButtonClicked;
-		ItemSelected -= OnItemSelected;
+		CellSelected -= OnItemSelected;
+		ItemCollapsed -= OnItemCollapsed;
 		ItemActivated -= OnItemActivated;
 		Application.Model.Property.Visual.VisibilityResolved -= OnPropertyVisibilityResolved;
 		Application.Model.Property.State.ValueNotified -= OnPropertyValueNotified;
 		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
 		Application.Model.Entity.State.PropertyTreeVisibleNotified -= OnEntityPropertyTreeVisibleNotified;
 		Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
+		Application.Model.Property.Selection.SelectionChanged -= OnSelectionChanged;
+		Application.Model.Property.Selection.Cleared -= OnPropertySelectionCleared;
 		Application.Ui.Theme.ThemeChanged -= OnThemeChanged;
 	}
 
 	/// <summary>
-	/// ルートのEntity行が選択されたとき、Pickを通知する。
+	/// 行が選択されたとき、EntityのPickまたはPropertyの選択を処理する。
 	/// </summary>
 	private void OnItemSelected()
 	{
-		if (_rootItem == null || _entityId == Guid.Empty || GetSelected() != _rootItem)
+		TreeItem item = GetSelected();
+		if (_rootItem == null || _entityId == Guid.Empty || item == null)
 		{
 			return;
 		}
 
-		_isNotifyingRootPick = true;
-		try
+		if (item == _rootItem)
 		{
-			Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(_entityId));
+			_lastSelectedPropertyItem = null;
+			_isNotifyingRootPick = true;
+			try
+			{
+				Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(_entityId));
+			}
+			finally
+			{
+				_isNotifyingRootPick = false;
+			}
+			return;
 		}
-		finally
+
+		if (!Guid.TryParse(item.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid propertyId))
 		{
-			_isNotifyingRootPick = false;
+			Application.Log.Warn("ModelPropertyTree: selected item has no associated property.");
+			return;
 		}
+
+		ModelSelectionMode mode = Application.Model.Selection.CurrentMode;
+		Guid[] ids = (mode == ModelSelectionMode.Add || mode == ModelSelectionMode.Remove) && _lastSelectedPropertyItem != null
+			? GetPropertyIdsInRange(_lastSelectedPropertyItem, item)
+			: new[] { propertyId };
+
+		switch (mode)
+		{
+			case ModelSelectionMode.Set:
+				Application.Model.Property.Selection.Set(ids);
+				break;
+			case ModelSelectionMode.Add:
+				Application.Model.Property.Selection.Add(ids);
+				break;
+			case ModelSelectionMode.Remove:
+				Application.Model.Property.Selection.Remove(ids);
+				break;
+			case ModelSelectionMode.Toggle:
+				Application.Model.Property.Selection.Toggle(ids);
+				break;
+			default:
+				Application.Log.Warn($"ModelPropertyTree: Unknown selection mode {mode}.");
+				break;
+		}
+
+		_lastSelectedPropertyItem = item;
 	}
 
 	/// <summary>
@@ -218,11 +269,23 @@ public partial class ModelPropertyTree : Tree
 	}
 
 	/// <summary>
-	/// Entityの選択状態が変更されたとき、ルート行の背景色を更新する。
+	/// EntityまたはPropertyの選択状態が変更されたとき、背景色を更新する。
 	/// </summary>
 	private void OnSelectionChanged()
 	{
-		ApplyRootSelectionHighlight();
+		RefreshSelectionHighlights();
+	}
+
+	/// <summary>Property選択の解除後、範囲選択の起点を破棄する。</summary>
+	private void OnPropertySelectionCleared()
+	{
+		_lastSelectedPropertyItem = null;
+	}
+
+	/// <summary>折り畳みに応じて選択背景を更新する。</summary>
+	private void OnItemCollapsed(TreeItem item)
+	{
+		RefreshSelectionHighlights();
 	}
 
 	/// <summary>
@@ -230,7 +293,7 @@ public partial class ModelPropertyTree : Tree
 	/// </summary>
 	private void OnThemeChanged()
 	{
-		ApplyRootSelectionHighlight();
+		RefreshSelectionHighlights();
 		ModelEntity entity = Application.Model.Entity.Registry.Get(_entityId);
 		if (_rootItem != null && entity != null)
 		{
@@ -255,11 +318,54 @@ public partial class ModelPropertyTree : Tree
 	}
 
 	/// <summary>
-	/// Entityルート行へ現在の選択色を適用する。
+	/// 現在の選択と折り畳み状態から各行の背景色を更新する。
 	/// </summary>
-	private void ApplyRootSelectionHighlight()
+	private void RefreshSelectionHighlights()
 	{
-		ModelEntityRowBehavior.ApplySelectionHighlight(_rootItem, _entityId, ModelEntityRowBehavior.GetSelectionColor());
+		if (_rootItem == null)
+		{
+			return;
+		}
+
+		var next = new HashSet<TreeItem>();
+		if (Application.Model.Entity.Selection.Contains(_entityId))
+		{
+			next.Add(_rootItem);
+		}
+
+		foreach (Guid propertyId in Application.Model.Property.Selection.SelectedIds)
+		{
+			if (!_propertyItems.TryGetValue(propertyId, out TreeItem item))
+			{
+				continue;
+			}
+
+			TreeItem visible = item;
+			for (TreeItem ancestor = item.GetParent(); ancestor != null; ancestor = ancestor.GetParent())
+			{
+				if (ancestor.Collapsed)
+				{
+					visible = ancestor;
+				}
+			}
+			next.Add(visible);
+		}
+
+		foreach (TreeItem item in _highlightedItems)
+		{
+			if (!next.Contains(item))
+			{
+				item.ClearCustomBgColor(0);
+			}
+		}
+
+		Color color = ModelEntityRowBehavior.GetSelectionColor();
+		foreach (TreeItem item in next)
+		{
+			item.SetCustomBgColor(0, color);
+		}
+		_highlightedItems.Clear();
+		_highlightedItems.UnionWith(next);
 	}
 
 	/// <summary>
@@ -366,6 +472,47 @@ public partial class ModelPropertyTree : Tree
 	#endregion
 
 	#region Helpers
+
+	/// <summary>表示順で2行の間にあるProperty識別子を取得する。</summary>
+	private Guid[] GetPropertyIdsInRange(TreeItem first, TreeItem last)
+	{
+		var visible = new List<TreeItem>();
+		CollectVisiblePropertyItems(_rootItem, visible);
+		int firstIndex = visible.IndexOf(first);
+		int lastIndex = visible.IndexOf(last);
+		if (firstIndex < 0 || lastIndex < 0)
+		{
+			return Guid.TryParse(last.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid id)
+				? new[] { id }
+				: Array.Empty<Guid>();
+		}
+
+		var ids = new List<Guid>();
+		for (int i = Math.Min(firstIndex, lastIndex); i <= Math.Max(firstIndex, lastIndex); i++)
+		{
+			if (Guid.TryParse(visible[i].GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid id))
+			{
+				ids.Add(id);
+			}
+		}
+		return ids.ToArray();
+	}
+
+	/// <summary>表示中のProperty行を階層順に収集する。</summary>
+	private void CollectVisiblePropertyItems(TreeItem item, List<TreeItem> items)
+	{
+		if (item != _rootItem)
+		{
+			items.Add(item);
+		}
+		if (!item.Collapsed)
+		{
+			for (TreeItem child = item.GetFirstChild(); child != null; child = child.GetNext())
+			{
+				CollectVisiblePropertyItems(child, items);
+			}
+		}
+	}
 
 	/// <summary>
 	/// Entityの表示設定と実効表示に対応するボタンアイコンを取得する

@@ -41,8 +41,11 @@
 | `IpcEventType.ToViewer.ReadModelSet` | クライアント → Viewer | IDを指定して読み出し |
 | `IpcEventType.Common.Result` | Viewer → クライアント | 要求の処理結果 |
 | `IpcEventType.FromViewer.ModelEntitySelected` | Viewer → クライアント | Entity選択の通知 |
+| `IpcEventType.FromViewer.ModelPropertySelected` | Viewer → クライアント | Property選択の通知 |
 | `IpcEventType.FromViewer.ModelEntityManipulated` | Viewer → クライアント | EntityのManipulate操作通知 |
 | `IpcEventType.FromViewer.ModelPropertyManipulated` | Viewer → クライアント | PropertyのManipulate操作通知 |
+
+EntityとPropertyの選択通知は、それぞれ選択集合が変更されるたび、選択中の全IDを`payload.entityIds`または`payload.propertyIds`に格納します。全解除時は空配列を送ります。通知は接続中のクライアントにのみ送られ、接続時に現在の選択状態は再送されません。
 
 ## 使い方
 

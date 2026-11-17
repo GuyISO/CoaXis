@@ -8,7 +8,7 @@ public partial class InputHub : BaseHub
     #region Fields
 
     /// <summary>入力によって一時的に設定した選択モード。</summary>
-    private ModelEntitySelectionMode? _selectionModeFromInput;
+    private ModelSelectionMode? _selectionModeFromInput;
 
     #endregion
 
@@ -32,11 +32,11 @@ public partial class InputHub : BaseHub
         // 別ウィンドウのテキスト入力でカメラなどが操作されないようにする。
         if (!GetTree().Root.HasFocus())
         {
-            if (_selectionModeFromInput is ModelEntitySelectionMode mode)
+            if (_selectionModeFromInput is ModelSelectionMode mode)
             {
-                if (Application.Model.Entity.Selection.Mode == mode)
+                if (Application.Model.Selection.CurrentMode == mode)
                 {
-                    Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
+                    Application.Model.Selection.SetMode(ModelSelectionMode.Set);
                 }
 
                 _selectionModeFromInput = null;
@@ -46,9 +46,9 @@ public partial class InputHub : BaseHub
         }
 
         // 押下中に状態を切り替えるボタンの入力処理
-        HandleSelectModeInput("switch_selection_mode_add", ModelEntitySelectionMode.Add);
-        HandleSelectModeInput("switch_selection_mode_remove", ModelEntitySelectionMode.Remove);
-        HandleSelectModeInput("switch_selection_mode_toggle", ModelEntitySelectionMode.Toggle);
+        HandleSelectModeInput("switch_selection_mode_add", ModelSelectionMode.Add);
+        HandleSelectModeInput("switch_selection_mode_remove", ModelSelectionMode.Remove);
+        HandleSelectModeInput("switch_selection_mode_toggle", ModelSelectionMode.Toggle);
 
         // ボタン入力処理
         HandleButtonInput();
@@ -73,18 +73,18 @@ public partial class InputHub : BaseHub
     /// <summary>
     /// 選択モードの切り替えを処理する。
     /// </summary>
-    private void HandleSelectModeInput(string actionName, ModelEntitySelectionMode assignMode)
+    private void HandleSelectModeInput(string actionName, ModelSelectionMode assignMode)
     { 
         if (Input.IsActionJustPressed(actionName))
         {
-            Application.Model.Entity.Selection.SetMode(assignMode);
+            Application.Model.Selection.SetMode(assignMode);
             _selectionModeFromInput = assignMode;
         }
         else if (Input.IsActionJustReleased(actionName))
         {
-            if (Application.Model.Entity.Selection.Mode == assignMode)
+            if (Application.Model.Selection.CurrentMode == assignMode)
             {
-                Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
+                Application.Model.Selection.SetMode(ModelSelectionMode.Set);
             }
 
             if (_selectionModeFromInput == assignMode)
@@ -102,7 +102,7 @@ public partial class InputHub : BaseHub
         
         if (Input.IsActionJustPressed("clear"))
         {
-            Application.Model.Entity.Load.Clear();
+            Application.Model.ModelSet.Clear();
         }
         
         if (Input.IsActionJustPressed("undo"))
@@ -120,8 +120,8 @@ public partial class InputHub : BaseHub
         if (Input.IsActionJustPressed("escape"))
         {
             Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Selection);
-            Application.Model.Entity.Selection.SetMode(ModelEntitySelectionMode.Set);
-            Application.Model.Entity.Selection.Clear();
+            Application.Model.Selection.SetMode(ModelSelectionMode.Set);
+            Application.Model.Selection.Clear();
         }
     }
 

@@ -19,6 +19,7 @@ public static class IpcPayloadTypeMap
         [IpcEventType.ToViewer.ReadModelSet] = typeof(ModelSetIdsPayload),
         // FromViewerイベントのpayload型
         [IpcEventType.FromViewer.ModelEntitySelected] = typeof(ModelEntitySelectedPayload),
+        [IpcEventType.FromViewer.ModelPropertySelected] = typeof(ModelPropertySelectedPayload),
         [IpcEventType.FromViewer.ModelEntityManipulated] = typeof(ModelEntityManipulatedPayload),
         [IpcEventType.FromViewer.ModelPropertyManipulated] = typeof(ModelPropertyManipulatedPayload),
         // Commonイベントのpayload型
