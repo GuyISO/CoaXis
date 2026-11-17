@@ -81,6 +81,27 @@ public partial class ModelSearchContract : Node
                 "Part", "Door", string.Empty, string.Empty, string.Empty);
             Check(entityFilteredProperties.SequenceEqual(new[] { materialAId, gradeAId, materialBId }),
                 "Entity条件のみ指定したProperty結果が不正");
+
+            var searchUiScene = GD.Load<PackedScene>("res://scenes/ui/search_ui.tscn");
+            var searchUi = searchUiScene.Instantiate<SearchUi>();
+            AddChild(searchUi);
+            Tree propertyTree = searchUi.GetNode<Tree>("MarginContainer/VBoxContainer/PropertyResults");
+            TreeItem gradeItem = FindPropertyItem(propertyTree.GetRoot(), gradeAId);
+            TreeItem materialItem = FindPropertyItem(propertyTree.GetRoot(), materialAId);
+            Check(gradeItem != null, "Search UIに検索対象Propertyが表示されない");
+            Check(gradeItem.GetButtonById(0, ModelPropertyRowBehavior.VisibilityButtonId) >= 0,
+                "Search UIのProperty行に共通Visibilityボタンが設定されない");
+            Texture2D materialIcon = materialItem?.GetIcon(0);
+            Texture2D gradeIcon = gradeItem?.GetIcon(0);
+            Check(materialIcon is AtlasTexture materialAtlas
+                && gradeIcon is AtlasTexture gradeAtlas
+                && gradeAtlas.Region.Size.X > materialAtlas.Region.Size.X,
+                "Search UIのProperty階層がアイコンオフセットに反映されない");
+            Check(searchUi.GetNode<Label>("MarginContainer/VBoxContainer/EntityResultCount").Text.StartsWith("Entity | "),
+                "Entity件数ラベルが表示されない");
+            Check(searchUi.GetNode<Label>("MarginContainer/VBoxContainer/PropertyResultCount").Text.StartsWith("Property | "),
+                "Property件数ラベルが表示されない");
+            searchUi.Free();
         }
         finally
         {
@@ -94,5 +115,24 @@ public partial class ModelSearchContract : Node
         {
             throw new InvalidOperationException(message);
         }
+    }
+
+    private static TreeItem FindPropertyItem(TreeItem item, Guid propertyId)
+    {
+        for (TreeItem current = item; current != null; current = current.GetNext())
+        {
+            if (ModelPropertyRowBehavior.GetPropertyId(current) == propertyId)
+            {
+                return current;
+            }
+
+            TreeItem descendant = FindPropertyItem(current.GetFirstChild(), propertyId);
+            if (descendant != null)
+            {
+                return descendant;
+            }
+        }
+
+        return null;
     }
 }

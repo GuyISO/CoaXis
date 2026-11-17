@@ -51,10 +51,11 @@ public partial class UiMenuHub : BaseHub
     /// 指定した ModelProperty の値を対象にコンテキストメニューを表示する。
     /// </summary>
     /// <param name="value">操作対象とするプロパティ値</param>
-    public void ShowModelPropertyMenu(string value)
+    /// <param name="entityId">操作対象プロパティが所属するModelEntityの識別子</param>
+    public void ShowModelPropertyMenu(string value, Guid entityId = default)
     {
         _modelPropertyMenu = EnsureMenu(_modelPropertyMenu, "ModelPropertyMenu");
-        _modelPropertyMenu.Show(value);
+        _modelPropertyMenu.Show(value, entityId);
     }
 
     /// <summary>

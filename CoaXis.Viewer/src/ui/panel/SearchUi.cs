@@ -14,7 +14,8 @@ public partial class SearchUi : PanelContainer
     private OptionButton _propertyType = null!;
     private OptionButton _propertyValueType = null!;
     private LineEdit _propertyValue = null!;
-    private Label _resultCount = null!;
+    private Label _entityResultCount = null!;
+    private Label _propertyResultCount = null!;
     private Tree _results = null!;
     private Tree _propertyResults = null!;
     private Button _selectAll = null!;
@@ -38,7 +39,8 @@ public partial class SearchUi : PanelContainer
         _propertyType = GetNode<OptionButton>("MarginContainer/VBoxContainer/Filters/PropertyType");
         _propertyValueType = GetNode<OptionButton>("MarginContainer/VBoxContainer/Filters/PropertyValueType");
         _propertyValue = GetNode<LineEdit>("MarginContainer/VBoxContainer/Filters/PropertyValue");
-        _resultCount = GetNode<Label>("MarginContainer/VBoxContainer/ResultCount");
+        _entityResultCount = GetNode<Label>("MarginContainer/VBoxContainer/EntityResultCount");
+        _propertyResultCount = GetNode<Label>("MarginContainer/VBoxContainer/PropertyResultCount");
         _results = GetNode<Tree>("MarginContainer/VBoxContainer/Results");
         _propertyResults = GetNode<Tree>("MarginContainer/VBoxContainer/PropertyResults");
         _selectAll = GetNode<Button>("MarginContainer/VBoxContainer/SelectAll");
@@ -76,12 +78,14 @@ public partial class SearchUi : PanelContainer
         _results.GuiInput += OnResultsGuiInput;
         _propertyResults.CellSelected += OnPropertyResultSelected;
         _propertyResults.ItemActivated += OnPropertyResultActivated;
+        _propertyResults.ButtonClicked += OnPropertyResultButtonClicked;
         _propertyResults.GuiInput += OnPropertyResultsGuiInput;
         _selectAll.Pressed += OnSelectAll;
         Application.Model.Entity.Registry.Registered += OnRegistryChanged;
         Application.Model.Entity.Registry.Cleared += OnRegistryChanged;
         Application.Model.Property.Registry.Changed += OnRegistryChanged;
         Application.Model.Property.State.ValueNotified += OnPropertyValueChanged;
+        Application.Model.Property.Visual.VisibilityResolved += OnPropertyVisibilityResolved;
         Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
         Application.Model.Property.Selection.SelectionChanged += OnPropertySelectionChanged;
@@ -112,12 +116,14 @@ public partial class SearchUi : PanelContainer
         _results.GuiInput -= OnResultsGuiInput;
         _propertyResults.CellSelected -= OnPropertyResultSelected;
         _propertyResults.ItemActivated -= OnPropertyResultActivated;
+        _propertyResults.ButtonClicked -= OnPropertyResultButtonClicked;
         _propertyResults.GuiInput -= OnPropertyResultsGuiInput;
         _selectAll.Pressed -= OnSelectAll;
         Application.Model.Entity.Registry.Registered -= OnRegistryChanged;
         Application.Model.Entity.Registry.Cleared -= OnRegistryChanged;
         Application.Model.Property.Registry.Changed -= OnRegistryChanged;
         Application.Model.Property.State.ValueNotified -= OnPropertyValueChanged;
+        Application.Model.Property.Visual.VisibilityResolved -= OnPropertyVisibilityResolved;
         Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
         Application.Model.Property.Selection.SelectionChanged -= OnPropertySelectionChanged;
@@ -177,20 +183,16 @@ public partial class SearchUi : PanelContainer
             ModelEntity entity = Application.Model.Entity.Registry.Get(pair.Key);
             if (entity != null)
             {
-                pair.Value.SetIcon(0, ModelEntityRowBehavior.GetModelIcon(entity.IconId));
+                pair.Value.SetIcon(0, ModelEntityRowBehavior.GetIndentedIcon(entity));
             }
         }
 
         foreach (KeyValuePair<Guid, TreeItem> pair in _propertyResultItems)
         {
             ModelProperty property = Application.Model.Property.Registry.Get(pair.Key);
-            if (property != null && !string.IsNullOrEmpty(property.IconId))
+            if (property != null)
             {
-                Texture2D icon = ModelEntityRowBehavior.GetModelIcon(property.IconId);
-                if (icon != null)
-                {
-                    pair.Value.SetIcon(0, icon);
-                }
+                ModelPropertyRowBehavior.UpdateThemeIcons(pair.Value, property, true);
             }
         }
 
@@ -206,6 +208,19 @@ public partial class SearchUi : PanelContainer
     {
         _lastSelectedPropertyItem = null;
         UpdatePropertySelectionIndicators();
+    }
+
+    private void OnPropertyVisibilityResolved(string propertyId)
+    {
+        if (Guid.TryParse(propertyId, out Guid id)
+            && _propertyResultItems.TryGetValue(id, out TreeItem item))
+        {
+            ModelProperty property = Application.Model.Property.Registry.Get(id);
+            if (property != null)
+            {
+                ModelPropertyRowBehavior.UpdateVisibilityButton(item, property);
+            }
+        }
     }
 
     private void OnResultSelected()
@@ -240,7 +255,8 @@ public partial class SearchUi : PanelContainer
     private void OnPropertyResultSelected()
     {
         TreeItem item = _propertyResults.GetSelected();
-        if (!TryGetPropertyResultId(item, out Guid propertyId))
+        Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(item);
+        if (propertyId == Guid.Empty)
         {
             return;
         }
@@ -275,9 +291,18 @@ public partial class SearchUi : PanelContainer
 
     private void OnPropertyResultActivated()
     {
-        if (TryGetPropertyResultId(_propertyResults.GetSelected(), out Guid propertyId))
+        Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(_propertyResults.GetSelected());
+        if (propertyId != Guid.Empty)
         {
-            Application.Model.Property.Manipulate(propertyId);
+            ModelPropertyRowBehavior.Manipulate(propertyId);
+        }
+    }
+
+    private void OnPropertyResultButtonClicked(TreeItem item, long column, long buttonId, long mouseButtonIndex)
+    {
+        if (item != null && column == 0)
+        {
+            ModelPropertyRowBehavior.HandleButtonClick(ModelPropertyRowBehavior.GetPropertyId(item), buttonId);
         }
     }
 
@@ -323,10 +348,9 @@ public partial class SearchUi : PanelContainer
         }
 
         TreeItem item = _propertyResults.GetItemAtPosition(mouseButton.Position);
-        if (TryGetPropertyResultId(item, out Guid propertyId))
+        if (ModelPropertyRowBehavior.GetPropertyId(item) != Guid.Empty)
         {
-            Application.Ui.Menu.ShowModelPropertyMenu(
-                item.GetMeta("PropertyValue", Variant.CreateFrom(string.Empty)).AsString());
+            ModelPropertyRowBehavior.ShowContextMenu(item);
         }
     }
 
@@ -436,7 +460,8 @@ public partial class SearchUi : PanelContainer
         }
 
         RefreshPropertyResults(propertyIds);
-        _resultCount.Text = $"Entities: {_resultIds.Count} | Properties: {_propertyResultItems.Count}";
+        _entityResultCount.Text = $"Entity | {_resultIds.Count}";
+        _propertyResultCount.Text = $"Property | {_propertyResultItems.Count}";
         _selectAll.Disabled = _resultIds.Count == 0;
         UpdateSelectionIndicators();
         UpdatePropertySelectionIndicators();
@@ -460,31 +485,14 @@ public partial class SearchUi : PanelContainer
             {
                 entityItem = _propertyResults.CreateItem(root);
                 entityItem.SetText(0, entity.Name);
-                Texture2D entityIcon = ModelEntityRowBehavior.GetModelIcon(entity.IconId);
-                if (entityIcon != null)
-                {
-                    entityItem.SetIcon(0, entityIcon);
-                }
+                entityItem.SetIcon(0, ModelEntityRowBehavior.GetIndentedIcon(entity));
 
                 entityItems.Add(entity.Id, entityItem);
                 _propertyResultEntityItems.Add(entity.Id, entityItem);
             }
 
             TreeItem item = _propertyResults.CreateItem(entityItem);
-            item.SetText(0, string.IsNullOrEmpty(property.Value)
-                ? property.PropertyType
-                : $"{property.PropertyType} : {property.Value}");
-            if (!string.IsNullOrEmpty(property.IconId))
-            {
-                Texture2D propertyIcon = ModelEntityRowBehavior.GetModelIcon(property.IconId);
-                if (propertyIcon != null)
-                {
-                    item.SetIcon(0, propertyIcon);
-                }
-            }
-
-            item.SetMeta("PropertyId", Variant.CreateFrom(property.Id.ToString()));
-            item.SetMeta("PropertyValue", Variant.CreateFrom(property.Value ?? string.Empty));
+            ModelPropertyRowBehavior.Configure(item, property, true);
             _propertyResultItems.Add(property.Id, item);
         }
     }
@@ -503,14 +511,7 @@ public partial class SearchUi : PanelContainer
         Color selectedColor = ModelEntityRowBehavior.GetSelectionColor();
         foreach (KeyValuePair<Guid, TreeItem> pair in _propertyResultItems)
         {
-            if (Application.Model.Property.Selection.Contains(pair.Key))
-            {
-                pair.Value.SetCustomBgColor(0, selectedColor);
-            }
-            else
-            {
-                pair.Value.ClearCustomBgColor(0);
-            }
+            ModelPropertyRowBehavior.ApplySelectionHighlight(pair.Value, pair.Key, selectedColor);
         }
     }
 
@@ -520,7 +521,8 @@ public partial class SearchUi : PanelContainer
         TreeItem root = _propertyResults.GetRoot();
         if (root == null)
         {
-            return TryGetPropertyResultId(last, out Guid id) ? new[] { id } : Array.Empty<Guid>();
+            Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(last);
+            return propertyId != Guid.Empty ? new[] { propertyId } : Array.Empty<Guid>();
         }
 
         CollectVisiblePropertyItems(root, items);
@@ -528,15 +530,17 @@ public partial class SearchUi : PanelContainer
         int lastIndex = items.IndexOf(last);
         if (firstIndex < 0 || lastIndex < 0)
         {
-            return TryGetPropertyResultId(last, out Guid id) ? new[] { id } : Array.Empty<Guid>();
+            Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(last);
+            return propertyId != Guid.Empty ? new[] { propertyId } : Array.Empty<Guid>();
         }
 
         var ids = new List<Guid>();
         for (int i = Math.Min(firstIndex, lastIndex); i <= Math.Max(firstIndex, lastIndex); i++)
         {
-            if (TryGetPropertyResultId(items[i], out Guid id))
+            Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(items[i]);
+            if (propertyId != Guid.Empty)
             {
-                ids.Add(id);
+                ids.Add(propertyId);
             }
         }
 
@@ -545,7 +549,7 @@ public partial class SearchUi : PanelContainer
 
     private void CollectVisiblePropertyItems(TreeItem item, List<TreeItem> items)
     {
-        if (TryGetPropertyResultId(item, out _))
+        if (ModelPropertyRowBehavior.GetPropertyId(item) != Guid.Empty)
         {
             items.Add(item);
         }
@@ -574,14 +578,6 @@ public partial class SearchUi : PanelContainer
 
         Application.Log.Warn("SearchUi: Invalid result identifier.");
         return false;
-    }
-
-    private static bool TryGetPropertyResultId(TreeItem item, out Guid propertyId)
-    {
-        propertyId = Guid.Empty;
-        return item != null
-            && Guid.TryParse(item.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out propertyId)
-            && propertyId != Guid.Empty;
     }
 
     #endregion

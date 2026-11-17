@@ -29,6 +29,17 @@ hide_folding = true
 hide_root = true
 auto_tooltip = false
 
+[node name="SelectedPropertiesLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+text = "Selected Properties"
+
+[node name="PropertyTree" type="Tree" parent="MarginContainer/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+allow_reselect = true
+allow_search = false
+hide_root = true
+
 [node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1678572172]
 layout_mode = 2
 alignment = 1

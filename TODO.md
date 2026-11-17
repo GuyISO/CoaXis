@@ -1,21 +1,17 @@
 # Viewer
 
+SelectionUIの挙動見直す
+
 どこかにアプリケーションのバージョンを表示する
 
 向きを持ったPointに対応するsceneを作る
 
-
 Overlayに表示する、特定の座標を指すリサイズ可能なUIコンポーネントを作成する、あらゆるContainerを保有できるようにする
 ModelProertyTreeは、Containerの中に配置する形で使用する
-
-SettingもFacadeにして、各種設定を管理するHub
-Settingで設定可能にする必要のない項目が多すぎる、Settingは全体的に見直す
 
 三面図などの複数Viewportに対応できるように、各Viewportごとに独立したカメラやオーバーレイを管理する仕組みを検討する
 ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介してカメラを表示できるようにする、各Viewportごとに独立したカメラ制御を可能にする
 FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
-
-ライトテーマ切替
 
 ## 3D表示関係
 コマンド化、IPC化進める
@@ -25,11 +21,6 @@ FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
     設定変更したら、Settings.jsonに保存する
 各種パネル
     フローティングor右側でタブから選んで使用できるように配置する
-
-## 今後を考えて
-
-Property用のSelectionやManipulate機能の仕様を検討する
-
 
 ## 細かい修正
 

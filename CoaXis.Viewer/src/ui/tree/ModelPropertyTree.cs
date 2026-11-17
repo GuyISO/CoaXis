@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using CoaXis.Protocol.Viewer;
 using Godot;
 
 /// <summary>
@@ -31,11 +30,6 @@ public partial class ModelPropertyTree : Tree
 	/// Property OverlayTree表示切替ボタンのID（Root行のみ）
 	/// </summary>
 	private const int PropertyButtonId = ModelEntityRowBehavior.PropertyButtonId;
-
-	/// <summary>
-	/// Particleテクスチャ表示ボタンのID（Particle指定のProperty行のみ）
-	/// </summary>
-	private const int ParticleButtonId = 3;
 
 	/// <summary>
 	/// ModelProperty識別子と、対応する TreeItem の対応表
@@ -85,7 +79,7 @@ public partial class ModelPropertyTree : Tree
 			}
 			else
 			{
-				Application.Ui.Menu.ShowModelPropertyMenu(TryGetPropertyValue(targetItem));
+				ModelPropertyRowBehavior.ShowContextMenu(targetItem);
 			}
 		}
 	}
@@ -206,7 +200,8 @@ public partial class ModelPropertyTree : Tree
 			return;
 		}
 
-		if (!Guid.TryParse(item.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid propertyId))
+		Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(item);
+		if (propertyId == Guid.Empty)
 		{
 			Application.Log.Warn("ModelPropertyTree: selected item has no associated property.");
 			return;
@@ -255,17 +250,7 @@ public partial class ModelPropertyTree : Tree
 			return;
 		}
 
-		if (id != VisibilityButtonId)
-		{
-			return;
-		}
-
-		if (!Guid.TryParse(item.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid propertyId))
-		{
-			return;
-		}
-
-		Application.Model.Property.Registry.Get(propertyId)?.ToggleVisibility();
+		ModelPropertyRowBehavior.HandleButtonClick(ModelPropertyRowBehavior.GetPropertyId(item), id);
 	}
 
 	/// <summary>
@@ -308,12 +293,7 @@ public partial class ModelPropertyTree : Tree
 				continue;
 			}
 
-			pair.Value.SetIcon(0, ModelEntityRowBehavior.GetModelIcon(property.IconId));
-			int index = pair.Value.GetButtonById(0, VisibilityButtonId);
-			if (index >= 0)
-			{
-				pair.Value.SetButton(0, index, GetVisibilityIcon(property));
-			}
+			ModelPropertyRowBehavior.UpdateThemeIcons(pair.Value, property);
 		}
 	}
 
@@ -380,10 +360,10 @@ public partial class ModelPropertyTree : Tree
 			return;
 		}
 
-		if (selectedItem != null &&
-			Guid.TryParse(selectedItem.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid propertyId))
+		Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(selectedItem);
+		if (propertyId != Guid.Empty)
 		{
-			Application.Model.Property.Manipulate(propertyId);
+			ModelPropertyRowBehavior.Manipulate(propertyId);
 		}
 	}
 
@@ -401,11 +381,7 @@ public partial class ModelPropertyTree : Tree
 		ModelProperty property = Application.Model.Property.Registry.Get(parsedId);
 		if (property != null)
 		{
-			int index = item.GetButtonById(0, VisibilityButtonId);
-			if (index >= 0)
-			{
-				item.SetButton(0, index, GetVisibilityIcon(property));
-			}
+			ModelPropertyRowBehavior.UpdateVisibilityButton(item, property);
 		}
 	}
 
@@ -423,8 +399,7 @@ public partial class ModelPropertyTree : Tree
 		ModelProperty property = Application.Model.Property.Registry.Get(parsedId);
 		if (property != null)
 		{
-			item.SetText(0, GetPropertyText(property));
-			item.SetMeta("PropertyValue", Variant.CreateFrom(property.Value ?? string.Empty));
+			ModelPropertyRowBehavior.UpdateText(item, property);
 		}
 	}
 
@@ -482,17 +457,19 @@ public partial class ModelPropertyTree : Tree
 		int lastIndex = visible.IndexOf(last);
 		if (firstIndex < 0 || lastIndex < 0)
 		{
-			return Guid.TryParse(last.GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid id)
-				? new[] { id }
+			Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(last);
+			return propertyId != Guid.Empty
+				? new[] { propertyId }
 				: Array.Empty<Guid>();
 		}
 
 		var ids = new List<Guid>();
 		for (int i = Math.Min(firstIndex, lastIndex); i <= Math.Max(firstIndex, lastIndex); i++)
 		{
-			if (Guid.TryParse(visible[i].GetMeta("PropertyId", Variant.CreateFrom(string.Empty)).AsString(), out Guid id))
+			Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(visible[i]);
+			if (propertyId != Guid.Empty)
 			{
-				ids.Add(id);
+				ids.Add(propertyId);
 			}
 		}
 		return ids.ToArray();
@@ -531,64 +508,6 @@ public partial class ModelPropertyTree : Tree
 	}
 
 	/// <summary>
-	/// Propertyの行に表示する文字列を取得する
-	/// </summary>
-	private static string GetPropertyText(ModelProperty property)
-	{
-		return string.IsNullOrEmpty(property.Value)
-			? property.PropertyType
-			: $"{property.PropertyType} : {property.Value}";
-	}
-
-	/// <summary>
-	/// Propertyの表示設定と実効表示に対応するボタンアイコンを取得する
-	/// </summary>
-	private static Texture2D GetVisibilityIcon(ModelProperty property)
-	{
-		return ModelEntityRowBehavior.GetVisibilityIcon(property.Visibility, property.IsVisible);
-	}
-
-	/// <summary>
-	/// Particleテクスチャ指定があるPropertyのボタンアイコンを、ParticleColorで着色して取得する
-	/// </summary>
-	/// <returns>着色済みアイコン、テクスチャ未指定または取得失敗時は null</returns>
-	private static Texture2D GetParticleIcon(ModelProperty property)
-	{
-		if (!property.IsParticleEnabled)
-		{
-			return null;
-		}
-
-		Texture2D source = Application.Asset.Texture.GetParticle(property.ParticleTextureId);
-		Image image = source?.GetImage();
-		if (image == null)
-		{
-			return null;
-		}
-
-		image = (Image)image.Duplicate();
-		if (image.IsCompressed())
-		{
-			image.Decompress();
-		}
-
-		image.Convert(Image.Format.Rgba8);
-		int size = Constant.Ui.Tree.HierarchyVisibleIconSize;
-		image.Resize(size, size, Image.Interpolation.Lanczos);
-
-		Color tint = property.ParticleColor ?? Colors.White;
-		for (int y = 0; y < image.GetHeight(); y++)
-		{
-			for (int x = 0; x < image.GetWidth(); x++)
-			{
-				image.SetPixel(x, y, image.GetPixel(x, y) * tint);
-			}
-		}
-
-		return ImageTexture.CreateFromImage(image);
-	}
-
-	/// <summary>
 	/// ModelProperty とその子プロパティをツリーへ追加する
 	/// </summary>
 	/// <param name="property">追加対象の ModelProperty</param>
@@ -601,26 +520,7 @@ public partial class ModelPropertyTree : Tree
 		}
 
 		TreeItem propertyItem = parentItem.CreateChild();
-		propertyItem.SetText(0, GetPropertyText(property));
-		if (!string.IsNullOrEmpty(property.IconId))
-		{
-			Texture2D icon = ModelEntityRowBehavior.GetModelIcon(property.IconId);
-			if (icon != null)
-			{
-				propertyItem.SetIcon(0, icon);
-			}
-		}
-		
-		// 右クリックメニューでの値コピー用に、表示列とは別に値そのものをメタデータへ保持する
-		propertyItem.SetMeta("PropertyValue", Variant.CreateFrom(property.Value ?? string.Empty));
-		propertyItem.SetMeta("PropertyId", Variant.CreateFrom(property.Id.ToString()));
-
-		Texture2D particleIcon = GetParticleIcon(property);
-		if (particleIcon != null)
-		{
-			propertyItem.AddButton(0, particleIcon, id: ParticleButtonId);
-		}
-		propertyItem.AddButton(0, GetVisibilityIcon(property), id: VisibilityButtonId);
+		ModelPropertyRowBehavior.Configure(propertyItem, property);
 
 		_propertyItems[property.Id] = propertyItem;
 
@@ -628,21 +528,6 @@ public partial class ModelPropertyTree : Tree
 		{
 			AddPropertyToTree(childProperty, propertyItem);
 		}
-	}
-
-	/// <summary>
-	/// TreeItem に保持されたプロパティ値を取得する
-	/// </summary>
-	/// <param name="item">値を取得する対象の TreeItem</param>
-	/// <returns>保持されている値、存在しない場合は空文字</returns>
-	private static string TryGetPropertyValue(TreeItem item)
-	{
-		if (item == null)
-		{
-			return string.Empty;
-		}
-
-		return item.GetMeta("PropertyValue", Variant.CreateFrom(string.Empty)).AsString();
 	}
 
 	#endregion

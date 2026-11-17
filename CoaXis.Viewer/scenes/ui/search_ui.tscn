@@ -77,8 +77,9 @@ size_flags_horizontal = 3
 tooltip_text = "所属Propertyの値を大文字・小文字を区別せず部分一致で検索します"
 placeholder_text = "Property value contains"
 
-[node name="ResultCount" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="EntityResultCount" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
+text = "Entity | 0"
 
 [node name="Results" type="Tree" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
@@ -89,9 +90,9 @@ hide_root = true
 hide_folding = true
 auto_tooltip = false
 
-[node name="PropertyResultsLabel" type="Label" parent="MarginContainer/VBoxContainer"]
+[node name="PropertyResultCount" type="Label" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2
-text = "Properties"
+text = "Property | 0"
 
 [node name="PropertyResults" type="Tree" parent="MarginContainer/VBoxContainer"]
 layout_mode = 2

@@ -77,6 +77,8 @@ public partial class ModelSelectionContract : Node
         TreeItem child = first.GetFirstChild();
         TreeItem last = first.GetNext();
         TreeItem secondFirst = secondTree.GetRoot().GetFirstChild();
+        Check(first.GetButtonById(0, ModelPropertyRowBehavior.VisibilityButtonId) >= 0,
+            "PropertyTree行に共通Visibilityボタンが設定されない");
 
         Application.Model.Entity.Pick.SetHandlingMode(PickHandlingMode.Measurement);
         selection.SetMode(ModelSelectionMode.Set);
@@ -132,6 +134,19 @@ public partial class ModelSelectionContract : Node
         property.Add(new[] { firstId, childId, lastId });
         Application.Model.ModelSet.Remove(Array.Empty<Guid>(), new[] { firstId });
         Check(property.SelectedIds.SequenceEqual(new[] { lastId }), "連鎖削除で選択が同期されない");
+
+        var selectionUiScene = GD.Load<PackedScene>("res://scenes/ui/selection_ui.tscn");
+        var selectionUi = selectionUiScene.Instantiate<SelectionUi>();
+        AddChild(selectionUi);
+        Tree selectedPropertyTree = selectionUi.GetNode<Tree>("MarginContainer/VBoxContainer/PropertyTree");
+        TreeItem selectedEntityItem = selectedPropertyTree.GetRoot().GetFirstChild();
+        TreeItem selectedPropertyItem = selectedEntityItem.GetFirstChild();
+        Check(ModelPropertyRowBehavior.GetPropertyId(selectedPropertyItem) == lastId,
+            "Selection UIに選択中Propertyが表示されない");
+        Check(selectedPropertyItem.GetButtonById(0, ModelPropertyRowBehavior.VisibilityButtonId) >= 0,
+            "Selection UIのProperty行に共通Visibilityボタンが設定されない");
+        selectionUi.Free();
+
         selection.Clear();
         Check(property.Count == 0, "共通ClearでProperty選択が解除されない");
 
