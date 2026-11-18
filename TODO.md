@@ -1,7 +1,5 @@
 # Viewer
 
-SelectionUIの挙動見直す
-
 どこかにアプリケーションのバージョンを表示する
 
 向きを持ったPointに対応するsceneを作る
@@ -12,6 +10,10 @@ ModelProertyTreeは、Containerの中に配置する形で使用する
 三面図などの複数Viewportに対応できるように、各Viewportごとに独立したカメラやオーバーレイを管理する仕組みを検討する
 ViewportCameraHubにCamera実体を持たせ、ViewportからはそのHubを介してカメラを表示できるようにする、各Viewportごとに独立したカメラ制御を可能にする
 FocalPointは1点のみでよい、各ViewportはそのFocalPointを共有する
+
+Particleなどのアセット、アイコン整理
+
+範囲選択がマジで遅い、もっとなんとかしないと
 
 ## 3D表示関係
 コマンド化、IPC化進める
@@ -44,3 +46,4 @@ Modelの移動機能
     LineSetも角度によってはレイキャストを受け付けない場合がある
 範囲選択
     至近距離になるとPickByShapeが効かなくなる場合がある
+    Joltなどの物理演算設定を見直す？

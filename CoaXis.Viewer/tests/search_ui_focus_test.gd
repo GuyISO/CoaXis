@@ -12,18 +12,21 @@ func _run() -> void:
 	root.add_child(window)
 	var search := load("res://scenes/ui/search_ui.tscn").instantiate() as Control
 	window.call("SetContainer", search)
-	var entity_count := search.get_node("MarginContainer/VBoxContainer/EntityResultCount") as Label
+	var entity_count := search.get_node("MarginContainer/VBoxContainer/EntityResultCount") as Button
 	var results := search.get_node("MarginContainer/VBoxContainer/Results") as Tree
-	var property_count := search.get_node("MarginContainer/VBoxContainer/PropertyResultCount") as Label
-	var property_results := search.get_node("MarginContainer/VBoxContainer/PropertyResults") as Tree
+	var property_count := search.get_node("MarginContainer/VBoxContainer/PropertyResultCount") as Button
 	if entity_count.get_index() >= results.get_index() or not entity_count.text.begins_with("Entity | "):
 		failures.append("Entity検索結果の件数ラベルがツリーの上にありません")
-	if property_count.get_index() >= property_results.get_index() or not property_count.text.begins_with("Property | "):
+	if property_count.get_index() >= results.get_index() or not property_count.text.begins_with("Property | "):
 		failures.append("Property検索結果の件数ラベルがツリーの上にありません")
-	if property_results.get_index() <= results.get_index():
-		failures.append("Property表示用ツリーがEntity表示用ツリーの下にありません")
-	if not property_results.hide_root:
-		failures.append("Property検索結果のグルーピング用ルートが非表示になっていません")
+	if not results.hide_root:
+		failures.append("統合検索結果のルートが非表示になっていません")
+	if not results.hide_folding:
+		failures.append("検索結果Treeの親子階層機能が無効化されていません")
+	if not entity_count.toggle_mode or not property_count.toggle_mode:
+		failures.append("件数表示がトグルボタンになっていません")
+	if not entity_count.button_pressed or not property_count.button_pressed:
+		failures.append("検索結果種別の初期表示設定が無効です")
 	var entity_name := search.get_node("MarginContainer/VBoxContainer/Filters/EntityName") as LineEdit
 	var property_value := search.get_node("MarginContainer/VBoxContainer/Filters/PropertyValue") as LineEdit
 

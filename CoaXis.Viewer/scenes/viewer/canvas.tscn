@@ -11,7 +11,7 @@
 [ext_resource type="PackedScene" uid="uid://djb751h7aic7h" path="res://scenes/ui/visual_ui.tscn" id="7_xrtxh"]
 [ext_resource type="Script" uid="uid://0c6hjpufigtx" path="res://src/ui/tree/EmbeddedModelEntityTree.cs" id="10_57r0r"]
 [ext_resource type="Script" uid="uid://cappsl4oxcewa" path="res://src/ui/tree/EmbeddedModelPropertyTree.cs" id="12_bn6oc"]
-[ext_resource type="PackedScene" path="res://scenes/ui/search_ui.tscn" id="13_search"]
+[ext_resource type="PackedScene" uid="uid://dhkj8c1retx5x" path="res://scenes/ui/search_ui.tscn" id="13_search"]
 [ext_resource type="Texture2D" uid="uid://dhyc73hgnwlkb" path="res://assets/icon/ui/message.svg" id="14_message"]
 [ext_resource type="Texture2D" uid="uid://dq2o0w4njcqbh" path="res://assets/icon/ui/viewport.svg" id="15_viewport"]
 [ext_resource type="Texture2D" uid="uid://bqeoq3ag4qnvb" path="res://assets/icon/ui/measurement.svg" id="16_measurement"]
@@ -205,6 +205,7 @@ _lightIcon = ExtResource("25_theme_light")
 _darkIcon = ExtResource("26_theme_dark")
 
 [node name="BottomBar" type="HBoxContainer" parent="VBoxContainer" unique_id=1599850976]
+visible = false
 layout_mode = 2
 
 [node name="BlankPanel" type="Panel" parent="VBoxContainer/BottomBar" unique_id=83578851]

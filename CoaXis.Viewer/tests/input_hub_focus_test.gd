@@ -42,8 +42,16 @@ func _run() -> void:
 	if root.has_focus() or not window.has_focus():
 		failures.append("別ウィンドウにフォーカスを切り替えられませんでした。")
 	if selection.get("CurrentMode") != 0:
-		failures.append("フォーカス喪失後に一時的な選択モードが解除されませんでした。")
+		failures.append("フォーカス切替時にGodotが解除した選択モードが残りました。")
 	Input.action_release("switch_selection_mode_add")
+	await process_frame
+	if selection.get("CurrentMode") != 0:
+		failures.append("別ウィンドウにフォーカス中の選択モード解放が処理されませんでした。")
+
+	Input.action_press("switch_selection_mode_add")
+	await process_frame
+	if selection.get("CurrentMode") != 1:
+		failures.append("別ウィンドウにフォーカス中の選択モード押下が処理されませんでした。")
 
 	selection.call("SetMode", 2)
 	initial_position = camera.get("Position")
@@ -65,6 +73,7 @@ func _run() -> void:
 	Input.action_release("translate_camera_right")
 	Input.action_release("rotate_camera_left")
 	Input.action_release("escape")
+	Input.action_release("switch_selection_mode_add")
 	root.grab_focus()
 	await create_timer(0.2).timeout
 	if not root.has_focus():

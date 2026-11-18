@@ -22,13 +22,7 @@ internal static class ModelEntityRowBehavior
     public static Texture2D GetIndentedIcon(ModelEntity entity)
     {
         Texture2D icon = GetModelIcon(entity.IconId);
-        IReadOnlyList<ModelEntity> ancestors = Application.Model.Entity.Registry.GetAncestors(entity.Id);
-        int depth = ancestors.Count;
-        if (depth > 0 && ancestors[depth - 1].Id == ViewerConstants.RootModelEntityId)
-        {
-            depth--;
-        }
-
+        int depth = GetHierarchyDepth(entity);
         int indent = checked(depth * HierarchyIndent);
         if (icon == null)
         {
@@ -48,6 +42,21 @@ internal static class ModelEntityRowBehavior
             Region = new Rect2(0, 0, icon.GetWidth(), icon.GetHeight()),
             Margin = new Rect2(indent, 0, indent, 0),
         };
+    }
+
+    /// <summary>Entityの検索結果表示で使うルートを除いた階層深度を取得する。</summary>
+    public static int GetHierarchyDepth(ModelEntity entity)
+    {
+        if (entity == null)
+        {
+            return 0;
+        }
+
+        IReadOnlyList<ModelEntity> ancestors = Application.Model.Entity.Registry.GetAncestors(entity.Id);
+        int depth = ancestors.Count;
+        return depth > 0 && ancestors[depth - 1].Id == ViewerConstants.RootModelEntityId
+            ? depth - 1
+            : depth;
     }
 
     /// <summary>

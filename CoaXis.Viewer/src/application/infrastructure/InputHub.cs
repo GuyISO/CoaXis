@@ -29,26 +29,16 @@ public partial class InputHub : BaseHub
 
     public override void _Process(double delta)
     {
-        // 別ウィンドウのテキスト入力でカメラなどが操作されないようにする。
-        if (!GetTree().Root.HasFocus())
-        {
-            if (_selectionModeFromInput is ModelSelectionMode mode)
-            {
-                if (Application.Model.Selection.CurrentMode == mode)
-                {
-                    Application.Model.Selection.SetMode(ModelSelectionMode.Set);
-                }
-
-                _selectionModeFromInput = null;
-            }
-
-            return;
-        }
-
         // 押下中に状態を切り替えるボタンの入力処理
         HandleSelectModeInput("switch_selection_mode_add", ModelSelectionMode.Add);
         HandleSelectModeInput("switch_selection_mode_remove", ModelSelectionMode.Remove);
         HandleSelectModeInput("switch_selection_mode_toggle", ModelSelectionMode.Toggle);
+
+        // 別ウィンドウのテキスト入力でカメラなどが操作されないようにする。
+        if (!GetTree().Root.HasFocus())
+        {
+            return;
+        }
 
         // ボタン入力処理
         HandleButtonInput();

@@ -24,11 +24,18 @@ public partial class ModelSelectionContract : Node
     private void RunChecks()
     {
         Guid entityId = Guid.NewGuid();
+        Guid secondEntityId = Guid.NewGuid();
+        Guid thirdEntityId = Guid.NewGuid();
         Guid firstId = Guid.NewGuid();
         Guid childId = Guid.NewGuid();
         Guid lastId = Guid.NewGuid();
         Application.Model.ModelSet.Add(
-            new[] { new ModelEntityDto { Id = entityId, Name = "Selection test" } },
+            new[]
+            {
+                new ModelEntityDto { Id = entityId, Name = "Selection test" },
+                new ModelEntityDto { Id = secondEntityId, Name = "Selection test 2" },
+                new ModelEntityDto { Id = thirdEntityId, Name = "Selection test 3" },
+            },
             new[]
             {
                 new ModelPropertyDto { Id = firstId, ParentId = entityId, PropertyType = "First" },
@@ -131,24 +138,69 @@ public partial class ModelSelectionContract : Node
         selection.SetMode(ModelSelectionMode.Set);
         Application.Model.Entity.Pick.NotifyResult(null);
         Check(property.Count == 0, "空PickでProperty選択が解除されない");
-        property.Add(new[] { firstId, childId, lastId });
+        property.Set(lastId);
+        property.Add(childId);
+        property.Add(firstId);
+        var selectionUiScene = GD.Load<PackedScene>("res://scenes/ui/selection_ui.tscn");
+        var orderedPropertySelectionUi = selectionUiScene.Instantiate<SelectionUi>();
+        AddChild(orderedPropertySelectionUi);
+        Tree orderedPropertyTree = orderedPropertySelectionUi.GetNode<Tree>("MarginContainer/VBoxContainer/Tree");
+        TreeItem propertyEntityItem = orderedPropertyTree.GetRoot().GetFirstChild();
+        TreeItem orderedFirstProperty = propertyEntityItem.GetFirstChild();
+        TreeItem orderedChildProperty = orderedFirstProperty.GetNext();
+        TreeItem orderedLastProperty = orderedChildProperty.GetNext();
+        Check(ModelPropertyRowBehavior.GetPropertyId(orderedFirstProperty) == firstId,
+            "Selection UIのProperty表示順が階層順と一致しない: first");
+        Check(ModelPropertyRowBehavior.GetPropertyId(orderedChildProperty) == childId,
+            "Selection UIのProperty表示順が階層順と一致しない: child");
+        Check(ModelPropertyRowBehavior.GetPropertyId(orderedLastProperty) == lastId,
+            "Selection UIのProperty表示順が階層順と一致しない: last");
+        orderedPropertySelectionUi.Free();
+
         Application.Model.ModelSet.Remove(Array.Empty<Guid>(), new[] { firstId });
         Check(property.SelectedIds.SequenceEqual(new[] { lastId }), "連鎖削除で選択が同期されない");
 
-        var selectionUiScene = GD.Load<PackedScene>("res://scenes/ui/selection_ui.tscn");
         var selectionUi = selectionUiScene.Instantiate<SelectionUi>();
         AddChild(selectionUi);
-        Tree selectedPropertyTree = selectionUi.GetNode<Tree>("MarginContainer/VBoxContainer/PropertyTree");
-        TreeItem selectedEntityItem = selectedPropertyTree.GetRoot().GetFirstChild();
+        Tree selectedTree = selectionUi.GetNode<Tree>("MarginContainer/VBoxContainer/Tree");
+        Label selectionCountLabel = selectionUi.GetNode<Label>("MarginContainer/VBoxContainer/SelectionCountLabel");
+        TreeItem selectedEntityItem = selectedTree.GetRoot().GetFirstChild();
         TreeItem selectedPropertyItem = selectedEntityItem.GetFirstChild();
         Check(ModelPropertyRowBehavior.GetPropertyId(selectedPropertyItem) == lastId,
             "Selection UIに選択中Propertyが表示されない");
         Check(selectedPropertyItem.GetButtonById(0, ModelPropertyRowBehavior.VisibilityButtonId) >= 0,
             "Selection UIのProperty行に共通Visibilityボタンが設定されない");
+        Check(selectionCountLabel.Text == "Selected: 1", "Selection UIの総選択数が一致しない");
         selectionUi.Free();
 
+        entity.Set(entityId);
+        var entitySelectionUi = selectionUiScene.Instantiate<SelectionUi>();
+        AddChild(entitySelectionUi);
+        Tree entitySelectionTree = entitySelectionUi.GetNode<Tree>("MarginContainer/VBoxContainer/Tree");
+        Label entitySelectionCountLabel = entitySelectionUi.GetNode<Label>("MarginContainer/VBoxContainer/SelectionCountLabel");
+        TreeItem selectedEntity = entitySelectionTree.GetRoot().GetFirstChild();
+        Check(selectedEntity.GetMeta("EntityId", Variant.CreateFrom(string.Empty)).AsString() == entityId.ToString(),
+            "Selection UIに選択中Entityが表示されない");
+        Check(entitySelectionCountLabel.Text == "Selected: 1", "Entity選択時のSelection UI総選択数が一致しない");
+        entitySelectionUi.Free();
+
+        entity.Set(new[] { thirdEntityId, entityId, secondEntityId });
+        var orderedEntitySelectionUi = selectionUiScene.Instantiate<SelectionUi>();
+        AddChild(orderedEntitySelectionUi);
+        Tree orderedEntityTree = orderedEntitySelectionUi.GetNode<Tree>("MarginContainer/VBoxContainer/Tree");
+        TreeItem firstSelectedEntity = orderedEntityTree.GetRoot().GetFirstChild();
+        TreeItem secondSelectedEntity = firstSelectedEntity.GetNext();
+        TreeItem thirdSelectedEntity = secondSelectedEntity.GetNext();
+        Check(GetEntityId(firstSelectedEntity) == entityId,
+            "Selection UIのEntity表示順がRegistry階層順と一致しない: first");
+        Check(GetEntityId(secondSelectedEntity) == secondEntityId,
+            "Selection UIのEntity表示順がRegistry階層順と一致しない: second");
+        Check(GetEntityId(thirdSelectedEntity) == thirdEntityId,
+            "Selection UIのEntity表示順がRegistry階層順と一致しない: third");
+        orderedEntitySelectionUi.Free();
+
         selection.Clear();
-        Check(property.Count == 0, "共通ClearでProperty選択が解除されない");
+        Check(entity.Count == 0 && property.Count == 0, "共通ClearでEntity選択が解除されない");
 
         entity.SelectionChanged -= CheckExclusive;
         property.SelectionChanged -= CheckExclusive;
@@ -162,6 +214,12 @@ public partial class ModelSelectionContract : Node
     private static void Click(TreeItem item)
     {
         item.Select(0);
+    }
+
+    private static Guid GetEntityId(TreeItem item)
+    {
+        string value = item.GetMeta("EntityId", Variant.CreateFrom(string.Empty)).AsString();
+        return Guid.TryParse(value, out Guid entityId) ? entityId : Guid.Empty;
     }
 
     private static void Check(bool condition, string message)

@@ -24,7 +24,15 @@ internal static class ModelPropertyRowBehavior
     /// <summary>Property階層の深さをアイコン余白で表したテクスチャを取得する。</summary>
     public static Texture2D GetIndentedIcon(ModelProperty property)
     {
-        int depth = GetDepth(property);
+        return GetIndentedIcon(property, 0);
+    }
+
+    /// <summary>Property階層に加え、所有Entityまでの階層深度をアイコン余白で表したテクスチャを取得する。</summary>
+    /// <param name="property">表示するProperty</param>
+    /// <param name="hierarchyOffset">Property階層の前へ加算する深度</param>
+    public static Texture2D GetIndentedIcon(ModelProperty property, int hierarchyOffset)
+    {
+        int depth = checked(Math.Max(0, hierarchyOffset) + GetDepth(property));
         int indent = checked(depth * HierarchyIndent);
         Texture2D icon = GetModelIcon(property.IconId);
         if (icon == null)

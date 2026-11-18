@@ -9,9 +9,7 @@ public partial class SelectionUi : PanelContainer
 {
 	#region Fields
 
-	private readonly List<Guid> _selectedEntityIds = new();
 	private readonly Dictionary<Guid, TreeItem> _entityIdToTreeItem = new();
-	private readonly List<Guid> _selectedPropertyIds = new();
 	private readonly Dictionary<Guid, TreeItem> _propertyEntityIdToTreeItem = new();
 	private readonly Dictionary<Guid, TreeItem> _propertyIdToTreeItem = new();
 	private bool _isUpdatingTree = false;
@@ -20,7 +18,7 @@ public partial class SelectionUi : PanelContainer
 
 	// 関連ノードのキャッシュ
 	private Tree _tree = null!;
-	private Tree _propertyTree = null!;
+	private Label _selectionCountLabel = null!;
 	private Button _buttonSet = null!;
 	private Button _buttonAdd = null!;
 	private Button _buttonRemove = null!;
@@ -58,7 +56,7 @@ public partial class SelectionUi : PanelContainer
 	{
 		// シーン構造が変更される可能性があるため、名前探索で関連ノードを解決する
 		_tree = (Tree)FindChild("Tree");
-		_propertyTree = (Tree)FindChild("PropertyTree");
+		_selectionCountLabel = (Label)FindChild("SelectionCountLabel");
 		_buttonSet = (Button)FindChild("ButtonSet");
 		_buttonAdd = (Button)FindChild("ButtonAdd");
 		_buttonRemove = (Button)FindChild("ButtonRemove");
@@ -80,10 +78,6 @@ public partial class SelectionUi : PanelContainer
 		_tree.ItemSelected += OnTreeItemSelected;
 		_tree.ItemActivated += OnTreeItemActivated;
 		_tree.ButtonClicked += OnTreeButtonClicked;
-		_propertyTree.GuiInput += OnPropertyTreeGuiInput;
-		_propertyTree.CellSelected += OnPropertyTreeItemSelected;
-		_propertyTree.ItemActivated += OnPropertyTreeItemActivated;
-		_propertyTree.ButtonClicked += OnPropertyTreeButtonClicked;
 	}
 
 	/// <summary>
@@ -100,10 +94,6 @@ public partial class SelectionUi : PanelContainer
 		_tree.ItemSelected -= OnTreeItemSelected;
 		_tree.ItemActivated -= OnTreeItemActivated;
 		_tree.ButtonClicked -= OnTreeButtonClicked;
-		_propertyTree.GuiInput -= OnPropertyTreeGuiInput;
-		_propertyTree.CellSelected -= OnPropertyTreeItemSelected;
-		_propertyTree.ItemActivated -= OnPropertyTreeItemActivated;
-		_propertyTree.ButtonClicked -= OnPropertyTreeButtonClicked;
 	}
 
 	/// <summary>
@@ -113,8 +103,8 @@ public partial class SelectionUi : PanelContainer
 	{
 		Application.Model.Entity.Pick.HandlingModeNotified += OnPickHandlingModeNotified;
 		Application.Model.Selection.ModeNotified += OnModeNotified;
-		Application.Model.Entity.Selection.Selected += OnSelected;
-		Application.Model.Property.Selection.Selected += OnPropertySelected;
+		Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
+		Application.Model.Property.Selection.SelectionChanged += OnSelectionChanged;
 		Application.Model.Property.Selection.Cleared += OnPropertySelectionCleared;
 		Application.Model.Entity.Registry.Registered += OnEntityRegistryRegistered;
 		Application.Model.Entity.Visual.VisibilityResolved += OnEntityVisibilityResolved;
@@ -133,8 +123,8 @@ public partial class SelectionUi : PanelContainer
 	{
 		Application.Model.Entity.Pick.HandlingModeNotified -= OnPickHandlingModeNotified;
 		Application.Model.Selection.ModeNotified -= OnModeNotified;
-		Application.Model.Entity.Selection.Selected -= OnSelected;
-		Application.Model.Property.Selection.Selected -= OnPropertySelected;
+		Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
+		Application.Model.Property.Selection.SelectionChanged -= OnSelectionChanged;
 		Application.Model.Property.Selection.Cleared -= OnPropertySelectionCleared;
 		Application.Model.Entity.Registry.Registered -= OnEntityRegistryRegistered;
 		Application.Model.Entity.Visual.VisibilityResolved -= OnEntityVisibilityResolved;
@@ -255,6 +245,12 @@ public partial class SelectionUi : PanelContainer
 		}
 
 		TreeItem targetItem = _tree.GetItemAtPosition(_tree.GetLocalMousePosition());
+		if (ModelPropertyRowBehavior.GetPropertyId(targetItem) != Guid.Empty)
+		{
+			ModelPropertyRowBehavior.ShowContextMenu(targetItem);
+			return;
+		}
+
 		Guid entityId = TryGetEntityId(targetItem);
 		// 対象が無い空振りクリックではメニューを表示しない
 		if (entityId == Guid.Empty)
@@ -270,7 +266,15 @@ public partial class SelectionUi : PanelContainer
 	/// </summary>
 	private void OnTreeItemActivated()
 	{
-		ModelEntityRowBehavior.Manipulate(TryGetEntityId(_tree.GetSelected()));
+		TreeItem selectedItem = _tree.GetSelected();
+		Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(selectedItem);
+		if (propertyId != Guid.Empty)
+		{
+			ModelPropertyRowBehavior.Manipulate(propertyId);
+			return;
+		}
+
+		ModelEntityRowBehavior.Manipulate(TryGetEntityId(selectedItem));
 	}
 
 	/// <summary>
@@ -283,55 +287,36 @@ public partial class SelectionUi : PanelContainer
 			return;
 		}
 
+		Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(item);
+		if (propertyId != Guid.Empty)
+		{
+			ModelPropertyRowBehavior.HandleButtonClick(propertyId, buttonId);
+			return;
+		}
+
 		ModelEntityRowBehavior.HandleButtonClick(TryGetEntityId(item), buttonId);
 	}
 
 	/// <summary>
-	/// Property Tree の右クリックを受け取り、Property行のコンテキストメニューを表示する。
+	/// Tree の行が選択されたとき、EntityまたはPropertyの選択を更新する。
 	/// </summary>
-	private void OnPropertyTreeGuiInput(InputEvent @event)
-	{
-		if (@event is not InputEventMouseButton mouseButton
-			|| mouseButton.ButtonIndex != MouseButton.Right
-			|| !mouseButton.Pressed)
-		{
-			return;
-		}
-
-		TreeItem item = _propertyTree.GetItemAtPosition(_propertyTree.GetLocalMousePosition());
-		if (ModelPropertyRowBehavior.GetPropertyId(item) != Guid.Empty)
-		{
-			ModelPropertyRowBehavior.ShowContextMenu(item);
-		}
-	}
-
-	/// <summary>
-	/// Property Tree のボタン操作を対応するPropertyへ適用する。
-	/// </summary>
-	private void OnPropertyTreeButtonClicked(TreeItem item, long column, long buttonId, long mouseButtonIndex)
-	{
-		if (item == null || column != 0)
-		{
-			return;
-		}
-
-		ModelPropertyRowBehavior.HandleButtonClick(ModelPropertyRowBehavior.GetPropertyId(item), buttonId);
-	}
-
-	/// <summary>
-	/// Property Tree の行が選択されたとき、Property選択を更新する。
-	/// </summary>
-	private void OnPropertyTreeItemSelected()
+	private void OnTreeItemSelected()
 	{
 		if (_isUpdatingTree)
 		{
 			return;
 		}
 
-		TreeItem item = _propertyTree.GetSelected();
+		TreeItem item = _tree.GetSelected();
 		Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(item);
 		if (propertyId == Guid.Empty)
 		{
+			Guid entityId = TryGetEntityId(item);
+			if (entityId != Guid.Empty)
+			{
+				Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(entityId));
+			}
+
 			return;
 		}
 
@@ -364,37 +349,6 @@ public partial class SelectionUi : PanelContainer
 	}
 
 	/// <summary>
-	/// Property Tree の行がアクティブ化されたとき、PropertyのManipulate操作を通知する。
-	/// </summary>
-	private void OnPropertyTreeItemActivated()
-	{
-		Guid propertyId = ModelPropertyRowBehavior.GetPropertyId(_propertyTree.GetSelected());
-		if (propertyId != Guid.Empty)
-		{
-			ModelPropertyRowBehavior.Manipulate(propertyId);
-		}
-	}
-
-	/// <summary>
-	/// Tree の項目が選択されたとき、対応する ModelEntity の Pick を通知する
-	/// </summary>
-	private void OnTreeItemSelected()
-	{
-		if (_isUpdatingTree)
-		{
-			return;
-		}
-
-		Guid entityId = TryGetEntityId(_tree.GetSelected());
-		if (entityId == Guid.Empty)
-		{
-			return;
-		}
-
-		Application.Model.Entity.Pick.NotifyResult(PickUtility.PickByEntityId(entityId));
-	}
-
-	/// <summary>
 	/// 選択モード通知を受け取ったときに呼び出されるイベントハンドラ
 	/// </summary>
 	private void OnModeNotified()
@@ -403,55 +357,10 @@ public partial class SelectionUi : PanelContainer
 	}
 
 	/// <summary>
-	/// モデル選択状態通知を受け取ったときに呼び出されるイベントハンドラ
+	/// EntityまたはPropertyの選択状態変更後に表示を更新する。
 	/// </summary>
-	/// <param name="entityId">選択状態が変化した ModelEntity の識別子</param>
-	private void OnSelected(string entityId)
+	private void OnSelectionChanged()
 	{
-		if (!Guid.TryParse(entityId, out Guid parsedEntityId) || parsedEntityId == Guid.Empty)
-		{
-			return;
-		}
-
-		int index = _selectedEntityIds.IndexOf(parsedEntityId);
-		if (Application.Model.Entity.Selection.Contains(parsedEntityId))
-		{
-			if (index < 0)
-			{
-				_selectedEntityIds.Add(parsedEntityId);
-			}
-		}
-		else if (index >= 0)
-		{
-			_selectedEntityIds.RemoveAt(index);
-		}
-
-		QueueRebuildTree();
-	}
-
-	/// <summary>
-	/// Property選択状態通知を受け取り、選択中Propertyの一覧を更新する。
-	/// </summary>
-	private void OnPropertySelected(string propertyId)
-	{
-		if (!Guid.TryParse(propertyId, out Guid parsedPropertyId) || parsedPropertyId == Guid.Empty)
-		{
-			return;
-		}
-
-		int index = _selectedPropertyIds.IndexOf(parsedPropertyId);
-		if (Application.Model.Property.Selection.Contains(parsedPropertyId))
-		{
-			if (index < 0)
-			{
-				_selectedPropertyIds.Add(parsedPropertyId);
-			}
-		}
-		else if (index >= 0)
-		{
-			_selectedPropertyIds.RemoveAt(index);
-		}
-
 		QueueRebuildTree();
 	}
 
@@ -461,9 +370,6 @@ public partial class SelectionUi : PanelContainer
 	private void OnPropertySelectionCleared()
 	{
 		_lastSelectedPropertyId = Guid.Empty;
-		_selectedPropertyIds.Clear();
-		_selectedPropertyIds.AddRange(Application.Model.Property.Selection.SelectedIds);
-		QueueRebuildTree();
 	}
 
 	/// <summary>
@@ -471,7 +377,7 @@ public partial class SelectionUi : PanelContainer
 	/// </summary>
 	private void OnEntityRegistryRegistered()
 	{
-		if (_selectedEntityIds.Count > 0)
+		if (Application.Model.Entity.Selection.Count > 0)
 		{
 			QueueRebuildTree();
 		}
@@ -560,7 +466,7 @@ public partial class SelectionUi : PanelContainer
 			}
 		}
 
-		if (_selectedPropertyIds.Count > 0)
+		if (Application.Model.Property.Selection.Count > 0)
 		{
 			QueueRebuildTree();
 		}
@@ -576,21 +482,6 @@ public partial class SelectionUi : PanelContainer
 	private void SyncInitialState()
 	{
 		UpdateModeButtons(Application.Model.Selection.CurrentMode);
-
-		_selectedEntityIds.Clear();
-		IReadOnlyCollection<Guid> selectedEntityIds = Application.Model.Entity.Selection.SelectedIds;
-		if (selectedEntityIds != null && selectedEntityIds.Count > 0)
-		{
-			_selectedEntityIds.AddRange(selectedEntityIds);
-		}
-
-		_selectedPropertyIds.Clear();
-		IReadOnlyCollection<Guid> selectedPropertyIds = Application.Model.Property.Selection.SelectedIds;
-		if (selectedPropertyIds != null && selectedPropertyIds.Count > 0)
-		{
-			_selectedPropertyIds.AddRange(selectedPropertyIds);
-		}
-
 		RebuildTree();
 	}
 
@@ -641,28 +532,37 @@ public partial class SelectionUi : PanelContainer
 	private void RebuildTree()
 	{
 		if (_tree == null || !GodotObject.IsInstanceValid(_tree)
-			|| _propertyTree == null || !GodotObject.IsInstanceValid(_propertyTree))
+			|| _selectionCountLabel == null || !GodotObject.IsInstanceValid(_selectionCountLabel))
 		{
 			return;
 		}
 
 		_isUpdatingTree = true;
 
-		_selectedEntityIds.RemoveAll(entityId => entityId == Guid.Empty || Application.Model.Entity.Registry.Get(entityId) == null);
-		_selectedPropertyIds.RemoveAll(propertyId =>
-			propertyId == Guid.Empty || Application.Model.Property.Registry.Get(propertyId) == null);
+		IReadOnlyCollection<Guid> selectedEntityIds = Application.Model.Entity.Selection.SelectedIds;
+		IReadOnlyCollection<Guid> selectedPropertyIds = Application.Model.Property.Selection.SelectedIds;
+		var selectedEntityIdSet = new HashSet<Guid>(selectedEntityIds);
+		var selectedPropertyIdSet = new HashSet<Guid>(selectedPropertyIds);
+		_selectionCountLabel.Text = $"Selected: {checked(selectedEntityIds.Count + selectedPropertyIds.Count)}";
+
 		_tree.Clear();
 		_entityIdToTreeItem.Clear();
-		TreeItem entityRoot = _tree.CreateItem();
-		if (entityRoot != null)
+		_propertyEntityIdToTreeItem.Clear();
+		_propertyIdToTreeItem.Clear();
+		TreeItem root = _tree.CreateItem();
+		if (root != null)
 		{
 			Color selectedColor = ModelEntityRowBehavior.GetSelectionColor();
 			Dictionary<Guid, int> propertySubtreeCounts = ModelEntityRowBehavior.BuildPropertySubtreeCounts(Application.Model.Entity.Registry.Root);
-			for (int i = 0; i < _selectedEntityIds.Count; i++)
+			foreach (ModelEntity modelEntity in GetEntitiesInCanonicalOrder())
 			{
-				Guid entityId = _selectedEntityIds[i];
-				ModelEntity modelEntity = Application.Model.Entity.Registry.Get(entityId);
-				TreeItem item = _tree.CreateItem(entityRoot);
+				Guid entityId = modelEntity.Id;
+				if (!selectedEntityIdSet.Contains(entityId))
+				{
+					continue;
+				}
+
+				TreeItem item = _tree.CreateItem(root);
 				item.SetText(0, modelEntity?.Name ?? entityId.ToString());
 				ModelEntityRowBehavior.ApplySelectionHighlight(item, entityId, selectedColor);
 
@@ -675,42 +575,141 @@ public partial class SelectionUi : PanelContainer
 				item.SetMeta("EntityId", entityId.ToString());
 				_entityIdToTreeItem.Add(entityId, item);
 			}
-		}
 
-		_propertyTree.Clear();
-		_propertyEntityIdToTreeItem.Clear();
-		_propertyIdToTreeItem.Clear();
-		TreeItem propertyRoot = _propertyTree.CreateItem();
-		if (propertyRoot != null)
-		{
-			Color selectedColor = ModelEntityRowBehavior.GetSelectionColor();
 			var entityItems = new Dictionary<Guid, TreeItem>();
-			foreach (Guid propertyId in _selectedPropertyIds)
+			foreach (ModelEntity entity in GetEntitiesInCanonicalOrder())
 			{
-				ModelProperty property = Application.Model.Property.Registry.Get(propertyId);
-				ModelEntity entity = Application.Model.Property.Registry.GetOwningEntity(propertyId);
-				if (property == null || entity == null)
+				bool hasSelectedProperty = HasSelectedProperty(entity, selectedPropertyIdSet);
+				if (!hasSelectedProperty)
 				{
 					continue;
 				}
 
 				if (!entityItems.TryGetValue(entity.Id, out TreeItem entityItem))
 				{
-					entityItem = _propertyTree.CreateItem(propertyRoot);
+					entityItem = _tree.CreateItem(root);
 					entityItem.SetText(0, entity.Name);
 					entityItem.SetIcon(0, ModelEntityRowBehavior.GetIndentedIcon(entity));
 					entityItems.Add(entity.Id, entityItem);
 					_propertyEntityIdToTreeItem.Add(entity.Id, entityItem);
 				}
 
-				TreeItem item = _propertyTree.CreateItem(entityItem);
-				ModelPropertyRowBehavior.Configure(item, property, true);
-				ModelPropertyRowBehavior.ApplySelectionHighlight(item, propertyId, selectedColor);
-				_propertyIdToTreeItem.Add(propertyId, item);
+				foreach (ModelProperty property in entity.Properties)
+				{
+					AddSelectedProperties(entityItem, property, selectedPropertyIdSet, selectedColor);
+				}
 			}
 		}
 
 		_isUpdatingTree = false;
+	}
+
+	/// <summary>Registryの親子順を保ったEntity一覧を深さ優先で取得する。</summary>
+	private static List<ModelEntity> GetEntitiesInCanonicalOrder()
+	{
+		var entities = new List<ModelEntity>();
+		var visited = new HashSet<Guid>();
+		ModelEntity root = Application.Model.Entity.Registry.Root;
+		if (root == null)
+		{
+			return entities;
+		}
+
+		foreach (ModelEntity child in root.Children)
+		{
+			CollectEntitiesInCanonicalOrder(child, entities, visited);
+		}
+
+		return entities;
+	}
+
+	/// <summary>Entity部分木を深さ優先で一覧へ追加する。</summary>
+	private static void CollectEntitiesInCanonicalOrder(
+		ModelEntity entity, List<ModelEntity> entities, HashSet<Guid> visited)
+	{
+		if (entity == null || !visited.Add(entity.Id))
+		{
+			return;
+		}
+
+		entities.Add(entity);
+		foreach (ModelEntity child in entity.Children)
+		{
+			CollectEntitiesInCanonicalOrder(child, entities, visited);
+		}
+	}
+
+	/// <summary>Entity部分木に選択中Propertyがあるかを判定する。</summary>
+	private static bool HasSelectedProperty(ModelEntity entity, HashSet<Guid> selectedPropertyIds)
+	{
+		foreach (ModelProperty property in entity.Properties)
+		{
+			if (ContainsSelectedProperty(property, selectedPropertyIds, new HashSet<Guid>()))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>Property部分木に選択中Propertyがあるかを判定する。</summary>
+	private static bool ContainsSelectedProperty(
+		ModelProperty property, HashSet<Guid> selectedPropertyIds, HashSet<Guid> visited)
+	{
+		if (property == null || !visited.Add(property.Id))
+		{
+			return false;
+		}
+
+		if (selectedPropertyIds.Contains(property.Id))
+		{
+			return true;
+		}
+
+		foreach (ModelProperty child in property.Children)
+		{
+			if (ContainsSelectedProperty(child, selectedPropertyIds, visited))
+			{
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/// <summary>Property部分木の選択行を元の深さ優先順で追加する。</summary>
+	private void AddSelectedProperties(
+		TreeItem parentItem, ModelProperty property, HashSet<Guid> selectedPropertyIds, Color selectedColor)
+	{
+		AddSelectedPropertiesCore(parentItem, property, selectedPropertyIds, selectedColor, new HashSet<Guid>());
+	}
+
+	/// <summary>Property部分木を走査して選択行だけを追加する。</summary>
+	private void AddSelectedPropertiesCore(
+		TreeItem parentItem,
+		ModelProperty property,
+		HashSet<Guid> selectedPropertyIds,
+		Color selectedColor,
+		HashSet<Guid> visited)
+	{
+		if (property == null || !visited.Add(property.Id))
+		{
+			return;
+		}
+
+		if (selectedPropertyIds.Contains(property.Id))
+		{
+			TreeItem item = _tree.CreateItem(parentItem);
+			ModelPropertyRowBehavior.Configure(item, property, true);
+			ModelPropertyRowBehavior.ApplySelectionHighlight(item, property.Id, selectedColor);
+			_propertyIdToTreeItem.Add(property.Id, item);
+		}
+
+		foreach (ModelProperty child in property.Children)
+		{
+			AddSelectedPropertiesCore(parentItem, child, selectedPropertyIds, selectedColor, visited);
+		}
 	}
 
 	/// <summary>
@@ -725,7 +724,7 @@ public partial class SelectionUi : PanelContainer
 		}
 
 		var items = new List<TreeItem>();
-		TreeItem root = _propertyTree.GetRoot();
+		TreeItem root = _tree.GetRoot();
 		if (root == null)
 		{
 			return new[] { lastPropertyId };
