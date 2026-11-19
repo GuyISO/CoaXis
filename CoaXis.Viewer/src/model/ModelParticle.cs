@@ -109,7 +109,7 @@ public partial class ModelParticle : GpuParticles3D
 		}
 
 		if (GetParent() is not ModelNode modelNode ||
-			!ParticleEmitterFitter.TryFit(
+			!ModelParticleFitter.TryFit(
 				modelNode,
 				material,
 				property.ParticleEmitterType,

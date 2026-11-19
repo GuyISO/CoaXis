@@ -4,7 +4,7 @@ using CoaXis.Protocol.Viewer;
 /// <summary>
 /// ModelNode の形状に合わせて、パーティクルの放出範囲・大きさ・描画範囲を算出するサービス。
 /// </summary>
-public static class ParticleEmitterFitter
+public static class ModelParticleFitter
 {
     #region Fields
 
@@ -14,7 +14,10 @@ public static class ParticleEmitterFitter
     /// <summary>AABB対角線長に対する、スプライト1枚の一辺の割合。モデルの大きさに関わらず密度感を保つ。</summary>
     private const float SpriteSizeRatio = 0.03f;
 
-    /// <summary>Emerge の移動距離を Disperse に対して抑える割合。</summary>
+    /// <summary>Disperse の AABB 半径に対する移動距離の割合。</summary>
+    private const float DisperseVelocityRatio = 1.2f;
+
+    /// <summary>Emerge の AABB 半径に対する移動距離の割合。</summary>
     private const float EmergeVelocityRatio = 0.2f;
 
     #endregion
@@ -119,7 +122,7 @@ public static class ParticleEmitterFitter
     {
         float velocityRatio = behaviorType switch
         {
-            ModelParticleBehaviorType.Disperse => 1f,
+            ModelParticleBehaviorType.Disperse => DisperseVelocityRatio,
             ModelParticleBehaviorType.Emerge => EmergeVelocityRatio,
             _ => 0f,
         };

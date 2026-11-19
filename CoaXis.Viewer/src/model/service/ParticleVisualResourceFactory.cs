@@ -72,9 +72,10 @@ public static class ParticleVisualResourceFactory
         var curve = new Curve();
         if (behaviorType is ModelParticleBehaviorType.Disperse or ModelParticleBehaviorType.Emerge)
         {
-            // 発生時にサイズ1、消滅時に0へ線形に遷移させる。Linear モードは端点の接線が0になるため、傾き-1を明示する
-            curve.AddPoint(new Vector2(0f, 1f), 0f, -1f);
-            curve.AddPoint(new Vector2(1f, 0f), -1f, 0f);
+            // 序盤は大きさを保ち、後半に向けて滑らかに加速しながら縮小する
+            curve.AddPoint(new Vector2(0f, 1f), 0f, 0f);
+            curve.AddPoint(new Vector2(0.5f, 0.7f), -0.8f, -0.8f);
+            curve.AddPoint(new Vector2(1f, 0f), -1.6f, 0f);
         }
         else
         {
