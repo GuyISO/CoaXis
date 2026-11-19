@@ -108,7 +108,7 @@ public static class PickUtility
 
         var pickResults = new List<PickResult>();
         var selectedEntityIds = new HashSet<Guid>();
-        const int batchSize = 32;
+        const int batchSize = 1024;
 
         // Godot の IntersectShape はヒット位置や法線などの詳細情報を返さないため、ノード参照のみを PickResult に格納する
         // 1回のクエリで複数件を取得し、物理クエリの呼び出し回数と除外配列の再構築回数を減らす

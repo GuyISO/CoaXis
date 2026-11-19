@@ -13,6 +13,8 @@ public partial class ModelEntityTree : Tree
 
     private TreeItem _lastSelectedItem; // 最後に選択された TreeItem を保持
 
+    private Guid _pendingScrollEntityId = Guid.Empty;
+
     private readonly HashSet<TreeItem> _highlightedItems = new(); // 直近のRefreshAllHighlightsで着色した TreeItem の集合、差分更新の比較に使う
 
     private Guid _rootEntityId = Guid.Empty;
@@ -106,6 +108,7 @@ public partial class ModelEntityTree : Tree
     private void SubscribeApplicationEvents()
     {
         Application.Model.Entity.Selection.Selected += OnModelEntitySelected;
+        Application.Model.Entity.Selection.SelectionChanged += OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared += OnSelectionCleared;
         Application.Model.Entity.Registry.Registered += OnModelEntityRegistered;
         Application.Model.Entity.Visual.VisibilityResolved += OnModelEntityVisibilityResolved;
@@ -123,6 +126,7 @@ public partial class ModelEntityTree : Tree
     private void UnsubscribeApplicationEvents()
     {
         Application.Model.Entity.Selection.Selected -= OnModelEntitySelected;
+        Application.Model.Entity.Selection.SelectionChanged -= OnSelectionChanged;
         Application.Model.Entity.Selection.Cleared -= OnSelectionCleared;
         Application.Model.Entity.Registry.Registered -= OnModelEntityRegistered;
         Application.Model.Entity.Visual.VisibilityResolved -= OnModelEntityVisibilityResolved;
@@ -241,20 +245,36 @@ public partial class ModelEntityTree : Tree
             return;
         }
 
-        TreeItem treeItem = _entityIdToTreeItem.TryGetValue(parsedEntityId, out TreeItem item) ? item : null;
-        if (treeItem == null)
+        if (!_entityIdToTreeItem.ContainsKey(parsedEntityId))
         {
             return;
         }
 
-        // 差分更新だと折り畳み状態とのタイミングでズレるため、選択変更のたびに全件を見直して再描画する
-        RefreshAllHighlights();
-
         if (Application.Model.Entity.Selection.Contains(parsedEntityId))
         {
-            // 対象が畳まれた祖先の下に隠れている場合、CATIA同様に表示中の祖先までスクロールする
-            ScrollToItem(FindNearestVisibleAncestor(treeItem));
+            _pendingScrollEntityId = parsedEntityId;
         }
+        else if (_pendingScrollEntityId == parsedEntityId)
+        {
+            _pendingScrollEntityId = Guid.Empty;
+        }
+    }
+
+    /// <summary>
+    /// 選択集合の確定後にハイライトとスクロールをまとめて更新する
+    /// </summary>
+    private void OnSelectionChanged()
+    {
+        RefreshAllHighlights();
+
+        if (_pendingScrollEntityId != Guid.Empty
+            && Application.Model.Entity.Selection.Contains(_pendingScrollEntityId)
+            && _entityIdToTreeItem.TryGetValue(_pendingScrollEntityId, out TreeItem item))
+        {
+            ScrollToItem(FindNearestVisibleAncestor(item));
+        }
+
+        _pendingScrollEntityId = Guid.Empty;
     }
 
     /// <summary>
@@ -263,6 +283,7 @@ public partial class ModelEntityTree : Tree
     private void OnSelectionCleared()
     {
         _lastSelectedItem = null;
+        _pendingScrollEntityId = Guid.Empty;
     }
 
     /// <summary>
@@ -418,6 +439,7 @@ public partial class ModelEntityTree : Tree
         _entityIdToTreeItem.Clear();
         _highlightedItems.Clear();
         _lastSelectedItem = null;
+        _pendingScrollEntityId = Guid.Empty;
 
         ModelEntity rootModelEntity = _rootEntityId == Guid.Empty
             ? Application.Model.Entity.Registry.Root
@@ -591,7 +613,7 @@ public partial class ModelEntityTree : Tree
     /// <summary>
     /// 現在の選択状態と折り畳み状態から着色すべき TreeItem 集合を計算し直し、前回との差分だけ着色/解除する。
     /// 参照カウントによる差分更新は Collapsed/Selected の発火順序によって選択状態と着色状態がズレる不具合があったため、
-    /// 「都度全件を計算し直す」方針は維持しつつ、実際に描画APIを叩くのは変化があった TreeItem のみに絞って高速化している。
+    /// 選択集合や折り畳み状態の変更後に全件を計算し直し、実際の描画APIは変化があった TreeItem のみに適用する。
     /// </summary>
     private void RefreshAllHighlights()
     {

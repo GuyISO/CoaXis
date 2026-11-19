@@ -264,12 +264,19 @@ public partial class ModelEntitySelectionHub : BaseHub
 
         _selectedIds.UnionWith(newSelectedIds);
 
+        bool logIndividually = entityIds.Length <= 1 && previousSelectedIds.Length <= 1;
+        int deselectedCount = 0;
+        int selectedCount = 0;
         foreach (Guid entityId in previousSelectedIds)
         {
             if (!newSelectedIds.Contains(entityId))
             {
                 EmitSignal(SignalName.Selected, entityId.ToString());
-                Application.Log.Info($"Deselected: {entityId}");
+                deselectedCount++;
+                if (logIndividually)
+                {
+                    Application.Log.Info($"Deselected: {entityId}");
+                }
             }
         }
 
@@ -278,8 +285,17 @@ public partial class ModelEntitySelectionHub : BaseHub
             if (!previousSelectedIdSet.Contains(entityId))
             {
                 EmitSignal(SignalName.Selected, entityId.ToString());
-                Application.Log.Info($"Selected: {entityId}");
+                selectedCount++;
+                if (logIndividually)
+                {
+                    Application.Log.Info($"Selected: {entityId}");
+                }
             }
+        }
+
+        if (!logIndividually)
+        {
+            Application.Log.Info($"Entity selection set: selected={selectedCount}, deselected={deselectedCount}.");
         }
 
         EmitSignal(SignalName.SelectionChanged);
@@ -317,14 +333,22 @@ public partial class ModelEntitySelectionHub : BaseHub
             throw new ArgumentNullException(nameof(entityIds));
         }
 
-        bool changed = false;
+        bool logIndividually = entityIds.Length <= 1;
+        int changedCount = 0;
         foreach (Guid entityId in entityIds)
         {
-            changed |= AddCore(entityId);
+            if (AddCore(entityId, logIndividually))
+            {
+                changedCount++;
+            }
         }
 
-        if (changed)
+        if (changedCount > 0)
         {
+            if (!logIndividually)
+            {
+                Application.Log.Info($"Entity selection added: count={changedCount}.");
+            }
             EmitSignal(SignalName.SelectionChanged);
         }
     }
@@ -362,14 +386,22 @@ public partial class ModelEntitySelectionHub : BaseHub
             throw new ArgumentNullException(nameof(entityIds));
         }
 
-        bool changed = false;
+        bool logIndividually = entityIds.Length <= 1;
+        int changedCount = 0;
         foreach (Guid entityId in entityIds)
         {
-            changed |= RemoveCore(entityId);
+            if (RemoveCore(entityId, logIndividually))
+            {
+                changedCount++;
+            }
         }
 
-        if (changed)
+        if (changedCount > 0)
         {
+            if (!logIndividually)
+            {
+                Application.Log.Info($"Entity selection removed: count={changedCount}.");
+            }
             NotifyEmptySelection();
             EmitSignal(SignalName.SelectionChanged);
         }
@@ -400,14 +432,31 @@ public partial class ModelEntitySelectionHub : BaseHub
             return;
         }
 
-        bool changed = false;
+        bool logIndividually = entityIds.Length <= 1;
+        int selectedCount = 0;
+        int deselectedCount = 0;
         foreach (Guid entityId in entityIds)
         {
-            changed |= ToggleCore(entityId);
+            bool wasSelected = _selectedIds.Contains(entityId);
+            if (ToggleCore(entityId, logIndividually))
+            {
+                if (wasSelected)
+                {
+                    deselectedCount++;
+                }
+                else
+                {
+                    selectedCount++;
+                }
+            }
         }
 
-        if (changed)
+        if (selectedCount + deselectedCount > 0)
         {
+            if (!logIndividually)
+            {
+                Application.Log.Info($"Entity selection toggled: selected={selectedCount}, deselected={deselectedCount}.");
+            }
             NotifyEmptySelection();
             EmitSignal(SignalName.SelectionChanged);
         }
@@ -433,7 +482,15 @@ public partial class ModelEntitySelectionHub : BaseHub
         foreach (Guid entityId in entityIdsToDeselect)
         {
             EmitSignal(SignalName.Selected, entityId.ToString());
-            Application.Log.Info($"Deselected: {entityId}");
+            if (entityIdsToDeselect.Length == 1)
+            {
+                Application.Log.Info($"Deselected: {entityId}");
+            }
+        }
+
+        if (entityIdsToDeselect.Length > 1)
+        {
+            Application.Log.Info($"Entity selection cleared: count={entityIdsToDeselect.Length}.");
         }
 
         EmitSignal(SignalName.Cleared);
@@ -448,7 +505,7 @@ public partial class ModelEntitySelectionHub : BaseHub
     /// <summary>
     /// 選択対象へ追加し、Entity単位の変更通知を発行する。
     /// </summary>
-    private bool AddCore(Guid entityId)
+    private bool AddCore(Guid entityId, bool logIndividually = true)
     {
         if (entityId == Guid.Empty || _selectedIds.Contains(entityId))
         {
@@ -464,14 +521,17 @@ public partial class ModelEntitySelectionHub : BaseHub
         Application.Model.Selection.PrepareEntitySelection();
         _selectedIds.Add(entityId);
         EmitSignal(SignalName.Selected, entityId.ToString());
-        Application.Log.Info($"Selected: {entityId}");
+        if (logIndividually)
+        {
+            Application.Log.Info($"Selected: {entityId}");
+        }
         return true;
     }
 
     /// <summary>
     /// 選択対象から解除し、Entity単位の変更通知を発行する。
     /// </summary>
-    private bool RemoveCore(Guid entityId)
+    private bool RemoveCore(Guid entityId, bool logIndividually = true)
     {
         if (entityId == Guid.Empty || !_selectedIds.Remove(entityId))
         {
@@ -479,18 +539,21 @@ public partial class ModelEntitySelectionHub : BaseHub
         }
 
         EmitSignal(SignalName.Selected, entityId.ToString());
-        Application.Log.Info($"Deselected: {entityId}");
+        if (logIndividually)
+        {
+            Application.Log.Info($"Deselected: {entityId}");
+        }
         return true;
     }
 
     /// <summary>
     /// 指定Entityの選択状態を切り替える。
     /// </summary>
-    private bool ToggleCore(Guid entityId)
+    private bool ToggleCore(Guid entityId, bool logIndividually = true)
     {
         return _selectedIds.Contains(entityId)
-            ? RemoveCore(entityId)
-            : AddCore(entityId);
+            ? RemoveCore(entityId, logIndividually)
+            : AddCore(entityId, logIndividually);
     }
 
     /// <summary>
