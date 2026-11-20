@@ -2,6 +2,9 @@ using Godot;
 using Godot.Collections;
 using System;
 using System.Collections.Generic;
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 /// <summary>
 /// レイキャストや形状クエリを行うためのユーティリティ
@@ -108,7 +111,14 @@ public static class PickUtility
 
         var pickResults = new List<PickResult>();
         var selectedEntityIds = new HashSet<Guid>();
-        const int batchSize = 1024;
+        const int batchSize = 1048576;
+
+#if DEBUG
+        long startTimestamp = Stopwatch.GetTimestamp();
+        long queryTicks = 0;
+        int queryCount = 0;
+        long hitCount = 0;
+#endif
 
         // Godot の IntersectShape はヒット位置や法線などの詳細情報を返さないため、ノード参照のみを PickResult に格納する
         // 1回のクエリで複数件を取得し、物理クエリの呼び出し回数と除外配列の再構築回数を減らす
@@ -130,7 +140,15 @@ public static class PickUtility
             }
 
             // 上限件数に達した場合は未取得のヒットが残る可能性があるため、RIDを除外して次のバッチを取得する
+#if DEBUG
+            long queryStart = Stopwatch.GetTimestamp();
+#endif
             var results = space.IntersectShape(query, batchSize);
+#if DEBUG
+            queryTicks += Stopwatch.GetTimestamp() - queryStart;
+            queryCount++;
+            hitCount += results.Count;
+#endif
             if (results.Count == 0)
             {
                 break;
@@ -182,6 +200,11 @@ public static class PickUtility
             }
         }
 
+#if DEBUG
+        double queryMilliseconds = queryTicks * 1000.0 / Stopwatch.Frequency;
+        double totalMilliseconds = Stopwatch.GetElapsedTime(startTimestamp).TotalMilliseconds;
+        Application.Log.Info($"Rect pick shape: queries={queryCount}, hits={hitCount}, results={pickResults.Count}, query_ms={queryMilliseconds:F2}, processing_ms={totalMilliseconds - queryMilliseconds:F2}.");
+#endif
         return pickResults.ToArray();
     }
 

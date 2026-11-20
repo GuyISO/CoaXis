@@ -1,5 +1,8 @@
 using Godot;
 using System;
+#if DEBUG
+using System.Diagnostics;
+#endif
 
 /// <summary>
 /// アタッチされている3Dビューの入力を受け取り、ViewportEvent へ中継する
@@ -527,10 +530,21 @@ public partial class ViewportInteractionHandler : SubViewport
         }
 
         // 画面上の矩形領域をカメラの視錐台として、そこに含まれるオブジェクトを選択する
+#if DEBUG
+        long startTimestamp = Stopwatch.GetTimestamp();
+#endif
         var frustumShape = CreateFrustumShape(topLeft, bottomRight);
         var camera = GetCamera3D();
         var pickResults = PickUtility.PickByShape(camera, frustumShape);
+#if DEBUG
+        long notifyStart = Stopwatch.GetTimestamp();
+#endif
         Application.Model.Entity.Pick.NotifyResults(pickResults);
+#if DEBUG
+        double pickMilliseconds = (notifyStart - startTimestamp) * 1000.0 / Stopwatch.Frequency;
+        double notifyMilliseconds = Stopwatch.GetElapsedTime(notifyStart).TotalMilliseconds;
+        Application.Log.Info($"Rect pick total: results={pickResults.Length}, pick_ms={pickMilliseconds:F2}, notify_ms={notifyMilliseconds:F2}.");
+#endif
     }
 
     /// <summary>
